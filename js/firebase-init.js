@@ -2,7 +2,6 @@
 
 // Configuración del proyecto Firebase (REEMPLAZA estos datos)
 const firebaseConfig = {
-  const firebaseConfig = {
     apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
     authDomain: "ya-me-vi.firebaseapp.com",
     projectId: "ya-me-vi",
