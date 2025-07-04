@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YA ME VI - Bienvenido</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+</head>
+<body class="login-body">
+  <div class="hero is-fullheight is-bold" id="hero-background">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <h1 class="title is-1 has-text-white animate__animated animate__fadeInDown">YA ME VI</h1>
+        <p class="subtitle has-text-white animate__animated animate__fadeInUp mb-5">
+          Descubre qué número podría cambiar tu vida...
+        </p>
+        <button id="loginBtn" class="button is-warning is-large animate__animated animate__pulse">
+          Iniciar con Google
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/firebase-init.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
