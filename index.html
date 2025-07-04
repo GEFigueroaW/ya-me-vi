@@ -1,0 +1,70 @@
+<!-- /index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analizador Inteligente de Sorteos</title>
+
+  <!-- Bulma CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title has-text-centered">🔍 Analizador Inteligente de Sorteos</h1>
+
+      <!-- Selector de sorteo -->
+      <div class="field">
+        <label class="label">Selecciona el sorteo:</label>
+        <div class="control">
+          <div class="select">
+            <select id="gameSelect">
+              <option value="melate">Melate</option>
+              <option value="revancha">Revancha</option>
+              <option value="revanchita">Revanchita</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón de análisis -->
+      <div class="buttons is-centered">
+        <button class="button is-primary" id="analyzeBtn">Analizar últimos 50 sorteos</button>
+      </div>
+
+      <!-- Resultados de análisis -->
+      <div id="analysisResults" class="box is-hidden animate__animated animate__fadeIn"></div>
+
+      <!-- Entrada de combinación -->
+      <div id="userInputSection" class="box is-hidden">
+        <h2 class="subtitle">🔢 Ingresa tu combinación de 6 números:</h2>
+        <div class="field is-grouped is-grouped-multiline" id="numberInputs"></div>
+        <button class="button is-info mt-3" id="checkCombinationBtn">Ver probabilidad</button>
+        <div id="combinationResult" class="mt-4"></div>
+      </div>
+
+      <!-- Combinación sugerida -->
+      <div id="suggestedComboSection" class="box is-hidden">
+        <h2 class="subtitle">🎯 Sugerencia basada en análisis + IA:</h2>
+        <p id="suggestedCombo" class="has-text-weight-semibold is-size-4"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/dataParser.js"></script>
+  <script src="js/mlPredictor.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
