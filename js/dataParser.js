@@ -1,97 +1,68 @@
-// /js/dataParser.js
+// js/dataParser.js
 
-/**
- * Descarga y parsea el CSV según el juego seleccionado.
- * Devuelve un array de arrays con los 6 números de cada sorteo.
- */
-async function fetchGameData(gameKey) {
-  const game = GAME_CONFIG[gameKey];
-  const response = await fetch(game.csvUrl);
-  const text = await response.text();
+// Obtiene y analiza los datos CSV según el tipo de sorteo
+async function fetchGameData(gameType) {
+  const csvURLs = {
+    melate: "https://raw.githubusercontent.com/GEFigueroaW/ya-me-vi/main/data/melate.csv",
+    revancha: "https://raw.githubusercontent.com/GEFigueroaW/ya-me-vi/main/data/revancha.csv",
+    revanchita: "https://raw.githubusercontent.com/GEFigueroaW/ya-me-vi/main/data/revanchita.csv"
+  };
 
-  // Dividir por líneas y omitir encabezado
-  const lines = text.trim().split("\n").slice(1);
-
-  // Tomar solo los últimos MAX_SORTEOS
-  const draws = lines.slice(-MAX_SORTEOS).map(line => {
-    const columns = line.split(",");
-    // Extraer solo los 6 primeros números principales
-    return columns.slice(1, 7).map(n => parseInt(n.trim(), 10));
-  });
-
-  return draws;
+  const url = csvURLs[gameType];
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("No se pudo obtener el archivo CSV");
+  const csvText = await response.text();
+  return parseCSV(csvText);
 }
 
-/**
- * Calcula frecuencia absoluta de aparición de cada número.
- */
-function calculateFrequencies(draws, maxNumber) {
-  const freq = Array(maxNumber + 1).fill(0); // índice 0 no se usa
-
-  draws.forEach(numbers => {
-    numbers.forEach(n => {
-      if (!isNaN(n)) freq[n]++;
-    });
+// Parsea texto CSV a un array de arrays de números
+function parseCSV(csvText) {
+  const lines = csvText.trim().split("\n");
+  return lines.map(line => {
+    const numbers = line.split(",").map(num => parseInt(num, 10));
+    return numbers.filter(n => !isNaN(n)); // elimina NaNs
   });
-
-  return freq;
 }
 
-/**
- * Calcula delay: cuántos sorteos han pasado desde la última aparición.
- */
-function calculateDelays(draws, maxNumber) {
-  const delays = Array(maxNumber + 1).fill(null); // índice 0 no se usa
+// Calcula estadísticas de los últimos 50 sorteos
+function analyzeGameData(data) {
+  const frequency = {};
+  const lastAppearance = {};
+  const totalDraws = data.length;
 
-  for (let i = draws.length - 1; i >= 0; i--) {
-    draws[i].forEach(n => {
-      if (delays[n] === null) {
-        delays[n] = draws.length - 1 - i;
-      }
-    });
+  // Inicializar estadísticas
+  for (let i = 1; i <= 56; i++) {
+    frequency[i] = 0;
+    lastAppearance[i] = -1;
   }
 
-  // Reemplazar los que nunca han salido
-  for (let i = 1; i <= maxNumber; i++) {
-    if (delays[i] === null) delays[i] = draws.length;
-  }
-
-  return delays;
-}
-
-/**
- * Calcula distribución por sección.
- */
-function calculateSectionDistribution(draws) {
-  const sectionCounts = NUMBER_SECTIONS.map(() => 0);
-  const totalNumbers = draws.length * 6;
-
-  draws.flat().forEach(n => {
-    NUMBER_SECTIONS.forEach((range, i) => {
-      if (n >= range.min && n <= range.max) {
-        sectionCounts[i]++;
+  data.forEach((draw, index) => {
+    draw.forEach(num => {
+      frequency[num]++;
+      if (lastAppearance[num] === -1) {
+        lastAppearance[num] = totalDraws - index;
       }
     });
   });
 
-  const distribution = sectionCounts.map(count => ({
-    total: count,
-    percentage: ((count / totalNumbers) * 100).toFixed(2)
-  }));
+  const delay = {};
+  for (let i = 1; i <= 56; i++) {
+    delay[i] = lastAppearance[i] === -1 ? totalDraws : lastAppearance[i];
+  }
 
-  return distribution;
-}
+  const sectionCount = {
+    "1-9": 0, "10-18": 0, "19-27": 0, "28-36": 0, "37-45": 0, "46-56": 0
+  };
 
-/**
- * Junta todos los análisis para un juego.
- */
-async function analyzeGame(gameKey) {
-  const draws = await fetchGameData(gameKey);
-  const game = GAME_CONFIG[gameKey];
+  Object.keys(frequency).forEach(n => {
+    const num = parseInt(n);
+    if (num <= 9) sectionCount["1-9"] += frequency[n];
+    else if (num <= 18) sectionCount["10-18"] += frequency[n];
+    else if (num <= 27) sectionCount["19-27"] += frequency[n];
+    else if (num <= 36) sectionCount["28-36"] += frequency[n];
+    else if (num <= 45) sectionCount["37-45"] += frequency[n];
+    else sectionCount["46-56"] += frequency[n];
+  });
 
-  const frequencies = calculateFrequencies(draws, game.maxNumber);
-  const delays = calculateDelays(draws, game.maxNumber);
-  const sectionDist = calculateSectionDistribution(draws);
-
-  return { draws, frequencies, delays, sectionDist };
+  return { frequency, delay, sectionCount };
 }
