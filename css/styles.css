@@ -1,119 +1,32 @@
-/* /css/styles.css */
-
-/* Base */
-body {
-  background-color: #f9f9f9;
-  font-family: 'Segoe UI', sans-serif;
-  color: #333;
-}
-
-/* Títulos */
-.title, .subtitle {
-  color: #1F3A93;
-}
-
-/* Botones */
-.button.is-primary {
-  background-color: #F39C12;
-  border-color: #F39C12;
-  color: white;
-}
-.button.is-primary:hover {
-  background-color: #d98c0b;
-}
-
-.button.is-info {
-  background-color: #1F3A93;
-  border-color: #1F3A93;
-  color: white;
-}
-.button.is-info:hover {
-  background-color: #162d70;
-}
-
-/* Contenedores de resultados */
-.box {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  padding: 1.5rem;
-}
-
-/* Inputs numéricos */
-input[type="number"] {
-  width: 70px;
-  text-align: center;
-  font-weight: bold;
-  border: 2px solid #1F3A93;
-  border-radius: 8px;
-  padding: 0.5rem;
-  font-size: 1.2rem;
-}
-
-/* Resultados sugeridos */
-#suggestedCombo {
-  color: #A3CB38;
-  letter-spacing: 2px;
-}
-
-/* Probabilidades destacadas */
-.high-prob {
-  color: #A3CB38;
-  font-weight: bold;
-}
-.low-prob {
-  color: #F39C12;
-  font-weight: bold;
-}
-.no-prob {
-  color: #ccc;
-}
-
-/* Transiciones suaves */
-.is-hidden {
-  display: none !important;
-}
-/* Fondo animado login */
+/* Fondo slideshow login */
 .login-background {
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  transition: background-image 2s ease-in-out;
-  animation: slideshow 25s infinite;
-  height: 100vh;
+  background: url('../assets/bg1.jpg') center center/cover no-repeat fixed;
+  animation: slideshow 30s infinite ease-in-out;
 }
 
 @keyframes slideshow {
-  0% { background-image: url('../assets/bg1.jpg'); }
-  20% { background-image: url('../assets/bg2.jpg'); }
-  40% { background-image: url('../assets/bg3.jpg'); }
-  60% { background-image: url('../assets/bg4.jpg'); }
-  80% { background-image: url('../assets/bg5.jpg'); }
-  100% { background-image: url('../assets/bg1.jpg'); }
+  0%    { background-image: url('../assets/bg1.jpg'); }
+  20%   { background-image: url('../assets/bg2.jpg'); }
+  40%   { background-image: url('../assets/bg3.jpg'); }
+  60%   { background-image: url('../assets/bg4.jpg'); }
+  80%   { background-image: url('../assets/bg5.jpg'); }
+  100%  { background-image: url('../assets/bg1.jpg'); }
 }
 
-/* Fondo desenfocado principal */
-.main-background {
-  background: url('../assets/bg1.jpg') no-repeat center center fixed;
-  background-size: cover;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+/* Fondo desenfocado index */
+.main-background::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: url('../assets/bg1_blur.jpg') center center/cover no-repeat fixed;
+  filter: blur(8px);
+  z-index: -1;
 }
 
-/* Contenedor opaco para secciones */
-.section {
-  position: relative;
-  z-index: 2;
+/* Caja de login */
+.login-box {
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 2rem;
+  box-shadow: 0 0 30px rgba(0,0,0,0.3);
   border-radius: 8px;
+  padding: 2rem;
 }
-
-/* Botones */
-.button {
-  transition: all 0.3s ease;
-}
-.button:hover {
-  transform: scale(1.05);
-}
-
