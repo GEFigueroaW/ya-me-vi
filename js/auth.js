@@ -1,6 +1,15 @@
 // auth.js
 
-// Espera a que Firebase esté listo
+// Verifica si el usuario volvió del login con redirect
+firebase.auth().getRedirectResult().then((result) => {
+  if (result.user) {
+    window.location.href = "index.html";
+  }
+}).catch((error) => {
+  console.error("Error después del redirect:", error.message);
+});
+
+// Control de sesión y redirección automática
 firebase.auth().onAuthStateChanged((user) => {
   const currentPage = window.location.pathname;
 
@@ -32,7 +41,7 @@ function loginWithGoogle() {
     });
 }
 
-// Función de logout (cierre de sesión)
+// Función de logout
 function logout() {
   firebase.auth().signOut().then(() => {
     window.location.href = "home.html";
