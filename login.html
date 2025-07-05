@@ -3,83 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Página de Login</title>
+  <title>YA ME VI - Iniciar sesión</title>
+
+  <!-- Bulma CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+  <!-- Font Awesome -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
   <style>
-    /* Fondo de pantalla rotatorio */
+    /* Estilo para las imágenes de fondo */
     .bg-image {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background-size: cover;
-      background-position: center center;
+      background-position: center;
       background-repeat: no-repeat;
       opacity: 0;
       transition: opacity 2s ease-in-out;
-      z-index: -1;               /* Detrás de otros contenidos */
-      pointer-events: none;      /* No bloquear interacción con formulario */
-    }
-    .bg-image.visible { 
-      opacity: 1;                /* Imagen visible (se mostrará con fade-in) */
+      z-index: -1;
     }
 
-    /* Ejemplo de estilos para el formulario de login */
-    #login-container {
-      position: relative;        /* Crear contexto de apilado para estar encima del fondo */
-      z-index: 1;                /* Asegura que esté por encima de .bg-image */
-      /* ... otros estilos de formulario (colores, padding, etc) ... */
+    .bg-image.visible {
+      opacity: 1;
+    }
+
+    .login-container {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
     }
   </style>
 </head>
 <body>
-  <!-- Divs de fondo rotatorio -->
-  <div class="bg-image visible" id="bg1" style="background-image: url('bg1.jpg');"></div>
+  <!-- Fondo rotatorio -->
+  <div class="bg-image visible" id="bg1"></div>
   <div class="bg-image" id="bg2"></div>
 
-  <!-- Contenedor del formulario de login -->
-  <div id="login-container">
-    <!-- ... contenido del formulario de login (campos, botones, etc.) ... -->
-    <h2>Iniciar Sesión</h2>
-    <form>
-      <input type="text" name="usuario" placeholder="Usuario" required>
-      <input type="password" name="clave" placeholder="Contraseña" required>
-      <button type="submit">Ingresar</button>
-    </form>
-  </div>
+  <!-- Contenedor del login -->
+  <section class="section login-container">
+    <div class="container">
+      <div class="box has-text-centered animate__animated animate__fadeIn">
+        <h1 class="title is-3 has-text-primary">🔍 YA ME VI</h1>
+        <p class="subtitle">Inicia sesión para comenzar tu análisis inteligente de sorteos</p>
+        <button id="loginBtn" class="button is-warning is-medium">
+          <span class="icon"><i class="fab fa-google"></i></span>
+          <span>Iniciar sesión con Google</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
 
   <script>
-    // Array de imágenes de fondo
-    const imagenes = ["bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg", "bg5.jpg"];
-    let indiceActual = 0;
-    let fondoActivo = 1;  // 1 o 2, id del div de fondo actualmente visible
+    // Lógica de login con Google
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginBtn = document.getElementById("loginBtn");
+      loginBtn.addEventListener("click", () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithRedirect(provider);
+      });
 
-    const div1 = document.getElementById('bg1');
-    const div2 = document.getElementById('bg2');
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          window.location.href = "index.html";
+        }
+      });
 
-    // Función para cambiar al siguiente fondo con efecto fade
-    function cambiarFondo() {
-      // Calcular el índice de la siguiente imagen
-      let siguienteIndice = (indiceActual + 1) % imagenes.length;
-      // Determinar cuál div está oculto (el próximo a mostrar)
-      if (fondoActivo === 1) {
-        // Configurar bg2 con la siguiente imagen y mostrarlo
-        div2.style.backgroundImage = `url('${imagenes[siguienteIndice]}')`;
-        div2.classList.add('visible');
-        div1.classList.remove('visible');
-        // Actualizar estado
-        fondoActivo = 2;
-      } else {
-        // Configurar bg1 con la siguiente imagen y mostrarlo
-        div1.style.backgroundImage = `url('${imagenes[siguienteIndice]}')`;
-        div1.classList.add('visible');
-        div2.classList.remove('visible');
-        // Actualizar estado
-        fondoActivo = 1;
-      }
-      indiceActual = siguienteIndice;
-    }
+      // Imagen de fondo rotatoria
+      const images = ["bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg", "bg5.jpg"];
+      let index = 0;
+      let active = 1;
 
-    // Iniciar cambio automático cada 8 segundos (5000ms visible + 3000ms transición)
-    setInterval(cambiarFondo, 8000);
+      const div1 = document.getElementById("bg1");
+      const div2 = document.getElementById("bg2");
+
+      div1.style.backgroundImage = `url('${images[0]}')`;
+
+      setInterval(() => {
+        const nextIndex = (index + 1) % images.length;
+        if (active === 1) {
+          div2.style.backgroundImage = `url('${images[nextIndex]}')`;
+          div2.classList.add("visible");
+          div1.classList.remove("visible");
+          active = 2;
+        } else {
+          div1.style.backgroundImage = `url('${images[nextIndex]}')`;
+          div1.classList.add("visible");
+          div2.classList.remove("visible");
+          active = 1;
+        }
+        index = nextIndex;
+      }, 8000);
+    });
   </script>
 </body>
 </html>
