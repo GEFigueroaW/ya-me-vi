@@ -7,52 +7,23 @@
 
   <!-- Bulma CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
-
-  <!-- Animate.css -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
 
-  <!-- Font Awesome -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
-  <style>
-    /* Estilo para las imágenes de fondo */
-    .bg-image {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      opacity: 0;
-      transition: opacity 2s ease-in-out;
-      z-index: -1;
-    }
-
-    .bg-image.visible {
-      opacity: 1;
-    }
-
-    .login-container {
-      position: relative;
-      z-index: 1;
-      padding: 2rem;
-    }
-  </style>
+  <!-- Firebase init -->
+  <script src="js/firebase-init.js"></script>
 </head>
-<body>
-  <!-- Fondo rotatorio -->
-  <div class="bg-image visible" id="bg1"></div>
-  <div class="bg-image" id="bg2"></div>
-
-  <!-- Contenedor del login -->
-  <section class="section login-container">
+<body class="login-background">
+  <section class="section">
     <div class="container">
       <div class="box has-text-centered animate__animated animate__fadeIn">
         <h1 class="title is-3 has-text-primary">🔍 YA ME VI</h1>
         <p class="subtitle">Inicia sesión para comenzar tu análisis inteligente de sorteos</p>
-        <button id="loginBtn" class="button is-warning is-medium">
+        <button id="loginBtn" class="button is-primary is-medium mt-4">
           <span class="icon"><i class="fab fa-google"></i></span>
           <span>Iniciar sesión con Google</span>
         </button>
@@ -60,13 +31,7 @@
     </div>
   </section>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="js/firebase-init.js"></script>
-
   <script>
-    // Lógica de login con Google
     document.addEventListener("DOMContentLoaded", () => {
       const loginBtn = document.getElementById("loginBtn");
       loginBtn.addEventListener("click", () => {
@@ -79,38 +44,6 @@
           window.location.href = "index.html";
         }
       });
-
-      // Imagen de fondo rotatoria
-const images = [
-  "assets/bg1.jpg",
-  "assets/bg2.jpg",
-  "assets/bg3.jpg",
-  "assets/bg4.jpg",
-  "assets/bg5.jpg"
-];
-      let index = 0;
-      let active = 1;
-
-      const div1 = document.getElementById("bg1");
-      const div2 = document.getElementById("bg2");
-
-      div1.style.backgroundImage = `url('${images[0]}')`;
-
-      setInterval(() => {
-        const nextIndex = (index + 1) % images.length;
-        if (active === 1) {
-          div2.style.backgroundImage = `url('${images[nextIndex]}')`;
-          div2.classList.add("visible");
-          div1.classList.remove("visible");
-          active = 2;
-        } else {
-          div1.style.backgroundImage = `url('${images[nextIndex]}')`;
-          div1.classList.add("visible");
-          div2.classList.remove("visible");
-          active = 1;
-        }
-        index = nextIndex;
-      }, 8000);
     });
   </script>
 </body>
