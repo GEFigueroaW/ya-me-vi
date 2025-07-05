@@ -4,86 +4,54 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YA ME VI</title>
-
-  <!-- Bulma CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
-
-  <!-- Animate.css -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-
-  <!-- Estilos personalizados -->
-  <link rel="stylesheet" href="css/styles.css" />
-
-  <!-- TensorFlow.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js" defer></script>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js" defer></script>
-
-  <!-- Inicialización Firebase -->
-  <script src="js/firebase-init.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </head>
-<body>
-
-  <!-- Barra de navegación superior -->
-  <nav class="navbar is-light">
-    <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">YA ME VI</span>
-    </div>
-    <div class="navbar-end pr-4">
-      <span class="navbar-item" id="userName">👤</span>
-      <button class="button is-danger is-small navbar-item" id="logoutBtn">Cerrar sesión</button>
-    </div>
-  </nav>
+<body class="has-background-light">
 
   <section class="section">
-    <div class="container">
-      <h1 class="title has-text-centered">🔍 YA ME VI</h1>
+    <div class="container has-text-centered">
+      <h1 class="title is-3 mb-4">🔍 YA ME VI</h1>
 
-      <!-- Selector de sorteo -->
-      <div class="field">
-        <label class="label">Selecciona el sorteo:</label>
-        <div class="control">
-          <div class="select">
-            <select id="gameSelect">
-              <option value="melate">Melate</option>
-              <option value="revancha">Revancha</option>
-              <option value="revanchita">Revanchita</option>
-            </select>
-          </div>
+      <div id="userInfo" class="mb-3">
+        <p id="userName" class="subtitle is-5">👤 Cargando usuario...</p>
+        <button id="logoutBtn" class="button is-danger is-small">Cerrar sesión</button>
+      </div>
+
+      <div id="gameSelectionSection" class="mb-5">
+        <label for="gameSelector" class="label">Selecciona el sorteo:</label>
+        <div class="select">
+          <select id="gameSelector">
+            <option value="melate">Melate</option>
+            <option value="revancha">Revancha</option>
+            <option value="revanchita">Revanchita</option>
+          </select>
         </div>
       </div>
 
-      <!-- Botón de análisis -->
-      <div class="buttons is-centered">
-        <button class="button is-primary" id="analyzeBtn">Analizar últimos 50 sorteos</button>
-      </div>
+      <button id="analyzeBtn" class="button is-warning is-medium mb-4">Analizar últimos 50 sorteos</button>
 
-      <!-- Resultados de análisis -->
-      <div id="analysisResults" class="box is-hidden animate__animated animate__fadeIn"></div>
-
-      <!-- Entrada de combinación -->
-      <div id="userInputSection" class="box is-hidden">
-        <h2 class="subtitle">🔢 Ingresa tu combinación de 6 números:</h2>
-        <div class="field is-grouped is-grouped-multiline" id="numberInputs"></div>
+      <div id="userInputSection" class="box has-text-left">
+        <label class="label">Ingresa tu combinación (6 números separados por comas):</label>
+        <input class="input" type="text" id="userCombination" placeholder="Ej. 5,12,23,34,45,56">
         <button class="button is-info mt-3" id="checkCombinationBtn">Ver probabilidad</button>
         <div id="combinationResult" class="mt-4"></div>
       </div>
 
-      <!-- Combinación sugerida -->
-      <div id="suggestedComboSection" class="box is-hidden">
-        <h2 class="subtitle">🎯 Sugerencia basada en análisis + IA:</h2>
-        <p id="suggestedCombo" class="has-text-weight-semibold is-size-4"></p>
+      <div id="resultsContainer" class="box mt-4 animate__animated animate__fadeIn">
+        <p class="has-text-grey-dark">⏳ Esperando análisis...</p>
       </div>
+
     </div>
   </section>
 
-  <!-- Scripts de la app -->
-  <script src="js/config.js" defer></script>
-  <script src="js/dataParser.js" defer></script>
-  <script src="js/mlPredictor.js" defer></script>
-  <script src="js/main.js" defer></script>
-  <script src="js/auth.js" defer></script> <!-- 🔐 Incluye el control de sesión/login/logout -->
+  <!-- Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="js/firebaseConfig.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dataParser.js"></script>
+  <script src="js/mlPredictor.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
