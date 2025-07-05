@@ -3,89 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YA ME VI - Iniciar sesión</title>
-
-  <!-- Bulma CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
-  <!-- Animate.css -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  <!-- Font Awesome para el ícono -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <!-- Estilos personalizados -->
+  <title>Página de Login</title>
   <style>
-    body, html {
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    .background-slideshow {
+    /* Fondo de pantalla rotatorio */
+    .bg-image {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      z-index: -1;
       background-size: cover;
-      background-position: center;
-      animation: slideshow 25s infinite;
+      background-position: center center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+      z-index: -1;               /* Detrás de otros contenidos */
+      pointer-events: none;      /* No bloquear interacción con formulario */
+    }
+    .bg-image.visible { 
+      opacity: 1;                /* Imagen visible (se mostrará con fade-in) */
     }
 
-    @keyframes slideshow {
-      0%, 20%   { background-image: url('assets/bg1.jpg'); }
-      20%, 40%  { background-image: url('assets/bg2.jpg'); }
-      40%, 60%  { background-image: url('assets/bg3.jpg'); }
-      60%, 80%  { background-image: url('assets/bg4.jpg'); }
-      80%, 100% { background-image: url('assets/bg5.jpg'); }
-    }
-
-    .login-box {
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 1rem;
-      padding: 2rem;
+    /* Ejemplo de estilos para el formulario de login */
+    #login-container {
+      position: relative;        /* Crear contexto de apilado para estar encima del fondo */
+      z-index: 1;                /* Asegura que esté por encima de .bg-image */
+      /* ... otros estilos de formulario (colores, padding, etc) ... */
     }
   </style>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="js/firebase-init.js"></script>
 </head>
 <body>
-  <!-- Fondo -->
-  <div class="background-slideshow"></div>
+  <!-- Divs de fondo rotatorio -->
+  <div class="bg-image visible" id="bg1" style="background-image: url('bg1.jpg');"></div>
+  <div class="bg-image" id="bg2"></div>
 
-  <!-- Login -->
-  <section class="section is-flex is-justify-content-center is-align-items-center" style="height: 100vh;">
-    <div class="login-box has-text-centered animate__animated animate__fadeIn">
-      <h1 class="title is-3 has-text-primary">🔍 YA ME VI</h1>
-      <p class="subtitle">Inicia sesión para comenzar tu análisis inteligente de sorteos</p>
-
-      <button id="loginBtn" class="button is-warning is-medium mt-4">
-        <span class="icon"><i class="fab fa-google"></i></span>
-        <span>Iniciar sesión con Google</span>
-      </button>
-    </div>
-  </section>
+  <!-- Contenedor del formulario de login -->
+  <div id="login-container">
+    <!-- ... contenido del formulario de login (campos, botones, etc.) ... -->
+    <h2>Iniciar Sesión</h2>
+    <form>
+      <input type="text" name="usuario" placeholder="Usuario" required>
+      <input type="password" name="clave" placeholder="Contraseña" required>
+      <button type="submit">Ingresar</button>
+    </form>
+  </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const loginBtn = document.getElementById("loginBtn");
+    // Array de imágenes de fondo
+    const imagenes = ["bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg", "bg5.jpg"];
+    let indiceActual = 0;
+    let fondoActivo = 1;  // 1 o 2, id del div de fondo actualmente visible
 
-      firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-          window.location.href = "index.html";
-        }
-      });
+    const div1 = document.getElementById('bg1');
+    const div2 = document.getElementById('bg2');
 
-      loginBtn.addEventListener("click", () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth()
-          .signInWithRedirect(provider)
-          .catch((error) => {
-            console.error("Error al iniciar sesión:", error);
-            alert("Ocurrió un error al iniciar sesión.");
-          });
-      });
-    });
+    // Función para cambiar al siguiente fondo con efecto fade
+    function cambiarFondo() {
+      // Calcular el índice de la siguiente imagen
+      let siguienteIndice = (indiceActual + 1) % imagenes.length;
+      // Determinar cuál div está oculto (el próximo a mostrar)
+      if (fondoActivo === 1) {
+        // Configurar bg2 con la siguiente imagen y mostrarlo
+        div2.style.backgroundImage = `url('${imagenes[siguienteIndice]}')`;
+        div2.classList.add('visible');
+        div1.classList.remove('visible');
+        // Actualizar estado
+        fondoActivo = 2;
+      } else {
+        // Configurar bg1 con la siguiente imagen y mostrarlo
+        div1.style.backgroundImage = `url('${imagenes[siguienteIndice]}')`;
+        div1.classList.add('visible');
+        div2.classList.remove('visible');
+        // Actualizar estado
+        fondoActivo = 1;
+      }
+      indiceActual = siguienteIndice;
+    }
+
+    // Iniciar cambio automático cada 8 segundos (5000ms visible + 3000ms transición)
+    setInterval(cambiarFondo, 8000);
   </script>
 </body>
 </html>
