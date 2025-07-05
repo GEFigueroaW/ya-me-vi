@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+</head>
+<body>
+  <nav class="navbar is-light">
+    <div class="navbar-brand">
+      <span class="navbar-item has-text-weight-bold">YA ME VI</span>
+    </div>
+    <div class="navbar-end pr-4">
+      <span class="navbar-item" id="userName">Hola, usuario</span>
+      <button class="button is-danger is-small navbar-item" id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container has-text-centered">
+      <h1 class="title is-3">🔍 YA ME VI</h1>
+
+      <div class="field">
+        <label class="label">Selecciona el sorteo:</label>
+        <div class="control">
+          <div class="select is-medium">
+            <select id="gameSelect">
+              <option value="melate">Melate</option>
+              <option value="revancha">Revancha</option>
+              <option value="revanchita">Revanchita</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="button is-primary is-medium my-4" id="analyzeBtn">
+        Analizar últimos 50 sorteos
+      </button>
+
+      <div id="analysisResults" class="box is-hidden animate__animated animate__fadeIn"></div>
+
+      <div id="chartSection" class="box is-hidden">
+        <h2 class="subtitle">📊 Visualización de Datos</h2>
+        <canvas id="frequencyChart" style="max-width: 100%"></canvas>
+        <canvas id="delayChart" style="max-width: 100%" class="mt-4"></canvas>
+        <p class="is-size-7 mt-3 has-text-info">
+          <span class="icon"><i class="fas fa-info-circle"></i></span>
+          Nota: el número 21 aparece tanto en frecuencia como en retraso — <em>una paradoja interesante</em>.
+        </p>
+      </div>
+
+      <div id="userInputSection" class="box">
+        <h2 class="subtitle">🔢 Ingresa tu combinación de 6 números:</h2>
+        <div class="field is-grouped is-grouped-multiline is-justify-content-center" id="numberInputs"></div>
+        <div class="buttons is-centered mt-3">
+          <button class="button is-info" id="checkCombinationBtn">Ver probabilidad</button>
+          <button class="button is-warning" id="clearBtn">Limpiar campos</button>
+        </div>
+        <div id="combinationResult" class="mt-4"></div>
+      </div>
+
+      <div id="suggestedComboSection" class="box is-hidden">
+        <h2 class="subtitle">🎯 Sugerencia basada en análisis + IA:</h2>
+        <p id="suggestedCombo" class="has-text-weight-semibold is-size-4"></p>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/firebase-init.js"></script>
+  <script src="js/auth-protect.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/dataParser.js"></script>
+  <script src="js/mlPredictor.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
