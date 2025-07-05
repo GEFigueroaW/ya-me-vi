@@ -4,52 +4,86 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YA ME VI</title>
+
+  <!-- Bulma CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+
+  <!-- Inicialización -->
+  <script src="js/firebase-init.js"></script>
+  <script src="js/auth-protect.js"></script>
 </head>
-<body class="has-background-light">
+<body>
+  <!-- Barra de navegación -->
+  <nav class="navbar is-light">
+    <div class="navbar-brand">
+      <span class="navbar-item has-text-weight-bold">YA ME VI</span>
+    </div>
+    <div class="navbar-end pr-4">
+      <span class="navbar-item" id="userName"></span>
+      <button class="button is-danger is-small navbar-item" id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </nav>
 
   <section class="section">
-    <div class="container has-text-centered">
-      <h1 class="title is-3 mb-4">🔍 YA ME VI</h1>
+    <div class="container">
+      <h1 class="title has-text-centered">🔍 YA ME VI</h1>
 
-      <div id="userInfo" class="mb-3">
-        <p id="userName" class="subtitle is-5">👤 Cargando usuario...</p>
-        <button id="logoutBtn" class="button is-danger is-small">Cerrar sesión</button>
-      </div>
-
-      <div id="gameSelectionSection" class="mb-5">
-        <label for="gameSelector" class="label">Selecciona el sorteo:</label>
-        <div class="select">
-          <select id="gameSelector">
-            <option value="melate">Melate</option>
-            <option value="revancha">Revancha</option>
-            <option value="revanchita">Revanchita</option>
-          </select>
+      <!-- Selección de sorteo -->
+      <div class="field">
+        <label class="label">Selecciona el sorteo:</label>
+        <div class="control">
+          <div class="select">
+            <select id="gameSelect">
+              <option value="melate">Melate</option>
+              <option value="revancha">Revancha</option>
+              <option value="revanchita">Revanchita</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <button id="analyzeBtn" class="button is-warning is-medium mb-4">Analizar últimos 50 sorteos</button>
+      <!-- Botón de análisis -->
+      <div class="buttons is-centered">
+        <button class="button is-primary" id="analyzeBtn">Analizar últimos 50 sorteos</button>
+      </div>
 
-      <div id="userInputSection" class="box has-text-left">
-        <label class="label">Ingresa tu combinación (6 números separados por comas):</label>
-        <input class="input" type="text" id="userCombination" placeholder="Ej. 5,12,23,34,45,56">
-        <button class="button is-info mt-3" id="checkCombinationBtn">Ver probabilidad</button>
+      <!-- Resultados -->
+      <div id="analysisResults" class="box is-hidden animate__animated animate__fadeIn"></div>
+
+      <!-- Entrada manual -->
+      <div id="userInputSection" class="box">
+        <h2 class="subtitle">🔢 Ingresa tu combinación de 6 números:</h2>
+        <div class="field is-grouped is-grouped-multiline" id="numberInputs"></div>
+        <div class="buttons mt-3">
+          <button class="button is-info" id="checkCombinationBtn">Ver probabilidad</button>
+          <button class="button is-warning" id="clearBtn">Limpiar campos</button>
+        </div>
         <div id="combinationResult" class="mt-4"></div>
       </div>
 
-      <div id="resultsContainer" class="box mt-4 animate__animated animate__fadeIn">
-        <p class="has-text-grey-dark">⏳ Esperando análisis...</p>
+      <!-- Sugerencia IA -->
+      <div id="suggestedComboSection" class="box is-hidden">
+        <h2 class="subtitle">🎯 Sugerencia basada en análisis + IA:</h2>
+        <p id="suggestedCombo" class="has-text-weight-semibold is-size-4"></p>
       </div>
-
     </div>
   </section>
 
-  <!-- Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="js/firebaseConfig.js"></script>
-  <script src="js/auth.js"></script>
+  <!-- Scripts funcionales -->
+  <script src="js/config.js"></script>
   <script src="js/dataParser.js"></script>
   <script src="js/mlPredictor.js"></script>
   <script src="js/main.js"></script>
