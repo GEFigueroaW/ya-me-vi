@@ -7,23 +7,50 @@
 
   <!-- Bulma CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
-
   <!-- Animate.css -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-
   <!-- Estilos personalizados -->
   <link rel="stylesheet" href="css/styles.css" />
 
   <!-- TensorFlow.js -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
-
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-
-  <!-- Inicialización -->
+  <!-- Firebase Init + Auth -->
   <script src="js/firebase-init.js"></script>
   <script src="js/auth-protect.js"></script>
+
+  <style>
+    /* Fondo slideshow con desenfoque */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      filter: blur(10px);
+      z-index: -1;
+      animation: slideShow 25s infinite;
+    }
+
+    @keyframes slideShow {
+      0%, 20%   { background-image: url('assets/bg1.jpg'); }
+      21%, 40%  { background-image: url('assets/bg2.jpg'); }
+      41%, 60%  { background-image: url('assets/bg3.jpg'); }
+      61%, 80%  { background-image: url('assets/bg4.jpg'); }
+      81%, 100% { background-image: url('assets/bg5.jpg'); }
+    }
+
+    /* Asegura contraste */
+    .box, .navbar, .section {
+      background-color: rgba(255, 255, 255, 0.92);
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
   <!-- Barra de navegación -->
