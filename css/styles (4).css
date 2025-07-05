@@ -1,0 +1,15 @@
+body.main-background {
+  background-image: url('../assets/bg1_blur.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+canvas {
+  max-width: 100% !important;
+  height: auto !important;
+}
+#frequencyChart, #delayChart {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 8px;
+}
