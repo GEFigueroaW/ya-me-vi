@@ -1,73 +1,67 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   const analyzeBtn = document.getElementById("analyzeBtn");
-  analyzeBtn.addEventListener("click", () => {
-    const game = document.getElementById("gameSelect").value;
-    analyzeGame(game);
-  });
+
+  if (analyzeBtn) {
+    analyzeBtn.addEventListener("click", async () => {
+      const selectedGame = document.getElementById("gameSelect").value;
+      const resultsContainer = document.getElementById("analysisResults");
+      const inputSection = document.getElementById("userInputSection");
+      const suggestionSection = document.getElementById("suggestedComboSection");
+
+      resultsContainer.classList.remove("is-hidden");
+      resultsContainer.innerHTML = "⏳ Analizando sorteos...";
+
+      inputSection.classList.add("is-hidden");
+      suggestionSection.classList.add("is-hidden");
+
+      try {
+        const gameData = await fetchGameData(selectedGame);
+        const analysis = analyzeGame(gameData);
+
+        resultsContainer.innerHTML = `
+          <p><strong>Total sorteos analizados:</strong> ${analysis.total}</p>
+          <p><strong>Números más frecuentes:</strong> ${analysis.frequent.join(", ")}</p>
+          <p><strong>Números más atrasados:</strong> ${analysis.delayed.join(", ")}</p>
+          <p><strong>Distribución por secciones:</strong></p>
+          <ul>${Object.entries(analysis.sections).map(([section, count]) => `<li>${section}: ${count}</li>`).join("")}</ul>
+        `;
+
+        renderNumberInputs();
+        inputSection.classList.remove("is-hidden");
+
+        const suggestion = generateAISuggestion(gameData);
+        document.getElementById("suggestedCombo").textContent = suggestion.join(" - ");
+        suggestionSection.classList.remove("is-hidden");
+
+      } catch (error) {
+        resultsContainer.innerHTML = `<p class="has-text-danger">❌ Error al analizar los sorteos: ${error.message}</p>`;
+      }
+    });
+  }
+
+  // Evento para ver la probabilidad de una combinación
+  const checkBtn = document.getElementById("checkCombinationBtn");
+  if (checkBtn) {
+    checkBtn.addEventListener("click", () => {
+      const numbers = [...document.querySelectorAll(".numberInput")]
+        .map(input => parseInt(input.value))
+        .filter(n => !isNaN(n));
+
+      const selectedGame = document.getElementById("gameSelect").value;
+      const resultDiv = document.getElementById("combinationResult");
+
+      if (numbers.length !== 6) {
+        resultDiv.innerHTML = `<p class="has-text-warning">Debes ingresar exactamente 6 números.</p>`;
+        return;
+      }
+
+      calculateProbability(selectedGame, numbers)
+        .then(prob => {
+          resultDiv.innerHTML = `<p>Probabilidad estimada: <strong>${(prob * 100).toFixed(4)}%</strong></p>`;
+        })
+        .catch(err => {
+          resultDiv.innerHTML = `<p class="has-text-danger">❌ Error al calcular: ${err.message}</p>`;
+        });
+    });
+  }
 });
-
-async function analyzeGame(game) {
-  try {
-    const data = await fetchGameData(game);
-    const analysis = analyzeData(data);
-    displayAnalysis(analysis);
-    showUserInputSection();
-    suggestCombination(data);
-  } catch (error) {
-    console.error("❌ Error al analizar el juego:", error);
-    alert("Hubo un problema al analizar los sorteos. Intenta nuevamente.");
-  }
-}
-
-function displayAnalysis(analysis) {
-  const section = document.getElementById("analysisResults");
-  section.innerHTML = \`
-    <h2 class="subtitle">📊 Análisis de los últimos 50 sorteos:</h2>
-    <ul>
-      <li><strong>Números más frecuentes:</strong> \${analysis.frequent.join(", ")}</li>
-      <li><strong>Números más atrasados:</strong> \${analysis.delayed.join(", ")}</li>
-      <li><strong>Distribución por secciones:</strong></li>
-    </ul>
-    <ul>
-      \${analysis.distribution.map((count, i) => \`<li>Sección \${i + 1}: \${count} números</li>\`).join("")}
-    </ul>
-  \`;
-  section.classList.remove("is-hidden");
-}
-
-function showUserInputSection() {
-  const inputContainer = document.getElementById("numberInputs");
-  inputContainer.innerHTML = "";
-  for (let i = 1; i <= 6; i++) {
-    const input = document.createElement("input");
-    input.type = "number";
-    input.min = 1;
-    input.max = 56;
-    input.className = "input is-small";
-    input.style.width = "60px";
-    input.required = true;
-    inputContainer.appendChild(input);
-  }
-  document.getElementById("userInputSection").classList.remove("is-hidden");
-  document.getElementById("checkCombinationBtn").addEventListener("click", checkCombination);
-}
-
-function checkCombination() {
-  const inputs = document.querySelectorAll("#numberInputs input");
-  const combination = Array.from(inputs).map(input => parseInt(input.value, 10)).filter(n => !isNaN(n));
-  if (combination.length !== 6) {
-    alert("Por favor ingresa 6 números válidos entre 1 y 56.");
-    return;
-  }
-  const probability = calculateProbability(combination);
-  document.getElementById("combinationResult").innerHTML = \`
-    <p>🔎 Probabilidad estimada de esta combinación: <strong>\${(probability * 100).toFixed(6)}%</strong></p>
-  \`;
-}
-
-function suggestCombination(data) {
-  const suggestion = generateSmartCombination(data);
-  document.getElementById("suggestedCombo").textContent = suggestion.join(" - ");
-  document.getElementById("suggestedComboSection").classList.remove("is-hidden");
-}
