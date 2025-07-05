@@ -11,10 +11,18 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
   <!-- Estilos personalizados -->
   <link rel="stylesheet" href="css/styles.css" />
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/auth-protect.js"></script>
+  <!-- Chart.js (debe ir antes de main.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="main-background">
-
-  <!-- Barra de navegación -->
+<body>
+  <!-- NAV -->
   <nav class="navbar is-light">
     <div class="navbar-brand">
       <span class="navbar-item has-text-weight-bold">YA ME VI</span>
@@ -25,7 +33,7 @@
     </div>
   </nav>
 
-  <!-- Contenido principal -->
+  <!-- CONTENIDO -->
   <section class="section">
     <div class="container">
       <h1 class="title has-text-centered">🔍 YA ME VI</h1>
@@ -45,37 +53,36 @@
       </div>
 
       <!-- Botón de análisis -->
-      <div class="buttons is-centered">
+      <div class="buttons is-centered mt-3">
         <button class="button is-primary" id="analyzeBtn">Analizar últimos 50 sorteos</button>
       </div>
 
-      <!-- Resultados -->
+      <!-- Resultados del análisis -->
       <div id="analysisResults" class="box is-hidden animate__animated animate__fadeIn"></div>
 
-<!-- Agrega esto dentro de index.html justo debajo de #analysisResults -->
-
-<!-- 📊 Gráfico de Frecuencias -->
-<div id="frequencyChartContainer" class="box is-hidden">
-  <h2 class="subtitle has-text-weight-semibold">📊 Frecuencia de aparición</h2>
-  <canvas id="freqChart"></canvas>
-</div>
-
-<!-- 📉 Gráfico de Retrasos -->
-<div id="delayChartContainer" class="box is-hidden mt-4">
-  <h2 class="subtitle has-text-weight-semibold">⏱️ Números más retrasados</h2>
-  <canvas id="delayChart"></canvas>
-</div>
-
-<!-- ⚡ Paradojas Interesantes -->
-<div id="paradojaContainer" class="box is-hidden mt-4 has-background-warning-light">
-  <h2 class="subtitle has-text-weight-semibold has-text-warning-dark">⚡ Paradojas interesantes</h2>
-  <p id="paradojaList" class="content is-size-6 has-text-dark"></p>
-</div>
+      <!-- Gráficos de frecuencia y retraso -->
+      <div id="chartSection" class="is-hidden">
+        <h2 class="subtitle mt-4 has-text-weight-semibold">📊 Visualización estadística:</h2>
+        <div class="box">
+          <canvas id="frecuenciaChart" height="120"></canvas>
+        </div>
+        <div class="box">
+          <canvas id="retrasoChart" height="120"></canvas>
+        </div>
+        <p class="has-text-info has-text-weight-medium mt-2">🔁 <strong>Paradoja interesante:</strong> Algunos números como el <strong>21</strong> aparecen tanto entre los más frecuentes como entre los más retrasados.</p>
+      </div>
 
       <!-- Entrada manual -->
-      <div id="userInputSection" class="box">
+      <div id="userInputSection" class="box mt-5">
         <h2 class="subtitle">🔢 Ingresa tu combinación de 6 números:</h2>
-        <div class="field is-grouped is-grouped-multiline" id="numberInputs"></div>
+        <div class="field is-grouped is-grouped-multiline" id="numberInputs">
+          <input class="input is-small" type="number" min="1" max="56" />
+          <input class="input is-small" type="number" min="1" max="56" />
+          <input class="input is-small" type="number" min="1" max="56" />
+          <input class="input is-small" type="number" min="1" max="56" />
+          <input class="input is-small" type="number" min="1" max="56" />
+          <input class="input is-small" type="number" min="1" max="56" />
+        </div>
         <div class="buttons mt-3">
           <button class="button is-info" id="checkCombinationBtn">Ver probabilidad</button>
           <button class="button is-warning" id="clearBtn">Limpiar campos</button>
@@ -92,11 +99,6 @@
   </section>
 
   <!-- Scripts funcionales -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="js/firebase-init.js"></script>
-  <script src="js/auth-protect.js"></script>
   <script src="js/config.js"></script>
   <script src="js/dataParser.js"></script>
   <script src="js/mlPredictor.js"></script>
