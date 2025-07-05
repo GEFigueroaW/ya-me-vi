@@ -73,3 +73,47 @@ input[type="number"] {
 .is-hidden {
   display: none !important;
 }
+/* Fondo animado login */
+.login-background {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: background-image 2s ease-in-out;
+  animation: slideshow 25s infinite;
+  height: 100vh;
+}
+
+@keyframes slideshow {
+  0% { background-image: url('../assets/bg1.jpg'); }
+  20% { background-image: url('../assets/bg2.jpg'); }
+  40% { background-image: url('../assets/bg3.jpg'); }
+  60% { background-image: url('../assets/bg4.jpg'); }
+  80% { background-image: url('../assets/bg5.jpg'); }
+  100% { background-image: url('../assets/bg1.jpg'); }
+}
+
+/* Fondo desenfocado principal */
+.main-background {
+  background: url('../assets/bg1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Contenedor opaco para secciones */
+.section {
+  position: relative;
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+/* Botones */
+.button {
+  transition: all 0.3s ease;
+}
+.button:hover {
+  transform: scale(1.05);
+}
+
