@@ -9,21 +9,14 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
   <link rel="stylesheet" href="css/styles.css" />
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-
-  <!-- Firebase init -->
-  <script src="js/firebase-init.js"></script>
 </head>
 <body class="login-background">
   <section class="section">
-    <div class="container">
-      <div class="box has-text-centered animate__animated animate__fadeIn">
+    <div class="container has-text-centered">
+      <div class="box login-box animate__animated animate__fadeIn">
         <h1 class="title is-3 has-text-primary">🔍 YA ME VI</h1>
         <p class="subtitle">Inicia sesión para comenzar tu análisis inteligente de sorteos</p>
-        <button id="loginBtn" class="button is-primary is-medium mt-4">
+        <button id="loginBtn" class="button is-warning is-medium mt-4">
           <span class="icon"><i class="fab fa-google"></i></span>
           <span>Iniciar sesión con Google</span>
         </button>
@@ -31,6 +24,10 @@
     </div>
   </section>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const loginBtn = document.getElementById("loginBtn");
@@ -40,9 +37,7 @@
       });
 
       firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-          window.location.href = "index.html";
-        }
+        if (user) window.location.href = "index.html";
       });
     });
   </script>
