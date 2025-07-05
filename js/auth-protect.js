@@ -1,18 +1,29 @@
-// /js/auth-protect.js
+// auth-protect.js
 
-firebase.auth().onAuthStateChanged(user => {
-  if (!user) {
-    // No autenticado, redirigir a login
-    window.location.href = "home.html";
-  } else {
-    // Mostrar nombre del usuario en la interfaz
-    document.getElementById("userName").innerText = `Hola, ${user.displayName}`;
-  }
-});
+document.addEventListener("DOMContentLoaded", () => {
+  // Esperar a que Firebase esté listo
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      // Mostrar nombre del usuario
+      const userName = document.getElementById("userName");
+      if (userName) {
+        userName.textContent = `Hola, ${user.displayName || user.email}`;
+      }
 
-// Cerrar sesión
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  firebase.auth().signOut().then(() => {
-    window.location.href = "home.html";
+      // Configurar botón de logout
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          firebase.auth().signOut().then(() => {
+            window.location.href = "login.html";
+          }).catch(error => {
+            console.error("Error al cerrar sesión:", error);
+          });
+        });
+      }
+    } else {
+      // Redirigir si no está autenticado
+      window.location.href = "login.html";
+    }
   });
 });
