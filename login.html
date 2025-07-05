@@ -11,6 +11,9 @@
   <!-- Animate.css -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
+  <!-- Font Awesome (ícono de Google) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
   <!-- Estilos personalizados -->
   <link rel="stylesheet" href="css/styles.css" />
 
@@ -19,16 +22,18 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
   <!-- Inicialización de Firebase -->
-  <script src="js/firebase-init.js"></script>
+  <script src="js/firebase-init.js" defer></script>
+  <!-- Protección de login (redirige si ya está logueado) -->
+  <script src="js/auth-protect.js" defer></script>
 </head>
 <body class="has-background-light">
   <section class="section">
     <div class="container">
       <div class="box has-text-centered animate__animated animate__fadeIn">
-        <h1 class="title is-3 has-text-primary">🔍 YA ME VI</h1>
+        <h1 class="title is-3 has-text-link">🔍 YA ME VI</h1>
         <p class="subtitle">Inicia sesión para comenzar tu análisis inteligente de sorteos</p>
 
-        <button id="loginBtn" class="button is-primary is-medium mt-4">
+        <button id="loginBtn" class="button is-warning is-medium mt-4">
           <span class="icon"><i class="fab fa-google"></i></span>
           <span>Iniciar sesión con Google</span>
         </button>
@@ -36,23 +41,15 @@
     </div>
   </section>
 
-  <!-- Font Awesome (ícono de Google) -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const loginBtn = document.getElementById("loginBtn");
-      loginBtn.addEventListener("click", () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithRedirect(provider);
-      });
-
-      // Si el usuario ya está logueado, redirige
-      firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-          window.location.href = "index.html";
-        }
-      });
+      if (loginBtn) {
+        loginBtn.addEventListener("click", () => {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          firebase.auth().signInWithRedirect(provider);
+        });
+      }
     });
   </script>
 </body>
