@@ -1,52 +1,56 @@
-// auth.js
+// ===============================
+// YA ME VI - Autenticación Firebase
+// ===============================
 
-// Espera el resultado del login por redirección
+// 🔁 Obtener resultado del login por redirección (solo una vez)
 firebase.auth().getRedirectResult()
   .then((result) => {
     if (result.user) {
       console.log("✅ Usuario autenticado tras redirect:", result.user.displayName);
-      window.location.href = "index.html"; // Redirige después del login
+      // Redirige a la app si fue desde login
+      window.location.href = "index.html";
     }
   })
   .catch((error) => {
-    console.error("❌ Error después del redirect:", error.message);
-    alert("Error tras el inicio de sesión. Intenta de nuevo.");
+    console.error("❌ Error tras redirect:", error.message);
+    alert("Error al iniciar sesión. Intenta nuevamente.");
   });
 
-// Este bloque se mantiene para control automático de sesión
+// 👁️ Monitorea el estado de sesión del usuario
 firebase.auth().onAuthStateChanged((user) => {
-  const currentPage = window.location.pathname;
+  const path = window.location.pathname;
 
-  // Si está en home.html y el usuario YA está logueado, redirige a index.html
-  if (user && currentPage.includes("home.html")) {
+  // Si está logueado y está en home.html, redirige a index
+  if (user && path.includes("home.html")) {
     window.location.href = "index.html";
   }
 
-  // Si está en index.html y NO hay usuario, redirige a home.html
-  if (!user && currentPage.includes("index.html")) {
+  // Si NO está logueado y está en index.html, redirige a home
+  if (!user && path.includes("index.html")) {
     window.location.href = "home.html";
   }
 
-  // Mostrar nombre del usuario
-  if (user && document.getElementById("userName")) {
-    document.getElementById("userName").textContent = `👤 ${user.displayName}`;
+  // Si hay usuario y existe el contenedor, muestra su nombre
+  const userNameEl = document.getElementById("userName");
+  if (user && userNameEl) {
+    userNameEl.textContent = `👤 ${user.displayName}`;
   }
 });
 
-// Login con Google
+// 🔐 Login con Google
 function loginWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithRedirect(provider);
 }
 
-// Logout
+// 🔓 Logout y volver a inicio
 function logout() {
   firebase.auth().signOut().then(() => {
     window.location.href = "home.html";
   });
 }
 
-// Asignar eventos al cargar el DOM
+// 🧠 Eventos al cargar la página
 document.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
