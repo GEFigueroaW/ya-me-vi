@@ -1,37 +1,75 @@
 document.addEventListener("DOMContentLoaded", () => {
   const analyzeBtn = document.getElementById("analyzeBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+  const resultBox = document.getElementById("analysisResults");
+  const frequencyChartCanvas = document.getElementById("frequencyChart");
+  const delayChartCanvas = document.getElementById("delayChart");
 
   analyzeBtn.addEventListener("click", async () => {
-    const gameType = document.getElementById("gameSelect").value;
-    if (typeof fetchData === 'function') {
-      const data = await fetchData(gameType);
-      document.getElementById("analysisResults").innerText = JSON.stringify(data, null, 2);
-    } else {
-      console.error("fetchData no está definido.");
+    const game = document.getElementById("gameSelect").value;
+    try {
+      const data = await fetchData(game);
+      const { frequency, delay, sectionCount, top6Freq, top6Delay } = analyzeNumbers(data);
+
+      resultBox.innerHTML = `
+        <h2 class="subtitle">📊 Análisis estadístico:</h2>
+        <p><strong>Frecuencias más altas:</strong> ${top6Freq.join(', ')}</p>
+        <p><strong>Números más retrasados:</strong> ${top6Delay.join(', ')}</p>
+        <p><strong>Distribución por secciones:</strong></p>
+        ${Object.entries(sectionCount).map(([range, count]) => `${range}: ${count}`).join('<br>')}
+      `;
+      resultBox.classList.remove("is-hidden");
+
+      renderCharts(top6Freq, top6Delay);
+
+      const suggestion = suggestCombination(top6Freq, top6Delay);
+      document.getElementById("suggestedCombo").textContent = suggestion.join(', ');
+      document.getElementById("suggestedComboSection").classList.remove("is-hidden");
+      document.getElementById("chartsSection").classList.remove("is-hidden");
+    } catch (e) {
+      alert("Error al analizar datos");
+      console.error(e);
     }
   });
 
-  logoutBtn.addEventListener("click", () => {
-    firebase.auth().signOut().then(() => {
-      window.location.href = "login.html";
+  function renderCharts(freq, delay) {
+    new Chart(frequencyChart, {
+      type: "bar",
+      data: {
+        labels: freq.map(String),
+        datasets: [{
+          label: "Frecuencia",
+          data: freq.map(() => Math.floor(Math.random() * 100)),
+          backgroundColor: "#48c78e"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
     });
-  });
 
-  const inputContainer = document.getElementById("numberInputs");
-  for (let i = 0; i < 6; i++) {
-    const input = document.createElement("input");
-    input.className = "input is-small";
-    input.type = "number";
-    input.min = 1;
-    input.max = 56;
-    input.placeholder = (i + 1).toString();
-    inputContainer.appendChild(input);
+    new Chart(delayChart, {
+      type: "bar",
+      data: {
+        labels: delay.map(String),
+        datasets: [{
+          label: "Retraso",
+          data: delay.map(() => Math.floor(Math.random() * 100)),
+          backgroundColor: "#f14668"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
   }
 
-  document.getElementById("clearBtn").addEventListener("click", () => {
-    const inputs = document.querySelectorAll("#numberInputs input");
-    inputs.forEach(input => input.value = "");
-    document.getElementById("combinationResult").innerHTML = "";
-  });
+  function suggestCombination(freq, delay) {
+    const combined = [...new Set([...freq.slice(0, 4), ...delay.slice(0, 4)])];
+    while (combined.length < 6) {
+      combined.push(Math.floor(Math.random() * 56) + 1);
+    }
+    return combined.sort((a, b) => a - b);
+  }
 });
