@@ -1,40 +1,32 @@
-// js/auth-protect.js
+// ✅ auth-protect.js corregido
 
 document.addEventListener("DOMContentLoaded", () => {
-  const path = window.location.pathname;
-  const isLoginPage = path.endsWith("login.html") || path === "/login.html";
-
   firebase.auth().onAuthStateChanged((user) => {
+    const isLoginPage = window.location.pathname.includes("login.html");
+
     if (user) {
-      // ✅ Redirección desde login a index si ya hay sesión activa
+      // Si hay sesión activa y estás en login.html, redirige al index
       if (isLoginPage) {
         window.location.href = "index.html";
       } else {
-        // ✅ Mostrar nombre del usuario si está logueado
+        // Mostrar el nombre del usuario en todas las páginas protegidas
         const nameSpan = document.getElementById("userName");
-        if (nameSpan && user.displayName) {
-          nameSpan.textContent = `Hola, ${user.displayName}`;
-        }
+        if (nameSpan) nameSpan.textContent = `Hola, ${user.displayName}`;
       }
     } else {
-      // ⛔ Redirección a login si no hay sesión activa
+      // Si no hay sesión activa y no estás en login, redirige a login
       if (!isLoginPage) {
         window.location.href = "login.html";
       }
     }
   });
 
-  // 🔘 Botón de cierre de sesión
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await firebase.auth().signOut();
+    logoutBtn.addEventListener("click", () => {
+      firebase.auth().signOut().then(() => {
         window.location.href = "login.html";
-      } catch (error) {
-        console.error("Error al cerrar sesión:", error);
-        alert("Ocurrió un error al cerrar sesión. Intenta de nuevo.");
-      }
+      });
     });
   }
 });
