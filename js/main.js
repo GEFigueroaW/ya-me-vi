@@ -8,10 +8,11 @@ const userName = document.getElementById('userName');
 const resultsDiv = document.getElementById('results');
 
 const backgrounds = [
-  'assets/vg1.jpg',
-  'assets/vg2.jpg',
-  'assets/vg3.jpg',
-  'assets/vg4.jpg'
+  'assets/bg1.jpg',
+  'assets/bg2.jpg',
+  'assets/bg3.jpg',
+  'assets/bg4.jpg',
+  'assets/bg5.jpg'  
 ];
 let current = 0;
 function rotateBackground() {
