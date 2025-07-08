@@ -13,7 +13,7 @@ const tabEvaluar = document.getElementById('tab-evaluar');
 const background = document.getElementById('background');
 
 // Rotación de fondo
-const images = ['vg1.jpg', 'vg2.jpg', 'vg3.jpg', 'vg4.jpg'];
+const images = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
 let current = 0;
 setInterval(() => {
   background.style.backgroundImage = `url('assets/${images[current]}')`;
