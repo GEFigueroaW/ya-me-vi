@@ -1,4 +1,3 @@
-
 const mlPredictor = {
   async mostrarEvaluacion(nums) {
     const juegos = [
@@ -12,6 +11,16 @@ const mlPredictor = {
 
     for (const juego of juegos) {
       const draws = await DataParser.parseCSV(juego.archivo);
+      if (draws.length === 0) {
+        const errorCard = document.createElement('div');
+        errorCard.classList.add('box', 'has-background-danger-light', 'mb-4');
+        errorCard.innerHTML = `
+          <h3 class="title is-5">${juego.nombre}</h3>
+          <p>No se pudo analizar el archivo. Verifica que <code>${juego.archivo}</code> exista y tenga datos válidos.</p>
+        `;
+        contenedor.appendChild(errorCard);
+        continue;
+      }
 
       let matchCount = 0;
       draws.forEach(draw => {
