@@ -1,15 +1,15 @@
-// --- CONFIGURACIÓN DE FIREBASE (¡AHORA CON TUS CREDENCIALES!) ---
+// --- CONFIGURACIÓN DE FIREBASE (¡CON TUS CREDENCIALES DEL PROYECTO 'ya-me-vi'!) ---
 const firebaseConfig = {
-    apiKey: "AIzaSyCScJA-UGs3WcBnfAm-6K94ybZ4bzBahz8",
-    authDomain: "brain-storm-8f0d8.firebaseapp.com",
-    projectId: "brain-storm-8f0d8",
-    storageBucket: "brain-storm-8f0d8.appspot.com",
-    messagingSenderId: "401208607043",
-    appId: "1:401208607043:web:6f35fc81fdce7b3fbeaff6"
-    // measurementId: "TU_MEASUREMENT_ID" // Si lo tienes, puedes añadirlo aquí
+    apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+    authDomain: "ya-me-vi.firebaseapp.com",
+    projectId: "ya-me-vi",
+    storageBucket: "ya-me-vi.firebasestorage.app",
+    messagingSenderId: "748876890843",
+    appId: "1:748876890843:web:070d1eb476d38594d002fe",
+    measurementId: "G-D7R797S5BC"
 };
 
-// Inicializa Firebase
+// Inicializa Firebase (usando la sintaxis 'compat' compatible con tus SDKs de index.html)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -17,7 +17,7 @@ const googleProvider = new firebase.auth.GoogleAuthProvider();
 // --- FIN DE CONFIGURACIÓN DE FIREBASE ---
 
 
-// --- ELEMENTOS DEL DOM (se mantienen igual) ---
+// --- ELEMENTOS DEL DOM ---
 const welcomeSection = document.getElementById('welcome-section');
 const dreamQuestionSection = document.getElementById('dream-question-section');
 const nextDrawAnalysisSection = document.getElementById('next-draw-analysis-section');
@@ -38,20 +38,29 @@ const carouselContainer = document.querySelector('.background-carousel');
 const comboNumbers = document.querySelectorAll('.combo-number');
 const analyzeMyComboBtn = document.getElementById('analyze-my-combo-btn');
 
-// --- IMÁGENES DEL CARRUSEL (se mantienen igual) ---
-// Las rutas de tus imágenes subidas (asegúrate de que los nombres de archivo sean correctos)
+// Elementos para mostrar datos históricos (nuevos)
+const historicalDataLoader = document.getElementById('historical-data-loader');
+const historicalDataContent = document.getElementById('historical-data-content');
+
+
+// --- IMÁGENES DEL CARRUSEL ---
+// Las rutas de tus imágenes subidas (asegúrate de que los nombres de archivo sean correctos y estén en la raíz)
 const carouselImages = [
     './bg1.jpg', // Casa
     './bg2.jpg', // Coche
     './bg3.jpg', // Éxito Familiar
     './bg4.jpg', // Éxito Profesional (Hombre)
-    './bg5.jpg'  // Éxito Profesional (Mujer) - Suponiendo que esta es la que buscaste
+    './bg5.jpg'  // Éxito Profesional (Mujer)
 ];
 let currentImageIndex = 0;
 let carouselInterval;
 
-// --- FUNCIONES DE LA INTERFAZ (se mantienen igual) ---
+// --- FUNCIONES DE LA INTERFAZ ---
 
+/**
+ * Muestra la sección deseada y oculta las demás.
+ * @param {HTMLElement} sectionToShow - La sección que se va a mostrar.
+ */
 function showSection(sectionToShow) {
     const allSections = [
         welcomeSection,
@@ -63,21 +72,34 @@ function showSection(sectionToShow) {
     allSections.forEach(section => {
         if (section === sectionToShow) {
             section.classList.add('active-section');
-            section.style.display = 'flex';
+            section.style.display = 'flex'; // Usar flex para centrado CSS
         } else {
             section.classList.remove('active-section');
-            section.style.display = 'none';
+            section.style.display = 'none'; // Ocultar
         }
     });
+
+    // Detener/Iniciar carrusel según la sección
+    if (sectionToShow === nextDrawAnalysisSection) {
+        startCarousel();
+    } else {
+        stopCarousel();
+    }
 }
 
+/**
+ * Inicia el carrusel de imágenes de fondo.
+ */
 function startCarousel() {
+    // Limpiar cualquier intervalo existente para evitar duplicados
     if (carouselInterval) {
         clearInterval(carouselInterval);
     }
 
-    carouselContainer.innerHTML = ''; // Asegurarse de que el contenedor esté vacío
+    // Asegurarse de que el contenedor esté vacío
+    carouselContainer.innerHTML = '';
 
+    // Cargar todas las imágenes inicialmente, pero solo la primera activa
     carouselImages.forEach((src, index) => {
         const img = document.createElement('img');
         img.src = src;
@@ -97,10 +119,17 @@ function startCarousel() {
     }, 8000); // Cambia cada 8 segundos (8000 ms)
 }
 
+/**
+ * Detiene el carrusel de imágenes.
+ */
 function stopCarousel() {
     clearInterval(carouselInterval);
 }
 
+/**
+ * Valida que los 6 números ingresados para la combinación sean únicos y estén dentro del rango.
+ * @returns {Array|null} Array de números válidos o null si hay errores.
+ */
 function validateCombinationInput() {
     const numbers = [];
     let isValid = true;
@@ -134,7 +163,7 @@ function validateCombinationInput() {
 }
 
 
-// --- LÓGICA DE AUTENTICACIÓN (¡AHORA REAL CON FIREBASE!) ---
+// --- LÓGICA DE AUTENTICACIÓN (REAL CON FIREBASE) ---
 
 function handleAuthStateChanged(user) {
     if (user) {
@@ -158,7 +187,6 @@ function handleAuthStateChanged(user) {
 async function signInGoogle() {
     try {
         await auth.signInWithPopup(googleProvider);
-        // console.log("Usuario autenticado:", result.user); // Puedes descomentar para depurar
         // handleAuthStateChanged ya se encargaría de actualizar la UI
     } catch (error) {
         console.error("Error al iniciar sesión con Google:", error);
@@ -169,7 +197,6 @@ async function signInGoogle() {
 async function signOutGoogle() {
     try {
         await auth.signOut();
-        // console.log("Sesión cerrada"); // Puedes descomentar para depurar
         // handleAuthStateChanged ya se encargaría de actualizar la UI
     } catch (error) {
         console.error("Error al cerrar sesión:", error);
@@ -178,14 +205,15 @@ async function signOutGoogle() {
 }
 
 
-// --- LÓGICA DEL SUEÑO/OBJETIVO (AHORA CON FIREBASE FIRESTORE) ---
+// --- LÓGICA DEL SUEÑO/OBJETIVO (CON FIREBASE FIRESTORE) ---
 async function checkUserDreamStatus(uid) {
     try {
         const userDoc = await db.collection('users').doc(uid).get();
         if (userDoc.exists && userDoc.data().dream) {
             // El usuario ya tiene un sueño guardado, ir directamente a la sección de análisis
             showSection(nextDrawAnalysisSection);
-            startCarousel();
+            // Cargar datos históricos al entrar a la sección de análisis
+            fetchAndDisplayHistoricalData();
         } else {
             // Es la primera vez que se loguea o no tiene un sueño, preguntar
             showSection(dreamQuestionSection);
@@ -203,17 +231,114 @@ async function saveUserDream(uid, dreamValue) {
         console.log("Sueño guardado con éxito!");
         alert(`¡Tu sueño "${dreamValue}" ha sido guardado! ¡Ahora a analizar!`);
         showSection(nextDrawAnalysisSection);
-        startCarousel();
+        fetchAndDisplayHistoricalData(); // Cargar datos históricos después de guardar el sueño
     } catch (error) {
         console.error("Error al guardar el sueño:", error);
         alert("Hubo un error al guardar tu sueño. Por favor, inténtalo de nuevo. Detalles: " + error.message);
     }
 }
 
+// --- LÓGICA DE DATOS HISTÓRICOS Y ANÁLISIS (¡INTEGRACIÓN CON FIREBASE FUNCTIONS!) ---
 
-// --- EVENT LISTENERS (Actualizados para Firebase) ---
+/**
+ * Llama a la Firebase Function para raspar los datos y luego los muestra.
+ */
+async function fetchAndDisplayHistoricalData() {
+    historicalDataLoader.textContent = 'Cargando datos históricos... Esto puede tomar unos segundos.';
+    historicalDataLoader.style.display = 'block';
+    historicalDataContent.innerHTML = ''; // Limpiar contenido anterior
+
+    try {
+        // Obtenemos una referencia a la función callable
+        const scrapeMelate = firebase.functions().httpsCallable('scrapeMelateResults');
+        const result = await scrapeMelate();
+
+        console.log("Resultados del scraping:", result.data.data); // Los datos que la función devuelve
+
+        // Ahora, recuperamos los datos directamente de Firestore (son los mismos que la función guardó)
+        const snapshot = await db.collection('melate_history').orderBy('timestamp', 'desc').limit(15).get();
+        const historicalDraws = [];
+        snapshot.forEach(doc => {
+            historicalDraws.push(doc.data());
+        });
+
+        displayHistoricalData(historicalDraws); // Llama a la función para mostrar los datos
+        historicalDataLoader.style.display = 'none'; // Oculta el loader
+
+    } catch (error) {
+        console.error("Error al obtener y mostrar datos históricos:", error);
+        historicalDataLoader.textContent = 'Error al cargar los datos históricos. Asegúrate de que la Cloud Function esté desplegada y funcionando.';
+        historicalDataLoader.style.color = 'red';
+    }
+}
+
+
+/**
+ * Muestra los datos históricos en la sección correspondiente.
+ * @param {Array<Object>} data - Array de objetos de sorteos históricos.
+ */
+function displayHistoricalData(data) {
+    if (!historicalDataContent) return; // Asegurarse de que el elemento exista
+
+    if (data.length === 0) {
+        historicalDataContent.innerHTML = '<p>No hay datos históricos disponibles aún. Intenta recargar o contacta al soporte.</p>';
+        return;
+    }
+
+    let html = '<table>';
+    html += '<thead><tr><th>Sorteo</th><th>Fecha</th><th>Melate</th><th>Revancha</th><th>Revanchita</th></tr></thead>';
+    html += '<tbody>';
+
+    data.forEach(draw => {
+        html += `<tr>
+            <td>${draw.sorteo}</td>
+            <td>${draw.fecha}</td>
+            <td>${draw.melate ? draw.melate.join(', ') : 'N/A'}</td>
+            <td>${draw.revancha ? draw.revancha.join(', ') : 'N/A'}</td>
+            <td>${draw.revanchita ? draw.revanchita.join(', ') : 'N/A'}</td>
+        </tr>`;
+    });
+
+    html += '</tbody></table>';
+    historicalDataContent.innerHTML = html;
+}
+
+function displayPatternAnalysis(analysis) {
+    // Implementar la visualización del análisis de patrones aquí
+    const patternAnalysisElement = document.querySelector('#next-draw-analysis-section .pattern-analysis p');
+    if (patternAnalysisElement) {
+        patternAnalysisElement.innerHTML = 'Análisis de patrones en desarrollo...'; // Placeholder
+        // Aquí iría tu lógica de análisis y visualización
+        // Ejemplo: patternAnalysisElement.innerHTML = `Números calientes: ${analysis.hotNumbers.join(', ')}<br>Números fríos: ${analysis.coldNumbers.join(', ')}`;
+    }
+    console.log("Mostrar análisis de patrones:", analysis);
+}
+
+function displayPrediction(prediction) {
+    // Implementar la visualización de la predicción aquí
+    const predictionElement = document.querySelector('#next-draw-analysis-section .prediction p');
+    if (predictionElement) {
+        predictionElement.innerHTML = 'Predicción en desarrollo...'; // Placeholder
+        // Aquí iría tu lógica de predicción y visualización
+        // Ejemplo: predictionElement.innerHTML = `Combinación sugerida: ${prediction.suggestedNumbers.join(', ')}`;
+    }
+    console.log("Mostrar predicción:", prediction);
+}
+
+function displayCombinationAnalysis(combination, results) {
+    // Implementar la visualización de los resultados del análisis de la combinación del usuario
+    const analysisResultsElement = document.querySelector('#my-combination-analysis-section .analysis-results p');
+    if (analysisResultsElement) {
+        analysisResultsElement.innerHTML = `Análisis de tu combinación ${combination.join(', ')} en desarrollo...`; // Placeholder
+        // Aquí iría tu lógica de análisis de combinación y visualización
+    }
+    console.log("Mostrar análisis de combinación:", combination, results);
+}
+
+
+// --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Esto es vital para Firebase Auth. Escucha cambios en el estado de autenticación.
+    // Escucha cambios en el estado de autenticación de Firebase
     auth.onAuthStateChanged(handleAuthStateChanged);
 
     // Navegación principal
@@ -221,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         if (auth.currentUser) { // Solo permitir navegar si está logueado
             showSection(nextDrawAnalysisSection);
-            startCarousel();
+            fetchAndDisplayHistoricalData(); // Cargar/actualizar datos al ir a esta sección
         } else {
             alert("Por favor, inicia sesión para acceder a esta sección.");
             showSection(welcomeSection);
@@ -232,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         if (auth.currentUser) { // Solo permitir navegar si está logueado
             showSection(myCombinationAnalysisSection);
-            stopCarousel();
+            stopCarousel(); // Detener el carrusel cuando no está en la sección de análisis de sorteo
         } else {
             alert("Por favor, inicia sesión para acceder a esta sección.");
             showSection(welcomeSection);
@@ -292,34 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userCombination = validateCombinationInput();
         if (userCombination) {
             console.log("Combinación del usuario para analizar:", userCombination);
-            // Aquí se llamaría a la función para analizar la combinación y mostrar resultados
-            // displayCombinationAnalysis(userCombination); // Se implementará más adelante
-            alert(`Analizando tu combinación: ${userCombination.join(', ')}`); // Simulación
+            displayCombinationAnalysis(userCombination); // Llama a la función para mostrar el análisis
         }
     });
 });
-
-// --- FUNCIONES DE ANÁLISIS (Se implementarán más adelante con lógica de probabilidad y datos históricos) ---
-function displayHistoricalData(data) {
-    // Implementar la visualización de datos históricos aquí
-    console.log("Mostrar datos históricos:", data);
-}
-
-function displayPatternAnalysis(analysis) {
-    // Implementar la visualización del análisis de patrones aquí
-    console.log("Mostrar análisis de patrones:", analysis);
-}
-
-function displayPrediction(prediction) {
-    // Implementar la visualización de la predicción aquí
-    console.log("Mostrar predicción:", prediction);
-}
-
-function displayCombinationAnalysis(combination, results) {
-    // Implementar la visualización de los resultados de la combinación aquí
-    console.log("Mostrar análisis de combinación:", combination, results);
-}
-
-// --- Aquí se añadirán funciones para obtener datos de la API de Melate, limpiar, etc. ---
-// Esto requerirá un backend (por ejemplo, con Firebase Functions) o un proxy CORS
-// si la API no permite peticiones directas desde el navegador.
