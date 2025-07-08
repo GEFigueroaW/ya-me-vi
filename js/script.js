@@ -1,30 +1,23 @@
-// --- CONFIGURACIÓN DE FIREBASE (¡REEMPLAZA CON TUS PROPIAS CREDENCIALES!) ---
-// Visita la consola de Firebase de tu proyecto para obtener estas configuraciones
-// Ve a "Configuración del proyecto" -> "Tus apps" -> "SDK de configuración y configuración"
+// --- CONFIGURACIÓN DE FIREBASE (¡AHORA CON TUS CREDENCIALES!) ---
 const firebaseConfig = {
-  apiKey: "AIzaSyCScJA-UGs3WcBnfAm-6K94ybZ4bzBahz8",
-  authDomain: "brain-storm-8f0d8.firebaseapp.com",
-  projectId: "brain-storm-8f0d8",
-  storageBucket: "brain-storm-8f0d8.appspot.com",
-  messagingSenderId: "401208607043",
-  appId: "1:401208607043:web:6f35fc81fdce7b3fbeaff6"
+    apiKey: "AIzaSyCScJA-UGs3WcBnfAm-6K94ybZ4bzBahz8",
+    authDomain: "brain-storm-8f0d8.firebaseapp.com",
+    projectId: "brain-storm-8f0d8",
+    storageBucket: "brain-storm-8f0d8.appspot.com",
+    messagingSenderId: "401208607043",
+    appId: "1:401208607043:web:6f35fc81fdce7b3fbeaff6"
+    // measurementId: "TU_MEASUREMENT_ID" // Si lo tienes, puedes añadirlo aquí
 };
 
-// Inicializa Firebase (asegúrate de que los SDKs de Firebase estén cargados en index.html)
-// Ejemplo de cómo deberían verse en index.html (justo antes de <script src="js/script.js"></script>):
-/*
-    <script src="https://www.gstatic.com/firebasejs/9.X.X/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.X.X/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.X.X/firebase-firestore-compat.js"></script>
-*/
-// firebase.initializeApp(firebaseConfig);
-// const auth = firebase.auth();
-// const db = firebase.firestore();
-// const googleProvider = new firebase.auth.GoogleAuthProvider();
+// Inicializa Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
 // --- FIN DE CONFIGURACIÓN DE FIREBASE ---
 
 
-// --- ELEMENTOS DEL DOM ---
+// --- ELEMENTOS DEL DOM (se mantienen igual) ---
 const welcomeSection = document.getElementById('welcome-section');
 const dreamQuestionSection = document.getElementById('dream-question-section');
 const nextDrawAnalysisSection = document.getElementById('next-draw-analysis-section');
@@ -32,8 +25,8 @@ const myCombinationAnalysisSection = document.getElementById('my-combination-ana
 
 const navNextDraw = document.getElementById('nav-next-draw');
 const navMyCombination = document.getElementById('nav-my-combination');
-const authButton = document.getElementById('auth-button');
-const googleSignInBtn = document.getElementById('google-signin-btn');
+const authButton = document.getElementById('auth-button'); // Botón de "Iniciar Sesión" en el header
+const googleSignInBtn = document.getElementById('google-signin-btn'); // Botón de "Iniciar Sesión con Google" en welcome-section
 const userDisplay = document.getElementById('user-display');
 const userNameSpan = document.getElementById('user-name');
 
@@ -45,7 +38,7 @@ const carouselContainer = document.querySelector('.background-carousel');
 const comboNumbers = document.querySelectorAll('.combo-number');
 const analyzeMyComboBtn = document.getElementById('analyze-my-combo-btn');
 
-// --- IMÁGENES DEL CARRUSEL ---
+// --- IMÁGENES DEL CARRUSEL (se mantienen igual) ---
 // Las rutas de tus imágenes subidas (asegúrate de que los nombres de archivo sean correctos)
 const carouselImages = [
     './bg1.jpg', // Casa
@@ -57,12 +50,8 @@ const carouselImages = [
 let currentImageIndex = 0;
 let carouselInterval;
 
-// --- FUNCIONES DE LA INTERFAZ ---
+// --- FUNCIONES DE LA INTERFAZ (se mantienen igual) ---
 
-/**
- * Muestra la sección deseada y oculta las demás.
- * @param {HTMLElement} sectionToShow - La sección que se va a mostrar.
- */
 function showSection(sectionToShow) {
     const allSections = [
         welcomeSection,
@@ -74,27 +63,21 @@ function showSection(sectionToShow) {
     allSections.forEach(section => {
         if (section === sectionToShow) {
             section.classList.add('active-section');
-            section.style.display = 'flex'; // Usar flex para centrado CSS
+            section.style.display = 'flex';
         } else {
             section.classList.remove('active-section');
-            section.style.display = 'none'; // Ocultar
+            section.style.display = 'none';
         }
     });
 }
 
-/**
- * Inicia el carrusel de imágenes de fondo.
- */
 function startCarousel() {
-    // Limpiar cualquier intervalo existente para evitar duplicados
     if (carouselInterval) {
         clearInterval(carouselInterval);
     }
 
-    // Asegurarse de que el contenedor esté vacío
-    carouselContainer.innerHTML = '';
+    carouselContainer.innerHTML = ''; // Asegurarse de que el contenedor esté vacío
 
-    // Cargar todas las imágenes inicialmente, pero solo la primera activa
     carouselImages.forEach((src, index) => {
         const img = document.createElement('img');
         img.src = src;
@@ -114,17 +97,10 @@ function startCarousel() {
     }, 8000); // Cambia cada 8 segundos (8000 ms)
 }
 
-/**
- * Detiene el carrusel de imágenes.
- */
 function stopCarousel() {
     clearInterval(carouselInterval);
 }
 
-/**
- * Valida que los 6 números ingresados para la combinación sean únicos y estén dentro del rango.
- * @returns {Array|null} Array de números válidos o null si hay errores.
- */
 function validateCombinationInput() {
     const numbers = [];
     let isValid = true;
@@ -158,8 +134,7 @@ function validateCombinationInput() {
 }
 
 
-// --- LÓGICA DE AUTENTICACIÓN (ESQUELETO PARA FIREBASE) ---
-// Estas funciones se conectarán a Firebase Authentication una vez que esté configurado.
+// --- LÓGICA DE AUTENTICACIÓN (¡AHORA REAL CON FIREBASE!) ---
 
 function handleAuthStateChanged(user) {
     if (user) {
@@ -169,10 +144,8 @@ function handleAuthStateChanged(user) {
         authButton.textContent = 'Cerrar Sesión';
         authButton.onclick = signOutGoogle;
 
-        // Comprobar si es el primer login para preguntar por el sueño
-        // (Esto requerirá interacción con Firestore para guardar el estado del usuario)
-        // Por ahora, simulamos que preguntamos el sueño después del login
-        checkUserDreamStatus(user.uid); // Función que se implementará con Firestore
+        // Comprobar si es el primer login o si ya ha definido su sueño
+        checkUserDreamStatus(user.uid);
     } else {
         // Usuario no logueado
         userDisplay.style.display = 'none';
@@ -183,115 +156,92 @@ function handleAuthStateChanged(user) {
 }
 
 async function signInGoogle() {
-    // console.log("Intento de inicio de sesión con Google"); // Debug
-    // Aquí iría la lógica de Firebase para signInWithPopup
-    // try {
-    //     const result = await auth.signInWithPopup(googleProvider);
-    //     console.log("Usuario autenticado:", result.user);
-    //     // handleAuthStateChanged ya se encargaría de actualizar la UI
-    // } catch (error) {
-    //     console.error("Error al iniciar sesión con Google:", error);
-    //     alert("Error al iniciar sesión. Por favor, inténtalo de nuevo.");
-    // }
-
-    // --- SIMULACIÓN DE LOGIN PARA PRUEBAS SIN FIREBASE ---
-    // REMOVER ESTO CUANDO FIREBASE ESTÉ ACTIVO
-    const simulatedUser = {
-        uid: "simulatedUserID123",
-        displayName: "Usuario Demo",
-        email: "demo@example.com",
-        isNewUser: true // Simular que es un nuevo usuario para activar la pregunta del sueño
-    };
-    handleAuthStateChanged(simulatedUser);
-    // --- FIN SIMULACIÓN ---
+    try {
+        await auth.signInWithPopup(googleProvider);
+        // console.log("Usuario autenticado:", result.user); // Puedes descomentar para depurar
+        // handleAuthStateChanged ya se encargaría de actualizar la UI
+    } catch (error) {
+        console.error("Error al iniciar sesión con Google:", error);
+        alert("Error al iniciar sesión. Por favor, inténtalo de nuevo. Detalles: " + error.message);
+    }
 }
 
 async function signOutGoogle() {
-    // console.log("Intento de cierre de sesión"); // Debug
-    // Aquí iría la lógica de Firebase para signOut
-    // try {
-    //     await auth.signOut();
-    //     console.log("Sesión cerrada");
-    //     // handleAuthStateChanged ya se encargaría de actualizar la UI
-    // } catch (error) {
-    //     console.error("Error al cerrar sesión:", error);
-    //     alert("Error al cerrar sesión. Por favor, inténtalo de nuevo.");
-    // }
-
-    // --- SIMULACIÓN DE LOGOUT PARA PRUEBAS SIN FIREBASE ---
-    // REMOVER ESTO CUANDO FIREBASE ESTÉ ACTIVO
-    handleAuthStateChanged(null);
-    // --- FIN SIMULACIÓN ---
+    try {
+        await auth.signOut();
+        // console.log("Sesión cerrada"); // Puedes descomentar para depurar
+        // handleAuthStateChanged ya se encargaría de actualizar la UI
+    } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+        alert("Error al cerrar sesión. Por favor, inténtalo de nuevo. Detalles: " + error.message);
+    }
 }
 
 
-// --- LÓGICA DEL SUEÑO/OBJETIVO (REQUERIRÁ FIREBASE FIRESTORE) ---
+// --- LÓGICA DEL SUEÑO/OBJETIVO (AHORA CON FIREBASE FIRESTORE) ---
 async function checkUserDreamStatus(uid) {
-    // Esto se implementará con Firestore para verificar si el usuario ya ha establecido su sueño.
-    // Si no lo ha hecho, mostrar dreamQuestionSection.
-    // Si ya lo hizo, mostrar nextDrawAnalysisSection.
-
-    // --- SIMULACIÓN PARA PRUEBAS SIN FIREBASE ---
-    // Simular que el usuario no ha establecido un sueño (mostrar la sección del sueño)
-    // En una aplicación real, esto se leería de Firestore.
-    const userHasDream = false; // Cambiar a true para simular que ya tiene un sueño
-    if (!userHasDream) {
+    try {
+        const userDoc = await db.collection('users').doc(uid).get();
+        if (userDoc.exists && userDoc.data().dream) {
+            // El usuario ya tiene un sueño guardado, ir directamente a la sección de análisis
+            showSection(nextDrawAnalysisSection);
+            startCarousel();
+        } else {
+            // Es la primera vez que se loguea o no tiene un sueño, preguntar
+            showSection(dreamQuestionSection);
+        }
+    } catch (error) {
+        console.error("Error al verificar el estado del sueño del usuario:", error);
+        // En caso de error, por seguridad, mostrar la sección de pregunta de sueño
         showSection(dreamQuestionSection);
-    } else {
-        showSection(nextDrawAnalysisSection);
-        startCarousel();
     }
-    // --- FIN SIMULACIÓN ---
 }
 
 async function saveUserDream(uid, dreamValue) {
-    // console.log("Guardando sueño:", uid, dreamValue); // Debug
-    // Aquí iría la lógica para guardar en Firestore
-    // try {
-    //     await db.collection('users').doc(uid).set({ dream: dreamValue }, { merge: true });
-    //     console.log("Sueño guardado con éxito!");
-    //     showSection(nextDrawAnalysisSection);
-    //     startCarousel();
-    // } catch (error) {
-    //     console.error("Error al guardar el sueño:", error);
-    //     alert("Hubo un error al guardar tu sueño. Por favor, inténtalo de nuevo.");
-    // }
-
-    // --- SIMULACIÓN PARA PRUEBAS SIN FIREBASE ---
-    console.log(`Sueño simulado guardado para ${uid}: ${dreamValue}`);
-    alert(`Tu sueño "${dreamValue}" ha sido guardado. ¡Ahora a analizar!`);
-    showSection(nextDrawAnalysisSection);
-    startCarousel();
-    // --- FIN SIMULACIÓN ---
+    try {
+        await db.collection('users').doc(uid).set({ dream: dreamValue }, { merge: true });
+        console.log("Sueño guardado con éxito!");
+        alert(`¡Tu sueño "${dreamValue}" ha sido guardado! ¡Ahora a analizar!`);
+        showSection(nextDrawAnalysisSection);
+        startCarousel();
+    } catch (error) {
+        console.error("Error al guardar el sueño:", error);
+        alert("Hubo un error al guardar tu sueño. Por favor, inténtalo de nuevo. Detalles: " + error.message);
+    }
 }
 
 
-// --- EVENT LISTENERS ---
+// --- EVENT LISTENERS (Actualizados para Firebase) ---
 document.addEventListener('DOMContentLoaded', () => {
     // Esto es vital para Firebase Auth. Escucha cambios en el estado de autenticación.
-    // auth.onAuthStateChanged(handleAuthStateChanged); // Descomentar cuando Firebase esté activo
-
-    // --- SIMULACIÓN DE INICIO: SI NO HAY USUARIO, MOSTRAR BIENVENIDA ---
-    // Comenta la línea `auth.onAuthStateChanged` y descomenta la siguiente para probar sin Firebase activo.
-    handleAuthStateChanged(null); // Simula que nadie está logueado al cargar
-    // --- FIN SIMULACIÓN ---
+    auth.onAuthStateChanged(handleAuthStateChanged);
 
     // Navegación principal
     navNextDraw.addEventListener('click', (e) => {
         e.preventDefault();
-        showSection(nextDrawAnalysisSection);
-        startCarousel();
+        if (auth.currentUser) { // Solo permitir navegar si está logueado
+            showSection(nextDrawAnalysisSection);
+            startCarousel();
+        } else {
+            alert("Por favor, inicia sesión para acceder a esta sección.");
+            showSection(welcomeSection);
+        }
     });
 
     navMyCombination.addEventListener('click', (e) => {
         e.preventDefault();
-        showSection(myCombinationAnalysisSection);
-        stopCarousel(); // Detener el carrusel cuando no está en la sección de análisis de sorteo
+        if (auth.currentUser) { // Solo permitir navegar si está logueado
+            showSection(myCombinationAnalysisSection);
+            stopCarousel();
+        } else {
+            alert("Por favor, inicia sesión para acceder a esta sección.");
+            showSection(welcomeSection);
+        }
     });
 
     // Botón de inicio de sesión de Google en la pantalla de bienvenida
     googleSignInBtn.addEventListener('click', signInGoogle);
-    // El botón en el header (authButton) se gestiona por handleAuthStateChanged
+    // El botón en el header (authButton) ya se gestiona por handleAuthStateChanged
 
     // Lógica para el dropdown de sueño
     dreamDropdown.addEventListener('change', () => {
@@ -314,10 +264,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (dreamToSave) {
-            // Aquí se debería obtener el UID del usuario actualmente logueado de Firebase
-            // Para la simulación, usamos un UID ficticio
-            const userId = "simulatedUserID123"; // Reemplazar con user.uid de Firebase
-            saveUserDream(userId, dreamToSave);
+            if (auth.currentUser) {
+                saveUserDream(auth.currentUser.uid, dreamToSave);
+            } else {
+                alert("No hay usuario autenticado. Por favor, intenta iniciar sesión de nuevo.");
+                showSection(welcomeSection);
+            }
         } else {
             alert('Por favor, selecciona o escribe tu sueño.');
         }
