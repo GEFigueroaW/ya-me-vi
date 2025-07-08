@@ -71,4 +71,11 @@
   .imagen-rotatoria {
   transition: opacity 1.5s ease-in-out;
   }
+  .imagen-rotatoria {
+  transition: opacity 2s ease-in-out;
+  opacity: 0;
+ }
+  .imagen-rotatoria.mostrando {
+  opacity: 1;
+ }  
 }
