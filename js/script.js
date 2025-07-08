@@ -2,13 +2,12 @@
 // Visita la consola de Firebase de tu proyecto para obtener estas configuraciones
 // Ve a "Configuración del proyecto" -> "Tus apps" -> "SDK de configuración y configuración"
 const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_AUTH_DOMAIN",
-    projectId: "TU_PROJECT_ID",
-    storageBucket: "TU_STORAGE_BUCKET",
-    messagingSenderId: "TU_MESSAGING_SENDER_ID",
-    appId: "TU_APP_ID",
-    measurementId: "TU_MEASUREMENT_ID" // Opcional, si usas Google Analytics
+  apiKey: "AIzaSyCScJA-UGs3WcBnfAm-6K94ybZ4bzBahz8",
+  authDomain: "brain-storm-8f0d8.firebaseapp.com",
+  projectId: "brain-storm-8f0d8",
+  storageBucket: "brain-storm-8f0d8.appspot.com",
+  messagingSenderId: "401208607043",
+  appId: "1:401208607043:web:6f35fc81fdce7b3fbeaff6"
 };
 
 // Inicializa Firebase (asegúrate de que los SDKs de Firebase estén cargados en index.html)
