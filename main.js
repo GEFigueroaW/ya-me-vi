@@ -1,25 +1,35 @@
-
 document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const menu = document.getElementById('menu');
   const welcome = document.getElementById('welcome');
-
+  
   const tabAnalisis = document.getElementById('tab-analisis');
   const tabEvaluar = document.getElementById('tab-evaluar');
   const seccionAnalisis = document.getElementById('analisis');
   const seccionEvaluar = document.getElementById('evaluar');
-
-  const analyzeBtn = document.getElementById('analyzeBtn');
+  
+  const analizarBtn = document.getElementById('analizarBtn');
   const checkMelate = document.getElementById('check-melate');
   const checkRevancha = document.getElementById('check-revancha');
   const checkRevanchita = document.getElementById('check-revanchita');
   const results = document.getElementById('results');
   const prediction = document.getElementById('prediction');
-
+  
   const evaluateBtn = document.getElementById('evaluateBtn');
 
-  // Simular login
+  // Imágenes de fondo dinámicas
+  const imagenes = ['vg1.jpg', 'vg2.jpg', 'vg3.jpg', 'vg4.jpg'];
+  let indiceImagen = 0;
+
+  function cambiarImagenFondo() {
+    document.body.style.backgroundImage = `url('./assets/${imagenes[indiceImagen]}')`;
+    indiceImagen = (indiceImagen + 1) % imagenes.length;
+  }
+
+  setInterval(cambiarImagenFondo, 3000);
+
+  // Simular login básico (ejemplo simple)
   loginBtn.addEventListener('click', () => {
     loginBtn.classList.add('is-hidden');
     welcome.textContent = '¡Hola, jugador!';
@@ -28,7 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   logoutBtn.addEventListener('click', () => {
-    location.reload();
+    firebase.auth().signOut().then(() => {
+      location.reload();
+    });
   });
 
   tabAnalisis.addEventListener('click', () => {
@@ -45,48 +57,46 @@ document.addEventListener('DOMContentLoaded', () => {
     seccionAnalisis.classList.add('is-hidden');
   });
 
-  analyzeBtn.addEventListener('click', async () => {
-    results.innerHTML = '<p class="has-text-info">Procesando análisis...</p>';
+  // Bloque de análisis profesional real
+  analizarBtn.addEventListener('click', async () => {
     const juegosSeleccionados = [];
-    if (checkMelate.checked) juegosSeleccionados.push('melate.csv');
-    if (checkRevancha.checked) juegosSeleccionados.push('revancha.csv');
-    if (checkRevanchita.checked) juegosSeleccionados.push('revanchita.csv');
+    if (checkMelate.checked) juegosSeleccionados.push('data/melate.csv');
+    if (checkRevancha.checked) juegosSeleccionados.push('data/revancha.csv');
+    if (checkRevanchita.checked) juegosSeleccionados.push('data/revanchita.csv');
 
     if (juegosSeleccionados.length === 0) {
       results.innerHTML = '<p class="has-text-danger">Selecciona al menos un sorteo.</p>';
       return;
     }
 
-    results.innerHTML = '<p class="has-text-success">Sorteos seleccionados: ' + juegosSeleccionados.join(', ') + '</p>';
-    prediction.innerHTML = '<p class="has-text-grey">Aquí irán las predicciones pronto...</p>';
+    results.innerHTML = `<p class="has-text-success">Sorteos seleccionados: ${juegosSeleccionados.join(', ')}</p>`;
+    prediction.innerHTML = '<p class="has-text-info">Analizando resultados y generando predicciones...</p>';
+
+    try {
+      await mlPredictor.analizarSorteos(juegosSeleccionados);
+    } catch (error) {
+      console.error("Error al analizar sorteos:", error);
+      prediction.innerHTML = '<p class="has-text-danger">Error en el análisis. Verifica la consola.</p>';
+    }
   });
 
+  // Bloque evaluar combinación (ejemplo básico)
   evaluateBtn.addEventListener('click', () => {
     const nums = [];
     for (let i = 1; i <= 6; i++) {
       const val = parseInt(document.getElementById('n' + i).value);
-      if (!isNaN(val) && val >= 1 && val <= 56) {
-        nums.push(val);
-      }
+      if (!isNaN(val) && val >= 1 && val <= 56) nums.push(val);
     }
     if (nums.length !== 6) {
       alert('Por favor ingresa 6 números válidos entre 1 y 56.');
       return;
     }
 
-    const evaluacion = nums.map(n => ({
-      numero: n,
-      melate: (Math.random() * 100).toFixed(2) + '%',
-      revancha: (Math.random() * 100).toFixed(2) + '%',
-      revanchita: (Math.random() * 100).toFixed(2) + '%'
-    }));
+    mlPredictor.mostrarEvaluacion(nums);
+  });
 
-    let html = '<table class="table is-fullwidth"><thead><tr><th>Número</th><th>Melate</th><th>Revancha</th><th>Revanchita</th></tr></thead><tbody>';
-    evaluacion.forEach(e => {
-      html += `<tr><td>${e.numero}</td><td>${e.melate}</td><td>${e.revancha}</td><td>${e.revanchita}</td></tr>`;
-    });
-    html += '</tbody></table>';
-
-    document.getElementById('evaluationResults').innerHTML = html;
+  // Verificar autenticación al cargar
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) location.href = './index.html';
   });
 });
