@@ -1,0 +1,420 @@
+/* Estilos Generales y Reseteo */
+:root {
+    --primary-color: #4CAF50; /* Verde fuerte */
+    --secondary-color: #FFC107; /* Amarillo para acentos */
+    --text-color: #333;
+    --background-light: #f4f4f4;
+    --background-dark: #2c3e50; /* Azul oscuro */
+    --white: #ffffff;
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --transition-speed: 0.3s ease-in-out;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Puedes cambiar a otra fuente si lo deseas */
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-light);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Encabezado */
+header {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 4px var(--shadow-light);
+    position: relative; /* Para el carrusel de fondo en el futuro si se extiende */
+    z-index: 10; /* Asegura que esté sobre otros elementos */
+}
+
+header h1 {
+    margin-bottom: 0.5rem;
+}
+
+header nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap; /* Para que los elementos se ajusten en pantallas pequeñas */
+}
+
+header nav ul li {
+    margin: 0;
+}
+
+header nav ul li a,
+header nav ul li button {
+    color: var(--white);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    transition: background-color var(--transition-speed);
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+header nav ul li a:hover,
+header nav ul li button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+header nav ul li button#auth-button {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+header nav ul li button#auth-button:hover {
+    background-color: #ffda6a;
+}
+
+/* Contenido Principal */
+main {
+    flex: 1; /* Permite que el contenido principal ocupe el espacio restante */
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 8px var(--shadow-light);
+    position: relative; /* Necesario para posicionar elementos internos */
+    overflow: hidden; /* Para contener el carrusel de fondo */
+}
+
+/* Secciones de la Aplicación */
+section {
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    background-color: var(--white); /* Fondo predeterminado */
+    opacity: 0; /* Por defecto invisibles */
+    transition: opacity 0.6s ease-in-out;
+    position: absolute; /* Para que las secciones se superpongan y solo se muestre una */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex; /* Para centrar contenido fácilmente */
+    flex-direction: column;
+    justify-content: center; /* Centrar verticalmente */
+    align-items: center; /* Centrar horizontalmente */
+    text-align: center;
+    z-index: 1; /* Por debajo del overlay del carrusel */
+}
+
+section.active-section {
+    opacity: 1;
+    position: relative; /* Vuelve a posición normal para que ocupe espacio */
+    display: flex; /* Asegura que flexbox funcione */
+}
+
+/* Estilos específicos para Welcome Section */
+#welcome-section {
+    background-color: #e0f2f7; /* Un azul claro */
+}
+
+#welcome-section .welcome-content {
+    background-color: var(--white);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    max-width: 600px;
+}
+
+#google-signin-btn {
+    background-color: #DB4437; /* Color de Google */
+    color: var(--white);
+    padding: 12px 25px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color var(--transition-speed);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#google-signin-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Estilos específicos para Dream Question Section */
+#dream-question-section .dream-content {
+    background-color: var(--white);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    max-width: 600px;
+}
+
+.dream-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.dream-input-group select,
+.dream-input-group input[type="text"] {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+.dream-input-group button {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 12px 25px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color var(--transition-speed);
+}
+
+.dream-input-group button:hover {
+    background-color: #43a047;
+}
+
+
+/* Estilos para "Análisis del Próximo Sorteo" y su carrusel */
+#next-draw-analysis-section {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Alinear el contenido hacia arriba */
+    align-items: center;
+    padding: 0; /* El padding se manejará en el content-overlay */
+    overflow: hidden; /* Para el carrusel */
+    background-color: transparent; /* Permite que el carrusel se vea a través */
+    z-index: 1;
+}
+
+.background-carousel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1; /* Detrás del content-overlay */
+}
+
+.background-carousel img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0; /* Por defecto invisibles */
+    transition: opacity 1.5s ease-in-out; /* Transición suave */
+}
+
+.background-carousel img.active {
+    opacity: 1;
+}
+
+.content-overlay {
+    position: relative;
+    z-index: 2; /* Sobre las imágenes del carrusel */
+    background-color: rgba(255, 255, 255, 0.85); /* Fondo semitransparente para legibilidad */
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    max-width: 800px; /* Ancho máximo para el contenido */
+    width: 90%;
+    margin-top: 50px; /* Separación del top */
+    text-align: left; /* Alineación del texto dentro del overlay */
+}
+
+#next-draw-analysis-section h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.historical-data, .pattern-analysis, .prediction {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    background-color: var(--white);
+}
+
+.historical-data h3, .pattern-analysis h3, .prediction h3 {
+    color: var(--background-dark);
+    margin-bottom: 0.8rem;
+}
+
+
+/* Estilos para "Análisis de Mi Combinación" */
+#my-combination-analysis-section {
+    /* Mismas propiedades de posicionamiento que next-draw-analysis-section cuando está activa */
+    background-color: #f0f8ff; /* Un azul muy claro */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#my-combination-analysis-section .combination-input,
+#my-combination-analysis-section .analysis-results {
+    background-color: var(--white);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    max-width: 700px;
+    width: 90%;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.numbers-input {
+    display: flex;
+    flex-wrap: wrap; /* Para que los inputs se ajusten */
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.combo-number {
+    width: 70px; /* Ancho fijo para los inputs de números */
+    height: 70px;
+    text-align: center;
+    font-size: 1.8rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%; /* Hacerlos circulares */
+    background-color: #e8f5e9; /* Un verde muy claro */
+    transition: all var(--transition-speed);
+}
+
+.combo-number:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.3);
+}
+
+#analyze-my-combo-btn {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 12px 25px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color var(--transition-speed);
+    margin-top: 20px;
+    width: 100%; /* Ocupa todo el ancho disponible */
+    max-width: 300px; /* Limita el ancho máximo */
+}
+
+#analyze-my-combo-btn:hover {
+    background-color: #43a047;
+}
+
+
+/* Pie de Página */
+footer {
+    background-color: var(--background-dark);
+    color: var(--white);
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: auto; /* Empuja el footer hacia abajo */
+    box-shadow: 0 -2px 4px var(--shadow-light);
+    z-index: 10;
+}
+
+.legal-disclaimer {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    padding: 0 15px;
+}
+
+/* Media Queries para Responsividad */
+@media (max-width: 768px) {
+    header nav ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    header nav ul li button#auth-button {
+        width: 80%; /* Asegura que el botón se vea bien en móviles */
+        margin: 0 auto;
+    }
+
+    main {
+        padding: 1rem;
+        margin: 10px auto;
+    }
+
+    section {
+        padding: 1.5rem;
+    }
+
+    #welcome-section .welcome-content,
+    #dream-question-section .dream-content,
+    #my-combination-analysis-section .combination-input,
+    #my-combination-analysis-section .analysis-results,
+    .content-overlay {
+        padding: 1.5rem;
+        max-width: 95%;
+    }
+
+    .combo-number {
+        width: 55px; /* Reducir tamaño en móviles */
+        height: 55px;
+        font-size: 1.4rem;
+    }
+
+    .numbers-input {
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    header nav ul li a,
+    header nav ul li button {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    #google-signin-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+
+    .combo-number {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+}
