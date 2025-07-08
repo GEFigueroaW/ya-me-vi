@@ -1,66 +1,5 @@
-
-// main.js
-
-// Referencias a elementos
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const welcome = document.getElementById('welcome');
-const menu = document.getElementById('menu');
-const analisisSection = document.getElementById('analisis');
-const evaluarSection = document.getElementById('evaluar');
-const tabAnalisis = document.getElementById('tab-analisis');
-const tabEvaluar = document.getElementById('tab-evaluar');
-const background = document.getElementById('background');
-
-// Rotación de fondo
-const images = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
-let current = 0;
-setInterval(() => {
-  background.style.backgroundImage = `url('assets/${images[current]}')`;
-  current = (current + 1) % images.length;
-}, 3000);
-
-// Navegación
-tabAnalisis.addEventListener('click', () => {
-  tabAnalisis.classList.add('is-active');
-  tabEvaluar.classList.remove('is-active');
-  analisisSection.classList.remove('is-hidden');
-  evaluarSection.classList.add('is-hidden');
-});
-
-tabEvaluar.addEventListener('click', () => {
-  tabEvaluar.classList.add('is-active');
-  tabAnalisis.classList.remove('is-active');
-  evaluarSection.classList.remove('is-hidden');
-  analisisSection.classList.add('is-hidden');
-});
-
-// Login simulado (conexión real en firebase-init.js)
-loginBtn.addEventListener('click', () => {
-  firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
-});
-
-logoutBtn.addEventListener('click', () => {
-  firebase.auth().signOut();
-});
-
-firebase.auth().onAuthStateChanged(user => {
-  if (user) {
-    welcome.textContent = `Bienvenido, ${user.displayName}`;
-    loginBtn.classList.add('is-hidden');
-    menu.classList.remove('is-hidden');
-    analisisSection.classList.remove('is-hidden');
-  } else {
-    welcome.textContent = 'Bienvenido';
-    loginBtn.classList.remove('is-hidden');
-    menu.classList.add('is-hidden');
-    analisisSection.classList.add('is-hidden');
-    evaluarSection.classList.add('is-hidden');
-  }
-});
-
-// Placeholder: conectar con análisis real
-document.getElementById('analyzeBtn').addEventListener('click', () => {
+// Aquí se llamará a la función del archivo dataParser.js
+document.getElementById('analyzeBtn').addEventListener('click', async () => {
   const melate = document.getElementById('check-melate').checked;
   const revancha = document.getElementById('check-revancha').checked;
   const revanchita = document.getElementById('check-revanchita').checked;
@@ -70,24 +9,69 @@ document.getElementById('analyzeBtn').addEventListener('click', () => {
     return;
   }
 
-  document.getElementById('results').innerHTML = '<p class="has-text-white">Procesando análisis...</p>';
-  // Aquí se llamará a la función del archivo dataParser.js
-  // y se mostrará el análisis y predicción
-});
+  const resultsDiv = document.getElementById('results');
+  const predictionDiv = document.getElementById('prediction');
+  resultsDiv.innerHTML = '';
+  predictionDiv.innerHTML = '';
 
-// Evaluación de combinación
-document.getElementById('evaluateBtn').addEventListener('click', () => {
-  const nums = [];
-  for (let i = 1; i <= 6; i++) {
-    const val = parseInt(document.getElementById(`n${i}`).value);
-    if (isNaN(val) || val < 1 || val > 56) {
-      alert('Ingresa 6 números válidos entre 1 y 56.');
-      return;
-    }
-    nums.push(val);
+  const sorteos = [];
+  if (melate) sorteos.push({ nombre: 'Melate', archivo: 'melate.csv' });
+  if (revancha) sorteos.push({ nombre: 'Revancha', archivo: 'revancha.csv' });
+  if (revanchita) sorteos.push({ nombre: 'Revanchita', archivo: 'revanchita.csv' });
+
+  for (const sorteo of sorteos) {
+    const draws = await DataParser.parseCSV(sorteo.archivo);
+    const freq = DataParser.getFrequencies(draws);
+    const delay = DataParser.getDelays(draws);
+    const sections = DataParser.getSectionDistribution(draws);
+
+    // Crear contenedor para este sorteo
+    const section = document.createElement('div');
+    section.classList.add('box');
+    section.innerHTML = `
+      <h3 class="title is-5">${sorteo.nombre}</h3>
+      <canvas id="freq-${sorteo.nombre}"></canvas>
+      <canvas id="delay-${sorteo.nombre}"></canvas>
+      <canvas id="sections-${sorteo.nombre}"></canvas>`;
+    resultsDiv.appendChild(section);
+
+    // Gráfico de frecuencia
+    new Chart(document.getElementById(`freq-${sorteo.nombre}`), {
+      type: 'bar',
+      data: {
+        labels: Array.from({ length: 56 }, (_, i) => i + 1),
+        datasets: [{
+          label: 'Frecuencia',
+          data: freq,
+          backgroundColor: 'rgba(33, 150, 243, 0.5)'
+        }]
+      }
+    });
+
+    // Gráfico de retraso
+    new Chart(document.getElementById(`delay-${sorteo.nombre}`), {
+      type: 'bar',
+      data: {
+        labels: Array.from({ length: 56 }, (_, i) => i + 1),
+        datasets: [{
+          label: 'Retraso (número de sorteos)',
+          data: delay,
+          backgroundColor: 'rgba(255, 193, 7, 0.5)'
+        }]
+      }
+    });
+
+    // Gráfico de distribución por secciones
+    new Chart(document.getElementById(`sections-${sorteo.nombre}`), {
+      type: 'bar',
+      data: {
+        labels: ['1–9', '10–18', '19–27', '28–36', '37–45', '46–56'],
+        datasets: [{
+          label: 'Distribución por secciones',
+          data: sections,
+          backgroundColor: 'rgba(76, 175, 80, 0.5)'
+        }]
+      }
+    });
   }
-
-  document.getElementById('evaluationResults').innerHTML =
-    '<p class="has-text-white">Calculando probabilidades...</p>';
-  // Aquí se llamará al archivo mlPredictor.js con la combinación ingresada
 });
