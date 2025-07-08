@@ -4,38 +4,75 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YA ME VI</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+  <!-- Fondo dinámico -->
+  <div id="background" class="background"></div>
+
+  <!-- Contenedor principal -->
   <section class="section">
-    <div class="container">
+    <div class="container has-text-centered">
 
-      <div class="welcome animate__animated animate__fadeIn">
-        <h1 class="title">YA ME VI</h1>
-        <p id="userName">Bienvenido</p>
-        <button class="button is-primary" id="loginBtn">Ingresar con Google</button>
-        <button class="button is-danger is-light" id="logoutBtn" style="display: none;">Cerrar sesión</button>
+      <!-- Logo y bienvenida -->
+      <h1 class="title is-2 has-text-white animate__animated animate__fadeInDown">YA ME VI</h1>
+      <p id="welcome" class="subtitle is-4 has-text-white animate__animated animate__fadeInUp">Bienvenido</p>
+      <button id="loginBtn" class="button is-warning is-medium">Iniciar sesión con Google</button>
+
+      <!-- Menú de navegación -->
+      <div id="menu" class="tabs is-centered is-toggle is-large is-hidden">
+        <ul>
+          <li id="tab-analisis" class="is-active"><a>Análisis de sorteos</a></li>
+          <li id="tab-evaluar"><a>Evaluar mi combinación</a></li>
+          <li><a id="logoutBtn">Cerrar sesión</a></li>
+        </ul>
       </div>
 
-      <div class="buttons is-centered mt-5">
-        <button class="button is-link" id="btnMelate">Analizar Melate</button>
-        <button class="button is-success" id="btnRevancha">Analizar Revancha</button>
-        <button class="button is-warning" id="btnRevanchita">Analizar Revanchita</button>
+      <!-- Sección: Análisis -->
+      <div id="analisis" class="box is-hidden">
+        <h2 class="title is-4">Selecciona sorteos a analizar</h2>
+        <label><input type="checkbox" id="check-melate"> Melate</label><br>
+        <label><input type="checkbox" id="check-revancha"> Revancha</label><br>
+        <label><input type="checkbox" id="check-revanchita"> Revanchita</label><br>
+        <button id="analyzeBtn" class="button is-primary mt-3">Analizar sorteos seleccionados</button>
+        <div id="results" class="mt-5"></div>
+        <div id="prediction" class="mt-5"></div>
       </div>
 
-      <div id="results" class="chart-container mt-5"></div>
+      <!-- Sección: Evaluar combinación -->
+      <div id="evaluar" class="box is-hidden">
+        <h2 class="title is-4">Ingresa tus 6 números</h2>
+        <div class="field is-grouped is-grouped-multiline is-justify-content-center">
+          <div class="control"><input class="input" type="number" min="1" max="56" id="n1" placeholder="Núm 1"></div>
+          <div class="control"><input class="input" type="number" min="1" max="56" id="n2" placeholder="Núm 2"></div>
+          <div class="control"><input class="input" type="number" min="1" max="56" id="n3" placeholder="Núm 3"></div>
+          <div class="control"><input class="input" type="number" min="1" max="56" id="n4" placeholder="Núm 4"></div>
+          <div class="control"><input class="input" type="number" min="1" max="56" id="n5" placeholder="Núm 5"></div>
+          <div class="control"><input class="input" type="number" min="1" max="56" id="n6" placeholder="Núm 6"></div>
+        </div>
+        <button id="evaluateBtn" class="button is-link mt-3">Evaluar combinación</button>
+        <div id="evaluationResults" class="mt-5"></div>
+      </div>
 
     </div>
   </section>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Footer legal -->
+  <footer class="footer has-text-centered">
+    <p class="has-text-white">
+      Esta aplicación no garantiza resultados ni premios. Las combinaciones sugeridas se basan en análisis estadísticos y patrones históricos, sin asegurar la ocurrencia de los números. El uso de esta herramienta es únicamente informativo y recreativo.
+    </p>
+  </footer>
 
-  <script src="js/firebase-init.js"></script>
-  <script src="js/main.js"></script>
+  <!-- Scripts -->
+  <script src="firebase-init.js"></script>
+  <script src="dataParser.js"></script>
+  <script src="mlPredictor.js"></script>
+  <script src="main.js"></script>
+
 </body>
 </html>
