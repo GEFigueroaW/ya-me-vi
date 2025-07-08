@@ -67,4 +67,8 @@
   .subtitle {
     font-size: 1rem !important;
   }
+  /* Transición suave para las imágenes */
+  .imagen-rotatoria {
+  transition: opacity 1.5s ease-in-out;
+  }
 }
