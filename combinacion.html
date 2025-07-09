@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YA ME VI - Combinación Personalizada</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title has-text-centered has-text-weight-bold has-text-grey-dark is-size-3 mb-5">
+        ¡Evalúa tu combinación!
+      </h1>
+
+      <div class="box has-background-light mb-5">
+        <h2 class="subtitle has-text-weight-semibold is-size-5">Ingresa 6 números del 1 al 56</h2>
+        <div class="field is-grouped is-grouped-multiline" id="combinationInputs">
+          <!-- JS insertará 6 inputs aquí -->
+        </div>
+        <p class="help is-danger" id="errorMsg"></p>
+        <button id="evaluateBtn" class="button is-success mt-3">Evaluar combinación</button>
+      </div>
+
+      <div id="evaluationResults" class="mt-5"></div>
+
+      <div class="has-text-centered mt-6">
+        <a href="analisis.html" class="button is-light is-medium">Volver a análisis de sorteos</a>
+      </div>
+
+    </div>
+  </section>
+
+  <script src="firebase-init.js"></script>
+  <script src="data/dataParser.js"></script>
+  <script src="js/mlPredictor.js"></script>
+  <script src="js/combinacion.js"></script>
+</body>
+</html>
