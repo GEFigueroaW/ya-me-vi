@@ -7,20 +7,23 @@ let bgIndex = 0;
 
 function rotateBackground() {
   bgIndex = (bgIndex + 1) % images.length;
-const tempImg = new Image();
-tempImg.src = images[bgIndex];
-tempImg.onload = () => {
-  background.style.transition = 'opacity 1s ease-in-out';
-  background.style.opacity = 0;
-  setTimeout(() => {
-    background.style.backgroundImage = `url(${tempImg.src})`;
-    background.style.opacity = 1;
-  }, 300);
-};
+  const tempImg = new Image();
+  tempImg.src = images[bgIndex];
+  tempImg.onload = () => {
+    background.style.transition = 'opacity 1s ease-in-out';
+    background.style.opacity = 0;
+    setTimeout(() => {
+      background.style.backgroundImage = `url(${tempImg.src})`;
+      background.style.opacity = 1;
+    }, 300);
+  };
+}
+
+// Configuración inicial del fondo
 background.style.backgroundImage = `url(${images[bgIndex]})`;
 background.style.backgroundSize = 'cover';
 background.style.backgroundPosition = 'center';
-background.style.transition = 'background-image 1s ease-in-out';
+background.style.transition = 'opacity 1s ease-in-out';
 setInterval(rotateBackground, 3000);
 
 // Login
