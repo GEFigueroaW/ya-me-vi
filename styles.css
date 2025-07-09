@@ -1,4 +1,4 @@
-/* Fondo con capas animadas */
+/* Fondo animado con capas */
 #background {
   position: relative;
   overflow: hidden;
@@ -30,8 +30,32 @@
   z-index: 3;
 }
 
-/* Estilo de texto sobre imagen */
 .title, .subtitle {
   color: white;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Modal personalizado */
+.modal-card {
+  max-width: 480px;
+  width: 90%;
+  margin: auto;
+}
+
+.modal-card-body {
+  padding: 1.5rem 2rem;
+}
+
+.modal-card-foot {
+  border-top: none;
+  padding: 1.5rem 2rem;
+}
+
+.modal-card-title {
+  font-size: 1.25rem;
+}
+
+/* Opciones de radio en línea vertical */
+input[type="radio"] {
+  margin-right: 8px;
 }
