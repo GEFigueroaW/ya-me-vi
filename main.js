@@ -49,8 +49,8 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
   await signOut(auth);
 });
 
-// Guardar sueño al dar clic en botón
-document.getElementById('saveDreamBtn').addEventListener('click', async () => {
+// Guardar sueño
+document.getElementById('saveDreamBtn')?.addEventListener('click', async () => {
   const selected = document.querySelector('input[name="dream"]:checked');
   if (!selected) {
     alert('Por favor selecciona un sueño.');
@@ -66,17 +66,14 @@ document.getElementById('saveDreamBtn').addEventListener('click', async () => {
 });
 
 function showMainContent(uid, dream = null) {
-  const main = document.getElementById('mainContent');
-  const background = document.getElementById('background');
-  main.classList.remove('is-hidden');
-  background.classList.add('is-hidden');
+  document.getElementById('mainContent').classList.remove('is-hidden');
+  document.getElementById('background').classList.add('is-hidden');
 
   if (dream) {
     alert(`¡Bienvenido! Vas tras tu sueño: ${dream}.`);
   }
 }
 
-// Detectar si hay sesión activa
 onAuthStateChanged(auth, async user => {
   const main = document.getElementById('mainContent');
   const background = document.getElementById('background');
@@ -96,37 +93,92 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// Botones de análisis
-document.getElementById('analyzeMelate').addEventListener('click', () => fetchData('melate.csv'));
-document.getElementById('analyzeRevancha').addEventListener('click', () => fetchData('revancha.csv'));
-document.getElementById('analyzeRevanchita').addEventListener('click', () => fetchData('revanchita.csv'));
+// ✅ Checkbox exclusividad
+['optMelate', 'optMelateRevancha', 'optTodo'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('change', () => {
+    if (el.checked) {
+      ['optMelate', 'optMelateRevancha', 'optTodo'].forEach(otherId => {
+        if (otherId !== id) document.getElementById(otherId).checked = false;
+      });
+    }
+  });
+});
 
-async function fetchData(fileName) {
-  const response = await fetch(fileName);
-  const text = await response.text();
-  const lines = text.trim().split('\n');
-  const numbers = lines.map(line => line.split(',').map(Number));
+// 🔍 Análisis por checkbox
+document.getElementById('btnAnalizar').addEventListener('click', async () => {
+  const juegos = [];
 
-  const flatNumbers = numbers.flat();
+  if (document.getElementById('optMelate').checked) juegos.push('melate.csv');
+  else if (document.getElementById('optMelateRevancha').checked) juegos.push('melate.csv', 'revancha.csv');
+  else if (document.getElementById('optTodo').checked) juegos.push('melate.csv', 'revancha.csv', 'revanchita.csv');
+  else return alert('Selecciona una opción de análisis.');
+
+  let allNumbers = [];
+
+  for (const file of juegos) {
+    const res = await fetch(`data/${file}`);
+    const txt = await res.text();
+    const lines = txt.trim().split('\n').map(l => l.split(',').map(Number));
+    allNumbers.push(...lines.flat());
+  }
 
   const frequency = Array(56).fill(0);
   const lastSeen = Array(56).fill(-1);
-
-  flatNumbers.forEach((num, index) => {
+  allNumbers.forEach((num, idx) => {
     frequency[num - 1]++;
-    lastSeen[num - 1] = index;
+    lastSeen[num - 1] = idx;
   });
 
-  const delay = lastSeen.map((val, i) => flatNumbers.length - val);
+  const delay = lastSeen.map((val) => allNumbers.length - val);
   const distribution = [0, 0, 0, 0, 0, 0];
-  flatNumbers.forEach(num => {
-    const section = Math.floor((num - 1) / 9);
-    distribution[section]++;
+  allNumbers.forEach(num => {
+    const sec = Math.floor((num - 1) / 9);
+    distribution[sec]++;
   });
 
   renderCharts(frequency, delay, distribution);
   showPrediction(frequency);
-}
+});
+
+// ✍️ Evaluar combinación personalizada
+document.getElementById('btnEvaluar').addEventListener('click', async () => {
+  const input = document.getElementById('customCombination').value.trim();
+  const nums = input.split(',').map(n => parseInt(n)).filter(n => !isNaN(n) && n >= 1 && n <= 56);
+
+  if (nums.length !== 6) {
+    return alert('Por favor ingresa 6 números válidos separados por coma.');
+  }
+
+  const juegos = ['melate.csv', 'revancha.csv', 'revanchita.csv'];
+  const results = [];
+
+  for (const archivo of juegos) {
+    const res = await fetch(`data/${archivo}`);
+    const txt = await res.text();
+    const lines = txt.trim().split('\n').map(l => l.split(',').map(Number));
+    let aciertos = 0;
+
+    lines.forEach(draw => {
+      const match = draw.filter(n => nums.includes(n));
+      if (match.length >= 3) aciertos++;
+    });
+
+    const porcentaje = (aciertos / lines.length) * 100;
+    results.push({ juego: archivo.replace('.csv', ''), porcentaje });
+  }
+
+  const container = document.getElementById('predictionCardContainer');
+  container.innerHTML = `
+    <div class="box has-background-info-light">
+      <h3 class="title is-5">Evaluación personalizada</h3>
+      <p><strong>Tu combinación:</strong> ${nums.join(' - ')}</p>
+      <ul class="mt-2">
+        ${results.map(r => `<li>${r.juego}: ${r.porcentaje.toFixed(2)}% de acierto significativo</li>`).join('')}
+      </ul>
+    </div>
+  `;
+});
 
 let freqChart, delayChart, distChart;
 
@@ -164,17 +216,16 @@ function renderCharts(frequency, delay, distribution) {
 }
 
 function showPrediction(frequency) {
-  const topNumbers = frequency
-    .map((count, num) => ({ num: num + 1, count }))
+  const top = frequency
+    .map((count, idx) => ({ num: idx + 1, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 6)
-    .map(obj => obj.num);
+    .map(n => n.num);
 
-  const container = document.getElementById('predictionCardContainer');
-  container.innerHTML = `
+  document.getElementById('predictionCardContainer').innerHTML = `
     <div class="prediction-card">
       <p><strong>Predicción sugerida:</strong></p>
-      <p>${topNumbers.join(' - ')}</p>
+      <p>${top.join(' - ')}</p>
     </div>
   `;
 }
