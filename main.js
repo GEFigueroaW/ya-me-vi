@@ -1,30 +1,27 @@
 // js/main.js
 
-// Fondo rotatorio
-const background = document.getElementById('background');
+// Fondo rotatorio con fusión entre capas
 const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg', 'assets/vg5.jpg'];
-let bgIndex = 0;
+let currentIndex = 0;
+let currentLayer = 1;
 
 function rotateBackground() {
-  bgIndex = (bgIndex + 1) % images.length;
-  const tempImg = new Image();
-  tempImg.src = images[bgIndex];
-  tempImg.onload = () => {
-    background.style.transition = 'opacity 1s ease-in-out';
-    background.style.opacity = 0;
-    setTimeout(() => {
-      background.style.backgroundImage = `url(${tempImg.src})`;
-      background.style.opacity = 1;
-    }, 300);
-  };
+  const nextIndex = (currentIndex + 1) % images.length;
+  const current = document.getElementById(`bg-layer-${currentLayer}`);
+  const nextLayer = currentLayer === 1 ? 2 : 1;
+  const next = document.getElementById(`bg-layer-${nextLayer}`);
+
+  next.style.backgroundImage = `url(${images[nextIndex]})`;
+  next.style.opacity = 1;
+  current.style.opacity = 0;
+
+  currentIndex = nextIndex;
+  currentLayer = nextLayer;
 }
 
-// Configuración inicial del fondo
-background.style.backgroundImage = `url(${images[bgIndex]})`;
-background.style.backgroundSize = 'cover';
-background.style.backgroundPosition = 'center';
-background.style.transition = 'opacity 1s ease-in-out';
-setInterval(rotateBackground, 3000);
+document.getElementById('bg-layer-1').style.backgroundImage = `url(${images[0]})`;
+document.getElementById('bg-layer-1').style.opacity = 1;
+setInterval(rotateBackground, 4000);
 
 // Login
 document.getElementById('loginBtn').addEventListener('click', () => {
