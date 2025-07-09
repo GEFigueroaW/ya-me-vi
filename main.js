@@ -7,7 +7,7 @@ let bgIndex = 0;
 
 function rotateBackground() {
   bgIndex = (bgIndex + 1) % images.length;
-  background.style.opacity = 0.5;
+  background.style.opacity = 1;
   setTimeout(() => {
     background.style.backgroundImage = `url(${images[bgIndex]})`;
     background.style.opacity = 2;
