@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YA ME VI - Análisis</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title has-text-centered has-text-weight-bold mb-5" style="text-shadow: 1px 1px 3px #ccc;">
+        Selecciona el sorteo que deseas analizar
+      </h1>
+
+      <div class="box mb-5">
+        <h2 class="subtitle has-text-weight-semibold"> ¿Qué quieres analizar?</h2>
+        <div class="field">
+          <div class="control">
+            <label class="checkbox">
+              <input type="radio" name="opcionAnalisis" value="melate" checked>
+              Solo Melate
+            </label>
+          </div>
+          <div class="control">
+            <label class="checkbox">
+              <input type="radio" name="opcionAnalisis" value="melate-revancha">
+              Melate + Revancha
+            </label>
+          </div>
+          <div class="control">
+            <label class="checkbox">
+              <input type="radio" name="opcionAnalisis" value="todos">
+              Melate + Revancha + Revanchita
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="button is-primary" id="btnAnalizar">Analizar combinaciones anteriores</button>
+        <a href="combinacion.html" class="button is-link">Ir a mi combinación personalizada</a>
+      </div>
+
+      <div id="resultadosAnalisis" class="mt-5"></div>
+
+      <div class="has-text-centered mt-6">
+        <button class="button is-danger" id="logoutBtn">Cerrar sesión</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/firebase-init.js"></script>
+  <script src="js/analisis.js"></script>
+</body>
+</html>
