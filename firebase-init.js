@@ -1,15 +1,16 @@
 // firebase-init.js
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCScJA-UGs3WcBnfAm-6K94ybZ4bzBahz8",
-  authDomain: "brain-storm-8f0d8.firebaseapp.com",
-  projectId: "brain-storm-8f0d8",
-  storageBucket: "brain-storm-8f0d8.appspot.com",
-  messagingSenderId: "401208607043",
-  appId: "1:401208607043:web:6f35fc81fdce7b3fbeaff6"
+  apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+  authDomain: "ya-me-vi.firebaseapp.com",
+  projectId: "ya-me-vi",
+  storageBucket: "ya-me-vi.firebasestorage.app",
+  messagingSenderId: "748876890843",
+  appId: "1:748876890843:web:070d1eb476d38594d002fe",
+  measurementId: "G-D7R797S5BC"
 };
 
-// Inicializar Firebase solo si aún no está inicializado
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 }
