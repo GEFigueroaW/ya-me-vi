@@ -1,3 +1,5 @@
+// mlPredictor.js
+
 const mlPredictor = {
   async mostrarEvaluacion(nums) {
     const juegos = [
@@ -11,9 +13,10 @@ const mlPredictor = {
 
     for (const juego of juegos) {
       const draws = await DataParser.parseCSV(juego.archivo);
+
       if (draws.length === 0) {
         const errorCard = document.createElement('div');
-        errorCard.classList.add('box', 'has-background-danger-light', 'mb-4');
+        errorCard.classList.add('box', 'has-background-danger-light', 'mb-4', 'animate__animated', 'animate__shakeX');
         errorCard.innerHTML = `
           <h3 class="title is-5">${juego.nombre}</h3>
           <p>No se pudo analizar el archivo. Verifica que <code>${juego.archivo}</code> exista y tenga datos válidos.</p>
@@ -31,11 +34,12 @@ const mlPredictor = {
       const probabilidad = (matchCount / draws.length) * 100;
 
       const card = document.createElement('div');
-      card.classList.add('box', 'has-background-light', 'mb-4');
+      card.classList.add('box', 'has-background-info-light', 'mb-4', 'animate__animated', 'animate__fadeInUp');
       card.innerHTML = `
         <h3 class="title is-5">${juego.nombre}</h3>
-        <p>Probabilidad estimada de aciertos significativos (≥3): <strong>${probabilidad.toFixed(2)}%</strong></p>
-        <p>Basado en ${draws.length} sorteos analizados.</p>
+        <p>Tu combinación tiene una probabilidad estimada de aciertos significativos (3 o más):</p>
+        <p class="is-size-4 has-text-weight-bold">${probabilidad.toFixed(2)}%</p>
+        <p class="mt-2">Basado en ${draws.length} sorteos analizados.</p>
       `;
       contenedor.appendChild(card);
     }
