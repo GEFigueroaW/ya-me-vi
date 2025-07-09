@@ -2,7 +2,7 @@
 
 // Fondo rotatorio
 const background = document.getElementById('background');
-const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg'];
+const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg', 'assets/vg5.jpg'];
 let bgIndex = 0;
 
 function rotateBackground() {
@@ -11,7 +11,7 @@ function rotateBackground() {
   setTimeout(() => {
     background.style.backgroundImage = `url(${images[bgIndex]})`;
     background.style.opacity = 1;
-  }, 500);
+  }, 1000);
 }
 background.style.backgroundImage = `url(${images[bgIndex]})`;
 background.style.backgroundSize = 'cover';
