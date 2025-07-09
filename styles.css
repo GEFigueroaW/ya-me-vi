@@ -1,57 +1,37 @@
-/* styles.css */
-
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f4f4f4;
+/* Fondo con capas animadas */
+#background {
+  position: relative;
+  overflow: hidden;
+  background-color: black;
 }
 
-#background {
-  background-image: url('../assets/vg1.jpg');
+.bg-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
   background-size: cover;
   background-position: center;
-  transition: background-image 1s ease-in-out;
+  transition: opacity 2s ease-in-out;
+  opacity: 0;
+  z-index: 0;
 }
 
-/* Oculta contenido hasta que el usuario inicie sesión */
-#mainContent.is-hidden {
-  display: none;
+#bg-layer-1 {
+  z-index: 1;
 }
 
-/* Estilo para el contenedor de predicción */
-#predictionCardContainer {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#bg-layer-2 {
+  z-index: 2;
 }
 
-/* Tarjeta de predicción personalizada */
-.prediction-card {
-  background: linear-gradient(135deg, #f39c12, #f1c40f);
+#background .hero-body {
+  position: relative;
+  z-index: 3;
+}
+
+/* Estilo de texto sobre imagen */
+.title, .subtitle {
   color: white;
-  padding: 1.5rem 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  max-width: 500px;
-  text-align: center;
-  font-size: 1.3rem;
-  animation: fadeIn 1s ease;
-}
-
-/* Responsividad para gráficos */
-canvas {
-  width: 100% !important;
-  max-width: 800px;
-  height: auto !important;
-  margin: 0 auto;
-  display: block;
-}
-
-/* Animación de entrada */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
 }
