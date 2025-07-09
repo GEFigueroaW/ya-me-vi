@@ -1,102 +1,139 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const menu = document.getElementById('menu');
-  const welcome = document.getElementById('welcome');
-  
-  const tabAnalisis = document.getElementById('tab-analisis');
-  const tabEvaluar = document.getElementById('tab-evaluar');
-  const seccionAnalisis = document.getElementById('analisis');
-  const seccionEvaluar = document.getElementById('evaluar');
-  
-  const analizarBtn = document.getElementById('analizarBtn');
-  const checkMelate = document.getElementById('check-melate');
-  const checkRevancha = document.getElementById('check-revancha');
-  const checkRevanchita = document.getElementById('check-revanchita');
-  const results = document.getElementById('results');
-  const prediction = document.getElementById('prediction');
-  
-  const evaluateBtn = document.getElementById('evaluateBtn');
+// js/main.js
 
-  // Imágenes de fondo dinámicas
-  const imagenes = ['vg1.jpg', 'vg2.jpg', 'vg3.jpg', 'vg4.jpg'];
-  let indiceImagen = 0;
+// Fondo rotatorio
+const background = document.getElementById('background');
+const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg'];
+let bgIndex = 0;
 
-  function cambiarImagenFondo() {
-    document.body.style.backgroundImage = `url('./assets/${imagenes[indiceImagen]}')`;
-    indiceImagen = (indiceImagen + 1) % imagenes.length;
+function rotateBackground() {
+  bgIndex = (bgIndex + 1) % images.length;
+  background.style.opacity = 0.5;
+  setTimeout(() => {
+    background.style.backgroundImage = `url(${images[bgIndex]})`;
+    background.style.opacity = 1;
+  }, 500);
+}
+background.style.backgroundImage = `url(${images[bgIndex]})`;
+background.style.backgroundSize = 'cover';
+background.style.backgroundPosition = 'center';
+background.style.transition = 'background-image 1s ease-in-out';
+setInterval(rotateBackground, 3000);
+
+// Login
+document.getElementById('loginBtn').addEventListener('click', () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider);
+});
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  firebase.auth().signOut();
+});
+
+// Análisis por archivo
+document.getElementById('analyzeMelate').addEventListener('click', () => fetchData('melate.csv'));
+document.getElementById('analyzeRevancha').addEventListener('click', () => fetchData('revancha.csv'));
+document.getElementById('analyzeRevanchita').addEventListener('click', () => fetchData('revanchita.csv'));
+
+// Procesar CSV y generar análisis
+async function fetchData(fileName) {
+  const response = await fetch(fileName);
+  const text = await response.text();
+  const lines = text.trim().split('\n');
+  const numbers = lines.map(line => line.split(',').map(Number));
+
+  const flatNumbers = numbers.flat();
+
+  const frequency = Array(56).fill(0);
+  const lastSeen = Array(56).fill(-1);
+
+  flatNumbers.forEach((num, index) => {
+    frequency[num - 1]++;
+    lastSeen[num - 1] = index;
+  });
+
+  const delay = lastSeen.map((val, i) => flatNumbers.length - val);
+  const distribution = [0, 0, 0, 0, 0, 0];
+  flatNumbers.forEach(num => {
+    const section = Math.floor((num - 1) / 9);
+    distribution[section]++;
+  });
+
+  renderCharts(frequency, delay, distribution);
+  showPrediction(frequency);
+}
+
+// Gráficos
+let freqChart, delayChart, distChart;
+
+function renderCharts(frequency, delay, distribution) {
+  if (freqChart) freqChart.destroy();
+  if (delayChart) delayChart.destroy();
+  if (distChart) distChart.destroy();
+
+  const ctx1 = document.getElementById('frequencyChart').getContext('2d');
+  freqChart = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: Array.from({ length: 56 }, (_, i) => i + 1),
+      datasets: [{
+        label: 'Frecuencia',
+        data: frequency,
+      }]
+    }
+  });
+
+  const ctx2 = document.getElementById('delayChart').getContext('2d');
+  delayChart = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: Array.from({ length: 56 }, (_, i) => i + 1),
+      datasets: [{
+        label: 'Retraso',
+        data: delay,
+      }]
+    }
+  });
+
+  const ctx3 = document.getElementById('distributionChart').getContext('2d');
+  distChart = new Chart(ctx3, {
+    type: 'pie',
+    data: {
+      labels: ['1–9', '10–18', '19–27', '28–36', '37–45', '46–56'],
+      datasets: [{
+        label: 'Distribución',
+        data: distribution,
+      }]
+    }
+  });
+}
+
+// Predicción
+function showPrediction(frequency) {
+  const topNumbers = frequency
+    .map((count, num) => ({ num: num + 1, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6)
+    .map(obj => obj.num);
+
+  const container = document.getElementById('predictionCardContainer');
+  container.innerHTML = `
+    <div class="prediction-card">
+      <p><strong>Predicción sugerida:</strong></p>
+      <p>${topNumbers.join(' - ')}</p>
+    </div>
+  `;
+}
+
+// Mostrar contenido al iniciar sesión
+firebase.auth().onAuthStateChanged(user => {
+  const main = document.getElementById('mainContent');
+  const login = document.getElementById('background');
+  if (user) {
+    main.classList.remove('is-hidden');
+    login.classList.add('is-hidden');
+  } else {
+    main.classList.add('is-hidden');
+    login.classList.remove('is-hidden');
   }
-
-  setInterval(cambiarImagenFondo, 3000);
-
-  // Simular login básico (ejemplo simple)
-  loginBtn.addEventListener('click', () => {
-    loginBtn.classList.add('is-hidden');
-    welcome.textContent = '¡Hola, jugador!';
-    menu.classList.remove('is-hidden');
-    seccionAnalisis.classList.remove('is-hidden');
-  });
-
-  logoutBtn.addEventListener('click', () => {
-    firebase.auth().signOut().then(() => {
-      location.reload();
-    });
-  });
-
-  tabAnalisis.addEventListener('click', () => {
-    tabAnalisis.classList.add('is-active');
-    tabEvaluar.classList.remove('is-active');
-    seccionAnalisis.classList.remove('is-hidden');
-    seccionEvaluar.classList.add('is-hidden');
-  });
-
-  tabEvaluar.addEventListener('click', () => {
-    tabEvaluar.classList.add('is-active');
-    tabAnalisis.classList.remove('is-active');
-    seccionEvaluar.classList.remove('is-hidden');
-    seccionAnalisis.classList.add('is-hidden');
-  });
-
-  // Bloque de análisis profesional real
-  analizarBtn.addEventListener('click', async () => {
-    const juegosSeleccionados = [];
-    if (checkMelate.checked) juegosSeleccionados.push('data/melate.csv');
-    if (checkRevancha.checked) juegosSeleccionados.push('data/revancha.csv');
-    if (checkRevanchita.checked) juegosSeleccionados.push('data/revanchita.csv');
-
-    if (juegosSeleccionados.length === 0) {
-      results.innerHTML = '<p class="has-text-danger">Selecciona al menos un sorteo.</p>';
-      return;
-    }
-
-    results.innerHTML = `<p class="has-text-success">Sorteos seleccionados: ${juegosSeleccionados.join(', ')}</p>`;
-    prediction.innerHTML = '<p class="has-text-info">Analizando resultados y generando predicciones...</p>';
-
-    try {
-      await mlPredictor.analizarSorteos(juegosSeleccionados);
-    } catch (error) {
-      console.error("Error al analizar sorteos:", error);
-      prediction.innerHTML = '<p class="has-text-danger">Error en el análisis. Verifica la consola.</p>';
-    }
-  });
-
-  // Bloque evaluar combinación (ejemplo básico)
-  evaluateBtn.addEventListener('click', () => {
-    const nums = [];
-    for (let i = 1; i <= 6; i++) {
-      const val = parseInt(document.getElementById('n' + i).value);
-      if (!isNaN(val) && val >= 1 && val <= 56) nums.push(val);
-    }
-    if (nums.length !== 6) {
-      alert('Por favor ingresa 6 números válidos entre 1 y 56.');
-      return;
-    }
-
-    mlPredictor.mostrarEvaluacion(nums);
-  });
-
-  // Verificar autenticación al cargar
-  firebase.auth().onAuthStateChanged(user => {
-    if (!user) location.href = './index.html';
-  });
 });
