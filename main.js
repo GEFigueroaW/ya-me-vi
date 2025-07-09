@@ -1,6 +1,17 @@
-// js/main.js
+// main.js
 
-// Fondo rotatorio con fusión entre capas
+import {
+  auth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  db,
+  doc,
+  getDoc,
+  setDoc
+} from './firebase-init.js';
+
 const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg', 'assets/vg5.jpg'];
 let currentIndex = 0;
 let currentLayer = 1;
@@ -24,22 +35,72 @@ document.getElementById('bg-layer-1').style.opacity = 1;
 setInterval(rotateBackground, 4000);
 
 // Login
-document.getElementById('loginBtn').addEventListener('click', () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider);
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    alert('Error al iniciar sesión: ' + error.message);
+  }
 });
 
 // Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  firebase.auth().signOut();
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await signOut(auth);
 });
 
-// Análisis por archivo
+// Guardar sueño al dar clic en botón
+document.getElementById('saveDreamBtn').addEventListener('click', async () => {
+  const selected = document.querySelector('input[name="dream"]:checked');
+  if (!selected) {
+    alert('Por favor selecciona un sueño.');
+    return;
+  }
+
+  const user = auth.currentUser;
+  const userRef = doc(db, 'users', user.uid);
+  await setDoc(userRef, { dream: selected.value }, { merge: true });
+
+  document.getElementById('dreamModal').classList.remove('is-active');
+  showMainContent(user.uid, selected.value);
+});
+
+function showMainContent(uid, dream = null) {
+  const main = document.getElementById('mainContent');
+  const background = document.getElementById('background');
+  main.classList.remove('is-hidden');
+  background.classList.add('is-hidden');
+
+  if (dream) {
+    alert(`¡Bienvenido! Vas tras tu sueño: ${dream}.`);
+  }
+}
+
+// Detectar si hay sesión activa
+onAuthStateChanged(auth, async user => {
+  const main = document.getElementById('mainContent');
+  const background = document.getElementById('background');
+
+  if (user) {
+    const userRef = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(userRef);
+
+    if (docSnap.exists() && docSnap.data().dream) {
+      showMainContent(user.uid, docSnap.data().dream);
+    } else {
+      document.getElementById('dreamModal').classList.add('is-active');
+    }
+  } else {
+    main.classList.add('is-hidden');
+    background.classList.remove('is-hidden');
+  }
+});
+
+// Botones de análisis
 document.getElementById('analyzeMelate').addEventListener('click', () => fetchData('melate.csv'));
 document.getElementById('analyzeRevancha').addEventListener('click', () => fetchData('revancha.csv'));
 document.getElementById('analyzeRevanchita').addEventListener('click', () => fetchData('revanchita.csv'));
 
-// Procesar CSV y generar análisis
 async function fetchData(fileName) {
   const response = await fetch(fileName);
   const text = await response.text();
@@ -67,7 +128,6 @@ async function fetchData(fileName) {
   showPrediction(frequency);
 }
 
-// Gráficos
 let freqChart, delayChart, distChart;
 
 function renderCharts(frequency, delay, distribution) {
@@ -80,10 +140,7 @@ function renderCharts(frequency, delay, distribution) {
     type: 'bar',
     data: {
       labels: Array.from({ length: 56 }, (_, i) => i + 1),
-      datasets: [{
-        label: 'Frecuencia',
-        data: frequency,
-      }]
+      datasets: [{ label: 'Frecuencia', data: frequency }]
     }
   });
 
@@ -92,10 +149,7 @@ function renderCharts(frequency, delay, distribution) {
     type: 'bar',
     data: {
       labels: Array.from({ length: 56 }, (_, i) => i + 1),
-      datasets: [{
-        label: 'Retraso',
-        data: delay,
-      }]
+      datasets: [{ label: 'Retraso', data: delay }]
     }
   });
 
@@ -104,15 +158,11 @@ function renderCharts(frequency, delay, distribution) {
     type: 'pie',
     data: {
       labels: ['1–9', '10–18', '19–27', '28–36', '37–45', '46–56'],
-      datasets: [{
-        label: 'Distribución',
-        data: distribution,
-      }]
+      datasets: [{ label: 'Distribución', data: distribution }]
     }
   });
 }
 
-// Predicción
 function showPrediction(frequency) {
   const topNumbers = frequency
     .map((count, num) => ({ num: num + 1, count }))
@@ -128,16 +178,3 @@ function showPrediction(frequency) {
     </div>
   `;
 }
-
-// Mostrar contenido al iniciar sesión
-firebase.auth().onAuthStateChanged(user => {
-  const main = document.getElementById('mainContent');
-  const login = document.getElementById('background');
-  if (user) {
-    main.classList.remove('is-hidden');
-    login.classList.add('is-hidden');
-  } else {
-    main.classList.add('is-hidden');
-    login.classList.remove('is-hidden');
-  }
-});
