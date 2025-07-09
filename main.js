@@ -1,4 +1,4 @@
-// main.js con mejoras visuales (Font Awesome + Animate.css)
+// main.js con mejoras visuales (Chart.js Pie Chart incluido)
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.getElementById('loginBtn');
@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const topFrecuencia = Object.entries(frecuencia).sort((a, b) => b[1] - a[1]).slice(0, 10);
       const canvasId = `chart-${archivo}`;
+      const pieCanvasId = `pie-${archivo}`;
 
       const card = document.createElement('div');
       card.classList.add('box', 'mb-5', 'animate__animated', 'animate__fadeIn');
@@ -67,9 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
           ${topFrecuencia.map(([num, freq]) => `<li><strong>${num}</strong>: ${freq} veces</li>`).join('')}
         </ul>
         <canvas id="${canvasId}" height="250"></canvas>
+        <p class="mt-4">Distribución por secciones:</p>
+        <canvas id="${pieCanvasId}" height="200"></canvas>
       `;
       results.appendChild(card);
 
+      // Gráfico de barras
       const ctx = document.getElementById(canvasId).getContext('2d');
       new Chart(ctx, {
         type: 'bar',
@@ -85,6 +89,27 @@ document.addEventListener('DOMContentLoaded', () => {
           responsive: true,
           plugins: {
             legend: { display: false }
+          }
+        }
+      });
+
+      // Gráfico de pastel por secciones
+      const pieCtx = document.getElementById(pieCanvasId).getContext('2d');
+      new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: ['1-9', '10-18', '19-27', '28-36', '37-45', '46-56'],
+          datasets: [{
+            data: secciones,
+            backgroundColor: [
+              '#00d1b2', '#209cee', '#ffdd57', '#ff3860', '#b86bff', '#48c774'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
           }
         }
       });
