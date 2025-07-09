@@ -10,8 +10,8 @@ function rotateBackground() {
   background.style.opacity = 0.5;
   setTimeout(() => {
     background.style.backgroundImage = `url(${images[bgIndex]})`;
-    background.style.opacity = 1;
-  }, 1000);
+    background.style.opacity = 2;
+  }, 500);
 }
 background.style.backgroundImage = `url(${images[bgIndex]})`;
 background.style.backgroundSize = 'cover';
