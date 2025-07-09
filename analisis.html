@@ -4,53 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YA ME VI - Análisis</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
   <section class="section">
     <div class="container">
-      <h1 class="title has-text-centered has-text-weight-bold mb-5" style="text-shadow: 1px 1px 3px #ccc;">
-        Selecciona el sorteo que deseas analizar
+      <h1 class="title has-text-centered has-text-weight-bold has-text-grey-dark is-size-3 mb-5">
+        <i class="fas fa-chart-line"></i> Análisis de Sorteos Anteriores
       </h1>
 
-      <div class="box mb-5">
-        <h2 class="subtitle has-text-weight-semibold"> ¿Qué quieres analizar?</h2>
+      <div class="box mb-4">
+        <h2 class="subtitle">Selecciona el tipo de análisis:</h2>
         <div class="field">
           <div class="control">
-            <label class="checkbox">
-              <input type="radio" name="opcionAnalisis" value="melate" checked>
+            <label class="radio">
+              <input type="radio" name="analisis" value="melate" checked>
               Solo Melate
             </label>
-          </div>
-          <div class="control">
-            <label class="checkbox">
-              <input type="radio" name="opcionAnalisis" value="melate-revancha">
+            <label class="radio">
+              <input type="radio" name="analisis" value="melate_revancha">
               Melate + Revancha
             </label>
-          </div>
-          <div class="control">
-            <label class="checkbox">
-              <input type="radio" name="opcionAnalisis" value="todos">
+            <label class="radio">
+              <input type="radio" name="analisis" value="todos">
               Melate + Revancha + Revanchita
             </label>
           </div>
         </div>
+        <button class="button is-link mt-3" id="analyzeBtn">
+          <i class="fas fa-search"></i> Analizar combinaciones anteriores
+        </button>
       </div>
 
-      <div class="buttons">
-        <button class="button is-primary" id="btnAnalizar">Analizar combinaciones anteriores</button>
-        <a href="combinacion.html" class="button is-link">Ir a mi combinación personalizada</a>
+      <div class="box">
+        <p>¿Tienes una combinación en mente?</p>
+        <a href="combinacion.html" class="button is-warning is-light mt-2">
+          <i class="fas fa-magic"></i> Evaluar mi combinación personalizada
+        </a>
       </div>
 
-      <div id="resultadosAnalisis" class="mt-5"></div>
+      <div id="results" class="mt-6"></div>
 
       <div class="has-text-centered mt-6">
-        <button class="button is-danger" id="logoutBtn">Cerrar sesión</button>
+        <button id="logoutBtn" class="button is-danger">
+          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        </button>
       </div>
     </div>
   </section>
 
-  <script src="js/firebase-init.js"></script>
-  <script src="js/analisis.js"></script>
+  <script src="firebase-init.js"></script>
+  <script src="data/dataParser.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
