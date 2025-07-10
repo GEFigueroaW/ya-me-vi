@@ -1,5 +1,3 @@
-
-// Fondo rotatorio
 const background = document.getElementById('background');
 const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg', 'assets/vg5.jpg'];
 let bgIndex = 0;
@@ -12,51 +10,105 @@ function rotateBackground() {
     background.style.opacity = 1;
   }, 500);
 }
-
 background.style.backgroundImage = `url(${images[bgIndex]})`;
 background.style.backgroundSize = 'cover';
 background.style.backgroundPosition = 'center';
 background.style.transition = 'background-image 1s ease-in-out';
 setInterval(rotateBackground, 3000);
 
-// Login y selección de sueño
-document.getElementById('loginBtn')?.addEventListener('click', async () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    const result = await firebase.auth().signInWithPopup(provider);
-    const user = result.user;
-    const db = firebase.firestore();
-    const docRef = db.collection("users").doc(user.uid);
-    const doc = await docRef.get();
-
-    if (!doc.exists) {
-      // Mostrar modal visual de sueño
-      document.getElementById("modalSueno").classList.add("is-active");
-
-      document.getElementById("btnGuardarSueno").onclick = async () => {
-        const seleccionado = document.querySelector('input[name="sueno"]:checked');
-        if (!seleccionado) {
-          alert("Por favor, selecciona un sueño antes de continuar.");
-          return;
-        }
-        const suenoElegido = seleccionado.value;
-        await docRef.set({
-          name: user.displayName,
-          email: user.email,
-          sueño: suenoElegido
-        });
-
-        alert(`¡Bienvenido, ${user.displayName}! Vas tras tu sueño: ${suenoElegido}`);
-        document.getElementById("modalSueno").classList.remove("is-active");
-        window.location.href = "analisis.html";
-      };
-    } else {
-      const data = doc.data();
-      alert(`¡Bienvenido de nuevo, ${data.name}! Vas tras tu sueño: ${data.sueño}`);
-      window.location.href = "analisis.html";
-    }
-  } catch (error) {
-    console.error("Error de login:", error);
-    alert("No se pudo iniciar sesión.");
+// Firebase
+let userUID = null;
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (user) {
+    userUID = user.uid;
+    showMenu(user);
+    checkDream(user.uid);
+    logoutAtMidnight();
+  } else {
+    document.getElementById('auth-section').classList.remove('is-hidden');
+    document.getElementById('menu').classList.add('is-hidden');
   }
 });
+
+document.getElementById('loginGoogleBtn').addEventListener('click', () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(console.error);
+});
+
+document.getElementById('registerBtn').addEventListener('click', () => {
+  const email = prompt("Tu correo:");
+  const password = prompt("Tu contraseña:");
+  const name = prompt("¿Cómo quieres que te llamemos?");
+  if (email && password && name) {
+    firebase.auth().createUserWithEmailAndPassword(email, password).then(async (cred) => {
+      await firebase.firestore().collection('users').doc(cred.user.uid).set({ name });
+    }).catch(console.error);
+  }
+});
+
+document.getElementById('loginEmailBtn').addEventListener('click', () => {
+  const email = prompt("Tu correo:");
+  const password = prompt("Tu contraseña:");
+  if (email && password) {
+    firebase.auth().signInWithEmailAndPassword(email, password).catch(console.error);
+  }
+});
+
+document.getElementById('resetPasswordLink').addEventListener('click', () => {
+  const email = prompt("Introduce tu correo:");
+  if (email) {
+    firebase.auth().sendPasswordResetEmail(email)
+      .then(() => alert("Revisa tu correo para restablecer tu contraseña"))
+      .catch(console.error);
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  firebase.auth().signOut();
+});
+
+function showMenu(user) {
+  document.getElementById('auth-section').classList.add('is-hidden');
+  document.getElementById('menu').classList.remove('is-hidden');
+  const welcome = document.getElementById('welcome');
+  firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
+    const name = doc.data()?.name || user.displayName || "Usuario";
+    const dream = doc.data()?.dream || "";
+    welcome.textContent = dream
+      ? `¡Bienvenido de nuevo! Vas tras tu sueño: ${dream}.`
+      : `¡Hola ${name}!`;
+  });
+}
+
+function checkDream(uid) {
+  firebase.firestore().collection('users').doc(uid).get().then(doc => {
+    if (!doc.exists || !doc.data().dream) {
+      document.getElementById('dreamModal').classList.add('is-active');
+    }
+  });
+}
+
+// Selección de sueños
+document.querySelectorAll('.dream-button').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const dream = btn.dataset.dream;
+    await firebase.firestore().collection('users').doc(userUID).update({ dream });
+    document.getElementById('dreamModal').classList.remove('is-active');
+    document.getElementById('welcome').textContent = `¡Bienvenido! Vas tras tu sueño: ${dream}.`;
+  });
+});
+
+// Ir a análisis o combinación
+document.getElementById('goToAnalisis').addEventListener('click', () => {
+  window.location.href = 'analisis.html';
+});
+document.getElementById('goToCombinacion').addEventListener('click', () => {
+  window.location.href = 'combinacion.html';
+});
+
+// Cerrar sesión automática a medianoche
+function logoutAtMidnight() {
+  const now = new Date();
+  const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+  setTimeout(() => firebase.auth().signOut(), msToMidnight);
+}
