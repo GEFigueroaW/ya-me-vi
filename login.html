@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YA ME VI - Ingreso</title>
+  <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="css/styles.css">
+  <script defer src="js/shared.js"></script>
 </head>
 <body>
   <div class="fullscreen-background" id="background"></div>
 
   <section class="section has-text-centered">
-    <h1 class="title is-3 has-text-white">YA ME VI</h1>
-    <div class="auth-buttons">
-      <button class="button is-light is-large" onclick="window.location.href='login-email.html'">Iniciar sesión</button>
-      <button class="button is-info is-large" onclick="window.location.href='register.html'">Registrarse</button>
+    <div class="container">
+      <h1 class="title has-text-white is-2 mb-5">YA ME VI</h1>
+
+      <div class="buttons is-centered">
+        <a href="login-email.html" class="button is-white is-large">Iniciar sesión</a>
+        <a href="register.html" class="button is-link is-large">Registrarme</a>
+      </div>
     </div>
   </section>
 
-  <footer class="footer">
-    Esta aplicación es solo una herramienta estadística y motivacional. No garantiza premios ni resultados. “YA ME VI” no tiene relación con Pronósticos para la Asistencia Pública ni con ninguna institución oficial.
+  <footer class="footer has-background-dark has-text-white py-3">
+    <div class="content has-text-centered is-size-7">
+      Esta aplicación es solo una herramienta estadística y motivacional. No garantiza premios ni resultados. “YA ME VI” no tiene relación con Pronósticos para la Asistencia Pública ni con ninguna institución oficial.
+    </div>
   </footer>
-
-  <script src="js/shared.js"></script>
 </body>
 </html>
