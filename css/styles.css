@@ -1,0 +1,65 @@
+/* Fondo rotatorio a pantalla completa */
+.fullscreen-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 1s ease-in-out, opacity 0.5s;
+  z-index: -1;
+}
+
+/* Títulos */
+.title, .modal-card-title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Modal de sueños */
+.modal-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+.dream-button {
+  font-size: 1.1rem;
+  padding: 1.2rem;
+  border-radius: 12px;
+  transition: transform 0.2s ease-in-out;
+}
+.dream-button:hover {
+  transform: scale(1.05);
+}
+
+/* Tarjetas de opciones después del login */
+.option-card {
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.9);
+}
+.option-card:hover {
+  border-color: #ff3860;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);
+}
+
+/* Footer disclaimer */
+footer.footer {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  text-align: center;
+}
+
+/* Responsivo */
+@media screen and (max-width: 768px) {
+  .dream-button {
+    font-size: 1rem;
+    padding: 1rem;
+  }
+  .option-card h3 {
+    font-size: 1.2rem;
+  }
+}
+
