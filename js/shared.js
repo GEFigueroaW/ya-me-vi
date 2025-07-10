@@ -32,14 +32,15 @@ function setupBackground() {
   }
 }
 
-// Footer dinámico
+// Footer dinámico con protección para evitar duplicados
 function insertFooter() {
+  if (document.querySelector('footer')) return; // Ya existe un footer
   fetch('footer.html')
     .then(res => res.text())
     .then(html => {
-      const footer = document.createElement('div');
-      footer.innerHTML = html;
-      document.body.appendChild(footer);
+      const footerContainer = document.createElement('div');
+      footerContainer.innerHTML = html;
+      document.body.appendChild(footerContainer);
     });
 }
 
