@@ -1,31 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YA ME VI - Inicio</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YA ME VI</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <script defer src="js/shared.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://kit.fontawesome.com/1c1bfcfaf0.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <div class="fullscreen-background" id="background"></div>
+  <div id="background" class="hero is-fullheight is-dark is-bold"></div>
 
-  <section class="section has-text-centered">
-    <div class="container">
-      <h1 class="title has-text-white is-2 mb-5">YA ME VI</h1>
-
-      <div class="buttons is-centered">
-        <a href="login-email.html" class="button is-white is-large">Iniciar sesión</a>
-        <a href="register.html" class="button is-link is-large">Registrarme</a>
+  <section class="hero is-fullheight is-dark is-bold">
+    <div class="hero-body">
+      <div class="container has-text-centered animate__animated animate__fadeIn">
+        <h1 class="title is-1 has-text-white mb-4">YA ME VI</h1>
+        <button id="loginBtn" class="button is-warning is-medium mb-4">
+          <span class="icon"><i class="fab fa-google"></i></span>
+          <span>Iniciar con Google</span>
+        </button>
+        <br>
+        <button id="showEmailModal" class="button is-light is-small">
+          <span class="icon"><i class="fas fa-envelope"></i></span>
+          <span>Usar correo y contraseña</span>
+        </button>
       </div>
     </div>
   </section>
 
-  <footer class="footer has-background-dark has-text-white py-3">
-    <div class="content has-text-centered is-size-7">
-      Esta aplicación es solo una herramienta estadística y motivacional. No garantiza premios ni resultados. “YA ME VI” no tiene relación con Pronósticos para la Asistencia Pública ni con ninguna institución oficial.
+  <!-- Modal para login con correo -->
+  <div class="modal" id="emailModal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Iniciar sesión con correo</p>
+        <button class="delete" aria-label="close" id="closeModal"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label">Correo</label>
+          <div class="control">
+            <input class="input" type="email" id="emailInput" placeholder="correo@ejemplo.com">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Contraseña</label>
+          <div class="control">
+            <input class="input" type="password" id="passwordInput" placeholder="********">
+          </div>
+        </div>
+        <p id="errorMsg" class="has-text-danger mt-2"></p>
+      </section>
+      <footer class="modal-card-foot is-justify-content-space-between">
+        <button class="button is-success" id="loginWithEmail">Iniciar sesión</button>
+        <button class="button is-link is-light" id="registerWithEmail">Registrarse</button>
+      </footer>
     </div>
-  </footer>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="firebase-init.js"></script>
+  <script>
+    // Fondo rotativo
+    const background = document.getElementById('background');
+    const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg'];
+    let bgIndex = 0;
+
+    function rotateBackground() {
+      bgIndex = (bgIndex + 1) % images.length;
+      background.style.opacity = 0.5;
+      setTimeout(() => {
+        background.style.backgroundImage = `url(${images[bgIndex]})`;
+        background.style.opacity = 1;
+      }, 500);
+    }
+    background.style.backgroundImage = `url(${images[bgIndex]})`;
+    background.style.backgroundSize = 'cover';
+    background.style.backgroundPosition = 'center';
+    background.style.transition = 'background-image 1s ease-in-out';
+    setInterval(rotateBackground, 3000);
+
+    // Modal control
+    const emailModal = document.getElementById("emailModal");
+    const showEmailModalBtn = document.getElementById("showEmailModal");
+    const closeModalBtn = document.getElementById("closeModal");
+
+    showEmailModalBtn.addEventListener("click", () => {
+      emailModal.classList.add("is-active");
+    });
+
+    closeModalBtn.addEventListener("click", () => {
+      emailModal.classList.remove("is-active");
+    });
+
+    document.querySelector(".modal-background").addEventListener("click", () => {
+      emailModal.classList.remove("is-active");
+    });
+
+    // Firebase login con Google
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          console.log("Login exitoso con Google:", result.user);
+          // Aquí puedes redirigir
+          window.location.href = 'analisis.html';
+        })
+        .catch(error => {
+          console.error("Error de autenticación:", error);
+        });
+    });
+  </script>
 </body>
 </html>
