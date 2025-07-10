@@ -1,55 +1,27 @@
-<!-- login.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YA ME VI - Inicia sesión</title>
+  <title>YA ME VI - Ingreso</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
-  <div id="background" class="fullscreen-background"></div>
-  <section class="section">
-    <div class="container has-text-centered">
-      <h1 class="title animate__animated animate__fadeInDown">YA ME VI</h1>
-      <p class="subtitle animate__animated animate__fadeIn">Cumple tu sueño, empieza analizando los sorteos</p>
+  <div class="fullscreen-background" id="background"></div>
 
-      <div class="box animate__animated animate__fadeInUp">
-        <button id="googleLogin" class="button is-danger is-fullwidth mb-2">
-          Iniciar sesión con Google
-        </button>
-        <hr>
-        <form id="emailLoginForm">
-          <div class="field">
-            <div class="control">
-              <input id="emailInput" class="input" type="email" placeholder="Correo electrónico" required>
-            </div>
-          </div>
-          <div class="field">
-            <div class="control">
-              <input id="passwordInput" class="input" type="password" placeholder="Contraseña" required>
-            </div>
-          </div>
-          <div class="field">
-            <div class="control">
-              <input id="displayNameInput" class="input" type="text" placeholder="Tu nombre" required>
-            </div>
-          </div>
-          <button type="submit" class="button is-primary is-fullwidth mt-2">Ingresar</button>
-        </form>
-        <div class="mt-3">
-          <a href="#" id="resetPassword" class="is-size-7">¿Olvidaste tu contraseña?</a>
-        </div>
-      </div>
+  <section class="section has-text-centered">
+    <h1 class="title is-3 has-text-white">YA ME VI</h1>
+    <div class="auth-buttons">
+      <button class="button is-light is-large" onclick="window.location.href='login-email.html'">Iniciar sesión</button>
+      <button class="button is-info is-large" onclick="window.location.href='register.html'">Registrarse</button>
     </div>
   </section>
 
-  <footer class="footer-disclaimer">
-    <p>Este sistema se basa en estadística, patrones, probabilidad e IA. No garantiza premios. Juega con responsabilidad.</p>
+  <footer class="footer">
+    Esta aplicación es solo una herramienta estadística y motivacional. No garantiza premios ni resultados. “YA ME VI” no tiene relación con Pronósticos para la Asistencia Pública ni con ninguna institución oficial.
   </footer>
 
-  <script src="js/firebase-init.js"></script>
-  <script src="js/login.js"></script>
+  <script src="js/shared.js"></script>
 </body>
 </html>
