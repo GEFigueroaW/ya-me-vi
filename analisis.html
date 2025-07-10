@@ -2,61 +2,61 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YA ME VI - Análisis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Análisis | YA ME VI</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 </head>
-<body>
+<body class="has-background-black has-text-white">
   <section class="section">
     <div class="container">
-      <h1 class="title has-text-centered has-text-weight-bold has-text-grey-dark is-size-3 mb-5">
-        <i class="fas fa-chart-line"></i> Análisis de Sorteos Anteriores
-      </h1>
+      <h1 class="title has-text-white">Análisis de sorteos</h1>
 
-      <div class="box mb-4">
-        <h2 class="subtitle">Selecciona el tipo de análisis:</h2>
-        <div class="field">
-          <div class="control">
-            <label class="radio">
-              <input type="radio" name="analisis" value="melate" checked>
-              Solo Melate
-            </label>
-            <label class="radio">
-              <input type="radio" name="analisis" value="melate_revancha">
-              Melate + Revancha
-            </label>
-            <label class="radio">
-              <input type="radio" name="analisis" value="todos">
-              Melate + Revancha + Revanchita
-            </label>
-          </div>
+      <div class="field">
+        <label class="label">¿Qué deseas analizar?</label>
+        <div class="control">
+          <label class="radio">
+            <input type="radio" name="modo" value="melate" checked>
+            Melate
+          </label>
+          <label class="radio">
+            <input type="radio" name="modo" value="melate-revancha">
+            Melate + Revancha
+          </label>
+          <label class="radio">
+            <input type="radio" name="modo" value="melate-revancha-revanchita">
+            Melate + Revancha + Revanchita
+          </label>
         </div>
-        <button class="button is-link mt-3" id="analyzeBtn">
-          <i class="fas fa-search"></i> Analizar combinaciones anteriores
+      </div>
+
+      <div class="buttons mt-4">
+        <button id="analyzeBtn" class="button is-primary">
+          <span class="icon"><i class="fas fa-chart-line"></i></span>
+          <span>Analizar</span>
+        </button>
+        <button id="logoutBtn" class="button is-light">
+          <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+          <span>Cerrar sesión</span>
         </button>
       </div>
 
-      <div class="box">
-        <p>¿Tienes una combinación en mente?</p>
-        <a href="combinacion.html" class="button is-warning is-light mt-2">
-          <i class="fas fa-magic"></i> Evaluar mi combinación personalizada
-        </a>
-      </div>
-
-      <div id="results" class="mt-6"></div>
-
-      <div class="has-text-centered mt-6">
-        <button id="logoutBtn" class="button is-danger">
-          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-        </button>
-      </div>
+      <div id="results" class="mt-5"></div>
+      <div id="prediction" class="mt-5"></div>
     </div>
   </section>
 
-  <script src="firebase-init.js"></script>
-  <script src="data/dataParser.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Scripts locales -->
+  <script src="js/firebase-init.js"></script>
+  <script src="js/dataParser.js"></script>
+  <script src="js/mlPredictor.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
