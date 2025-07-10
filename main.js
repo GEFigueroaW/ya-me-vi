@@ -1,4 +1,4 @@
-// main.js con mejoras visuales (Chart.js Pie Chart incluido)
+// main.js con diseño responsivo optimizado para móviles
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.getElementById('loginBtn');
@@ -63,13 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
       card.classList.add('box', 'mb-5', 'animate__animated', 'animate__fadeIn');
       card.innerHTML = `
         <h3 class="title is-5"><i class="fas fa-chart-bar"></i> ${archivo.replace('data/', '').replace('.csv', '').toUpperCase()}</h3>
-        <p>Números más frecuentes:</p>
-        <ul>
+        <p class="is-size-6">Números más frecuentes:</p>
+        <ul class="is-size-7">
           ${topFrecuencia.map(([num, freq]) => `<li><strong>${num}</strong>: ${freq} veces</li>`).join('')}
         </ul>
-        <canvas id="${canvasId}" height="250"></canvas>
-        <p class="mt-4">Distribución por secciones:</p>
-        <canvas id="${pieCanvasId}" height="200"></canvas>
+        <div class="is-flex is-flex-direction-column-touch">
+          <canvas id="${canvasId}" class="mb-4" style="max-width: 100%; height: auto;"></canvas>
+          <canvas id="${pieCanvasId}" style="max-width: 100%; height: auto;"></canvas>
+        </div>
       `;
       results.appendChild(card);
 
@@ -87,8 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: { display: false }
+          },
+          scales: {
+            x: { ticks: { font: { size: 10 } } },
+            y: { ticks: { font: { size: 10 } } }
           }
         }
       });
@@ -108,8 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom' }
+            legend: {
+              position: 'bottom',
+              labels: { font: { size: 10 } }
+            }
           }
         }
       });
