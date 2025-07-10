@@ -1,61 +1,84 @@
-/* Fondo animado con capas */
-#background {
-  position: relative;
-  overflow: hidden;
-  background-color: black;
+/* Estilos generales y responsivos YA ME VI */
+
+html, body {
+  background-color: #000;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-.bg-overlay {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  transition: opacity 2s ease-in-out;
-  opacity: 0;
-  z-index: 0;
+canvas {
+  max-width: 100% !important;
+  height: auto !important;
+  margin-bottom: 1.5rem;
 }
 
-#bg-layer-1 {
-  z-index: 1;
+.box {
+  padding: 1.5rem;
+  border-radius: 12px;
+  background-color: #1a1a1a;
+  color: #fff;
 }
 
-#bg-layer-2 {
-  z-index: 2;
+.title {
+  color: #fff;
 }
 
-#background .hero-body {
-  position: relative;
-  z-index: 3;
+.subtitle {
+  color: #ccc;
 }
 
-.title, .subtitle {
-  color: white;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+.button.is-primary {
+  background-color: #ff3860;
+  border-color: #ff3860;
 }
 
-/* Modal personalizado */
-.modal-card {
-  max-width: 480px;
-  width: 90%;
-  margin: auto;
+.button.is-primary:hover {
+  background-color: #ff4d6d;
+  border-color: #ff4d6d;
 }
 
-.modal-card-body {
-  padding: 1.5rem 2rem;
+.combo-input {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 0.3rem;
+  border: 2px solid #dbdbdb;
+  border-radius: 50%;
+  transition: border-color 0.3s ease;
 }
 
-.modal-card-foot {
-  border-top: none;
-  padding: 1.5rem 2rem;
+.combo-input:invalid {
+  border-color: #ff3860;
 }
 
-.modal-card-title {
-  font-size: 1.25rem;
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.25rem;
+  }
+  .subtitle {
+    font-size: 1rem;
+  }
+  .is-size-6 {
+    font-size: 0.9rem !important;
+  }
+  .is-size-7 {
+    font-size: 0.8rem !important;
+  }
+  .combo-input {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
 }
 
-/* Opciones de radio en línea vertical */
-input[type="radio"] {
-  margin-right: 8px;
+.is-hidden {
+  display: none !important;
+}
+
+.has-text-centered {
+  text-align: center;
 }
