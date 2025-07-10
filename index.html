@@ -4,50 +4,77 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YA ME VI</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css" />
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-init.js" defer></script>
+  <script src="js/main.js" defer></script>
 </head>
 <body>
-  <div id="background" class="hero is-fullheight is-dark is-bold">
-    <div class="hero-body has-text-centered">
-      <div class="container">
-        <h1 class="title has-text-white is-size-1 mb-5 animate__animated animate__fadeInDown">YA ME VI</h1>
-        <p class="subtitle has-text-white is-size-4 mb-6">Descubre tus números con inteligencia</p>
-        <button id="loginBtn" class="button is-warning is-medium animate__animated animate__pulse animate__infinite">
-          Iniciar sesión con Google
-        </button>
-      </div>
-    </div>
-  </div>
+  <div id="background" class="fullscreen-background"></div>
 
-  <!-- Modal de selección de sueño -->
-  <div id="modalSueno" class="modal">
+  <section class="section has-text-centered" id="auth-section">
+    <div class="container">
+      <h1 class="title has-text-white animate__animated animate__fadeInDown">YA ME VI</h1>
+      <div class="buttons is-centered mt-5 animate__animated animate__fadeInUp">
+        <button id="loginEmailBtn" class="button is-light is-medium">Iniciar sesión</button>
+        <button id="registerBtn" class="button is-info is-medium">Registrarse</button>
+        <button id="loginGoogleBtn" class="button is-warning is-medium">Iniciar con Google</button>
+      </div>
+      <p class="has-text-white mt-3">
+        <a href="#" id="resetPasswordLink" class="has-text-white">¿Olvidaste tu contraseña?</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Modal de selección de sueños -->
+  <div id="dreamModal" class="modal">
     <div class="modal-background"></div>
-    <div class="modal-card">
+    <div class="modal-card animate__animated animate__fadeInUp">
       <header class="modal-card-head">
-        <p class="modal-card-title">Platícame... ¿Cuál es tu sueño?</p>
+        <p class="modal-card-title">Platícame… ¿cuál es tu sueño?</p>
       </header>
       <section class="modal-card-body">
-        <div class="field">
-          <div class="control">
-            <label class="radio"><input type="radio" name="sueno" value="Comprar casa nueva" /> 🏡 Comprar casa nueva</label><br>
-            <label class="radio"><input type="radio" name="sueno" value="Comprar carro nuevo" /> 🚗 Comprar carro nuevo</label><br>
-            <label class="radio"><input type="radio" name="sueno" value="Casa para mis papás" /> 👨‍👩‍👧 Casa para mis papás</label><br>
-            <label class="radio"><input type="radio" name="sueno" value="Viaje de mis sueños" /> 🧳 Viaje de mis sueños</label><br>
-            <label class="radio"><input type="radio" name="sueno" value="Iniciar un negocio" /> 💼 Iniciar un negocio</label>
-          </div>
+        <div class="columns is-multiline is-centered">
+          <div class="column is-4"><button class="dream-button button is-primary is-fullwidth" data-dream="Casa">Casa propia</button></div>
+          <div class="column is-4"><button class="dream-button button is-link is-fullwidth" data-dream="Viaje">Viaje soñado</button></div>
+          <div class="column is-4"><button class="dream-button button is-warning is-fullwidth" data-dream="Auto">Auto nuevo</button></div>
+          <div class="column is-4"><button class="dream-button button is-success is-fullwidth" data-dream="Negocio">Iniciar negocio</button></div>
+          <div class="column is-4"><button class="dream-button button is-danger is-fullwidth" data-dream="Retiro">Retiro / Jubilación</button></div>
         </div>
       </section>
-      <footer class="modal-card-foot">
-        <button id="btnGuardarSueno" class="button is-success">Continuar</button>
-      </footer>
     </div>
   </div>
 
-  <script src="js/firebase-init.js"></script>
-  <script src="js/main.js"></script>
+  <!-- Menú de opciones después del login -->
+  <section id="menu" class="section is-hidden has-text-centered">
+    <div class="container">
+      <h2 class="title has-text-white mb-5" id="welcome"></h2>
+      <div class="columns is-centered">
+        <div class="column is-5">
+          <div class="box animate__animated animate__fadeInLeft option-card" id="goToAnalisis">
+            <h3 class="title is-4">🔍 Analizar sorteos anteriores</h3>
+            <p>Consulta patrones y predicción inteligente.</p>
+          </div>
+        </div>
+        <div class="column is-5">
+          <div class="box animate__animated animate__fadeInRight option-card" id="goToCombinacion">
+            <h3 class="title is-4">🎯 Evaluar mi combinación</h3>
+            <p>Analiza tu jugada personalizada.</p>
+          </div>
+        </div>
+      </div>
+      <button id="logoutBtn" class="button is-light mt-4">Cerrar sesión</button>
+    </div>
+  </section>
+
+  <!-- Footer con disclaimer -->
+  <footer class="footer has-text-centered is-fixed-bottom has-background-dark has-text-white p-3">
+    <p>
+      <small>Esta aplicación es solo una herramienta estadística y motivacional. No garantiza premios ni resultados. “YA ME VI” no tiene relación con Pronósticos para la Asistencia Pública ni con ninguna institución oficial.</small>
+    </p>
+  </footer>
 </body>
 </html>
