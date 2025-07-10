@@ -1,45 +1,101 @@
 const DataParser = {
-  async parseCSV(file) {
+  async parseExcel(url) {
     try {
-      const res = await fetch(file);
-      if (!res.ok) throw new Error(`No se pudo cargar el archivo: ${file}`);
-      const text = await res.text();
-      return text
-        .trim()
-        .split('\n')
-        .map(row => row.split(',').map(Number));
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+      const draws = [];
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        if (row.length >= 7) {
+          const nums = row.slice(1, 7).map(n => parseInt(n)).filter(n => !isNaN(n));
+          if (nums.length === 6) draws.push(nums);
+        }
+      }
+      return draws;
     } catch (error) {
-      console.error('Error al leer CSV:', error);
+      console.error("Error al leer el archivo Excel:", error);
       return [];
     }
   },
 
-  getFrequencies(draws) {
-    const freq = Array(56).fill(0);
-    draws.forEach(draw => draw.forEach(num => freq[num - 1]++));
-    return freq;
+  showFrequencyChart(draws, canvasId) {
+    const frequency = Array(56).fill(0);
+    draws.forEach(combo => combo.forEach(num => frequency[num - 1]++));
+
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Array.from({ length: 56 }, (_, i) => i + 1),
+        datasets: [{
+          label: 'Frecuencia de aparición',
+          data: frequency,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
   },
 
-  getDelays(draws) {
-    const lastSeen = Array(56).fill(-1);
+  showDelayChart(draws, canvasId) {
+    const lastSeen = Array(56).fill(null);
     for (let i = draws.length - 1; i >= 0; i--) {
-      draws[i].forEach(num => {
-        if (lastSeen[num - 1] === -1) {
-          lastSeen[num - 1] = draws.length - 1 - i;
+      draws[i].forEach(n => {
+        if (lastSeen[n - 1] === null) {
+          lastSeen[n - 1] = draws.length - i;
         }
       });
     }
-    return lastSeen.map(v => (v === -1 ? draws.length : v));
+
+    const delays = lastSeen.map(d => d ?? draws.length);
+
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Array.from({ length: 56 }, (_, i) => i + 1),
+        datasets: [{
+          label: 'Retraso desde última aparición',
+          data: delays,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
   },
 
-  getSectionDistribution(draws) {
-    const sections = [0, 0, 0, 0, 0, 0];
-    draws.forEach(draw => {
-      draw.forEach(num => {
-        const index = Math.floor((num - 1) / 9);
-        sections[index]++;
+  showZoneChart(draws, canvasId) {
+    const zones = [0, 0, 0, 0, 0, 0]; // 1–9, 10–18, ..., 46–56
+
+    draws.forEach(combo => {
+      combo.forEach(num => {
+        const zoneIndex = Math.floor((num - 1) / 9);
+        zones[zoneIndex]++;
       });
     });
-    return sections;
+
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['1–9', '10–18', '19–27', '28–36', '37–45', '46–56'],
+        datasets: [{
+          label: 'Distribución por secciones',
+          data: zones,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
   }
 };
