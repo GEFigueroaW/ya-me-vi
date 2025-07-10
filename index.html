@@ -1,39 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YA ME VI</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <script defer src="https://kit.fontawesome.com/cc1e1ac2ad.js" crossorigin="anonymous"></script>
-</head>
-<body>
-  <!-- Fondo rotatorio -->
-  <div class="fullscreen-background" id="background"></div>
 
-  <!-- Encabezado -->
-  <div class="top-bar">
-    <div class="brand">
-      <h1 class="title is-3 has-text-white">YA ME VI</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YA ME VI</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <!-- Fondo dinámico -->
+  <div id="background"></div>
+
+  <!-- Encabezado superior -->
+  <header class="top-bar">
+    <div class="left-text">
+      <h1 class="title is-4 has-text-white">YA ME VI</h1>
       <p class="subtitle is-6 has-text-white">Cumple tu sueño... hoy puede ser el gran día</p>
     </div>
-    <div class="buttons">
-      <a href="login.html" class="button is-light is-rounded">Iniciar sesión</a>
+    <div class="right-buttons">
+      <a href="login-email.html" class="button is-light is-rounded">Iniciar sesión</a>
       <a href="register.html" class="button is-light is-rounded">Registrarme</a>
     </div>
-  </div>
+  </header>
 
-  <!-- Footer -->
-  <footer class="footer has-background-light">
-    <div class="content has-text-centered">
-      <p class="has-text-grey-dark">
-        Este sistema se basa en estadísticas, patrones, probabilidad e inteligencia artificial. No garantiza premios. Juega con responsabilidad.
-      </p>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
+  <!-- Footer se inserta dinámicamente -->
   <script src="js/shared.js"></script>
 </body>
+
 </html>
