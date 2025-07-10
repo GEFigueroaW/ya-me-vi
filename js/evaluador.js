@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isNaN(val)) nums.push(val);
     }
 
-    // Validaciones
     const unique = [...new Set(nums)];
     if (nums.length !== 6 || unique.length !== 6 || nums.some(n => n < 1 || n > 56)) {
       alert('Por favor ingresa 6 números válidos y distintos entre 1 y 56.');
@@ -27,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 const mlPredictor = {
   async mostrarEvaluacion(nums) {
     const juegos = [
-      { nombre: 'Melate', archivo: 'data/melate.csv' },
-      { nombre: 'Revancha', archivo: 'data/revancha.csv' },
-      { nombre: 'Revanchita', archivo: 'data/revanchita.csv' }
+      { nombre: 'Melate', archivo: 'https://www.loterianacional.gob.mx/Content/Melate/MelateHistorico.csv' },
+      { nombre: 'Revancha', archivo: 'https://www.loterianacional.gob.mx/Content/Melate/RevanchaHistorico.csv' },
+      { nombre: 'Revanchita', archivo: 'https://www.loterianacional.gob.mx/Content/Melate/RevanchitaHistorico.csv' }
     ];
 
     const contenedor = document.getElementById('evaluationResults');
