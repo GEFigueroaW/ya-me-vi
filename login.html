@@ -5,27 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YA ME VI - Ingreso</title>
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <script defer src="js/shared.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="js/firebase-init.js"></script>
 </head>
-<body>
-  <div class="fullscreen-background" id="background"></div>
+<body class="fullscreen-bg">
+  <div class="login-container">
+    <h1 class="app-title">YA ME VI</h1>
+    <button id="openAuthModal" class="btn btn-primary">Iniciar sesión</button>
+    <footer id="footer-container"></footer>
+  </div>
 
-  <section class="section has-text-centered">
-    <div class="container">
-      <h1 class="title has-text-white is-2 mb-5">YA ME VI</h1>
-
-      <div class="buttons is-centered">
-        <a href="login-email.html" class="button is-white is-large">Iniciar sesión</a>
-        <a href="register.html" class="button is-link is-large">Registrarme</a>
-      </div>
+  <!-- Modal de autenticación -->
+  <div id="authModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" id="closeAuthModal">&times;</span>
+      <h2>Elige cómo iniciar sesión</h2>
+      <button id="loginWithGoogle" class="btn btn-google">Continuar con Google</button>
+      <hr />
+      <input type="email" id="emailInput" placeholder="Correo electrónico" />
+      <input type="password" id="passwordInput" placeholder="Contraseña" />
+      <button id="loginWithEmail" class="btn btn-secondary">Ingresar con correo</button>
+      <p class="forgot"><a href="#">¿Olvidaste tu contraseña?</a></p>
     </div>
-  </section>
+  </div>
 
-  <footer class="footer has-background-dark has-text-white py-3">
-    <div class="content has-text-centered is-size-7">
-      Esta aplicación es solo una herramienta estadística y motivacional. No garantiza premios ni resultados. “YA ME VI” no tiene relación con Pronósticos para la Asistencia Pública ni con ninguna institución oficial.
-    </div>
-  </footer>
+  <script src="js/shared.js"></script>
+  <script>
+    const openBtn = document.getElementById("openAuthModal");
+    const modal = document.getElementById("authModal");
+    const closeBtn = document.getElementById("closeAuthModal");
+
+    openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+    closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+
+    document.getElementById("loginWithGoogle").addEventListener("click", () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(() => window.location.href = "menu.html")
+        .catch(error => alert(error.message));
+    });
+
+    document.getElementById("loginWithEmail").addEventListener("click", () => {
+      const email = document.getElementById("emailInput").value.trim();
+      const password = document.getElementById("passwordInput").value.trim();
+      if (!email || !password) return alert("Ingresa ambos campos.");
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => window.location.href = "menu.html")
+        .catch(error => alert(error.message));
+    });
+  </script>
 </body>
 </html>
