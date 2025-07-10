@@ -1,23 +1,22 @@
 const DataParser = {
-  async parseExcel(url) {
+  async parseCSV(url) {
     try {
       const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: "array" });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-
+      const text = await response.text();
+      const lines = text.trim().split('\n');
       const draws = [];
-      for (let i = 1; i < data.length; i++) {
-        const row = data[i];
+
+      for (let i = 1; i < lines.length; i++) { // Saltar encabezado
+        const row = lines[i].split(',');
         if (row.length >= 7) {
           const nums = row.slice(1, 7).map(n => parseInt(n)).filter(n => !isNaN(n));
           if (nums.length === 6) draws.push(nums);
         }
       }
+
       return draws;
     } catch (error) {
-      console.error("Error al leer el archivo Excel:", error);
+      console.error("Error al leer CSV:", error);
       return [];
     }
   },
