@@ -1,52 +1,41 @@
+<!-- combinacion.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YA ME VI - Evaluar mi combinación</title>
+  <title>Evaluar mi combinación - YA ME VI</title>
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-  <script src="js/firebase-init.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
-<body class="has-background-black">
-  <div id="background" class="background"></div>
-
+<body>
+  <div id="background" class="fullscreen-background"></div>
   <section class="section">
-    <div class="container has-text-centered has-text-white">
-      <h1 class="title is-3 has-text-white">🎯 Evalúa tu combinación</h1>
-      <p class="subtitle">Ingresa 6 números del 1 al 56 para saber qué tan probable es que aparezcan juntos.</p>
+    <div class="container has-text-centered">
+      <h1 class="title animate__animated animate__fadeIn">Evalúa tu combinación</h1>
+      <p class="mb-4">Ingresa tus 6 números y verifica su probabilidad en Melate, Revancha y Revanchita.</p>
 
-      <div class="columns is-centered">
-        <div class="column is-half">
-          <div class="field is-grouped is-grouped-multiline is-justify-content-center">
-            ${[1,2,3,4,5,6].map(i => `
-              <p class="control">
-                <input class="input number-input" id="num${i}" type="number" min="1" max="56" placeholder="${i}">
-              </p>
-            `).join('')}
+      <form id="combinationForm" class="mt-5 animate__animated animate__fadeInUp">
+        <div class="columns is-mobile is-multiline is-centered">
+          <div class="column is-2" v-for="i in 6">
+            <input type="number" class="input" min="1" max="56" required>
           </div>
-
-          <div class="buttons is-centered mt-4">
-            <button id="evaluateBtn" class="button is-success">Evaluar combinación</button>
-            <button id="backBtn" class="button is-light">Volver al menú</button>
-          </div>
-
-          <div id="evaluationResults" class="mt-5"></div>
         </div>
-      </div>
+        <button type="submit" class="button is-success mt-4">Evaluar combinación</button>
+      </form>
+
+      <div id="evaluationResults" class="mt-6"></div>
     </div>
   </section>
 
-  <footer class="footer has-text-centered has-text-light is-size-7">
-    <p>Esta aplicación es de carácter informativo y no garantiza premios. Se basa en análisis estadístico, probabilístico y modelos IA ligeros.</p>
+  <footer class="footer-disclaimer">
+    <p>Este sistema se basa en estadística, patrones, probabilidad e IA. No garantiza premios. Juega con responsabilidad.</p>
   </footer>
 
+  <script src="js/firebase-init.js"></script>
+  <script src="js/auth-protect.js"></script>
   <script src="js/dataParser.js"></script>
   <script src="js/mlPredictor.js"></script>
   <script src="js/evaluador.js"></script>
-  <script src="js/background-rotator.js"></script>
 </body>
 </html>
