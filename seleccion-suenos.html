@@ -1,0 +1,44 @@
+<!-- seleccion-suenos.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¿Cuál es tu sueño? - YA ME VI</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+  <div id="background" class="fullscreen-background"></div>
+  <section class="section">
+    <div class="container has-text-centered">
+      <h1 class="title animate__animated animate__fadeInDown">Platícame... ¿cuál es tu sueño?</h1>
+
+      <div class="columns is-multiline is-centered mt-5">
+        <div class="column is-4">
+          <button class="button dream-button is-info is-light" data-dream="Casa">🏠 Casa</button>
+        </div>
+        <div class="column is-4">
+          <button class="button dream-button is-success is-light" data-dream="Viaje">✈️ Viaje</button>
+        </div>
+        <div class="column is-4">
+          <button class="button dream-button is-warning is-light" data-dream="Auto">🚗 Auto</button>
+        </div>
+        <div class="column is-4">
+          <button class="button dream-button is-danger is-light" data-dream="Negocio">💼 Negocio</button>
+        </div>
+        <div class="column is-4">
+          <button class="button dream-button is-link is-light" data-dream="Retiro">🧘‍♂️ Retiro/Jubilación</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer-disclaimer">
+    <p>Este sistema se basa en estadística, patrones, probabilidad e IA. No garantiza premios. Juega con responsabilidad.</p>
+  </footer>
+
+  <script src="js/firebase-init.js"></script>
+  <script src="js/dream-selection.js"></script>
+</body>
+</html>
