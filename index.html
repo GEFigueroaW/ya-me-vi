@@ -4,126 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YA ME VI</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://kit.fontawesome.com/a2e0e6ad95.js" crossorigin="anonymous"></script>
-  <style>
-    body, html {
-      height: 100%;
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      overflow: hidden;
-    }
-
-    #background {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
-      z-index: -1;
-      transition: opacity 1s ease-in-out;
-    }
-
-    .overlay {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      justify-content: space-between;
-      align-items: center;
-      background-color: rgba(255, 255, 255, 0); /* Eliminamos la malla */
-    }
-
-    .header-buttons {
-      display: flex;
-      justify-content: flex-end;
-      width: 100%;
-      padding: 1.5rem;
-      gap: 1rem;
-    }
-
-    .hero-content {
-      text-align: center;
-      color: white;
-      text-shadow: 1px 1px 3px black;
-      margin-top: 15%;
-    }
-
-    .hero-content h1 {
-      font-size: 3rem;
-      font-weight: bold;
-    }
-
-    .hero-content p {
-      font-size: 1.25rem;
-      margin-top: 0.5rem;
-    }
-
-    footer {
-      color: #fff;
-      background: rgba(0, 0, 0, 0.6);
-      font-size: 0.9rem;
-      padding: 0.8rem 1rem;
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      z-index: 2;
-    }
-
-    .button.is-light {
-      background-color: #fefefecc;
-      color: #363636;
-    }
-
-    .button.is-light:hover {
-      background-color: #fff;
-    }
-  </style>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE0z1zVf5zP0zRUQKf0p5pFc8Vn8ZZMpWn1pV6V7LhzY3DgvA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
   <div id="background"></div>
-  <div class="overlay">
-    <div class="header-buttons">
-      <a href="login-email.html" class="button is-light is-rounded"><i class="fas fa-sign-in-alt"></i>&nbsp;Iniciar sesión</a>
-      <a href="register.html" class="button is-light is-rounded"><i class="fas fa-user-plus"></i>&nbsp;Registrarme</a>
+
+  <header class="top-bar">
+    <div class="brand">
+      <h1>YA ME VI</h1>
+      <p class="subtitle">Cumple tu sueño... hoy puede ser el gran día</p>
     </div>
-
-    <div class="hero-content">
-      <h1 class="animate__animated animate__fadeInDown">YA ME VI</h1>
-      <p class="animate__animated animate__fadeInUp">Cumple tu sueño… hoy puede ser el gran día</p>
+    <div class="buttons">
+      <button class="btn-minimal">Iniciar sesión</button>
+      <button class="btn-minimal">Registrarme</button>
     </div>
+  </header>
 
-    <footer>
-      © 2025 YA ME VI. Todos los derechos reservados.
-    </footer>
-  </div>
+  <footer class="footer">
+    Este sistema se basa en estadísticas, patrones, probabilidad e inteligencia artificial. No garantiza premios. Juega con responsabilidad.
+  </footer>
 
-  <script>
-    const background = document.getElementById('background');
-    const images = [
-      'assets/vg1.jpg',
-      'assets/vg2.jpg',
-      'assets/vg3.jpg',
-      'assets/vg4.jpg'
-    ];
-    let bgIndex = 0;
-
-    function rotateBackground() {
-      bgIndex = (bgIndex + 1) % images.length;
-      background.style.opacity = 0;
-      setTimeout(() => {
-        background.style.backgroundImage = `url(${images[bgIndex]})`;
-        background.style.opacity = 1;
-      }, 500);
-    }
-
-    background.style.backgroundImage = `url(${images[bgIndex]})`;
-    background.style.opacity = 1;
-    setInterval(rotateBackground, 3000);
-  </script>
+  <script src="js/main.js"></script>
 </body>
 </html>
