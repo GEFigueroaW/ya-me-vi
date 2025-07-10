@@ -1,44 +1,48 @@
+<!-- analisis.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YA ME VI - Análisis</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="js/firebase-init.js"></script>
-  <script src="js/dataParser.js" defer></script>
-  <script src="js/mlPredictor.js" defer></script>
-  <script src="js/analisis.js" defer></script>
+  <title>Análisis de Sorteos - YA ME VI</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
   <div id="background" class="fullscreen-background"></div>
+  <section class="section">
+    <div class="container has-text-centered">
+      <h1 class="title animate__animated animate__fadeIn">Análisis de sorteos</h1>
 
-  <section class="section has-text-centered">
-    <div class="container">
-      <h1 class="title has-text-white animate__animated animate__fadeInDown">🔍 Análisis de Sorteos</h1>
-
-      <div class="buttons is-centered mt-5 animate__animated animate__fadeIn">
-        <button id="melateBtn" class="button is-primary">Solo Melate</button>
-        <button id="melateRevanchaBtn" class="button is-link">Melate + Revancha</button>
-        <button id="todosBtn" class="button is-warning">Melate + Revancha + Revanchita</button>
+      <div class="buttons is-centered mt-4 animate__animated animate__fadeInUp">
+        <label class="checkbox">
+          <input type="checkbox" id="check-melate" checked> Melate
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="check-revancha"> Revancha
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="check-revanchita"> Revanchita
+        </label>
       </div>
 
-      <button id="analyzeBtn" class="button is-success mt-4 animate__animated animate__pulse">Analizar últimos sorteos</button>
+      <div class="mt-5">
+        <button id="analyzeBtn" class="button is-primary is-medium">Analizar últimos sorteos</button>
+      </div>
 
-      <div class="mt-6" id="results"></div>
-      <div class="mt-6" id="prediction"></div>
-
-      <button class="button is-light mt-6" onclick="window.location.href='index.html'">⬅ Volver al menú principal</button>
+      <div id="results" class="mt-6 animate__animated animate__fadeIn"></div>
+      <div id="prediction" class="mt-4"></div>
     </div>
   </section>
 
-  <footer class="footer has-background-dark has-text-white is-fixed-bottom p-3">
-    <p><small>Esta herramienta ofrece análisis estadístico e inteligencia artificial sin garantía de resultados. No afiliada a la Lotería Nacional.</small></p>
+  <footer class="footer-disclaimer">
+    <p>Este sistema se basa en estadística, patrones, probabilidad e IA. No garantiza premios. Juega con responsabilidad.</p>
   </footer>
+
+  <script src="js/firebase-init.js"></script>
+  <script src="js/auth-protect.js"></script>
+  <script src="js/dataParser.js"></script>
+  <script src="js/mlPredictor.js"></script>
+  <script src="js/analisis.js"></script>
 </body>
 </html>
