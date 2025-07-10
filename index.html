@@ -1,41 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YA ME VI - Combinación Personalizada</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YA ME VI</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <section class="section">
-    <div class="container">
-      <h1 class="title has-text-centered has-text-weight-bold has-text-grey-dark is-size-3 mb-5">
-        ¡Evalúa tu combinación!
-      </h1>
-
-      <div class="box has-background-light mb-5">
-        <h2 class="subtitle has-text-weight-semibold is-size-5">Ingresa 6 números del 1 al 56</h2>
-        <div class="field is-grouped is-grouped-multiline" id="combinationInputs">
-          <!-- JS insertará 6 inputs aquí -->
-        </div>
-        <p class="help is-danger" id="errorMsg"></p>
-        <button id="evaluateBtn" class="button is-success mt-3">Evaluar combinación</button>
+  <div id="background" class="hero is-fullheight is-dark is-bold">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <h1 class="title is-1 animate__animated animate__fadeInDown">YA ME VI</h1>
+        <h2 class="subtitle is-4 animate__animated animate__fadeInUp">Descubre tus números con inteligencia</h2>
+        <button id="loginBtn" class="button is-danger is-large mt-5 animate__animated animate__fadeInUp">
+          <span class="icon"><i class="fab fa-google"></i></span>
+          <span>Ingresar con Google</span>
+        </button>
       </div>
-
-      <div id="evaluationResults" class="mt-5"></div>
-
-      <div class="has-text-centered mt-6">
-        <a href="analisis.html" class="button is-light is-medium">Volver a análisis de sorteos</a>
-      </div>
-
     </div>
-  </section>
+  </div>
 
-  <script src="firebase-init.js"></script>
-  <script src="data/dataParser.js"></script>
-  <script src="js/mlPredictor.js"></script>
-  <script src="js/combinacion.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <!-- Archivos locales -->
+  <script src="js/firebase-init.js"></script>
+  <script>
+    // Fondo rotatorio
+    const background = document.getElementById('background');
+    const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg', 'assets/vg5.jpg'];
+    let bgIndex = 0;
+    function rotateBackground() {
+      bgIndex = (bgIndex + 1) % images.length;
+      background.style.opacity = 0.4;
+      setTimeout(() => {
+        background.style.backgroundImage = `url(${images[bgIndex]})`;
+        background.style.opacity = 1;
+      }, 400);
+    }
+    background.style.backgroundImage = `url(${images[bgIndex]})`;
+    background.style.backgroundSize = 'cover';
+    background.style.backgroundPosition = 'center';
+    background.style.transition = 'background-image 0.8s ease-in-out';
+    setInterval(rotateBackground, 3000);
+
+    // Login
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        const result = await firebase.auth().signInWithPopup(provider);
+        const user = result.user;
+        const uid = user.uid;
+
+        const userRef = firebase.firestore().collection('users').doc(uid);
+        const doc = await userRef.get();
+
+        if (doc.exists && doc.data().dream) {
+          const dream = doc.data().dream;
+          alert(`¡Bienvenido de nuevo! Vas tras tu sueño: ${dream}.`);
+          window.location.href = 'analisis.html';
+        } else {
+          // Mostrar selección de sueño
+          const dream = prompt("Platícame... ¿cuál es tu sueño?\n1) Casa nueva\n2) Carro nuevo\n3) Casa a mis papás\n4) Viaje de mis sueños\n5) Iniciar un negocio", "1");
+          const opciones = {
+            '1': 'Comprar casa nueva',
+            '2': 'Comprar carro nuevo',
+            '3': 'Casa para mis papás',
+            '4': 'Viaje de mis sueños',
+            '5': 'Iniciar un negocio'
+          };
+          if (opciones[dream]) {
+            await userRef.set({ dream: opciones[dream] }, { merge: true });
+            alert(`¡Perfecto! Guardamos tu meta: ${opciones[dream]}.`);
+            window.location.href = 'analisis.html';
+          } else {
+            alert("No seleccionaste una opción válida.");
+          }
+        }
+      } catch (error) {
+        console.error("Error al iniciar sesión:", error);
+        alert("Ocurrió un error al iniciar sesión. Intenta nuevamente.");
+      }
+    });
+  </script>
 </body>
 </html>
