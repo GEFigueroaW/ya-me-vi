@@ -1,68 +1,53 @@
 document.addEventListener('DOMContentLoaded', () => {
-  let selectedOption = 'melate';
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const backBtn = document.getElementById('backBtn');
 
-  // Botones de opción
-  document.getElementById('melateBtn').addEventListener('click', () => {
-    selectedOption = 'melate';
-    highlightSelected('melateBtn');
-  });
-  document.getElementById('melateRevanchaBtn').addEventListener('click', () => {
-    selectedOption = 'melate_revancha';
-    highlightSelected('melateRevanchaBtn');
-  });
-  document.getElementById('todosBtn').addEventListener('click', () => {
-    selectedOption = 'todos';
-    highlightSelected('todosBtn');
-  });
-
-  function highlightSelected(id) {
-    ['melateBtn', 'melateRevanchaBtn', 'todosBtn'].forEach(btnId => {
-      const btn = document.getElementById(btnId);
-      btn.classList.remove('is-dark');
-    });
-    document.getElementById(id).classList.add('is-dark');
-  }
-
-  // Análisis principal
-  document.getElementById('analyzeBtn').addEventListener('click', async () => {
-    const resultsContainer = document.getElementById('results');
-    const predictionContainer = document.getElementById('prediction');
-    resultsContainer.innerHTML = '<p>Cargando y procesando sorteos...</p>';
-    predictionContainer.innerHTML = '';
+  analyzeBtn.addEventListener('click', async () => {
+    const onlyMelate = document.getElementById('check-melate').checked;
+    const includeRevancha = document.getElementById('check-revancha').checked;
+    const includeRevanchita = document.getElementById('check-revanchita').checked;
 
     const files = [];
-    if (selectedOption === 'melate' || selectedOption === 'melate_revancha' || selectedOption === 'todos') {
-      files.push({ nombre: 'Melate', url: 'https://www.loterianacional.gob.mx/Content/historicos/Melate.xlsx' });
-    }
-    if (selectedOption === 'melate_revancha' || selectedOption === 'todos') {
-      files.push({ nombre: 'Revancha', url: 'https://www.loterianacional.gob.mx/Content/historicos/Revancha.xlsx' });
-    }
-    if (selectedOption === 'todos') {
-      files.push({ nombre: 'Revanchita', url: 'https://www.loterianacional.gob.mx/Content/historicos/Revanchita.xlsx' });
-    }
 
-    const allDraws = [];
-    for (const file of files) {
-      const draws = await DataParser.parseExcel(file.url);
-      allDraws.push(...draws);
-    }
-
-    if (allDraws.length === 0) {
-      resultsContainer.innerHTML = '<p>No se pudieron procesar los sorteos.</p>';
+    if (onlyMelate) {
+      files.push('https://www.loterianacional.gob.mx/Content/Melate/MelateHistorico.csv');
+    } else if (includeRevancha) {
+      files.push(
+        'https://www.loterianacional.gob.mx/Content/Melate/MelateHistorico.csv',
+        'https://www.loterianacional.gob.mx/Content/Melate/RevanchaHistorico.csv'
+      );
+    } else if (includeRevanchita) {
+      files.push(
+        'https://www.loterianacional.gob.mx/Content/Melate/MelateHistorico.csv',
+        'https://www.loterianacional.gob.mx/Content/Melate/RevanchaHistorico.csv',
+        'https://www.loterianacional.gob.mx/Content/Melate/RevanchitaHistorico.csv'
+      );
+    } else {
+      alert('Selecciona una opción de análisis');
       return;
     }
 
-    resultsContainer.innerHTML = '<canvas id="freqChart" height="100"></canvas><canvas id="delayChart" height="100"></canvas><canvas id="zonesChart" height="100"></canvas>';
-    DataParser.showFrequencyChart(allDraws, 'freqChart');
-    DataParser.showDelayChart(allDraws, 'delayChart');
-    DataParser.showZoneChart(allDraws, 'zonesChart');
+    let allDraws = [];
+    for (const file of files) {
+      const draws = await DataParser.parseCSV(file);
+      allDraws = allDraws.concat(draws);
+    }
 
-    const prediccion = await mlPredictor.generarPrediccion(allDraws);
-    predictionContainer.innerHTML = `
-      <div class="box has-background-info-light mt-5">
-        <h2 class="title is-5">🎯 Predicción basada en patrones, estadísticas e IA</h2>
-        <p><strong>Combinación sugerida:</strong> ${prediccion.join(', ')}</p>
+    DataParser.showFrequencyChart(allDraws, 'chartFrecuencia');
+    DataParser.showDelayChart(allDraws, 'chartRetraso');
+    DataParser.showZoneChart(allDraws, 'chartZonas');
+
+    const prediction = await mlPredictor.generarPrediccion(allDraws);
+    document.getElementById('prediction').innerHTML = `
+      <div class="box has-background-success has-text-white">
+        <h3 class="title is-5">Predicción IA</h3>
+        <p>Posible combinación para próximo sorteo:</p>
+        <h2 class="title is-3">${prediction.join(' - ')}</h2>
       </div>
     `;
+  });
+
+  backBtn.addEventListener('click', () => {
+    window.location.href = 'menu.html';
   });
 });
