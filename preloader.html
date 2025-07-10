@@ -1,0 +1,45 @@
+<!-- preloader.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YA ME VI - Cargando...</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    .spinner {
+      width: 80px;
+      height: 80px;
+      border: 8px solid #ccc;
+      border-top: 8px solid #ff3860;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-size: 1.2rem;
+      margin-top: 1.5rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div id="background" class="fullscreen-background"></div>
+
+  <section class="section has-text-centered">
+    <div class="spinner"></div>
+    <p class="loading-text">Cargando tu experiencia... YA ME VI</p>
+  </section>
+
+  <script src="js/shared.js"></script>
+  <script>
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 2500);
+  </script>
+</body>
+</html>
