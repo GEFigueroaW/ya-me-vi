@@ -1,44 +1,39 @@
-// js/mlPredictor.js
-
 const mlPredictor = {
-  async mostrarEvaluacion(nums) {
-    const juegos = [
-      { nombre: 'Melate', archivo: 'data/melate.csv', color: '#3273dc' },
-      { nombre: 'Revancha', archivo: 'data/revancha.csv', color: '#23d160' },
-      { nombre: 'Revanchita', archivo: 'data/revanchita.csv', color: '#ff3860' }
-    ];
+  async generarPrediccion(draws) {
+    const frequency = Array(56).fill(0);
+    const lastSeen = Array(56).fill(draws.length);
 
-    const contenedor = document.getElementById('evaluationResults');
-    contenedor.innerHTML = '';
-
-    for (const juego of juegos) {
-      const draws = await DataParser.parseCSV(juego.archivo);
-
-      let matchCount = 0;
-      draws.forEach(draw => {
-        const intersection = draw.filter(n => nums.includes(n));
-        if (intersection.length >= 3) matchCount++;
+    // Cálculo de frecuencia y delay
+    for (let i = draws.length - 1; i >= 0; i--) {
+      draws[i].forEach(num => {
+        frequency[num - 1]++;
+        if (lastSeen[num - 1] === draws.length) {
+          lastSeen[num - 1] = draws.length - i;
+        }
       });
-
-      const probabilidad = (matchCount / draws.length) * 100;
-      const redondeada = probabilidad.toFixed(2);
-
-      const card = document.createElement('div');
-      card.classList.add('box', 'has-background-dark', 'mb-4');
-
-      card.innerHTML = `
-        <h3 class="title is-5 has-text-white">
-          <span class="icon"><i class="fas fa-bullseye"></i></span>
-          ${juego.nombre}
-        </h3>
-        <p class="mb-2 has-text-white">Probabilidad estimada de aciertos significativos (3 o más):</p>
-        <progress class="progress is-small" value="${redondeada}" max="100" style="background-color: white;">
-          ${redondeada}%
-        </progress>
-        <p class="has-text-white mt-1">≈ ${redondeada}% de coincidencia basada en datos históricos.</p>
-      `;
-
-      contenedor.appendChild(card);
     }
+
+    // Escala ambos vectores a valores entre 0 y 1
+    const freqMax = Math.max(...frequency);
+    const delayMax = Math.max(...lastSeen);
+
+    const normalized = frequency.map((f, i) => ({
+      num: i + 1,
+      value: (f / freqMax + lastSeen[i] / delayMax) / 2
+    }));
+
+    // Ordena por valor de "potencial" y elige los 6 mejores
+    normalized.sort((a, b) => b.value - a.value);
+    const top = normalized.slice(0, 12); // De aquí se eligen al azar 6
+
+    // IA simple: selección aleatoria ponderada entre top 12
+    const prediccion = [];
+    while (prediccion.length < 6) {
+      const randIndex = Math.floor(Math.random() * top.length);
+      const num = top[randIndex].num;
+      if (!prediccion.includes(num)) prediccion.push(num);
+    }
+
+    return prediccion.sort((a, b) => a - b);
   }
 };
