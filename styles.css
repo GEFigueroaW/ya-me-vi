@@ -82,3 +82,22 @@ canvas {
 .has-text-centered {
   text-align: center;
 }
+.option-sueno {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border 0.3s ease;
+}
+
+.option-sueno:hover {
+  border-color: #00d1b2;
+  background-color: #f0f0f0;
+}
+
+.option-sueno input[type="radio"] {
+  accent-color: #00d1b2;
+  transform: scale(1.3);
+}
+
