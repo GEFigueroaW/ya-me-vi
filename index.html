@@ -1,117 +1,87 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YA ME VI</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://kit.fontawesome.com/1c1bfcfaf0.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://kit.fontawesome.com/26c158b94b.js" crossorigin="anonymous"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 1s ease-in-out;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.0); /* Eliminamos la malla blanca */
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding-top: 15%;
+      color: #fff;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      color: #ffffffaa;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
-  <div id="background" class="hero is-fullheight is-dark is-bold"></div>
+  <div id="background"></div>
+  <div class="overlay"></div>
 
-  <section class="hero is-fullheight is-dark is-bold">
-    <div class="hero-body">
-      <div class="container has-text-centered animate__animated animate__fadeIn">
-        <h1 class="title is-1 has-text-white mb-4">YA ME VI</h1>
-        <button id="loginBtn" class="button is-warning is-medium mb-4">
+  <section class="hero is-fullheight is-transparent">
+    <div class="hero-body has-text-centered hero-content">
+      <div class="container">
+        <h1 class="title is-1 has-text-white animate__animated animate__fadeInDown">YA ME VI</h1>
+        <h2 class="subtitle has-text-white animate__animated animate__fadeInUp">Cumple tu sueño con el siguiente sorteo</h2>
+        <button id="loginBtn" class="button is-warning is-large animate__animated animate__fadeInUp mt-5">
           <span class="icon"><i class="fab fa-google"></i></span>
-          <span>Iniciar con Google</span>
-        </button>
-        <br>
-        <button id="showEmailModal" class="button is-light is-small">
-          <span class="icon"><i class="fas fa-envelope"></i></span>
-          <span>Usar correo y contraseña</span>
+          <span>Iniciar sesión con Google</span>
         </button>
       </div>
     </div>
   </section>
 
-  <!-- Modal para login con correo -->
-  <div class="modal" id="emailModal">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">Iniciar sesión con correo</p>
-        <button class="delete" aria-label="close" id="closeModal"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="field">
-          <label class="label">Correo</label>
-          <div class="control">
-            <input class="input" type="email" id="emailInput" placeholder="correo@ejemplo.com">
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">Contraseña</label>
-          <div class="control">
-            <input class="input" type="password" id="passwordInput" placeholder="********">
-          </div>
-        </div>
-        <p id="errorMsg" class="has-text-danger mt-2"></p>
-      </section>
-      <footer class="modal-card-foot is-justify-content-space-between">
-        <button class="button is-success" id="loginWithEmail">Iniciar sesión</button>
-        <button class="button is-link is-light" id="registerWithEmail">Registrarse</button>
-      </footer>
-    </div>
-  </div>
+  <footer class="footer">
+    <p>© 2025 YA ME VI. Todos los derechos reservados.</p>
+  </footer>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="firebase-init.js"></script>
-  <script>
-    // Fondo rotativo
-    const background = document.getElementById('background');
-    const images = ['assets/vg1.jpg', 'assets/vg2.jpg', 'assets/vg3.jpg', 'assets/vg4.jpg'];
-    let bgIndex = 0;
-
-    function rotateBackground() {
-      bgIndex = (bgIndex + 1) % images.length;
-      background.style.opacity = 0.5;
-      setTimeout(() => {
-        background.style.backgroundImage = `url(${images[bgIndex]})`;
-        background.style.opacity = 1;
-      }, 500);
-    }
-    background.style.backgroundImage = `url(${images[bgIndex]})`;
-    background.style.backgroundSize = 'cover';
-    background.style.backgroundPosition = 'center';
-    background.style.transition = 'background-image 1s ease-in-out';
-    setInterval(rotateBackground, 3000);
-
-    // Modal control
-    const emailModal = document.getElementById("emailModal");
-    const showEmailModalBtn = document.getElementById("showEmailModal");
-    const closeModalBtn = document.getElementById("closeModal");
-
-    showEmailModalBtn.addEventListener("click", () => {
-      emailModal.classList.add("is-active");
-    });
-
-    closeModalBtn.addEventListener("click", () => {
-      emailModal.classList.remove("is-active");
-    });
-
-    document.querySelector(".modal-background").addEventListener("click", () => {
-      emailModal.classList.remove("is-active");
-    });
-
-    // Firebase login con Google
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then(result => {
-          console.log("Login exitoso con Google:", result.user);
-          // Aquí puedes redirigir
-          window.location.href = 'analisis.html';
-        })
-        .catch(error => {
-          console.error("Error de autenticación:", error);
-        });
-    });
-  </script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
