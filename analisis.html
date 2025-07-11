@@ -63,6 +63,8 @@
   <script src="js/dataParser.js" type="module"></script>
   <script src="js/mlPredictor.js" type="module"></script>
   <script type="module">
+    console.log('🚀 Iniciando aplicación de análisis...');
+    
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { app } from './js/firebase-init.js';
     import { cargarDatosHistoricos, graficarEstadisticas } from './js/dataParser.js';
@@ -77,25 +79,42 @@
     });
 
     onAuthStateChanged(auth, async (user) => {
+      console.log('🔐 Estado de autenticación cambiado:', user ? 'Autenticado' : 'No autenticado');
       if (user) {
         usuarioID = user.uid;
+        console.log('👤 Usuario ID:', usuarioID);
         await analizar('melate');
       } else {
+        console.log('❌ Usuario no autenticado, redirigiendo...');
         window.location.href = 'index.html';
       }
     });
 
     async function analizar(modo) {
-      const datos = await cargarDatosHistoricos(modo);
-      graficarEstadisticas(datos);
+      console.log('🔍 Iniciando análisis para modo:', modo);
+      try {
+        const datos = await cargarDatosHistoricos(modo);
+        console.log('📊 Datos cargados, iniciando gráficos...');
+        graficarEstadisticas(datos);
 
-      const prediccion = await generarPrediccionPersonalizada(usuarioID, datos);
-      document.getElementById('combinacion-ia').textContent = prediccion.join(' - ');
+        console.log('🤖 Generando predicción personalizada...');
+        const prediccion = await generarPrediccionPersonalizada(usuarioID, datos);
+        document.getElementById('combinacion-ia').textContent = prediccion.join(' - ');
+        console.log('✅ Análisis completado');
+      } catch (error) {
+        console.error('❌ Error en análisis:', error);
+      }
     }
 
     document.querySelectorAll('.selector-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const modo = btn.dataset.mode;
+        console.log('🎯 Botón selector clickeado:', modo);
+        
+        // Destacar botón activo
+        document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('bg-blue-600'));
+        btn.classList.add('bg-blue-600');
+        
         analizar(modo);
       });
     });

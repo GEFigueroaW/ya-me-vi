@@ -1,4 +1,6 @@
 export async function cargarDatosHistoricos(modo) {
+  console.log('🚀 Iniciando carga de datos históricos para modo:', modo);
+  
   const urls = {
     melate: 'assets/melate.csv',
     'melate-revancha': ['assets/melate.csv', 'assets/revancha.csv'],
@@ -6,19 +8,23 @@ export async function cargarDatosHistoricos(modo) {
   };
 
   const archivos = Array.isArray(urls[modo]) ? urls[modo] : [urls[modo]];
+  console.log('📁 Archivos a cargar:', archivos);
+  
   let todosLosDatos = [];
   let todosLosNumeros = [];
 
   for (const archivo of archivos) {
     try {
+      console.log(`📥 Cargando ${archivo}...`);
       const response = await fetch(archivo);
       if (!response.ok) {
         throw new Error(`Error al cargar ${archivo}: ${response.status}`);
       }
       const texto = await response.text();
       const lineas = texto.trim().split('\n').slice(1); // sin encabezado
+      console.log(`📄 ${archivo}: ${lineas.length} líneas procesadas`);
 
-      lineas.forEach(linea => {
+      lineas.forEach((linea, index) => {
         const cols = linea.split(',');
         if (cols.length >= 8) {
           // Columnas C a H son índices 2 a 7 (números ganadores)
@@ -33,14 +39,17 @@ export async function cargarDatosHistoricos(modo) {
                       archivo.includes('revancha') ? 'Revancha' : 'Revanchita'
             });
             todosLosNumeros.push(...nums);
+          } else {
+            console.warn(`⚠️ Línea ${index + 1} de ${archivo} tiene números inválidos:`, nums);
           }
         }
       });
     } catch (error) {
-      console.error(`Error cargando ${archivo}:`, error);
+      console.error(`❌ Error cargando ${archivo}:`, error);
     }
   }
 
+  console.log(`✅ Carga completada: ${todosLosDatos.length} sorteos, ${todosLosNumeros.length} números`);
   return { datos: todosLosDatos, numeros: todosLosNumeros };
 }
 
@@ -48,13 +57,25 @@ export function graficarEstadisticas(datos) {
   const numeros = datos.numeros || [];
   const sorteos = datos.datos || [];
   
-  console.log('Datos recibidos:', { 
+  console.log('🔍 Datos recibidos:', { 
     totalNumeros: numeros.length, 
-    totalSorteos: sorteos.length 
+    totalSorteos: sorteos.length,
+    primerosNumeros: numeros.slice(0, 10),
+    primerSorteo: sorteos[0]
   });
   
   if (numeros.length === 0) {
-    console.warn('No hay números para graficar');
+    console.error('❌ No hay números para graficar');
+    
+    // Mostrar mensaje de error en la UI
+    const contenedorCharts = document.getElementById('charts-container');
+    if (contenedorCharts) {
+      contenedorCharts.innerHTML = `
+        <div class="col-span-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <strong>Error:</strong> No se pudieron cargar los datos históricos. Verifica que los archivos CSV estén disponibles.
+        </div>
+      `;
+    }
     return;
   }
 
@@ -109,9 +130,11 @@ export function graficarEstadisticas(datos) {
 }
 
 function mostrarGrafico(id, titulo, datos, tipo = 'bar', etiquetas = null) {
+  console.log(`📊 Creando gráfico ${id}:`, { titulo, tipo, datosLength: datos.length });
+  
   const canvas = document.getElementById(id);
   if (!canvas) {
-    console.warn(`Canvas ${id} no encontrado`);
+    console.error(`❌ Canvas ${id} no encontrado`);
     return;
   }
   
@@ -128,47 +151,52 @@ function mostrarGrafico(id, titulo, datos, tipo = 'bar', etiquetas = null) {
     ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'] :
     datos.map((_, i) => `hsl(${(i * 137.5) % 360}, 70%, 60%)`);
 
-  window[id] = new Chart(ctx, {
-    type: tipo,
-    data: {
-      labels: labels,
-      datasets: [{
-        label: titulo,
-        data: datos,
-        backgroundColor: colores,
-        borderColor: tipo === 'pie' ? '#fff' : colores,
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: tipo === 'pie' ? {} : {
-        y: { beginAtZero: true }
+  try {
+    window[id] = new Chart(ctx, {
+      type: tipo,
+      data: {
+        labels: labels,
+        datasets: [{
+          label: titulo,
+          data: datos,
+          backgroundColor: colores,
+          borderColor: tipo === 'pie' ? '#fff' : colores,
+          borderWidth: 2
+        }]
       },
-      plugins: {
-        legend: { 
-          display: tipo === 'pie',
-          position: 'bottom'
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: tipo === 'pie' ? {} : {
+          y: { beginAtZero: true }
         },
-        tooltip: {
-          backgroundColor: '#1F2937',
-          titleColor: '#fff',
-          bodyColor: '#fff',
-          callbacks: {
-            label: function(context) {
-              if (tipo === 'pie') {
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((context.parsed * 100) / total).toFixed(1);
-                return `${context.label}: ${context.parsed} (${percentage}%)`;
+        plugins: {
+          legend: { 
+            display: tipo === 'pie',
+            position: 'bottom'
+          },
+          tooltip: {
+            backgroundColor: '#1F2937',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            callbacks: {
+              label: function(context) {
+                if (tipo === 'pie') {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((context.parsed * 100) / total).toFixed(1);
+                  return `${context.label}: ${context.parsed} (${percentage}%)`;
+                }
+                return `${context.label}: ${context.parsed}`;
               }
-              return `${context.label}: ${context.parsed}`;
             }
           }
         }
       }
-    }
-  });
+    });
+    console.log(`✅ Gráfico ${id} creado exitosamente`);
+  } catch (error) {
+    console.error(`❌ Error creando gráfico ${id}:`, error);
+  }
 }
 
 function mostrarEstadisticasExtra(frecuencia, delay, numeros) {
