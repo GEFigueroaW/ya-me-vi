@@ -1,7 +1,5 @@
-// === Inicialización de Firebase YA ME VI ===
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
-// Puedes importar otros servicios si lo necesitas desde este archivo
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
@@ -13,5 +11,5 @@ const firebaseConfig = {
   measurementId: "G-D7R797S5BC"
 };
 
-// Inicializa Firebase
 export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app); // <-- esto faltaba
