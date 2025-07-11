@@ -1,32 +1,34 @@
 
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { auth } from "./firebase-init.js";
+document.addEventListener("DOMContentLoaded", function () {
+  const registerForm = document.getElementById("registerForm");
+  const googleBtn = document.getElementById("googleRegister");
 
-const provider = new GoogleAuthProvider();
+  if (registerForm) {
+    registerForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-document.getElementById("register-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          window.location.href = "dream-input.html";
+        })
+        .catch((error) => {
+          alert("Error al registrarse: " + error.message);
+        });
+    });
+  }
 
-    try {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        alert("Registro exitoso");
-        window.location.href = "bienvenida.html";
-    } catch (error) {
-        console.error(error.message);
-        alert("Error al registrar: " + error.message);
-    }
-});
-
-document.getElementById("google-register-btn").addEventListener("click", async () => {
-    try {
-        await signInWithPopup(auth, provider);
-        alert("Registro con Google exitoso");
-        window.location.href = "bienvenida.html";
-    } catch (error) {
-        console.error(error.message);
-        alert("Error con Google: " + error.message);
-    }
+  if (googleBtn) {
+    googleBtn.addEventListener("click", function () {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          window.location.href = "dream-input.html";
+        })
+        .catch((error) => {
+          alert("Error al registrarse con Google: " + error.message);
+        });
+    });
+  }
 });
