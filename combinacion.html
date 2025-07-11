@@ -54,14 +54,14 @@
   <script type="module">
     import { cargarDatosHistoricos } from './js/dataParser.js';
 
-    const form = document.getElementById('combo-form');
-    const btn = document.getElementById('evaluar-btn');
-    const resultado = document.getElementById('resultado');
-
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
       window.location.href = 'home.html';
     });
+
+    const form = document.getElementById('combo-form');
+    const btn = document.getElementById('evaluar-btn');
+    const resultado = document.getElementById('resultado');
 
     let datosHistoricos = [];
 
