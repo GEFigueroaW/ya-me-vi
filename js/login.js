@@ -1,35 +1,31 @@
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { app } from './firebase-init.js';
 
-const auth = getAuth(app);
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { auth } from "./firebase-init.js";
 
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
+const provider = new GoogleAuthProvider();
 
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCred.user;
-    window.location.href = "dream-input.html";
-  } catch (error) {
-    console.error(error);
-    alert("Correo o contraseña incorrectos. Intenta de nuevo.");
-  }
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Inicio de sesión exitoso");
+        window.location.href = "bienvenida.html";
+    } catch (error) {
+        console.error(error.message);
+        alert("Error al iniciar sesión: " + error.message);
+    }
 });
 
-
-import { auth } from './firebase-init.js';
-import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-document.getElementById('google-login')?.addEventListener('click', () => {
-  const provider = new GoogleAuthProvider();
-  signInWithPopup(auth, provider)
-    .then(() => {
-      window.location.href = 'home.html';
-    })
-    .catch(error => {
-      console.error(error);
-      alert("Error al iniciar sesión con Google.");
-    });
+document.getElementById("google-login-btn").addEventListener("click", async () => {
+    try {
+        await signInWithPopup(auth, provider);
+        alert("Inicio de sesión con Google exitoso");
+        window.location.href = "bienvenida.html";
+    } catch (error) {
+        console.error(error.message);
+        alert("Error con Google: " + error.message);
+    }
 });
