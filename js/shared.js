@@ -1,4 +1,4 @@
-// === FONDO DINÁMICO ROTATIVO ===
+// === SISTEMA DE FONDO DINÁMICO CON CROSSFADE SUAVE ===
 
 const fondoImagenes = [
   'assets/vg1.jpg',
@@ -9,8 +9,9 @@ const fondoImagenes = [
 ];
 
 let fondoActual = 0;
+let capaActiva = 'before'; // 'before' o 'after'
 
-// Precargar todas las imágenes para evitar parpadeos
+// Precargar todas las imágenes para evitar demoras
 function precargarImagenes() {
   return Promise.all(
     fondoImagenes.map(imagen => {
@@ -24,33 +25,60 @@ function precargarImagenes() {
   );
 }
 
-function cambiarFondo() {
+// Función para cambiar de imagen con transición suave
+function cambiarFondoSuave() {
   const fondo = document.getElementById('background');
-  if (fondo) {
-    const siguienteImagen = fondoImagenes[fondoActual];
+  if (!fondo) return;
+  
+  const siguienteImagen = fondoImagenes[fondoActual];
+  
+  // Crear imagen temporal para asegurar que esté cargada
+  const tempImg = new Image();
+  tempImg.onload = () => {
+    // Determinar qué capa usar para la nueva imagen
+    if (capaActiva === 'before') {
+      // Cambiar la capa after y hacerla visible
+      fondo.style.setProperty('--after-bg', `url('${siguienteImagen}')`);
+      fondo.classList.add('show-after');
+      capaActiva = 'after';
+    } else {
+      // Cambiar la capa before y hacerla visible
+      fondo.style.setProperty('--before-bg', `url('${siguienteImagen}')`);
+      fondo.classList.remove('show-after');
+      capaActiva = 'before';
+    }
     
-    // Crear una nueva imagen en segundo plano
-    const tempImg = new Image();
-    tempImg.onload = () => {
-      // Cambiar instantáneamente sin transición de opacity
-      fondo.style.backgroundImage = `url('${siguienteImagen}')`;
-      fondoActual = (fondoActual + 1) % fondoImagenes.length;
-    };
-    tempImg.src = siguienteImagen;
-  }
+    fondoActual = (fondoActual + 1) % fondoImagenes.length;
+  };
+  tempImg.src = siguienteImagen;
 }
 
-// Inicializar el sistema de fondo
+// Inicializar el sistema
+function inicializarFondo() {
+  const fondo = document.getElementById('background');
+  if (!fondo) return;
+  
+  // Establecer propiedades CSS personalizadas
+  fondo.style.setProperty('--before-bg', `url('${fondoImagenes[0]}')`);
+  fondo.style.setProperty('--after-bg', `url('${fondoImagenes[1]}')`);
+  
+  // Comenzar con la primera imagen
+  fondoActual = 1; // La siguiente será la segunda imagen
+  
+  // Comenzar la rotación
+  setTimeout(() => {
+    cambiarFondoSuave();
+    setInterval(cambiarFondoSuave, 4000); // Cambiar cada 4 segundos
+  }, 2000); // Esperar 2 segundos antes del primer cambio
+}
+
+// Inicializar cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", () => {
-  // Precargar todas las imágenes primero
   precargarImagenes().then(() => {
-    // Comenzar la rotación después de que todas las imágenes estén cargadas
-    cambiarFondo(); // Cambiar inmediatamente a la primera imagen
-    setInterval(cambiarFondo, 3000); // Cambiar cada 3 segundos
+    inicializarFondo();
   }).catch(err => {
     console.error('Error precargando imágenes:', err);
-    // Continuar con la rotación aunque haya errores
-    setInterval(cambiarFondo, 3000);
+    inicializarFondo(); // Continuar aunque haya errores
   });
 });
 
