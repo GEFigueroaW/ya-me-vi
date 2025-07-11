@@ -65,7 +65,7 @@ export function graficarEstadisticas(datos) {
   });
   
   if (numeros.length === 0) {
-    console.error('❌ No hay números para graficar');
+    console.error('❌ No hay números para analizar');
     
     // Mostrar mensaje de error en la UI
     const contenedorCharts = document.getElementById('charts-container');
@@ -79,7 +79,7 @@ export function graficarEstadisticas(datos) {
     return;
   }
 
-  // Cálculo de frecuencia
+  // Cálculo de frecuencia para cada número (1-56)
   const frecuencia = Array(56).fill(0);
   numeros.forEach(n => {
     if (n >= 1 && n <= 56) {
@@ -87,135 +87,37 @@ export function graficarEstadisticas(datos) {
     }
   });
 
-  // Cálculo de delay (números más atrasados)
-  const delay = Array(56).fill(0);
-  const ultimaAparicion = Array(56).fill(-1);
-  
-  // Encontrar la última aparición de cada número
-  sorteos.forEach((sorteo, index) => {
-    sorteo.numeros.forEach(num => {
-      if (num >= 1 && num <= 56) {
-        ultimaAparicion[num - 1] = index;
-      }
-    });
-  });
-  
-  // Calcular delay desde la última aparición
-  ultimaAparicion.forEach((ultimoIndex, i) => {
-    if (ultimoIndex >= 0) {
-      delay[i] = sorteos.length - ultimoIndex;
-    } else {
-      delay[i] = sorteos.length; // nunca ha aparecido
-    }
-  });
+  // Distribución por bloques (6 bloques de ~9-10 números cada uno)
+  const bloques = [
+    { rango: '1-9', numeros: [], total: 0 },
+    { rango: '10-18', numeros: [], total: 0 },
+    { rango: '19-27', numeros: [], total: 0 },
+    { rango: '28-36', numeros: [], total: 0 },
+    { rango: '37-45', numeros: [], total: 0 },
+    { rango: '46-56', numeros: [], total: 0 }
+  ];
 
-  // Distribución por rangos
-  const rangos = Array(6).fill(0);
-  const etiquetasRangos = ['1–9', '10–18', '19–27', '28–36', '37–45', '46–56'];
-  
-  numeros.forEach(n => {
-    if (n >= 1 && n <= 56) {
-      const indiceRango = Math.min(Math.floor((n - 1) / 9), 5);
-      rangos[indiceRango]++;
-    }
-  });
-
-  // Generar gráficos
-  mostrarGrafico('frecuenciaChart', 'Frecuencia de Números (1-56)', frecuencia, 'bar');
-  mostrarGrafico('delayChart', 'Números más Atrasados (Delay)', delay, 'bar');
-  mostrarGrafico('rangosChart', 'Distribución por Rangos', rangos, 'pie', etiquetasRangos);
-  
-  // Mostrar estadísticas adicionales
-  mostrarEstadisticasExtra(frecuencia, delay, numeros);
-}
-
-function mostrarGrafico(id, titulo, datos, tipo = 'bar', etiquetas = null) {
-  console.log(`📊 Creando gráfico ${id}:`, { titulo, tipo, datosLength: datos.length });
-  
-  const canvas = document.getElementById(id);
-  if (!canvas) {
-    console.error(`❌ Canvas ${id} no encontrado`);
-    return;
-  }
-
-  // Verificar que Chart.js esté disponible
-  if (typeof Chart === 'undefined') {
-    console.error('❌ Chart.js no está cargado');
-    canvas.innerHTML = '<p class="text-red-500 text-center p-4">Error: Chart.js no disponible</p>';
-    return;
-  }
-  
-  const ctx = canvas.getContext('2d');
-  
-  // Verificar y destruir gráfico existente de forma segura
-  if (window[id] && typeof window[id].destroy === 'function') {
-    console.log(`🗑️ Destruyendo gráfico existente ${id}`);
-    window[id].destroy();
-  }
-
-  const labels = etiquetas || (datos.length === 6 ? 
-    ['1–9','10–18','19–27','28–36','37–45','46–56'] : 
-    datos.map((_, i) => i + 1));
-
-  const colores = tipo === 'pie' ? 
-    ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'] :
-    datos.map((_, i) => `hsl(${(i * 137.5) % 360}, 70%, 60%)`);
-
-  try {
-    window[id] = new Chart(ctx, {
-      type: tipo,
-      data: {
-        labels: labels,
-        datasets: [{
-          label: titulo,
-          data: datos,
-          backgroundColor: colores,
-          borderColor: tipo === 'pie' ? '#fff' : colores,
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: tipo === 'pie' ? {} : {
-          y: { beginAtZero: true }
-        },
-        plugins: {
-          legend: { 
-            display: tipo === 'pie',
-            position: 'bottom'
-          },
-          tooltip: {
-            backgroundColor: '#1F2937',
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            callbacks: {
-              label: function(context) {
-                if (tipo === 'pie') {
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = ((context.parsed * 100) / total).toFixed(1);
-                  return `${context.label}: ${context.parsed} (${percentage}%)`;
-                }
-                return `${context.label}: ${context.parsed}`;
-              }
-            }
-          }
-        }
-      }
-    });
-    console.log(`✅ Gráfico ${id} creado exitosamente`);
-  } catch (error) {
-    console.error(`❌ Error creando gráfico ${id}:`, error);
+  // Clasificar números por bloques
+  for (let i = 1; i <= 56; i++) {
+    const freq = frecuencia[i - 1];
+    let bloqueIndex;
     
-    // Mostrar mensaje de error en el canvas
-    const errorMsg = document.createElement('div');
-    errorMsg.className = 'text-red-500 text-center p-4 bg-red-50 rounded';
-    errorMsg.textContent = `Error creando gráfico: ${error.message}`;
-    canvas.parentNode.replaceChild(errorMsg, canvas);
+    if (i <= 9) bloqueIndex = 0;
+    else if (i <= 18) bloqueIndex = 1;
+    else if (i <= 27) bloqueIndex = 2;
+    else if (i <= 36) bloqueIndex = 3;
+    else if (i <= 45) bloqueIndex = 4;
+    else bloqueIndex = 5;
+    
+    bloques[bloqueIndex].numeros.push({ numero: i, frecuencia: freq });
+    bloques[bloqueIndex].total += freq;
   }
+
+  // Mostrar las estadísticas en la UI
+  mostrarEstadisticasCompletas(frecuencia, bloques, numeros.length, sorteos.length);
 }
 
-function mostrarEstadisticasExtra(frecuencia, delay, numeros) {
+function mostrarEstadisticasCompletas(frecuencia, bloques, totalNumeros, totalSorteos) {
   // Top 10 números más frecuentes
   const top10Mas = frecuencia
     .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
@@ -228,49 +130,154 @@ function mostrarEstadisticasExtra(frecuencia, delay, numeros) {
     .sort((a, b) => a.frecuencia - b.frecuencia)
     .slice(0, 10);
 
-  // Actualizar la UI con las estadísticas
-  actualizarEstadisticasUI(top10Mas, top10Menos, numeros.length);
+  // Reemplazar el contenedor de gráficos con estadísticas
+  const contenedorCharts = document.getElementById('charts-container');
+  if (contenedorCharts) {
+    contenedorCharts.innerHTML = `
+      <!-- Top 10 Más y Menos Frecuentes -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-bold mb-4 text-green-600 flex items-center">
+            🔥 Los 10 Números que Más Salen
+          </h3>
+          <div class="space-y-3">
+            ${top10Mas.map((item, index) => `
+              <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                <div class="flex items-center">
+                  <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm mr-3">
+                    ${index + 1}
+                  </span>
+                  <span class="font-bold text-green-800 text-lg">Número ${item.numero}</span>
+                </div>
+                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold">
+                  ${item.frecuencia} veces
+                </span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-bold mb-4 text-red-600 flex items-center">
+            ❄️ Los 10 Números que Menos Salen
+          </h3>
+          <div class="space-y-3">
+            ${top10Menos.map((item, index) => `
+              <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+                <div class="flex items-center">
+                  <span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm mr-3">
+                    ${index + 1}
+                  </span>
+                  <span class="font-bold text-red-800 text-lg">Número ${item.numero}</span>
+                </div>
+                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full font-semibold">
+                  ${item.frecuencia} veces
+                </span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Distribución por Bloques -->
+      <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6 mb-8">
+        <h3 class="text-xl font-bold mb-4 text-blue-600 flex items-center">
+          📊 Distribución por Bloques de Números
+        </h3>
+        <p class="text-gray-600 mb-6">
+          Análisis de frecuencia por rangos de números basado en ${totalSorteos} sorteos históricos
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${bloques.map((bloque, index) => {
+            const porcentaje = ((bloque.total / totalNumeros) * 100).toFixed(1);
+            const colores = [
+              'bg-purple-100 border-purple-500 text-purple-800',
+              'bg-blue-100 border-blue-500 text-blue-800',
+              'bg-green-100 border-green-500 text-green-800',
+              'bg-yellow-100 border-yellow-500 text-yellow-800',
+              'bg-orange-100 border-orange-500 text-orange-800',
+              'bg-red-100 border-red-500 text-red-800'
+            ];
+            
+            return `
+              <div class="border-2 rounded-lg p-4 ${colores[index]}">
+                <div class="text-center">
+                  <h4 class="font-bold text-lg mb-2">Números ${bloque.rango}</h4>
+                  <div class="text-3xl font-bold mb-1">${bloque.total}</div>
+                  <div class="text-sm opacity-75 mb-3">${porcentaje}% del total</div>
+                  <div class="text-xs">
+                    Promedio: ${(bloque.total / bloque.numeros.length).toFixed(1)} por número
+                  </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-opacity-30">
+                  <div class="text-xs">
+                    Más frecuente: <strong>${bloque.numeros.sort((a, b) => b.frecuencia - a.frecuencia)[0].numero}</strong>
+                    (${bloque.numeros.sort((a, b) => b.frecuencia - a.frecuencia)[0].frecuencia} veces)
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Resumen General -->
+      <div class="bg-gradient-to-r from-blue-50 to-purple-50 text-gray-800 rounded-xl shadow-lg p-6">
+        <h3 class="text-lg font-bold mb-2 text-blue-800">📈 Resumen Estadístico</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600">${totalSorteos}</div>
+            <div class="text-gray-600">Sorteos Analizados</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-purple-600">${totalNumeros}</div>
+            <div class="text-gray-600">Números Extraídos</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600">${Math.round(totalNumeros / totalSorteos)}</div>
+            <div class="text-gray-600">Números por Sorteo</div>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-4 text-center">
+          * Estadísticas basadas en datos históricos de los últimos 30 meses
+        </p>
+      </div>
+    `;
+  }
+  
+  console.log('✅ Estadísticas mostradas exitosamente');
 }
 
-function actualizarEstadisticasUI(top10Mas, top10Menos, totalNumeros) {
-  const contenedorEstadisticas = document.getElementById('estadisticas-extra');
-  if (!contenedorEstadisticas) return;
+// Función para generar predicción por frecuencia (usado por mlPredictor.js)
+export function generarPrediccionPorFrecuencia(userId, datos) {
+  const numeros = datos.numeros || [];
+  const seed = hashCode(userId);
+  
+  if (numeros.length === 0) {
+    return [1, 7, 14, 21, 28, 35];
+  }
+  
+  const frecuencia = Array(56).fill(0);
+  numeros.forEach(n => {
+    if (n >= 1 && n <= 56) {
+      frecuencia[n - 1]++;
+    }
+  });
+  
+  const ponderados = frecuencia.map((freq, i) => ({
+    numero: i + 1,
+    score: freq + ((seed % (i + 7)) / 100)
+  }));
+  
+  return ponderados
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map(n => n.numero)
+    .sort((a, b) => a - b);
+}
 
-  const html = `
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-      <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">
-        <h3 class="text-lg font-semibold mb-4 text-green-600">🔥 Los 10 Números que Más Salen</h3>
-        <div class="space-y-2">
-          ${top10Mas.map((item, index) => `
-            <div class="flex justify-between items-center p-2 bg-green-50 rounded">
-              <span class="font-bold text-green-800">#${index + 1} - Número ${item.numero}</span>
-              <span class="text-sm text-green-600">${item.frecuencia} veces</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-      <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">
-        <h3 class="text-lg font-semibold mb-4 text-red-600">❄️ Los 10 Números que Menos Salen</h3>
-        <div class="space-y-2">
-          ${top10Menos.map((item, index) => `
-            <div class="flex justify-between items-center p-2 bg-red-50 rounded">
-              <span class="font-bold text-red-800">#${index + 1} - Número ${item.numero}</span>
-              <span class="text-sm text-red-600">${item.frecuencia} veces</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>
-    
-    <div class="bg-blue-50 text-blue-800 rounded-xl shadow-lg p-6 mt-6">
-      <h3 class="text-lg font-semibold mb-2">📊 Resumen General</h3>
-      <p class="text-sm">
-        Se analizaron <strong>${totalNumeros}</strong> números de sorteos históricos. 
-        Los números más frecuentes tienen mayor probabilidad estadística de aparecer nuevamente.
-      </p>
-    </div>
-  `;
-
-  contenedorEstadisticas.innerHTML = html;
+// Función auxiliar para hash
+function hashCode(str) {
+  return str.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 }

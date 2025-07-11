@@ -7,8 +7,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js"></script>
 </head>
 <body class="overflow-x-hidden">
 
@@ -37,11 +35,12 @@
       <button class="selector-btn" data-mode="todos">Melate + Revancha + Revanchita</button>
     </div>
 
-    <!-- Contenedor de gráficos -->
-    <div id="charts-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-      <canvas id="frecuenciaChart"></canvas>
-      <canvas id="delayChart"></canvas>
-      <canvas id="rangosChart"></canvas>
+    <!-- Contenedor de estadísticas -->
+    <div id="charts-container" class="mb-12">
+      <div class="text-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+        <p class="text-white">Cargando análisis estadístico...</p>
+      </div>
     </div>
 
     <!-- Predicción personalizada -->
@@ -64,20 +63,7 @@
   <script src="js/dataParser.js" type="module"></script>
   <script src="js/mlPredictor.js" type="module"></script>
   <script type="module">
-    console.log('🚀 Iniciando aplicación de análisis...');
-    
-    // Verificar que Chart.js esté cargado
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('📊 Chart.js disponible:', typeof Chart !== 'undefined');
-      console.log('🤖 TensorFlow.js disponible:', typeof tf !== 'undefined');
-      
-      if (typeof Chart === 'undefined') {
-        console.error('❌ Chart.js no está cargado correctamente');
-      }
-      if (typeof tf === 'undefined') {
-        console.warn('⚠️ TensorFlow.js no está cargado, se usará predicción por frecuencia');
-      }
-    });
+    console.log('🚀 Iniciando análisis estadístico...');
     
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { app } from './js/firebase-init.js';
@@ -93,18 +79,11 @@
     });
 
     onAuthStateChanged(auth, async (user) => {
-      console.log('🔐 Estado de autenticación cambiado:', user ? 'Autenticado' : 'No autenticado');
+      console.log('🔐 Estado de autenticación:', user ? 'Autenticado' : 'No autenticado');
       if (user) {
         usuarioID = user.uid;
         console.log('👤 Usuario ID:', usuarioID);
-        
-        // Esperar a que Chart.js esté disponible
-        if (typeof Chart === 'undefined') {
-          console.warn('⏳ Esperando a que Chart.js se cargue...');
-          setTimeout(() => analizar('melate'), 1000);
-        } else {
-          await analizar('melate');
-        }
+        await analizar('melate');
       } else {
         console.log('❌ Usuario no autenticado, redirigiendo...');
         window.location.href = 'index.html';
@@ -114,42 +93,43 @@
     async function analizar(modo) {
       console.log('🔍 Iniciando análisis para modo:', modo);
       
-      // Verificar Chart.js una vez más
-      if (typeof Chart === 'undefined') {
-        console.error('❌ Chart.js no disponible, no se pueden crear gráficos');
-        const container = document.getElementById('charts-container');
-        if (container) {
-          container.innerHTML = `
-            <div class="col-span-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              <strong>Error:</strong> Chart.js no está disponible. Por favor, recarga la página.
-            </div>
-          `;
-        }
-        return;
-      }
-      
       try {
         const datos = await cargarDatosHistoricos(modo);
-        console.log('📊 Datos cargados, iniciando gráficos...');
+        console.log('📊 Datos cargados, generando estadísticas...');
         graficarEstadisticas(datos);
 
         console.log('🤖 Generando predicción personalizada...');
         const prediccion = await generarPrediccionPersonalizada(usuarioID, datos);
         document.getElementById('combinacion-ia').textContent = prediccion.join(' - ');
-        console.log('✅ Análisis completado');
+        console.log('✅ Análisis completado exitosamente');
       } catch (error) {
         console.error('❌ Error en análisis:', error);
+        
+        // Mostrar error en la UI
+        const container = document.getElementById('charts-container');
+        if (container) {
+          container.innerHTML = `
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <strong>Error:</strong> No se pudo completar el análisis. ${error.message}
+            </div>
+          `;
+        }
       }
     }
 
+    // Botones de selección de modo
     document.querySelectorAll('.selector-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const modo = btn.dataset.mode;
-        console.log('🎯 Botón selector clickeado:', modo);
+        console.log('🎯 Modo seleccionado:', modo);
         
         // Destacar botón activo
-        document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('bg-blue-600'));
-        btn.classList.add('bg-blue-600');
+        document.querySelectorAll('.selector-btn').forEach(b => {
+          b.classList.remove('bg-blue-600', 'text-white');
+          b.classList.add('bg-white', 'text-gray-800');
+        });
+        btn.classList.remove('bg-white', 'text-gray-800');
+        btn.classList.add('bg-blue-600', 'text-white');
         
         analizar(modo);
       });
