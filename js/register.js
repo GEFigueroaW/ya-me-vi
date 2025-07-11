@@ -18,3 +18,19 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     alert("No se pudo registrar el usuario. Verifica los datos o intenta más tarde.");
   }
 });
+
+
+import { auth } from './firebase-init.js';
+import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+document.getElementById('google-register')?.addEventListener('click', () => {
+  const provider = new GoogleAuthProvider();
+  signInWithPopup(auth, provider)
+    .then(() => {
+      window.location.href = 'dream-input.html';
+    })
+    .catch(error => {
+      console.error(error);
+      alert("Error al registrarse con Google.");
+    });
+});
