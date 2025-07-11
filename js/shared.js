@@ -1,50 +1,40 @@
-// js/shared.js
+// === FONDO DINÁMICO ROTATIVO ===
 
-// Fondo rotatorio compartido
-const backgroundImages = [
+const fondoImagenes = [
   'assets/vg1.jpg',
   'assets/vg2.jpg',
   'assets/vg3.jpg',
   'assets/vg4.jpg',
   'assets/vg5.jpg'
 ];
-let bgIndex = 0;
 
-function rotateBackground() {
-  const bg = document.getElementById('background');
-  if (!bg) return;
-  bg.style.opacity = 0.4;
-  setTimeout(() => {
-    bgIndex = (bgIndex + 1) % backgroundImages.length;
-    bg.style.backgroundImage = `url(${backgroundImages[bgIndex]})`;
-    bg.style.opacity = 1;
-  }, 400);
-}
+let fondoActual = 0;
 
-function setupBackground() {
-  const bg = document.getElementById('background');
-  if (bg) {
-    bg.style.backgroundImage = `url(${backgroundImages[0]})`;
-    bg.style.backgroundSize = 'cover';
-    bg.style.backgroundPosition = 'center';
-    bg.style.transition = 'background-image 1s ease-in-out, opacity 0.5s';
-    setInterval(rotateBackground, 3000);
+function cambiarFondo() {
+  const fondo = document.getElementById('background');
+  if (fondo) {
+    fondo.style.opacity = 0;
+    setTimeout(() => {
+      fondo.style.backgroundImage = `url('${fondoImagenes[fondoActual]}')`;
+      fondo.style.opacity = 1;
+      fondoActual = (fondoActual + 1) % fondoImagenes.length;
+    }, 500);
   }
 }
 
-// Footer dinámico con protección para evitar duplicados
-function insertFooter() {
-  if (document.querySelector('footer')) return; // Ya existe un footer
-  fetch('footer.html')
-    .then(res => res.text())
-    .then(html => {
-      const footerContainer = document.createElement('div');
-      footerContainer.innerHTML = html;
-      document.body.appendChild(footerContainer);
-    });
-}
+// Cambiar cada 3 segundos
+setInterval(cambiarFondo, 3000);
 
-document.addEventListener('DOMContentLoaded', () => {
-  setupBackground();
-  insertFooter();
+// Cargar fondo inicial (vg1.jpg ya está como valor por defecto en el CSS)
+
+// === FOOTER AUTOMÁTICO (en caso de que se use vía JS en páginas secundarias) ===
+document.addEventListener("DOMContentLoaded", () => {
+  const footerContainer = document.getElementById("footer-container");
+  if (footerContainer) {
+    fetch("footer.html")
+      .then(res => res.text())
+      .then(data => {
+        footerContainer.innerHTML = data;
+      });
+  }
 });
