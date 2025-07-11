@@ -72,18 +72,23 @@ async function cargarSorteoIndividual(modo) {
 }
 
 async function cargarTodosSorteos() {
+  console.log('🔄 Iniciando carga de TODOS los sorteos...');
   const sorteos = ['melate', 'revancha', 'revanchita'];
   const datosPorSorteo = {};
   
   for (const sorteo of sorteos) {
+    console.log(`📥 Cargando sorteo: ${sorteo}`);
     try {
       const datos = await cargarSorteoIndividual(sorteo);
       datosPorSorteo[sorteo] = datos;
+      console.log(`✅ ${sorteo} cargado exitosamente:`, datos.datos.length, 'sorteos');
     } catch (error) {
-      console.error(`Error cargando ${sorteo}:`, error);
+      console.error(`❌ Error cargando ${sorteo}:`, error);
       datosPorSorteo[sorteo] = { datos: [], numeros: [], modo: sorteo };
     }
   }
+  
+  console.log('🎯 Datos completos por sorteo:', datosPorSorteo);
   
   return { 
     datosPorSorteo, 
