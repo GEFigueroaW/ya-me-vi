@@ -6,26 +6,27 @@ import { app } from './firebase-init.js';
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// === Referencias DOM ===
-const welcomeMsg = document.getElementById('welcome-msg');
-const btnAnalizar = document.getElementById('btn-analizar');
-const btnCombinacion = document.getElementById('btn-combinacion');
-
 // === Función para mostrar el sueño guardado del usuario ===
 async function mostrarBienvenidaConSueño(user) {
   try {
     const ref = doc(db, `users/${user.uid}/dream`, 'info');
     const snap = await getDoc(ref);
 
-    if (snap.exists()) {
-      const { sueño } = snap.data();
-      welcomeMsg.textContent = `¡Bienvenido! Vas tras tu sueño: ${sueño}.`;
-    } else {
-      welcomeMsg.textContent = '¡Bienvenido!';
+    const welcomeMsg = document.getElementById('welcome-msg');
+    if (welcomeMsg) {
+      if (snap.exists()) {
+        const { sueño } = snap.data();
+        welcomeMsg.textContent = `¡Bienvenido! Vas tras tu sueño: ${sueño}.`;
+      } else {
+        welcomeMsg.textContent = '¡Bienvenido!';
+      }
     }
   } catch (error) {
     console.error('Error obteniendo el sueño:', error);
-    welcomeMsg.textContent = '¡Bienvenido!';
+    const welcomeMsg = document.getElementById('welcome-msg');
+    if (welcomeMsg) {
+      welcomeMsg.textContent = '¡Bienvenido!';
+    }
   }
 }
 
@@ -38,17 +39,30 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// === Botones: alternar visibilidad y redirigir ===
-if (btnAnalizar && btnCombinacion) {
-  btnAnalizar.addEventListener('click', () => {
-    btnAnalizar.classList.add('hidden');
-    btnCombinacion.classList.remove('hidden');
-    window.location.href = "analisis.html";
-  });
+// === Inicialización cuando el DOM está listo ===
+document.addEventListener('DOMContentLoaded', () => {
+  // === Referencias DOM ===
+  const btnAnalizar = document.getElementById('btn-analizar');
+  const btnCombinacion = document.getElementById('btn-combinacion');
 
-  btnCombinacion.addEventListener('click', () => {
-    btnCombinacion.classList.add('hidden');
-    btnAnalizar.classList.remove('hidden');
-    window.location.href = "combinacion.html";
-  });
-}
+  // === Botones: alternar visibilidad y redirigir ===
+  if (btnAnalizar && btnCombinacion) {
+    btnAnalizar.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Botón Analizar clickeado');
+      btnAnalizar.classList.add('hidden');
+      btnCombinacion.classList.remove('hidden');
+      window.location.href = "analisis.html";
+    });
+
+    btnCombinacion.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Botón Combinación clickeado');
+      btnCombinacion.classList.add('hidden');
+      btnAnalizar.classList.remove('hidden');
+      window.location.href = "combinacion.html";
+    });
+  } else {
+    console.warn('No se encontraron los botones principales');
+  }
+});
