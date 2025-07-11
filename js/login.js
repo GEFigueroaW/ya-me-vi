@@ -17,3 +17,19 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     alert("Correo o contraseña incorrectos. Intenta de nuevo.");
   }
 });
+
+
+import { auth } from './firebase-init.js';
+import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+document.getElementById('google-login')?.addEventListener('click', () => {
+  const provider = new GoogleAuthProvider();
+  signInWithPopup(auth, provider)
+    .then(() => {
+      window.location.href = 'home.html';
+    })
+    .catch(error => {
+      console.error(error);
+      alert("Error al iniciar sesión con Google.");
+    });
+});
