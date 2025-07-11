@@ -1,7 +1,6 @@
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { app } from './firebase-init.js';
 
-const auth = getAuth(app);
 
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
