@@ -137,10 +137,20 @@ function mostrarGrafico(id, titulo, datos, tipo = 'bar', etiquetas = null) {
     console.error(`❌ Canvas ${id} no encontrado`);
     return;
   }
+
+  // Verificar que Chart.js esté disponible
+  if (typeof Chart === 'undefined') {
+    console.error('❌ Chart.js no está cargado');
+    canvas.innerHTML = '<p class="text-red-500 text-center p-4">Error: Chart.js no disponible</p>';
+    return;
+  }
   
   const ctx = canvas.getContext('2d');
-  if (window[id]) {
-    window[id].destroy(); // Evita duplicación
+  
+  // Verificar y destruir gráfico existente de forma segura
+  if (window[id] && typeof window[id].destroy === 'function') {
+    console.log(`🗑️ Destruyendo gráfico existente ${id}`);
+    window[id].destroy();
   }
 
   const labels = etiquetas || (datos.length === 6 ? 
@@ -196,6 +206,12 @@ function mostrarGrafico(id, titulo, datos, tipo = 'bar', etiquetas = null) {
     console.log(`✅ Gráfico ${id} creado exitosamente`);
   } catch (error) {
     console.error(`❌ Error creando gráfico ${id}:`, error);
+    
+    // Mostrar mensaje de error en el canvas
+    const errorMsg = document.createElement('div');
+    errorMsg.className = 'text-red-500 text-center p-4 bg-red-50 rounded';
+    errorMsg.textContent = `Error creando gráfico: ${error.message}`;
+    canvas.parentNode.replaceChild(errorMsg, canvas);
   }
 }
 

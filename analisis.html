@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 </head>
 <body class="overflow-x-hidden">
 
@@ -65,6 +65,14 @@
   <script type="module">
     console.log('🚀 Iniciando aplicación de análisis...');
     
+    // Verificar que Chart.js esté cargado
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📊 Chart.js disponible:', typeof Chart !== 'undefined');
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js no está cargado correctamente');
+      }
+    });
+    
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { app } from './js/firebase-init.js';
     import { cargarDatosHistoricos, graficarEstadisticas } from './js/dataParser.js';
@@ -83,7 +91,14 @@
       if (user) {
         usuarioID = user.uid;
         console.log('👤 Usuario ID:', usuarioID);
-        await analizar('melate');
+        
+        // Esperar a que Chart.js esté disponible
+        if (typeof Chart === 'undefined') {
+          console.warn('⏳ Esperando a que Chart.js se cargue...');
+          setTimeout(() => analizar('melate'), 1000);
+        } else {
+          await analizar('melate');
+        }
       } else {
         console.log('❌ Usuario no autenticado, redirigiendo...');
         window.location.href = 'index.html';
@@ -92,6 +107,21 @@
 
     async function analizar(modo) {
       console.log('🔍 Iniciando análisis para modo:', modo);
+      
+      // Verificar Chart.js una vez más
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js no disponible, no se pueden crear gráficos');
+        const container = document.getElementById('charts-container');
+        if (container) {
+          container.innerHTML = `
+            <div class="col-span-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <strong>Error:</strong> Chart.js no está disponible. Por favor, recarga la página.
+            </div>
+          `;
+        }
+        return;
+      }
+      
       try {
         const datos = await cargarDatosHistoricos(modo);
         console.log('📊 Datos cargados, iniciando gráficos...');
