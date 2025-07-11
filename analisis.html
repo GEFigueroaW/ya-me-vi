@@ -56,7 +56,7 @@
   </div>
 
   <!-- Footer -->
-  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+  <div id="footer-container" class="mt-8 w-full z-10"></div>
 
   <!-- Scripts -->
   <script src="js/shared.js"></script>
@@ -99,9 +99,15 @@
         console.log('📊 Datos cargados, generando estadísticas...');
         graficarEstadisticas(datos);
 
-        console.log('🤖 Generando predicción personalizada...');
-        const prediccion = await generarPrediccionPersonalizada(usuarioID, datos);
-        document.getElementById('combinacion-ia').textContent = prediccion.join(' - ');
+        // Solo generar predicción para modos individuales, no para comparativo
+        if (modo !== 'todos') {
+          console.log('🤖 Generando predicción personalizada...');
+          const prediccion = await generarPrediccionPersonalizada(usuarioID, datos);
+          document.getElementById('combinacion-ia').textContent = prediccion.join(' - ');
+        } else {
+          // Para el modo comparativo, ocultar la predicción
+          document.getElementById('combinacion-ia').textContent = 'Comparando todos los sorteos...';
+        }
         console.log('✅ Análisis completado exitosamente');
       } catch (error) {
         console.error('❌ Error en análisis:', error);
@@ -126,11 +132,18 @@
         
         // Destacar botón activo
         document.querySelectorAll('.selector-btn').forEach(b => {
-          b.classList.remove('bg-blue-600', 'text-white');
+          b.classList.remove('bg-blue-600', 'text-white', 'bg-gradient-to-r', 'from-purple-500', 'to-pink-500');
           b.classList.add('bg-white', 'text-gray-800');
         });
-        btn.classList.remove('bg-white', 'text-gray-800');
-        btn.classList.add('bg-blue-600', 'text-white');
+        
+        // Aplicar estilos según el botón
+        if (modo === 'todos') {
+          btn.classList.remove('bg-white', 'text-gray-800');
+          btn.classList.add('bg-gradient-to-r', 'from-purple-500', 'to-pink-500', 'text-white');
+        } else {
+          btn.classList.remove('bg-white', 'text-gray-800');
+          btn.classList.add('bg-blue-600', 'text-white');
+        }
         
         analizar(modo);
       });

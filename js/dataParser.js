@@ -3,15 +3,18 @@ export async function cargarDatosHistoricos(modo) {
   
   // Si el modo es específico, cargar solo ese sorteo
   if (modo === 'melate' || modo === 'revancha' || modo === 'revanchita') {
+    console.log('📁 Cargando sorteo individual:', modo);
     return await cargarSorteoIndividual(modo);
   }
   
   // Si el modo es 'todos', cargar los 3 sorteos para comparación
   if (modo === 'todos') {
+    console.log('📊 Cargando TODOS los sorteos para comparación');
     return await cargarTodosSorteos();
   }
   
   // Modo por defecto
+  console.log('📁 Modo por defecto, cargando Melate');
   return await cargarSorteoIndividual('melate');
 }
 
@@ -94,11 +97,13 @@ export function graficarEstadisticas(datos) {
   
   // Si es modo comparativo (todos los sorteos)
   if (datos.esComparativo) {
+    console.log('🔄 Modo comparativo detectado, mostrando estadísticas comparativas');
     mostrarEstadisticasComparativas(datos.datosPorSorteo);
     return;
   }
   
   // Modo individual
+  console.log('🔍 Modo individual detectado');
   const numeros = datos.numeros || [];
   const sorteos = datos.datos || [];
   const modo = datos.modo || 'melate';
