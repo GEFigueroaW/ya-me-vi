@@ -1,34 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YA ME VI</title>
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YA ME VI - Cumple tu sueño</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
+<body class="overflow-hidden">
 
-<body>
   <!-- Fondo dinámico -->
-  <div id="background"></div>
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
 
-  <!-- Encabezado centrado -->
-  <section class="hero is-transparent is-fullheight-with-navbar">
-    <div class="hero-body">
-      <div class="container has-text-centered">
-        <h1 class="title is-3 has-text-white">YA ME VI</h1>
-        <p class="subtitle is-5 has-text-white mb-5">Cumple tu sueño... hoy puede ser el gran día</p>
-        <div class="buttons is-centered">
-          <a href="login-email.html" class="button is-light is-medium is-rounded">Iniciar sesión</a>
-          <a href="register.html" class="button is-light is-medium is-rounded">Registrarme</a>
-        </div>
-      </div>
+  <!-- Contenido principal -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
+    <div class="animate__animated animate__fadeInDown">
+      <h1 class="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">YA ME VI</h1>
+      <p class="text-xl md:text-2xl mb-8 font-light">Cumple tu sueño… hoy puede ser el gran día</p>
     </div>
-  </section>
 
-  <!-- Footer se inserta dinámicamente -->
+    <div class="flex gap-6 animate__animated animate__fadeInUp">
+      <a href="login-email.html" class="border border-white px-6 py-2 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300">
+        Iniciar sesión
+      </a>
+      <a href="register.html" class="border border-white px-6 py-2 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300">
+        Registrarme
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer legal -->
+  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+
   <script src="js/shared.js"></script>
+  <script>
+    // Cargar footer legal en todas las páginas
+    fetch("footer.html")
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("footer-container").innerHTML = data;
+      });
+  </script>
 </body>
-
 </html>
