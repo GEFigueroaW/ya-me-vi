@@ -1,41 +1,111 @@
-<!-- combinacion.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Evaluar mi combinación - YA ME VI</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Evaluar Combinación</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
-  <div id="background" class="fullscreen-background"></div>
-  <section class="section">
-    <div class="container has-text-centered">
-      <h1 class="title animate__animated animate__fadeIn">Evalúa tu combinación</h1>
-      <p class="mb-4">Ingresa tus 6 números y verifica su probabilidad en Melate, Revancha y Revanchita.</p>
+<body class="overflow-x-hidden">
 
-      <form id="combinationForm" class="mt-5 animate__animated animate__fadeInUp">
-        <div class="columns is-mobile is-multiline is-centered">
-          <div class="column is-2" v-for="i in 6">
-            <input type="number" class="input" min="1" max="56" required>
-          </div>
-        </div>
-        <button type="submit" class="button is-success mt-4">Evaluar combinación</button>
-      </form>
+  <!-- Fondo dinámico -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
 
-      <div id="evaluationResults" class="mt-6"></div>
-    </div>
-  </section>
+  <!-- Contenido -->
+  <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
+    <h1 class="text-3xl font-bold mb-6 animate__animated animate__fadeInDown">Evalúa tu Combinación</h1>
 
-  <footer class="footer-disclaimer">
-    <p>Este sistema se basa en estadística, patrones, probabilidad e IA. No garantiza premios. Juega con responsabilidad.</p>
-  </footer>
+    <form id="combo-form" class="flex flex-wrap justify-center gap-3 max-w-xl mx-auto animate__animated animate__fadeInUp">
+      <!-- Entradas individuales -->
+      <input type="number" class="combo-input" min="1" max="56" required>
+      <input type="number" class="combo-input" min="1" max="56" required>
+      <input type="number" class="combo-input" min="1" max="56" required>
+      <input type="number" class="combo-input" min="1" max="56" required>
+      <input type="number" class="combo-input" min="1" max="56" required>
+      <input type="number" class="combo-input" min="1" max="56" required>
+    </form>
 
-  <script src="js/firebase-init.js"></script>
-  <script src="js/auth-protect.js"></script>
-  <script src="js/dataParser.js"></script>
-  <script src="js/mlPredictor.js"></script>
-  <script src="js/evaluador.js"></script>
+    <button id="evaluar-btn" class="mt-6 px-6 py-2 border border-white rounded-full hover:bg-white hover:text-gray-800 transition-all">
+      Evaluar combinación
+    </button>
+
+    <div id="resultado" class="mt-10 text-white"></div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script src="js/dataParser.js" type="module"></script>
+  <script type="module">
+    import { cargarDatosHistoricos } from './js/dataParser.js';
+
+    const form = document.getElementById('combo-form');
+    const btn = document.getElementById('evaluar-btn');
+    const resultado = document.getElementById('resultado');
+
+    let datosHistoricos = [];
+
+    async function prepararDatos() {
+      datosHistoricos = await cargarDatosHistoricos('melate'); // base para evaluación
+    }
+
+    function validarCombinacion(numeros) {
+      const sinDuplicados = new Set(numeros);
+      return sinDuplicados.size === 6 && numeros.every(n => n >= 1 && n <= 56);
+    }
+
+    function frecuenciaIndividual(num) {
+      return datosHistoricos.filter(n => n === num).length;
+    }
+
+    function clasificarProbabilidad(freq) {
+      const max = Math.max(...Array.from({ length: 56 }, (_, i) => frecuenciaIndividual(i + 1)));
+      const porcentaje = freq / max;
+
+      if (porcentaje >= 0.84) return 'Muy Alta';
+      if (porcentaje >= 0.63) return 'Alta';
+      if (porcentaje >= 0.42) return 'Media';
+      if (porcentaje >= 0.21) return 'Baja';
+      return 'Nula';
+    }
+
+    btn.addEventListener('click', () => {
+      const inputs = form.querySelectorAll('input');
+      const numeros = Array.from(inputs).map(input => parseInt(input.value.trim()));
+
+      if (!validarCombinacion(numeros)) {
+        resultado.innerHTML = `<p class="text-red-300 font-semibold">Por favor, ingresa 6 números únicos del 1 al 56.</p>`;
+        return;
+      }
+
+      const analisis = numeros.map(n => {
+        const freq = frecuenciaIndividual(n);
+        const cat = clasificarProbabilidad(freq);
+        return `<li class="mb-1">Número <strong>${n}</strong>: ${freq} apariciones → <em>${cat}</em> probabilidad</li>`;
+      });
+
+      const totalFreq = numeros.reduce((acc, n) => acc + frecuenciaIndividual(n), 0);
+      const promedio = totalFreq / 6;
+
+      resultado.innerHTML = `
+        <h2 class="text-xl font-bold mb-2">🔍 Resultado del Análisis:</h2>
+        <ul class="text-left text-sm mb-4">${analisis.join('')}</ul>
+        <p class="text-sm">Esta combinación ha tenido <strong>${totalFreq}</strong> apariciones sumadas en total.</p>
+        <p class="text-sm italic mt-1">Promedio por número: ${promedio.toFixed(2)}</p>
+      `;
+    });
+
+    prepararDatos();
+  </script>
+
+  <style>
+    .combo-input {
+      @apply w-20 text-center text-black text-xl font-bold px-2 py-1 rounded shadow bg-white;
+    }
+  </style>
 </body>
 </html>
