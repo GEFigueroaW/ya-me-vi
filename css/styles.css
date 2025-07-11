@@ -72,3 +72,8 @@ html, body {
 * {
   box-sizing: border-box;
 }
+
+/* Estilo para borde izquierdo personalizado */
+.border-l-3 {
+  border-left-width: 3px;
+}
