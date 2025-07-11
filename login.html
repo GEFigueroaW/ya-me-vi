@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YA ME VI - Ingreso</title>
   <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="js/firebase-init.js"></script>
 </head>
 <body class="fullscreen-bg">
   <div class="login-container">
@@ -31,7 +28,10 @@
   </div>
 
   <script src="js/shared.js"></script> 
-  <script>
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
     const openBtn = document.getElementById("openAuthModal");
     const modal = document.getElementById("authModal");
     const closeBtn = document.getElementById("closeAuthModal");
@@ -40,14 +40,40 @@
     closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
 
     document.getElementById("loginWithGoogle").addEventListener("click", () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then(() => window.location.href = "menu.html")
-        .catch(error => alert(error.message));
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          console.log("Usuario logueado con Google:", result.user);
+          window.location.href = "menu.html";
+        })
+        .catch((error) => {
+          console.error("Error al iniciar sesión con Google:", error);
+          alert("Error al iniciar sesión con Google: " + error.message);
+        });
     });
 
     document.getElementById("loginWithEmail").addEventListener("click", () => {
       const email = document.getElementById("emailInput").value.trim();
+      const password = document.getElementById("passwordInput").value.trim();
+      
+      if (!email || !password) {
+        alert("Por favor ingresa email y contraseña");
+        return;
+      }
+      
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          console.log("Usuario logueado:", userCredential.user);
+          window.location.href = "menu.html";
+        })
+        .catch((error) => {
+          console.error("Error al iniciar sesión:", error);
+          alert("Error al iniciar sesión: " + error.message);
+        });
+    });
+  </script>
+</body>
+</html>
       const password = document.getElementById("passwordInput").value.trim();
       if (!email || !password) return alert("Ingresa ambos campos.");
       firebase.auth().signInWithEmailAndPassword(email, password)
