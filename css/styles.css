@@ -10,15 +10,11 @@
   margin: 0;
   padding: 0;
   z-index: 0;
-  /* Variables CSS para las imágenes */
-  --before-bg: url('../assets/vg1.jpg');
-  --after-bg: url('../assets/vg2.jpg');
+  background-color: #000;
 }
 
 /* Capas de fondo para crossfade */
-#background::before,
-#background::after {
-  content: '';
+.background-layer {
   position: absolute;
   top: 0;
   left: 0;
@@ -27,26 +23,12 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
-  transition: opacity 1.8s ease-in-out;
-}
-
-/* Capa base - siempre visible */
-#background::before {
-  background-image: var(--before-bg);
-  opacity: 1;
-  z-index: 1;
-}
-
-/* Capa de transición - se muestra/oculta */
-#background::after {
-  background-image: var(--after-bg);
+  transition: opacity 2s ease-in-out;
   opacity: 0;
-  z-index: 2;
 }
 
-/* Clase para mostrar la capa after */
-#background.show-after::after {
+/* Capa activa */
+.background-layer.active {
   opacity: 1;
 }
 
