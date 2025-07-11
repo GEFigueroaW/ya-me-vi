@@ -16,6 +16,12 @@ export async function generarPrediccionPersonalizada(userId, datos) {
       return [3, 7, 15, 23, 31, 42];
     }
 
+    // Verificar si TensorFlow.js está disponible
+    if (typeof tf === 'undefined') {
+      console.warn('⚠️ TensorFlow.js no disponible, usando predicción basada en frecuencia');
+      return generarPrediccionPorFrecuencia(userId, datos);
+    }
+
     const seed = hashCode(userId);
     const frecuencia = Array(56).fill(0);
 
@@ -26,7 +32,8 @@ export async function generarPrediccionPersonalizada(userId, datos) {
     });
 
     // Crear entradas normalizadas para TensorFlow
-    const input = tf.tensor2d([frecuencia.map(f => f / Math.max(...frecuencia))]);
+    const maxFreq = Math.max(...frecuencia);
+    const input = tf.tensor2d([frecuencia.map(f => f / maxFreq)]);
 
     // Crear un modelo simple de red neuronal
     const model = tf.sequential();
@@ -61,29 +68,58 @@ export async function generarPrediccionPersonalizada(userId, datos) {
       .map(n => n.numero)
       .sort((a, b) => a - b);
 
-    console.log('✅ Predicción generada:', top6);
+    // Limpiar tensores
+    input.dispose();
+    salida.dispose();
+    model.dispose();
+
+    console.log('✅ Predicción ML generada:', top6);
     return top6;
     
   } catch (error) {
     console.error('❌ Error en predicción ML:', error);
     // Fallback a predicción simple basada en frecuencia
-    const numeros = datos.numeros || [];
-    const frecuencia = Array(56).fill(0);
-    
-    numeros.forEach(n => {
-      if (n >= 1 && n <= 56) {
-        frecuencia[n - 1]++;
-      }
-    });
-    
-    const masFrec = frecuencia
-      .map((freq, i) => ({ numero: i + 1, freq }))
-      .sort((a, b) => b.freq - a.freq)
-      .slice(0, 6)
-      .map(n => n.numero)
-      .sort((a, b) => a - b);
-      
-    console.log('✅ Predicción fallback:', masFrec);
-    return masFrec.length === 6 ? masFrec : [1, 7, 14, 21, 35, 49];
+    return generarPrediccionPorFrecuencia(userId, datos);
   }
+}
+
+// Función fallback para predicción por frecuencia
+function generarPrediccionPorFrecuencia(userId, datos) {
+  console.log('📊 Generando predicción por frecuencia para usuario:', userId);
+  
+  const numeros = datos.numeros || [];
+  const seed = hashCode(userId);
+  
+  if (numeros.length === 0) {
+    // Números aleatorios pero determinísticos basados en userId
+    const base = [1, 7, 14, 21, 28, 35, 42, 49];
+    return base
+      .map(n => ((n + seed) % 56) + 1)
+      .filter((n, i, arr) => arr.indexOf(n) === i)
+      .slice(0, 6)
+      .sort((a, b) => a - b);
+  }
+  
+  // Análisis de frecuencia
+  const frecuencia = Array(56).fill(0);
+  numeros.forEach(n => {
+    if (n >= 1 && n <= 56) {
+      frecuencia[n - 1]++;
+    }
+  });
+  
+  // Combinar frecuencia con personalización
+  const ponderados = frecuencia.map((freq, i) => ({
+    numero: i + 1,
+    score: freq + ((seed % (i + 7)) / 100)
+  }));
+  
+  const top6 = ponderados
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map(n => n.numero)
+    .sort((a, b) => a - b);
+  
+  console.log('✅ Predicción por frecuencia generada:', top6);
+  return top6;
 }

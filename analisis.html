@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js"></script>
 </head>
 <body class="overflow-x-hidden">
 
@@ -68,8 +69,13 @@
     // Verificar que Chart.js esté cargado
     document.addEventListener('DOMContentLoaded', () => {
       console.log('📊 Chart.js disponible:', typeof Chart !== 'undefined');
+      console.log('🤖 TensorFlow.js disponible:', typeof tf !== 'undefined');
+      
       if (typeof Chart === 'undefined') {
         console.error('❌ Chart.js no está cargado correctamente');
+      }
+      if (typeof tf === 'undefined') {
+        console.warn('⚠️ TensorFlow.js no está cargado, se usará predicción por frecuencia');
       }
     });
     
