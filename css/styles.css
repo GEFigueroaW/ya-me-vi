@@ -1,53 +1,39 @@
-/* styles.css */
-
-/* Fondo rotatorio */
+/* Fondo dinámico con transición suave */
 #background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
+  background-image: url('../assets/vg1.jpg');
   background-size: cover;
   background-position: center;
-  transition: background-image 1s ease-in-out, opacity 0.5s;
+  transition: background-image 1s ease-in-out;
 }
 
-/* Barra superior */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1rem 2rem;
-  position: relative;
-  z-index: 1;
+/* Estilo consistente para botones minimalistas */
+a.button-minimal {
+  @apply border border-white text-white rounded-full px-6 py-2 transition-all duration-300;
 }
 
-.top-bar .left-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+a.button-minimal:hover {
+  @apply bg-white text-gray-800;
 }
 
-.top-bar .title,
-.top-bar .subtitle {
+/* Sombra para mejorar legibilidad del texto sobre imágenes */
+h1, p {
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+}
+
+/* Ajustes del footer */
+footer {
+  @apply bg-gray-900 text-white text-center text-xs py-3 px-2;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Asegura el contenido principal centrado correctamente en móvil y escritorio */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Forzar que el fondo cubra completamente cualquier tamaño */
+html, body {
+  height: 100%;
   margin: 0;
-}
-
-.right-buttons {
-  display: flex;
-  gap: 0.75rem;
-}
-
-/* Footer disclaimer */
-.footer-disclaimer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.85);
-  padding: 1rem;
-  text-align: center;
-  font-size: 0.9rem;
-  z-index: 2;
-  color: #363636;
+  padding: 0;
 }
