@@ -1,39 +1,54 @@
-const mlPredictor = {
-  async generarPrediccion(draws) {
-    const frequency = Array(56).fill(0);
-    const lastSeen = Array(56).fill(draws.length);
+import * as tf from 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js';
 
-    // Cálculo de frecuencia y delay
-    for (let i = draws.length - 1; i >= 0; i--) {
-      draws[i].forEach(num => {
-        frequency[num - 1]++;
-        if (lastSeen[num - 1] === draws.length) {
-          lastSeen[num - 1] = draws.length - i;
-        }
-      });
-    }
+// Utilidad: genera una semilla numérica desde una cadena (userId)
+function hashCode(str) {
+  return str.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+}
 
-    // Escala ambos vectores a valores entre 0 y 1
-    const freqMax = Math.max(...frequency);
-    const delayMax = Math.max(...lastSeen);
+// === Generar predicción personalizada ===
+export async function generarPrediccionPersonalizada(userId, numeros) {
+  if (!numeros || numeros.length === 0) return Array(6).fill('--');
 
-    const normalized = frequency.map((f, i) => ({
-      num: i + 1,
-      value: (f / freqMax + lastSeen[i] / delayMax) / 2
-    }));
+  const seed = hashCode(userId);
+  const frecuencia = Array(56).fill(0);
 
-    // Ordena por valor de "potencial" y elige los 6 mejores
-    normalized.sort((a, b) => b.value - a.value);
-    const top = normalized.slice(0, 12); // De aquí se eligen al azar 6
+  numeros.forEach(n => frecuencia[n - 1]++);
 
-    // IA simple: selección aleatoria ponderada entre top 12
-    const prediccion = [];
-    while (prediccion.length < 6) {
-      const randIndex = Math.floor(Math.random() * top.length);
-      const num = top[randIndex].num;
-      if (!prediccion.includes(num)) prediccion.push(num);
-    }
+  // Crear entradas normalizadas
+  const input = tf.tensor2d([frecuencia.map(f => f / Math.max(...frecuencia))]);
 
-    return prediccion.sort((a, b) => a - b);
-  }
-};
+  // Crear un modelo simple de red neuronal
+  const model = tf.sequential();
+  model.add(tf.layers.dense({ inputShape: [56], units: 64, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 56, activation: 'sigmoid' }));
+
+  model.compile({ loss: 'meanSquaredError', optimizer: 'adam' });
+
+  // Entrenamiento mínimo (mock, solo para inicializar pesos)
+  await model.fit(input, input, {
+    epochs: 5,
+    shuffle: true,
+    verbose: 0
+  });
+
+  // Generar predicción
+  const salida = model.predict(input);
+  const predArray = await salida.array();
+  const probabilidades = predArray[0];
+
+  // Aplicar semilla personalizada
+  const ponderadas = probabilidades.map((prob, i) => ({
+    numero: i + 1,
+    score: prob + ((seed % (i + 7)) / 1000)
+  }));
+
+  // Seleccionar top 6 sin duplicados
+  const top6 = ponderadas
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map(n => n.numero)
+    .sort((a, b) => a - b);
+
+  return top6;
+}
