@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - ¿Cuál es tu sueño?</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="overflow-hidden">
+
+  <!-- Fondo dinámico -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
+    <div class="animate__animated animate__fadeInDown">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
+        Platícame... ¿cuál es tu sueño?
+      </h2>
+    </div>
+
+    <div id="dream-options" class="flex flex-wrap justify-center gap-4 animate__animated animate__fadeInUp">
+      <!-- Opciones de sueños -->
+      <button class="dream-btn">Casa</button>
+      <button class="dream-btn">Auto</button>
+      <button class="dream-btn">Viaje</button>
+      <button class="dream-btn">Negocio</button>
+      <button class="dream-btn">Retiro</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script src="js/firebase-init.js" type="module"></script>
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { app } from './js/firebase-init.js';
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const buttons = document.querySelectorAll('.dream-btn');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+      }
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const sueño = btn.textContent;
+          try {
+            await setDoc(doc(db, `users/${user.uid}/dream`, 'info'), { sueño });
+            window.location.href = 'home.html';
+          } catch (error) {
+            console.error('Error al guardar el sueño:', error);
+            alert('Ocurrió un error al guardar tu sueño. Intenta nuevamente.');
+          }
+        });
+      });
+    });
+  </script>
+
+  <style>
+    .dream-btn {
+      @apply bg-white text-gray-800 font-semibold px-6 py-3 rounded-full shadow-md hover:bg-gray-200 tra
