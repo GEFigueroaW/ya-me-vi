@@ -1,6 +1,21 @@
 export async function cargarDatosHistoricos(modo) {
   console.log('🚀 Iniciando carga de datos históricos para modo:', modo);
   
+  // Si el modo es específico, cargar solo ese sorteo
+  if (modo === 'melate' || modo === 'revancha' || modo === 'revanchita') {
+    return await cargarSorteoIndividual(modo);
+  }
+  
+  // Si el modo es 'todos', cargar los 3 sorteos para comparación
+  if (modo === 'todos') {
+    return await cargarTodosSorteos();
+  }
+  
+  // Modo por defecto
+  return await cargarSorteoIndividual('melate');
+}
+
+async function cargarSorteoIndividual(modo) {
   const urls = {
     melate: 'assets/melate.csv',
     revancha: 'assets/revancha.csv',
@@ -53,12 +68,42 @@ export async function cargarDatosHistoricos(modo) {
   return { datos: todosLosDatos, numeros: todosLosNumeros, modo };
 }
 
+async function cargarTodosSorteos() {
+  const sorteos = ['melate', 'revancha', 'revanchita'];
+  const datosPorSorteo = {};
+  
+  for (const sorteo of sorteos) {
+    try {
+      const datos = await cargarSorteoIndividual(sorteo);
+      datosPorSorteo[sorteo] = datos;
+    } catch (error) {
+      console.error(`Error cargando ${sorteo}:`, error);
+      datosPorSorteo[sorteo] = { datos: [], numeros: [], modo: sorteo };
+    }
+  }
+  
+  return { 
+    datosPorSorteo, 
+    modo: 'todos',
+    esComparativo: true 
+  };
+}
+
 export function graficarEstadisticas(datos) {
+  console.log('🔍 Datos recibidos:', datos);
+  
+  // Si es modo comparativo (todos los sorteos)
+  if (datos.esComparativo) {
+    mostrarEstadisticasComparativas(datos.datosPorSorteo);
+    return;
+  }
+  
+  // Modo individual
   const numeros = datos.numeros || [];
   const sorteos = datos.datos || [];
   const modo = datos.modo || 'melate';
   
-  console.log('🔍 Datos recibidos:', { 
+  console.log('🔍 Datos individuales recibidos:', { 
     totalNumeros: numeros.length, 
     totalSorteos: sorteos.length,
     modo: modo,
@@ -91,6 +136,171 @@ export function graficarEstadisticas(datos) {
 
   // Mostrar las estadísticas en la UI
   mostrarEstadisticasCompletas(frecuencia, numeros.length, sorteos.length, modo);
+}
+
+function mostrarEstadisticasComparativas(datosPorSorteo) {
+  console.log('🔍 Generando estadísticas comparativas...');
+  
+  const sorteos = ['melate', 'revancha', 'revanchita'];
+  const estadisticasPorSorteo = {};
+  
+  // Procesar cada sorteo
+  sorteos.forEach(sorteo => {
+    const datos = datosPorSorteo[sorteo];
+    const numeros = datos.numeros || [];
+    
+    if (numeros.length > 0) {
+      // Calcular frecuencia
+      const frecuencia = Array(56).fill(0);
+      numeros.forEach(n => {
+        if (n >= 1 && n <= 56) {
+          frecuencia[n - 1]++;
+        }
+      });
+      
+      // Top 10 más frecuentes
+      const top10Mas = frecuencia
+        .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
+        .sort((a, b) => b.frecuencia - a.frecuencia)
+        .slice(0, 10);
+      
+      // Top 10 menos frecuentes
+      const top10Menos = frecuencia
+        .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
+        .sort((a, b) => a.frecuencia - b.frecuencia)
+        .slice(0, 10);
+      
+      estadisticasPorSorteo[sorteo] = {
+        top10Mas,
+        top10Menos,
+        totalSorteos: datos.datos.length,
+        totalNumeros: numeros.length
+      };
+    } else {
+      estadisticasPorSorteo[sorteo] = {
+        top10Mas: [],
+        top10Menos: [],
+        totalSorteos: 0,
+        totalNumeros: 0
+      };
+    }
+  });
+  
+  // Generar HTML según tu diseño
+  const contenedorCharts = document.getElementById('charts-container');
+  if (contenedorCharts) {
+    contenedorCharts.innerHTML = `
+      <!-- Encabezado comparativo -->
+      <div class="mb-6 text-center">
+        <h2 class="text-2xl font-bold text-white mb-2">🎲 Comparativo de Sorteos</h2>
+        <p class="text-gray-300">Melate • Revancha • Revanchita</p>
+      </div>
+
+      <!-- Tabla comparativa según tu diseño -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          <!-- Columna izquierda: Los 10 que MÁS salen -->
+          <div>
+            <h3 class="text-lg font-bold mb-4 text-green-600 text-center">
+              🔥 Los 10 que MÁS salen
+            </h3>
+            <div class="space-y-2">
+              <!-- Encabezados -->
+              <div class="grid grid-cols-4 gap-2 pb-2 border-b font-semibold text-sm text-gray-700">
+                <div class="text-center">#</div>
+                <div class="text-center">Melate</div>
+                <div class="text-center">Revancha</div>
+                <div class="text-center">Revanchita</div>
+              </div>
+              
+              <!-- Filas de datos -->
+              ${Array.from({length: 10}, (_, i) => {
+                const pos = i + 1;
+                const melate = estadisticasPorSorteo.melate.top10Mas[i];
+                const revancha = estadisticasPorSorteo.revancha.top10Mas[i];
+                const revanchita = estadisticasPorSorteo.revanchita.top10Mas[i];
+                
+                return `
+                  <div class="grid grid-cols-4 gap-2 py-2 border-b border-gray-100 hover:bg-green-50 transition-colors">
+                    <div class="text-center font-bold text-green-600">${pos}</div>
+                    <div class="text-center ${melate ? 'text-gray-800 font-semibold' : 'text-gray-400'}">${melate ? melate.numero : '--'}</div>
+                    <div class="text-center ${revancha ? 'text-gray-800 font-semibold' : 'text-gray-400'}">${revancha ? revancha.numero : '--'}</div>
+                    <div class="text-center ${revanchita ? 'text-gray-800 font-semibold' : 'text-gray-400'}">${revanchita ? revanchita.numero : '--'}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          
+          <!-- Columna derecha: Los 10 que MENOS salen -->
+          <div>
+            <h3 class="text-lg font-bold mb-4 text-red-600 text-center">
+              ❄️ Los 10 que MENOS salen
+            </h3>
+            <div class="space-y-2">
+              <!-- Encabezados -->
+              <div class="grid grid-cols-4 gap-2 pb-2 border-b font-semibold text-sm text-gray-700">
+                <div class="text-center">#</div>
+                <div class="text-center">Melate</div>
+                <div class="text-center">Revancha</div>
+                <div class="text-center">Revanchita</div>
+              </div>
+              
+              <!-- Filas de datos -->
+              ${Array.from({length: 10}, (_, i) => {
+                const pos = i + 1;
+                const melate = estadisticasPorSorteo.melate.top10Menos[i];
+                const revancha = estadisticasPorSorteo.revancha.top10Menos[i];
+                const revanchita = estadisticasPorSorteo.revanchita.top10Menos[i];
+                
+                return `
+                  <div class="grid grid-cols-4 gap-2 py-2 border-b border-gray-100 hover:bg-red-50 transition-colors">
+                    <div class="text-center font-bold text-red-600">${pos}</div>
+                    <div class="text-center ${melate ? 'text-gray-800 font-semibold' : 'text-gray-400'}">${melate ? melate.numero : '--'}</div>
+                    <div class="text-center ${revancha ? 'text-gray-800 font-semibold' : 'text-gray-400'}">${revancha ? revancha.numero : '--'}</div>
+                    <div class="text-center ${revanchita ? 'text-gray-800 font-semibold' : 'text-gray-400'}">${revanchita ? revanchita.numero : '--'}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen comparativo -->
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-lg font-bold mb-4 text-blue-600 text-center">📊 Resumen Comparativo</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ${sorteos.map(sorteo => {
+            const stats = estadisticasPorSorteo[sorteo];
+            const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+            const colores = {
+              melate: 'bg-blue-50 border-blue-200',
+              revancha: 'bg-purple-50 border-purple-200', 
+              revanchita: 'bg-green-50 border-green-200'
+            };
+            
+            return `
+              <div class="border-2 rounded-lg p-4 ${colores[sorteo]}">
+                <h4 class="font-bold text-center mb-3">${nombre}</h4>
+                <div class="text-center space-y-2">
+                  <div class="text-2xl font-bold">${stats.totalSorteos}</div>
+                  <div class="text-sm text-gray-600">Sorteos</div>
+                  <div class="text-sm">
+                    <div>Más frecuente: <strong>${stats.top10Mas[0]?.numero || 'N/A'}</strong></div>
+                    <div>Menos frecuente: <strong>${stats.top10Menos[0]?.numero || 'N/A'}</strong></div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  console.log('✅ Estadísticas comparativas mostradas exitosamente');
 }
 
 function mostrarEstadisticasCompletas(frecuencia, totalNumeros, totalSorteos, modo) {
