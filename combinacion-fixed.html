@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Evaluar Combinación</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="overflow-x-hidden">
+
+  <!-- Fondo dinámico -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
+    
+    <!-- Botón de regreso -->
+    <div class="absolute top-4 left-4 z-20">
+      <button id="btn-back" class="border border-white px-4 py-2 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Volver
+      </button>
+    </div>
+
+    <h1 class="text-3xl font-bold mb-6 animate__animated animate__fadeInDown">
+      🎯 Evalúa tu Combinación Ganadora
+    </h1>
+
+    <!-- Sección de evaluación de número individual -->
+    <div class="mb-8 max-w-md mx-auto">
+      <div class="analisis-transparente rounded-xl p-6 mb-6">
+        <h2 class="text-xl font-bold mb-4 text-white">🔍 Evaluar Número Individual</h2>
+        <div class="flex gap-3 items-center justify-center">
+          <input type="number" id="numero-individual" class="numero-input" min="1" max="56" placeholder="1-56">
+          <button id="evaluar-numero-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300 font-semibold">
+            Evaluar
+          </button>
+        </div>
+        <div id="resultado-numero" class="mt-4 text-white"></div>
+      </div>
+    </div>
+
+    <!-- Sección de evaluación de combinación completa -->
+    <div class="max-w-2xl mx-auto">
+      <div class="analisis-transparente rounded-xl p-6 mb-6">
+        <h2 class="text-xl font-bold mb-4 text-white">🎲 Evaluar Combinación Completa (6 números)</h2>
+        
+        <form id="combo-form" class="flex flex-wrap justify-center gap-3 mb-6">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 1" data-pos="1">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 2" data-pos="2">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 3" data-pos="3">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 4" data-pos="4">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 5" data-pos="5">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 6" data-pos="6">
+        </form>
+
+        <button id="evaluar-combinacion-btn" class="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg transition-all duration-300 font-semibold text-lg">
+          🚀 Evaluar Combinación
+        </button>
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultado-combinacion" class="mt-6 max-w-4xl mx-auto"></div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script src="js/dataParser.js" type="module"></script>
+  <script type="module">
+    import { cargarDatosHistoricos } from './js/dataParser.js';
+
+    // Variables globales
+    let datosHistoricos = {};
+    let numerosPorSorteo = {
+      melate: [],
+      revancha: [],
+      revanchita: []
+    };
+
+    // Elementos DOM
+    const btnBack = document.getElementById('btn-back');
+    const btnNumero = document.getElementById('evaluar-numero-btn');
+    const btnCombinacion = document.getElementById('evaluar-combinacion-btn');
+    const inputNumero = document.getElementById('numero-individual');
+    const form = document.getElementById('combo-form');
+    const resultadoNumero = document.getElementById('resultado-numero');
+    const resultadoCombinacion = document.getElementById('resultado-combinacion');
+
+    // Botón de regreso
+    btnBack.addEventListener('click', () => {
+      window.location.href = 'home.html';
+    });
+
+    // Cargar datos históricos
+    async function prepararDatos() {
+      console.log('🔄 Cargando datos históricos...');
+      try {
+        datosHistoricos = await cargarDatosHistoricos();
+        console.log('📊 Datos cargados:', datosHistoricos);
+        
+        // Extraer números por sorteo
+        ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+          if (datosHistoricos[sorteo] && datosHistoricos[sorteo].numeros) {
+            numerosPorSorteo[sorteo] = datosHistoricos[sorteo].numeros;
+            console.log(`✅ ${sorteo}: ${numerosPorSorteo[sorteo].length} números cargados`);
+          } else {
+            console.warn(`⚠️ No hay datos para ${sorteo}`);
+            numerosPorSorteo[sorteo] = [];
+          }
+        });
+        
+        console.log('📈 Números por sorteo:', numerosPorSorteo);
+      } catch (error) {
+        console.error('❌ Error cargando datos:', error);
+        // Datos de ejemplo para testing
+        numerosPorSorteo = {
+          melate: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40],
+          revancha: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
+          revanchita: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29]
+        };
+      }
+    }
+
+    // Funciones de cálculo
+    function calcularFrecuenciaPorSorteo(num) {
+      const resultados = {};
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        resultados[sorteo] = {
+          frecuencia: numeros.filter(n => n === num).length,
+          total: numeros.length,
+          porcentaje: numeros.length > 0 ? (numeros.filter(n => n === num).length / numeros.length) * 100 : 0
+        };
+      });
+      return resultados;
+    }
+
+    function calcularFrecuenciaTotal(num) {
+      let total = 0;
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        total += numeros.filter(n => n === num).length;
+      });
+      return total;
+    }
+
+    function calcularPorcentajeTotal(num) {
+      let totalNumeros = 0;
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        totalNumeros += numerosPorSorteo[sorteo].length;
+      });
+      const frecuencia = calcularFrecuenciaTotal(num);
+      return totalNumeros > 0 ? (frecuencia / totalNumeros) * 100 : 0;
+    }
+
+    function clasificarProbabilidad(porcentaje) {
+      if (porcentaje >= 84) return { categoria: 'Muy Alta', color: 'text-green-300', emoji: '🔥' };
+      if (porcentaje >= 63) return { categoria: 'Alta', color: 'text-green-400', emoji: '⚡' };
+      if (porcentaje >= 42) return { categoria: 'Media', color: 'text-yellow-300', emoji: '⚖️' };
+      if (porcentaje >= 21) return { categoria: 'Baja', color: 'text-orange-300', emoji: '❄️' };
+      return { categoria: 'Nula', color: 'text-red-300', emoji: '💀' };
+    }
+
+    // Validación de inputs
+    function validarInput(input) {
+      const valor = parseInt(input.value);
+      
+      // Limpiar estilos previos
+      input.classList.remove('error-rango', 'error-duplicado');
+      
+      // Validar rango
+      if (isNaN(valor) || valor < 1 || valor > 56) {
+        input.classList.add('error-rango');
+        return false;
+      }
+      
+      // Validar duplicados solo para combinación
+      if (input.classList.contains('combo-input')) {
+        const inputs = form.querySelectorAll('.combo-input');
+        const valores = Array.from(inputs)
+          .map(inp => parseInt(inp.value))
+          .filter(v => !isNaN(v));
+        
+        const duplicados = valores.filter((v, i) => valores.indexOf(v) !== i);
+        
+        if (duplicados.includes(valor)) {
+          input.classList.add('error-duplicado');
+          return false;
+        }
+      }
+      
+      return true;
+    }
+
+    // Eventos de validación
+    form.addEventListener('input', (e) => {
+      if (e.target.classList.contains('combo-input')) {
+        validarInput(e.target);
+      }
+    });
+
+    // Limitar entrada a 56
+    function limitarEntrada(input) {
+      input.addEventListener('input', (e) => {
+        let valor = parseInt(e.target.value);
+        if (valor > 56) {
+          e.target.value = 56;
+        }
+      });
+    }
+
+    // Aplicar limitación a todos los inputs
+    document.querySelectorAll('.combo-input, .numero-input').forEach(limitarEntrada);
+
+    // Evaluar número individual
+    btnNumero.addEventListener('click', () => {
+      console.log('🔍 Evaluando número individual...');
+      
+      const numero = parseInt(inputNumero.value);
+      console.log('📊 Número capturado:', numero);
+      
+      if (isNaN(numero) || numero < 1 || numero > 56) {
+        resultadoNumero.innerHTML = `
+          <p class="text-red-300 font-semibold">⚠️ Por favor, ingresa un número válido entre 1 y 56.</p>
+        `;
+        return;
+      }
+      
+      try {
+        const frecuenciaPorSorteo = calcularFrecuenciaPorSorteo(numero);
+        const frecuenciaTotal = calcularFrecuenciaTotal(numero);
+        const porcentajeTotal = calcularPorcentajeTotal(numero);
+        const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
+        
+        console.log('📈 Resultados:', {
+          frecuenciaPorSorteo,
+          frecuenciaTotal,
+          porcentajeTotal,
+          clasificacionTotal
+        });
+
+        // Generar HTML por sorteo
+        let htmlPorSorteo = '';
+        ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+          const datos = frecuenciaPorSorteo[sorteo];
+          const clasificacion = clasificarProbabilidad(datos.porcentaje);
+          const nombreSorteo = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+          
+          htmlPorSorteo += `
+            <div class="analisis-transparente rounded-lg p-3 border border-white border-opacity-30">
+              <h4 class="font-bold text-white mb-2">🎲 ${nombreSorteo}</h4>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div class="text-center">
+                  <div class="text-xl font-bold text-white">${datos.frecuencia}</div>
+                  <div class="text-gray-300">Apariciones</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-xl font-bold ${clasificacion.color}">${datos.porcentaje.toFixed(1)}%</div>
+                  <div class="text-gray-300">Probabilidad</div>
+                </div>
+              </div>
+              <div class="mt-2 text-center">
+                <span class="text-sm ${clasificacion.color}">
+                  ${clasificacion.emoji} ${clasificacion.categoria}
+                </span>
+              </div>
+            </div>
+          `;
+        });
+
+        resultadoNumero.innerHTML = `
+          <div class="analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
+            <h3 class="text-lg font-bold mb-3 text-white">🔍 Análisis del Número ${numero}</h3>
+            
+            <div class="mb-4 text-center">
+              <div class="text-3xl font-bold ${clasificacionTotal.color} mb-1">${clasificacionTotal.emoji} ${clasificacionTotal.categoria}</div>
+              <div class="text-white">Probabilidad General: <span class="font-bold">${porcentajeTotal.toFixed(1)}%</span></div>
+              <div class="text-gray-300">Total de apariciones: ${frecuenciaTotal}</div>
+            </div>
+            
+            <h4 class="text-md font-bold mb-3 text-white">📊 Análisis por Sorteo</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              ${htmlPorSorteo}
+            </div>
+          </div>
+        `;
+        
+        console.log('✅ Número individual analizado exitosamente');
+        
+      } catch (error) {
+        console.error('❌ Error al analizar número individual:', error);
+        resultadoNumero.innerHTML = `
+          <p class="text-red-300 font-semibold">❌ Error al procesar el análisis. Error: ${error.message}</p>
+        `;
+      }
+    });
+
+    // Evaluar combinación completa
+    btnCombinacion.addEventListener('click', () => {
+      console.log('🎯 Evaluando combinación completa...');
+      
+      const inputs = form.querySelectorAll('.combo-input');
+      const numeros = Array.from(inputs).map(input => parseInt(input.value)).filter(n => !isNaN(n));
+      
+      console.log('📊 Números capturados:', numeros);
+
+      // Validación
+      if (numeros.length !== 6) {
+        resultadoCombinacion.innerHTML = `
+          <div class="analisis-transparente rounded-xl p-6 border border-red-300">
+            <p class="text-red-300 font-semibold text-lg">❌ Por favor, completa todos los 6 números.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Verificar duplicados
+      const sinDuplicados = new Set(numeros);
+      if (sinDuplicados.size !== 6) {
+        resultadoCombinacion.innerHTML = `
+          <div class="analisis-transparente rounded-xl p-6 border border-red-300">
+            <p class="text-red-300 font-semibold text-lg">❌ No se permiten números duplicados.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Verificar rango
+      if (numeros.some(n => n < 1 || n > 56)) {
+        resultadoCombinacion.innerHTML = `
+          <div class="analisis-transparente rounded-xl p-6 border border-red-300">
+            <p class="text-red-300 font-semibold text-lg">❌ Los números deben estar entre 1 y 56.</p>
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        // Análisis individual
+        const analisisIndividual = numeros.map(num => {
+          const frecuenciaPorSorteo = calcularFrecuenciaPorSorteo(num);
+          const frecuenciaTotal = calcularFrecuenciaTotal(num);
+          const porcentajeTotal = calcularPorcentajeTotal(num);
+          const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
+          
+          return {
+            numero: num,
+            frecuenciaTotal,
+            porcentajeTotal,
+            clasificacionTotal,
+            porSorteo: frecuenciaPorSorteo
+          };
+        });
+
+        console.log('📈 Análisis individual completo:', analisisIndividual);
+
+        // Generar HTML
+        let htmlAnalisis = '';
+        analisisIndividual.forEach(analisis => {
+          let htmlPorSorteo = '';
+          ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+            const datos = analisis.porSorteo[sorteo];
+            const clasificacion = clasificarProbabilidad(datos.porcentaje);
+            const nombreSorteo = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+            
+            htmlPorSorteo += `
+              <div class="text-xs text-gray-300 mb-1">
+                <span class="font-semibold">${nombreSorteo}:</span> 
+                ${datos.frecuencia} apariciones (${datos.porcentaje.toFixed(1)}%) 
+                <span class="${clasificacion.color}">${clasificacion.emoji}</span>
+              </div>
+            `;
+          });
+          
+          htmlAnalisis += `
+            <div class="analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
+              <div class="text-center mb-3">
+                <span class="text-3xl font-bold text-white">${analisis.numero}</span>
+                <div class="text-lg font-bold ${analisis.clasificacionTotal.color} mt-1">
+                  ${analisis.clasificacionTotal.emoji} ${analisis.clasificacionTotal.categoria}
+                </div>
+                <div class="text-sm text-gray-300 mt-1">
+                  Total: ${analisis.frecuenciaTotal} apariciones (${analisis.porcentajeTotal.toFixed(1)}%)
+                </div>
+              </div>
+              <div class="border-t border-white border-opacity-30 pt-2">
+                <div class="text-xs text-gray-400 mb-1">Desglose por sorteo:</div>
+                ${htmlPorSorteo}
+              </div>
+            </div>
+          `;
+        });
+
+        resultadoCombinacion.innerHTML = `
+          <div class="analisis-transparente rounded-xl p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 text-white">🎯 Análisis de tu Combinación</h2>
+            <div class="text-center mb-6">
+              <div class="text-4xl font-bold text-white mb-2">${numeros.join(' - ')}</div>
+              <p class="text-gray-300">Tu combinación seleccionada</p>
+            </div>
+            
+            <div class="mb-6">
+              <h3 class="text-xl font-bold mb-3 text-white">📊 Análisis Individual por Número</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                ${htmlAnalisis}
+              </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-4 text-center">
+              <h3 class="text-xl font-bold mb-2 text-white">💡 Recomendación</h3>
+              <p class="text-white">
+                ${analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Muy Alta' || a.clasificacionTotal.categoria === 'Alta').length >= 3 
+                  ? '🚀 ¡Excelente combinación! Tienes varios números con alta probabilidad.' 
+                  : '⚡ Combinación interesante. Considera mezclar números de diferentes categorías de probabilidad.'}
+              </p>
+            </div>
+          </div>
+        `;
+        
+        console.log('✅ Combinación analizada exitosamente');
+        
+      } catch (error) {
+        console.error('❌ Error al analizar combinación:', error);
+        resultadoCombinacion.innerHTML = `
+          <div class="analisis-transparente rounded-xl p-6 border border-red-300">
+            <p class="text-red-300 font-semibold text-lg">❌ Error al procesar el análisis</p>
+            <p class="text-gray-300 text-sm mt-2">Error: ${error.message}</p>
+          </div>
+        `;
+      }
+    });
+
+    // Permitir Enter en número individual
+    inputNumero.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        btnNumero.click();
+      }
+    });
+
+    // Inicializar
+    prepararDatos();
+  </script>
+
+  <style>
+    .analisis-transparente {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .combo-input, .numero-input {
+      width: 4rem;
+      height: 3rem;
+      text-align: center;
+      color: black;
+      font-size: 1.25rem;
+      font-weight: bold;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background: white;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
+    }
+    
+    .combo-input:focus, .numero-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      transform: scale(1.05);
+    }
+    
+    .combo-input.error-rango, .numero-input.error-rango {
+      border-color: #ef4444;
+      background-color: #fef2f2;
+    }
+    
+    .combo-input.error-duplicado {
+      border-color: #f59e0b;
+      background-color: #fef3c7;
+    }
+  </style>
+</body>
+</html>
