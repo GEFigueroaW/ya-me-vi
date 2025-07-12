@@ -50,12 +50,12 @@
         <h2 class="text-xl font-bold mb-4 text-white">🎲 Evaluar Combinación Completa (6 números)</h2>
         
         <form id="combo-form" class="flex flex-wrap justify-center gap-3 mb-6">
-          <input type="number" class="combo-input" min="1" max="56" placeholder="1-56" required>
-          <input type="number" class="combo-input" min="1" max="56" placeholder="1-56" required>
-          <input type="number" class="combo-input" min="1" max="56" placeholder="1-56" required>
-          <input type="number" class="combo-input" min="1" max="56" placeholder="1-56" required>
-          <input type="number" class="combo-input" min="1" max="56" placeholder="1-56" required>
-          <input type="number" class="combo-input" min="1" max="56" placeholder="1-56" required>
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 1" required>
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 2" required>
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 3" required>
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 4" required>
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 5" required>
+          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 6" required>
         </form>
 
         <button id="evaluar-combinacion-btn" class="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg transition-all duration-300 font-semibold text-lg">
@@ -90,23 +90,38 @@
     const inputNumero = document.getElementById('numero-individual');
 
     let datosHistoricos = {};
-    let todosLosNumeros = [];
+    let numerosPorSorteo = {
+      melate: [],
+      revancha: [],
+      revanchita: []
+    };
 
     async function prepararDatos() {
       console.log('🔄 Cargando datos históricos...');
       try {
         datosHistoricos = await cargarDatosHistoricos();
-        // Combinar todos los números de todos los sorteos
-        todosLosNumeros = [];
+        console.log('📊 Datos cargados:', datosHistoricos);
+        
+        // Extraer números por sorteo
         ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
           if (datosHistoricos[sorteo] && datosHistoricos[sorteo].numeros) {
-            todosLosNumeros = todosLosNumeros.concat(datosHistoricos[sorteo].numeros);
+            numerosPorSorteo[sorteo] = datosHistoricos[sorteo].numeros;
+            console.log(`✅ ${sorteo}: ${numerosPorSorteo[sorteo].length} números cargados`);
+          } else {
+            console.warn(`⚠️ No hay datos para ${sorteo}`);
+            numerosPorSorteo[sorteo] = [];
           }
         });
-        console.log('✅ Datos cargados:', { totalNumeros: todosLosNumeros.length });
+        
+        console.log('📈 Números por sorteo:', numerosPorSorteo);
       } catch (error) {
         console.error('❌ Error cargando datos:', error);
-        todosLosNumeros = [];
+        // Datos de ejemplo para testing
+        numerosPorSorteo = {
+          melate: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40],
+          revancha: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
+          revanchita: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29]
+        };
       }
     }
 
@@ -130,15 +145,35 @@
       return { valido: true, mensaje: 'Combinación válida' };
     }
 
+    function calcularFrecuenciaPorSorteo(num) {
+      const resultados = {};
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        resultados[sorteo] = {
+          frecuencia: numeros.filter(n => n === num).length,
+          total: numeros.length,
+          porcentaje: numeros.length > 0 ? (numeros.filter(n => n === num).length / numeros.length) * 100 : 0
+        };
+      });
+      return resultados;
+    }
+
     function calcularFrecuenciaNumero(num) {
-      if (todosLosNumeros.length === 0) return 0;
-      return todosLosNumeros.filter(n => n === num).length;
+      let total = 0;
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        total += numeros.filter(n => n === num).length;
+      });
+      return total;
     }
 
     function calcularPorcentajeAparicion(num) {
-      const totalSorteos = Math.floor(todosLosNumeros.length / 6); // Aproximado
+      let totalNumeros = 0;
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        totalNumeros += numerosPorSorteo[sorteo].length;
+      });
       const frecuencia = calcularFrecuenciaNumero(num);
-      return totalSorteos > 0 ? (frecuencia / totalSorteos) * 100 : 0;
+      return totalNumeros > 0 ? (frecuencia / totalNumeros) * 100 : 0;
     }
 
     function clasificarProbabilidad(porcentaje) {
@@ -167,39 +202,37 @@
     }
 
     function buscarCombinacionesSimilares(numeros) {
-      const sorteos = [];
+      const resultados = {
+        melate: { exactas: 0, parciales: [] },
+        revancha: { exactas: 0, parciales: [] },
+        revanchita: { exactas: 0, parciales: [] }
+      };
+
       ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
         if (datosHistoricos[sorteo] && datosHistoricos[sorteo].datos) {
           datosHistoricos[sorteo].datos.forEach(sorteoData => {
-            sorteos.push({
-              sorteo: sorteo,
-              numeros: sorteoData.numeros || [],
-              numeroSorteo: sorteoData.numeroSorteo
-            });
+            const numerosHistoricos = sorteoData.numeros || [];
+            const coincidencias = numeros.filter(n => numerosHistoricos.includes(n)).length;
+            
+            if (coincidencias === 6) {
+              resultados[sorteo].exactas++;
+            } else if (coincidencias >= 3) {
+              resultados[sorteo].parciales.push({
+                numero: sorteoData.numeroSorteo,
+                coincidencias: coincidencias,
+                numeros: numerosHistoricos
+              });
+            }
           });
+          
+          // Limitar a top 3 por sorteo
+          resultados[sorteo].parciales = resultados[sorteo].parciales
+            .sort((a, b) => b.coincidencias - a.coincidencias)
+            .slice(0, 3);
         }
       });
 
-      let coincidenciasExactas = 0;
-      let coincidenciasParciales = [];
-
-      sorteos.forEach(sorteoData => {
-        const coincidencias = numeros.filter(n => sorteoData.numeros.includes(n)).length;
-        if (coincidencias === 6) {
-          coincidenciasExactas++;
-        } else if (coincidencias >= 3) {
-          coincidenciasParciales.push({
-            sorteo: sorteoData.sorteo,
-            numero: sorteoData.numeroSorteo,
-            coincidencias: coincidencias
-          });
-        }
-      });
-
-      return {
-        exactas: coincidenciasExactas,
-        parciales: coincidenciasParciales.slice(0, 5) // Top 5
-      };
+      return resultados;
     }
 
     // Evaluar número individual
@@ -213,26 +246,55 @@
         return;
       }
 
-      const frecuencia = calcularFrecuenciaNumero(numero);
-      const porcentaje = calcularPorcentajeAparicion(numero);
-      const clasificacion = clasificarProbabilidad(porcentaje);
+      const frecuenciaPorSorteo = calcularFrecuenciaPorSorteo(numero);
+      const frecuenciaTotal = calcularFrecuenciaNumero(numero);
+      const porcentajeTotal = calcularPorcentajeAparicion(numero);
+      const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
+
+      // Generar análisis por sorteo
+      let htmlPorSorteo = '';
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const datos = frecuenciaPorSorteo[sorteo];
+        const clasificacion = clasificarProbabilidad(datos.porcentaje);
+        const nombreSorteo = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+        
+        htmlPorSorteo += `
+          <div class="analisis-transparente rounded-lg p-3 border border-white border-opacity-30">
+            <h4 class="font-bold text-white mb-2">🎲 ${nombreSorteo}</h4>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div class="text-center">
+                <div class="text-xl font-bold text-white">${datos.frecuencia}</div>
+                <div class="text-gray-300">Apariciones</div>
+              </div>
+              <div class="text-center">
+                <div class="text-xl font-bold ${clasificacion.color}">${datos.porcentaje.toFixed(1)}%</div>
+                <div class="text-gray-300">Probabilidad</div>
+              </div>
+            </div>
+            <div class="mt-2 text-center">
+              <span class="text-sm ${clasificacion.color}">
+                ${clasificacion.emoji} ${clasificacion.categoria}
+              </span>
+            </div>
+          </div>
+        `;
+      });
 
       resultadoNumero.innerHTML = `
         <div class="analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
           <h3 class="text-lg font-bold mb-3 text-white">🔍 Análisis del Número ${numero}</h3>
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div class="text-center">
-              <div class="text-2xl font-bold text-white">${frecuencia}</div>
-              <div class="text-gray-300">Apariciones</div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold ${clasificacion.color}">${porcentaje.toFixed(1)}%</div>
-              <div class="text-gray-300">Probabilidad</div>
-            </div>
+          
+          <!-- Resumen general -->
+          <div class="mb-4 text-center">
+            <div class="text-3xl font-bold ${clasificacionTotal.color} mb-1">${clasificacionTotal.emoji} ${clasificacionTotal.categoria}</div>
+            <div class="text-white">Probabilidad General: <span class="font-bold">${porcentajeTotal.toFixed(1)}%</span></div>
+            <div class="text-gray-300">Total de apariciones: ${frecuenciaTotal}</div>
           </div>
-          <div class="mt-3 p-2 bg-white bg-opacity-20 rounded-lg">
-            <span class="text-lg">${clasificacion.emoji}</span>
-            <span class="font-semibold ${clasificacion.color}">Probabilidad ${clasificacion.categoria}</span>
+          
+          <!-- Análisis por sorteo -->
+          <h4 class="text-md font-bold mb-3 text-white">📊 Análisis por Sorteo</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            ${htmlPorSorteo}
           </div>
         </div>
       `;
@@ -258,15 +320,17 @@
 
       // Análisis individual de cada número
       const analisisIndividual = numeros.map(num => {
-        const frecuencia = calcularFrecuenciaNumero(num);
-        const porcentaje = calcularPorcentajeAparicion(num);
-        const clasificacion = clasificarProbabilidad(porcentaje);
+        const frecuenciaPorSorteo = calcularFrecuenciaPorSorteo(num);
+        const frecuenciaTotal = calcularFrecuenciaNumero(num);
+        const porcentajeTotal = calcularPorcentajeAparicion(num);
+        const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
         
         return {
           numero: num,
-          frecuencia: frecuencia,
-          porcentaje: porcentaje,
-          clasificacion: clasificacion
+          frecuenciaTotal: frecuenciaTotal,
+          porcentajeTotal: porcentajeTotal,
+          clasificacionTotal: clasificacionTotal,
+          porSorteo: frecuenciaPorSorteo
         };
       });
 
@@ -279,38 +343,80 @@
       // Generar HTML de resultado
       let htmlAnalisisIndividual = '';
       analisisIndividual.forEach(analisis => {
+        // Análisis detallado por sorteo para cada número
+        let htmlPorSorteo = '';
+        ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+          const datos = analisis.porSorteo[sorteo];
+          const clasificacion = clasificarProbabilidad(datos.porcentaje);
+          const nombreSorteo = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+          
+          htmlPorSorteo += `
+            <div class="text-xs text-gray-300 mb-1">
+              <span class="font-semibold">${nombreSorteo}:</span> 
+              ${datos.frecuencia} apariciones (${datos.porcentaje.toFixed(1)}%) 
+              <span class="${clasificacion.color}">${clasificacion.emoji}</span>
+            </div>
+          `;
+        });
+        
         htmlAnalisisIndividual += `
-          <div class="analisis-transparente rounded-lg p-3 border border-white border-opacity-30">
-            <div class="flex justify-between items-center">
-              <span class="text-xl font-bold text-white">${analisis.numero}</span>
-              <div class="text-right">
-                <div class="text-lg font-bold ${analisis.clasificacion.color}">
-                  ${analisis.clasificacion.emoji} ${analisis.clasificacion.categoria}
-                </div>
-                <div class="text-sm text-gray-300">
-                  ${analisis.frecuencia} apariciones (${analisis.porcentaje.toFixed(1)}%)
-                </div>
+          <div class="analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
+            <div class="text-center mb-3">
+              <span class="text-3xl font-bold text-white">${analisis.numero}</span>
+              <div class="text-lg font-bold ${analisis.clasificacionTotal.color} mt-1">
+                ${analisis.clasificacionTotal.emoji} ${analisis.clasificacionTotal.categoria}
               </div>
+              <div class="text-sm text-gray-300 mt-1">
+                Total: ${analisis.frecuenciaTotal} apariciones (${analisis.porcentajeTotal.toFixed(1)}%)
+              </div>
+            </div>
+            <div class="border-t border-white border-opacity-30 pt-2">
+              <div class="text-xs text-gray-400 mb-1">Desglose por sorteo:</div>
+              ${htmlPorSorteo}
             </div>
           </div>
         `;
       });
 
       let htmlSimilares = '';
-      if (similares.exactas > 0) {
-        htmlSimilares += `<p class="text-green-300 font-semibold">🎯 ¡Increíble! Esta combinación exacta ha salido ${similares.exactas} vez(es) antes.</p>`;
-      }
+      const similares = buscarCombinacionesSimilares(numeros);
       
-      if (similares.parciales.length > 0) {
-        htmlSimilares += `<p class="text-yellow-300 mb-2">⚡ Combinaciones similares encontradas:</p>`;
-        similares.parciales.forEach(similar => {
+      // Generar HTML para cada sorteo
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const datosSimiliares = similares[sorteo];
+        const nombreSorteo = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+        
+        htmlSimilares += `
+          <div class="analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
+            <h4 class="font-bold text-white mb-2">🎲 ${nombreSorteo}</h4>
+        `;
+        
+        if (datosSimiliares.exactas > 0) {
           htmlSimilares += `
-            <div class="text-sm text-gray-300 mb-1">
-              • ${similar.sorteo.toUpperCase()} #${similar.numero}: ${similar.coincidencias} números coincidentes
-            </div>
+            <p class="text-green-300 font-semibold mb-2">
+              🎯 ¡Increíble! Esta combinación exacta ha salido ${datosSimiliares.exactas} vez(es) en ${nombreSorteo}.
+            </p>
           `;
-        });
-      }
+        }
+        
+        if (datosSimiliares.parciales.length > 0) {
+          htmlSimilares += `<p class="text-yellow-300 text-sm mb-2">⚡ Combinaciones similares:</p>`;
+          datosSimiliares.parciales.forEach(similar => {
+            htmlSimilares += `
+              <div class="text-xs text-gray-300 mb-1">
+                • Sorteo #${similar.numero}: ${similar.coincidencias} coincidencias
+                <div class="text-xs text-gray-400">Números: ${similar.numeros.join(', ')}</div>
+              </div>
+            `;
+          });
+        }
+        
+        if (datosSimiliares.exactas === 0 && datosSimiliares.parciales.length === 0) {
+          htmlSimilares += `<p class="text-gray-400 text-sm">No se encontraron combinaciones similares.</p>`;
+        }
+        
+        htmlSimilares += `</div>`;
+      });
 
       resultadoCombinacion.innerHTML = `
         <div class="analisis-transparente rounded-xl p-6 mb-6">
@@ -323,7 +429,7 @@
           <!-- Análisis individual -->
           <div class="mb-6">
             <h3 class="text-xl font-bold mb-3 text-white">📊 Análisis Individual por Número</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               ${htmlAnalisisIndividual}
             </div>
           </div>
@@ -347,11 +453,11 @@
             </div>
           </div>
           
-          <!-- Combinaciones similares -->
+          <!-- Combinaciones similares por sorteo -->
           <div class="mb-6">
-            <h3 class="text-xl font-bold mb-3 text-white">🔍 Historial de Combinaciones Similares</h3>
-            <div class="analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
-              ${htmlSimilares || '<p class="text-gray-300">No se encontraron combinaciones similares con 3+ coincidencias.</p>'}
+            <h3 class="text-xl font-bold mb-3 text-white">🔍 Historial por Sorteo</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              ${htmlSimilares}
             </div>
           </div>
           
@@ -359,7 +465,7 @@
           <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-4 text-center">
             <h3 class="text-xl font-bold mb-2 text-white">💡 Recomendación</h3>
             <p class="text-white">
-              ${analisisIndividual.filter(a => a.clasificacion.categoria === 'Muy Alta' || a.clasificacion.categoria === 'Alta').length >= 3 
+              ${analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Muy Alta' || a.clasificacionTotal.categoria === 'Alta').length >= 3 
                 ? '🚀 ¡Excelente combinación! Tienes varios números con alta probabilidad.' 
                 : '⚡ Combinación interesante. Considera mezclar números de diferentes categorías de probabilidad.'}
             </p>
@@ -393,11 +499,34 @@
 
   <style>
     .combo-input {
-      @apply w-20 text-center text-black text-xl font-bold px-2 py-1 rounded shadow bg-white border-2;
+      width: 4rem;
+      height: 3rem;
+      text-align: center;
+      color: black;
+      font-size: 1.25rem;
+      font-weight: bold;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background: white;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
     }
     
     .combo-input:focus {
-      @apply outline-none ring-2 ring-blue-500;
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      transform: scale(1.05);
+    }
+    
+    .combo-input:hover {
+      border-color: #6b7280;
+    }
+    
+    .combo-input.error {
+      border-color: #ef4444;
+      background-color: #fef2f2;
     }
     
     .analisis-transparente {
