@@ -273,14 +273,37 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       const estadisticasBloques = bloques.map((bloque, index) => {
         const counts = numerosPorBloque[index];
         const promedio = counts.length > 0 ? counts.reduce((sum, count) => sum + count, 0) / counts.length : 0;
-        const porcentaje = (promedio / 6) * 100; // De 6 números posibles
         
         return {
           bloque: bloque.nombre,
-          promedio: Math.round(promedio),
-          porcentaje: Math.round(porcentaje)
+          promedio: promedio,
+          porcentaje: 0 // Se calculará después para que sume 100%
         };
       });
+      
+      // Ajustar porcentajes para que sumen exactamente 100% (6 números)
+      const totalPromedio = estadisticasBloques.reduce((sum, bloque) => sum + bloque.promedio, 0);
+      if (totalPromedio > 0) {
+        estadisticasBloques.forEach(bloque => {
+          bloque.porcentaje = Math.round((bloque.promedio / totalPromedio) * 100);
+          bloque.numerosProbables = Math.round((bloque.promedio / totalPromedio) * 6);
+        });
+        
+        // Asegurar que la suma sea exactamente 6
+        const totalNumeros = estadisticasBloques.reduce((sum, bloque) => sum + bloque.numerosProbables, 0);
+        if (totalNumeros !== 6) {
+          // Ajustar el bloque con mayor promedio
+          const bloqueMaximo = estadisticasBloques.reduce((max, bloque) => 
+            bloque.promedio > max.promedio ? bloque : max
+          );
+          bloqueMaximo.numerosProbables += (6 - totalNumeros);
+        }
+      } else {
+        estadisticasBloques.forEach(bloque => {
+          bloque.porcentaje = 25; // 25% cada uno si no hay datos
+          bloque.numerosProbables = 1; // 1-2 números por bloque
+        });
+      }
       
       estadisticasPorSorteo[sorteo] = {
         top10Mas,
@@ -298,7 +321,8 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
         bloques: bloques.map(bloque => ({
           bloque: bloque.nombre,
           promedio: 0,
-          porcentaje: 0
+          porcentaje: 25,
+          numerosProbables: 1
         })),
         totalSorteos: 0
       };
@@ -368,32 +392,42 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
           
           <!-- Análisis por bloques -->
           <div class="mb-4">
-            <h4 class="text-lg font-semibold text-white mb-2">📈 Análisis por Bloques</h4>
+            <h4 class="text-lg font-semibold text-white mb-2">🎯 Predicción por Zonas Numéricas</h4>
+            <p class="text-xs text-gray-300 mb-3">¿Cuántos números saldrán de cada zona? (Total: 6 números)</p>
             <div class="space-y-2">
       `;
       
       stats.bloques.forEach(bloque => {
+        const numeroTexto = bloque.numerosProbables === 1 ? '1 número' : `${bloque.numerosProbables} números`;
         htmlContent += `
           <div class="analisis-transparente rounded-lg p-3 border border-white border-opacity-30">
             <div class="flex justify-between items-center">
-              <span class="font-semibold text-white">Bloque ${bloque.bloque}</span>
+              <span class="font-semibold text-white">Zona ${bloque.bloque}</span>
               <div class="text-right">
-                <div class="text-lg font-bold text-white">${bloque.promedio}</div>
-                <div class="text-sm text-gray-300">${bloque.porcentaje}%</div>
+                <div class="text-lg font-bold text-green-300">${numeroTexto}</div>
+                <div class="text-sm text-gray-300">${bloque.porcentaje}% probabilidad</div>
               </div>
             </div>
             <div class="mt-2">
               <div class="w-full bg-gray-600 rounded-full h-2">
-                <div class="bg-white h-2 rounded-full transition-all duration-300" 
-                     style="width: ${Math.min(bloque.porcentaje, 100)}%">
+                <div class="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-300" 
+                     style="width: ${bloque.porcentaje}%">
                 </div>
               </div>
+            </div>
+            <div class="mt-1 text-xs text-gray-400">
+              🎲 Rango: ${bloque.bloque} • Tendencia: ${bloque.numerosProbables > 1 ? 'Alta' : 'Moderada'}
             </div>
           </div>
         `;
       });
       
       htmlContent += `
+            </div>
+            <div class="mt-3 p-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg text-center">
+              <p class="text-sm font-semibold text-white">
+                💡 Esta predicción sugiere de qué zonas saldrán los 6 números ganadores
+              </p>
             </div>
           </div>
         </div>
