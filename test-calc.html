@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cálculos</title>
+</head>
+<body>
+    <h1>Test de Cálculos</h1>
+    <div id="resultado"></div>
+    
+    <script>
+        // Simular datos de prueba
+        const numerosPorSorteo = {
+            melate: [],
+            revancha: [],
+            revanchita: []
+        };
+        
+        // Generar datos de prueba más realistas
+        const generarDatosPrueba = () => {
+            const numeros = [];
+            const totalSorteos = 200; // Simular 200 sorteos
+            
+            for (let sorteo = 0; sorteo < totalSorteos; sorteo++) {
+                // Cada sorteo genera 6 números (como en Melate)
+                const numerosDelSorteo = new Set();
+                while (numerosDelSorteo.size < 6) {
+                    const numeroAleatorio = Math.floor(Math.random() * 56) + 1;
+                    numerosDelSorteo.add(numeroAleatorio);
+                }
+                numeros.push(...numerosDelSorteo);
+            }
+            
+            return numeros;
+        };
+        
+        // Generar datos
+        numerosPorSorteo.melate = generarDatosPrueba();
+        numerosPorSorteo.revancha = generarDatosPrueba();
+        numerosPorSorteo.revanchita = generarDatosPrueba();
+        
+        // Función de cálculo
+        function calcularFrecuenciaPorSorteo(num) {
+            const resultados = {};
+            ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                const numeros = numerosPorSorteo[sorteo] || [];
+                resultados[sorteo] = {
+                    frecuencia: numeros.filter(n => n === num).length,
+                    total: numeros.length,
+                    porcentaje: numeros.length > 0 ? (numeros.filter(n => n === num).length / numeros.length) * 100 : 0
+                };
+            });
+            return resultados;
+        }
+        
+        function calcularPorcentajeTotal(num) {
+            let totalNumeros = 0;
+            let frecuenciaTotal = 0;
+            
+            ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                const numeros = numerosPorSorteo[sorteo] || [];
+                totalNumeros += numeros.length;
+                frecuenciaTotal += numeros.filter(n => n === num).length;
+            });
+            
+            return totalNumeros > 0 ? (frecuenciaTotal / totalNumeros) * 100 : 0;
+        }
+        
+        function clasificarProbabilidad(porcentaje) {
+            if (porcentaje >= 3.0) return { categoria: 'Muy Alta', color: 'green', emoji: '🔥' };
+            if (porcentaje >= 2.5) return { categoria: 'Alta', color: 'blue', emoji: '⚡' };
+            if (porcentaje >= 2.0) return { categoria: 'Media', color: 'orange', emoji: '⚖️' };
+            if (porcentaje >= 1.5) return { categoria: 'Baja', color: 'red', emoji: '❄️' };
+            return { categoria: 'Muy Baja', color: 'gray', emoji: '💀' };
+        }
+        
+        // Probar con el número 7
+        const numeroTest = 7;
+        const porcentajeTest = calcularPorcentajeTotal(numeroTest);
+        const clasificacionTest = clasificarProbabilidad(porcentajeTest);
+        const frecuenciaTest = calcularFrecuenciaPorSorteo(numeroTest);
+        
+        console.log('Datos generados:', {
+            melate: numerosPorSorteo.melate.length,
+            revancha: numerosPorSorteo.revancha.length,
+            revanchita: numerosPorSorteo.revanchita.length
+        });
+        
+        console.log('Prueba número 7:', {
+            porcentaje: porcentajeTest,
+            clasificacion: clasificacionTest,
+            frecuencia: frecuenciaTest
+        });
+        
+        document.getElementById('resultado').innerHTML = `
+            <h2>Prueba del número ${numeroTest}</h2>
+            <p>Porcentaje: ${porcentajeTest.toFixed(2)}%</p>
+            <p>Clasificación: ${clasificacionTest.emoji} ${clasificacionTest.categoria}</p>
+            <p>Melate: ${frecuenciaTest.melate.frecuencia} apariciones (${frecuenciaTest.melate.porcentaje.toFixed(2)}%)</p>
+            <p>Revancha: ${frecuenciaTest.revancha.frecuencia} apariciones (${frecuenciaTest.revancha.porcentaje.toFixed(2)}%)</p>
+            <p>Revanchita: ${frecuenciaTest.revanchita.frecuencia} apariciones (${frecuenciaTest.revanchita.porcentaje.toFixed(2)}%)</p>
+            <p>Total datos: ${numerosPorSorteo.melate.length + numerosPorSorteo.revancha.length + numerosPorSorteo.revanchita.length}</p>
+        `;
+    </script>
+</body>
+</html>

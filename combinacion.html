@@ -14,7 +14,7 @@
   <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
 
   <!-- Contenido -->
-  <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
+  <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10 pb-32">
     
     <!-- Botón de regreso -->
     <div class="absolute top-4 left-4 z-20">
@@ -26,7 +26,7 @@
       </button>
     </div>
 
-    <h1 class="text-2xl sm:text-3xl font-bold mb-6 animate__animated animate__fadeInDown leading-tight px-4">
+    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-6 animate__animated animate__fadeInDown leading-tight px-4 text-center">
       🎯 Evalúa tus Números de la Suerte
     </h1>
     <!-- Versión actualizada con validación completa -->
@@ -34,9 +34,9 @@
     <!-- Sección de evaluación de número individual -->
     <div class="mb-8 max-w-md mx-auto">
       <div class="analisis-transparente rounded-xl p-6 mb-6">
-        <h2 class="text-lg sm:text-xl font-bold mb-4 text-white leading-tight">🔍 Ingresa un número para evaluar posibilidad</h2>
+        <h2 class="text-base sm:text-lg md:text-xl font-bold mb-4 text-white leading-tight text-center">🔍 Ingresa un número para evaluar posibilidad</h2>
         <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
-          <input type="number" id="numero-individual" class="numero-input" min="1" max="56" placeholder="Número">
+          <input type="number" id="numero-individual" class="numero-input" min="1" max="56" placeholder="">
           <button id="evaluar-numero-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300 font-semibold whitespace-nowrap">
             Evaluar
           </button>
@@ -48,7 +48,7 @@
     <!-- Sección de evaluación de combinación completa -->
     <div class="max-w-2xl mx-auto">
       <div class="analisis-transparente rounded-xl p-6 mb-6">
-        <h2 class="text-lg sm:text-xl font-bold mb-4 text-white leading-tight">🎲 Ingresa tu combinación (6 números)</h2>
+        <h2 class="text-base sm:text-lg md:text-xl font-bold mb-4 text-white leading-tight text-center">🎲 Ingresa tu combinación (6 números)</h2>
         
         <form id="combo-form" class="flex flex-wrap justify-center gap-3 mb-6">
           <input type="number" class="combo-input" min="1" max="56" placeholder="" data-pos="1">
@@ -66,11 +66,11 @@
     </div>
 
     <!-- Resultados -->
-    <div id="resultado-combinacion" class="mt-6 max-w-4xl mx-auto"></div>
+    <div id="resultado-combinacion" class="mt-6 max-w-4xl mx-auto mb-8"></div>
   </div>
 
   <!-- Footer -->
-  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+  <div id="footer-container" class="relative z-10 w-full"></div>
 
   <!-- Scripts -->
   <script src="js/shared.js"></script>
@@ -127,13 +127,18 @@
         // Generar datos de prueba más realistas
         const generarDatosPrueba = () => {
           const numeros = [];
-          for (let i = 1; i <= 56; i++) {
-            // Simular diferentes frecuencias más realistas (5-25 apariciones)
-            const frecuencia = Math.floor(Math.random() * 20) + 5;
-            for (let j = 0; j < frecuencia; j++) {
-              numeros.push(i);
+          const totalSorteos = 200; // Simular 200 sorteos
+          
+          for (let sorteo = 0; sorteo < totalSorteos; sorteo++) {
+            // Cada sorteo genera 6 números (como en Melate)
+            const numerosDelSorteo = new Set();
+            while (numerosDelSorteo.size < 6) {
+              const numeroAleatorio = Math.floor(Math.random() * 56) + 1;
+              numerosDelSorteo.add(numeroAleatorio);
             }
+            numeros.push(...numerosDelSorteo);
           }
+          
           return numeros;
         };
         
@@ -184,11 +189,11 @@
     }
 
     function clasificarProbabilidad(porcentaje) {
-      if (porcentaje >= 84) return { categoria: 'Muy Alta', color: 'text-green-300', emoji: '🔥' };
-      if (porcentaje >= 63) return { categoria: 'Alta', color: 'text-green-400', emoji: '⚡' };
-      if (porcentaje >= 42) return { categoria: 'Media', color: 'text-yellow-300', emoji: '⚖️' };
-      if (porcentaje >= 21) return { categoria: 'Baja', color: 'text-orange-300', emoji: '❄️' };
-      return { categoria: 'Nula', color: 'text-red-300', emoji: '💀' };
+      if (porcentaje >= 3.0) return { categoria: 'Muy Alta', color: 'text-green-300', emoji: '🔥' };
+      if (porcentaje >= 2.5) return { categoria: 'Alta', color: 'text-green-400', emoji: '⚡' };
+      if (porcentaje >= 2.0) return { categoria: 'Media', color: 'text-yellow-300', emoji: '⚖️' };
+      if (porcentaje >= 1.5) return { categoria: 'Baja', color: 'text-orange-300', emoji: '❄️' };
+      return { categoria: 'Muy Baja', color: 'text-red-300', emoji: '💀' };
     }
 
     // Validación de inputs
@@ -528,6 +533,8 @@
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.2);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
     
     .combo-input, .numero-input {
@@ -576,6 +583,14 @@
     .combo-input.error-duplicado {
       border-color: #f59e0b;
       background-color: #fef3c7;
+    }
+
+    /* Responsive text adjustments */
+    @media (max-width: 640px) {
+      .text-responsive {
+        font-size: 0.875rem;
+        line-height: 1.25;
+      }
     }
 
     /* Capas de fondo dinámico */
