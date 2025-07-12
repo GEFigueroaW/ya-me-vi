@@ -26,18 +26,18 @@
       </button>
     </div>
 
-    <h1 class="text-3xl font-bold mb-6 animate__animated animate__fadeInDown">
-      🎯 Evalúa tu Combinación Ganadora
+    <h1 class="text-2xl sm:text-3xl font-bold mb-6 animate__animated animate__fadeInDown leading-tight px-4">
+      🎯 Evalúa tus Números de la Suerte
     </h1>
     <!-- Versión actualizada con validación completa -->
 
     <!-- Sección de evaluación de número individual -->
     <div class="mb-8 max-w-md mx-auto">
       <div class="analisis-transparente rounded-xl p-6 mb-6">
-        <h2 class="text-xl font-bold mb-4 text-white">🔍 Evaluar Número Individual</h2>
-        <div class="flex gap-3 items-center justify-center">
-          <input type="number" id="numero-individual" class="numero-input" min="1" max="56" placeholder="1-56">
-          <button id="evaluar-numero-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300 font-semibold">
+        <h2 class="text-lg sm:text-xl font-bold mb-4 text-white leading-tight">🔍 Ingresa un número para evaluar posibilidad</h2>
+        <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
+          <input type="number" id="numero-individual" class="numero-input" min="1" max="56" placeholder="Número">
+          <button id="evaluar-numero-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300 font-semibold whitespace-nowrap">
             Evaluar
           </button>
         </div>
@@ -48,18 +48,18 @@
     <!-- Sección de evaluación de combinación completa -->
     <div class="max-w-2xl mx-auto">
       <div class="analisis-transparente rounded-xl p-6 mb-6">
-        <h2 class="text-xl font-bold mb-4 text-white">🎲 Evaluar Combinación Completa (6 números)</h2>
+        <h2 class="text-lg sm:text-xl font-bold mb-4 text-white leading-tight">🎲 Ingresa tu combinación (6 números)</h2>
         
         <form id="combo-form" class="flex flex-wrap justify-center gap-3 mb-6">
-          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 1" data-pos="1">
-          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 2" data-pos="2">
-          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 3" data-pos="3">
-          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 4" data-pos="4">
-          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 5" data-pos="5">
-          <input type="number" class="combo-input" min="1" max="56" placeholder="Nº 6" data-pos="6">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="" data-pos="1">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="" data-pos="2">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="" data-pos="3">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="" data-pos="4">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="" data-pos="5">
+          <input type="number" class="combo-input" min="1" max="56" placeholder="" data-pos="6">
         </form>
 
-        <button id="evaluar-combinacion-btn" class="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg transition-all duration-300 font-semibold text-lg">
+        <button id="evaluar-combinacion-btn" class="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg transition-all duration-300 font-semibold text-base sm:text-lg whitespace-nowrap">
           🚀 Evaluar Combinación
         </button>
       </div>
@@ -128,8 +128,8 @@
         const generarDatosPrueba = () => {
           const numeros = [];
           for (let i = 1; i <= 56; i++) {
-            // Simular diferentes frecuencias
-            const frecuencia = Math.floor(Math.random() * 20) + 1;
+            // Simular diferentes frecuencias más realistas (5-25 apariciones)
+            const frecuencia = Math.floor(Math.random() * 20) + 5;
             for (let j = 0; j < frecuencia; j++) {
               numeros.push(i);
             }
@@ -543,6 +543,22 @@
       background: white;
       border: 2px solid #e5e7eb;
       transition: all 0.3s ease;
+      -webkit-appearance: none;
+      -moz-appearance: textfield;
+      appearance: none;
+    }
+    
+    .combo-input::-webkit-outer-spin-button,
+    .combo-input::-webkit-inner-spin-button,
+    .numero-input::-webkit-outer-spin-button,
+    .numero-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .combo-input[type=number],
+    .numero-input[type=number] {
+      -moz-appearance: textfield;
     }
     
     .combo-input:focus, .numero-input:focus {
