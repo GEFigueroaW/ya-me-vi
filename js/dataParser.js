@@ -218,7 +218,11 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
     const datos = datosPorSorteo[sorteo];
     const sorteosDatos = datos.datos || [];
     
-    console.log(`📊 Analizando bloques para ${sorteo}:`, { totalSorteos: sorteosDatos.length });
+    console.log(`📊 Analizando bloques para ${sorteo}:`, { 
+      totalSorteos: sorteosDatos.length,
+      primerSorteo: sorteosDatos[0],
+      ultimoSorteo: sorteosDatos[sorteosDatos.length - 1]
+    });
     
     if (sorteosDatos.length > 0) {
       // Analizar cada sorteo para contar números por bloque
@@ -226,6 +230,7 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       
       sorteosDatos.forEach(sorteoData => {
         const numeros = sorteoData.numeros || [];
+        console.log(`🔍 Procesando sorteo con números:`, numeros);
         
         // Contar números por bloque en este sorteo
         const contadorBloque = Array(6).fill(0);
@@ -237,6 +242,8 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
           });
         });
         
+        console.log(`📈 Contadores para este sorteo:`, contadorBloque);
+        
         // Guardar contadores de este sorteo
         contadorBloque.forEach((count, index) => {
           numerosPorBloque[index].push(count);
@@ -246,7 +253,7 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       // Calcular estadísticas por bloque
       const estadisticasBloques = bloques.map((bloque, index) => {
         const counts = numerosPorBloque[index];
-        const promedio = counts.reduce((sum, count) => sum + count, 0) / counts.length;
+        const promedio = counts.length > 0 ? counts.reduce((sum, count) => sum + count, 0) / counts.length : 0;
         const porcentaje = (promedio / 6) * 100; // De 6 números posibles
         
         return {
@@ -263,6 +270,7 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       
       console.log(`✅ ${sorteo} procesado:`, estadisticasBloques);
     } else {
+      console.warn(`⚠️ No hay datos para ${sorteo}`);
       estadisticasPorSorteo[sorteo] = {
         bloques: bloques.map(bloque => ({
           bloque: bloque.nombre,
@@ -277,61 +285,69 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
   // Generar HTML con análisis por bloques
   const contenedorCharts = document.getElementById('charts-container');
   if (contenedorCharts) {
+    // Crear HTML para cada sorteo
+    let htmlSorteos = '';
+    sorteos.forEach(sorteo => {
+      const stats = estadisticasPorSorteo[sorteo];
+      const color = colores[sorteo];
+      const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+      
+      // Crear HTML para bloques
+      let htmlBloques = '';
+      stats.bloques.forEach(bloque => {
+        htmlBloques += `
+          <div class="bg-white bg-opacity-20 rounded-lg p-3 border border-white border-opacity-30">
+            <div class="flex justify-between items-center">
+              <span class="font-semibold text-white">Bloque ${bloque.bloque}</span>
+              <div class="text-right">
+                <div class="text-lg font-bold text-white">${bloque.promedio}</div>
+                <div class="text-sm text-gray-300">${bloque.porcentaje}%</div>
+              </div>
+            </div>
+            <div class="mt-2">
+              <div class="w-full bg-gray-600 rounded-full h-2">
+                <div class="bg-white h-2 rounded-full transition-all duration-300" 
+                     style="width: ${Math.min(bloque.porcentaje, 100)}%">
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      htmlSorteos += `
+        <div class="analisis-transparente rounded-xl p-6 text-white">
+          <div class="text-center mb-4">
+            <h3 class="text-xl font-bold text-white mb-2">
+              🎲 ${nombre}
+            </h3>
+            <p class="text-gray-300 text-sm">${stats.totalSorteos} sorteos analizados</p>
+          </div>
+          
+          <div class="space-y-3">
+            ${htmlBloques}
+          </div>
+          
+          <div class="mt-4 text-center">
+            <p class="text-xs text-gray-300">
+              Promedio: números por bloque | Porcentaje: probabilidad relativa
+            </p>
+          </div>
+        </div>
+      `;
+    });
+    
     contenedorCharts.innerHTML = `
-      <!-- Encabezado de análisis por bloques -->
       <div class="mb-6 text-center">
         <h2 class="text-2xl font-bold text-white mb-2">📊 Análisis por Bloques Numéricos</h2>
         <p class="text-gray-300">Probabilidad de números por rangos (1-56 dividido en 6 bloques)</p>
       </div>
-
-      <!-- Tarjetas por sorteo -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        ${sorteos.map(sorteo => {
-          const stats = estadisticasPorSorteo[sorteo];
-          const color = colores[sorteo];
-          const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
-          
-          return `
-            <div class="analisis-transparente rounded-xl p-6 text-white">
-              <div class="text-center mb-4">
-                <h3 class="text-xl font-bold ${color.title.replace('text-', 'text-white')} mb-2">
-                  🎲 ${nombre}
-                </h3>
-                <p class="text-gray-300 text-sm">${stats.totalSorteos} sorteos analizados</p>
-              </div>
-              
-              <div class="space-y-3">
-                ${stats.bloques.map(bloque => `                        <div class="bg-white bg-opacity-20 rounded-lg p-3 border border-white border-opacity-30">
-                          <div class="flex justify-between items-center">
-                            <span class="font-semibold text-white">Bloque ${bloque.bloque}</span>
-                            <div class="text-right">
-                              <div class="text-lg font-bold text-white">${bloque.promedio}</div>
-                              <div class="text-sm text-gray-300">${bloque.porcentaje}%</div>
-                            </div>
-                          </div>
-                          <div class="mt-2">
-                            <div class="w-full bg-gray-600 rounded-full h-2">
-                              <div class="bg-white h-2 rounded-full transition-all duration-300" 
-                                   style="width: ${Math.min(bloque.porcentaje, 100)}%">
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                `).join('')}
-              </div>
-              
-              <div class="mt-4 text-center">
-                <p class="text-xs text-gray-300">
-                  Promedio: números por bloque | Porcentaje: probabilidad relativa
-                </p>
-              </div>
-            </div>
-          `;
-        }).join('')}
+        ${htmlSorteos}
       </div>
     `;
   }
-}
+  
   console.log('✅ Análisis por bloques mostrado exitosamente');
 }
 
