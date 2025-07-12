@@ -233,7 +233,6 @@
 
     // Funciones de cálculo
     function calcularFrecuenciaPorSorteo(num) {
-      console.log(`🔍 Calculando frecuencia para número ${num}`);
       const resultados = {};
       ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
         const numeros = numerosPorSorteo[sorteo] || [];
@@ -251,8 +250,6 @@
           total: total,
           porcentaje: porcentajeFinal
         };
-        
-        console.log(`📊 ${sorteo}: ${frecuencia}/${total} = ${porcentajeBase.toFixed(2)}% base → ${porcentajeFinal.toFixed(1)}% ajustado`);
       });
       return resultados;
     }
@@ -267,7 +264,6 @@
     }
 
     function calcularPorcentajeTotal(num) {
-      console.log(`🔍 Calculando porcentaje total para número ${num}`);
       let totalNumeros = 0;
       let frecuenciaTotal = 0;
       
@@ -276,7 +272,6 @@
         totalNumeros += numeros.length;
         const frecuenciaSorteo = numeros.filter(n => n === num).length;
         frecuenciaTotal += frecuenciaSorteo;
-        console.log(`📊 ${sorteo}: ${frecuenciaSorteo} apariciones de ${numeros.length} números`);
       });
       
       // Cálculo base
@@ -290,20 +285,18 @@
       // Asegurar que ningún número tenga 0% (mínimo 8%)
       const porcentajeFinal = Math.max(porcentajeAjustado, 8.0);
       
-      console.log(`📈 Cálculo: ${frecuenciaTotal}/${totalNumeros} = ${porcentajeBase.toFixed(2)}% base → ${porcentajeFinal.toFixed(1)}% ajustado`);
       return porcentajeFinal;
     }
 
     function clasificarProbabilidad(porcentaje) {
-      console.log('🔍 Clasificando porcentaje:', porcentaje);
       // Rangos ajustados para los nuevos porcentajes motivadores
       if (porcentaje >= 25) return { categoria: 'Excelente', color: 'text-green-300', emoji: '🔥' };
       if (porcentaje >= 20) return { categoria: 'Muy Alta', color: 'text-green-400', emoji: '⚡' };
       if (porcentaje >= 16) return { categoria: 'Alta', color: 'text-blue-300', emoji: '📈' };
       if (porcentaje >= 12) return { categoria: 'Buena', color: 'text-yellow-300', emoji: '⚖️' };
-      if (porcentaje >= 8) return { categoria: 'Media', color: 'text-orange-300', emoji: '�' };
+      if (porcentaje >= 8) return { categoria: 'Media', color: 'text-orange-300', emoji: '🎲' };
       if (porcentaje >= 5) return { categoria: 'Aceptable', color: 'text-purple-300', emoji: '🎯' };
-      return { categoria: 'Baja', color: 'text-gray-300', emoji: '�' };
+      return { categoria: 'Baja', color: 'text-gray-300', emoji: '🎲' };
     }
 
     // Validación de inputs
@@ -406,10 +399,7 @@
 
     // Evaluar número individual
     btnNumero.addEventListener('click', () => {
-      console.log('🔍 Evaluando número individual...');
-      
       const numero = parseInt(inputNumero.value);
-      console.log('📊 Número capturado:', numero);
       
       if (isNaN(numero) || numero < 1 || numero > 56) {
         resultadoNumero.innerHTML = `
@@ -423,13 +413,6 @@
         const frecuenciaTotal = calcularFrecuenciaTotal(numero);
         const porcentajeTotal = calcularPorcentajeTotal(numero);
         const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
-        
-        console.log('📈 Resultados:', {
-          frecuenciaPorSorteo,
-          frecuenciaTotal,
-          porcentajeTotal,
-          clasificacionTotal
-        });
 
         // Generar HTML por sorteo
         let htmlPorSorteo = '';
@@ -477,8 +460,6 @@
           </div>
         `;
         
-        console.log('✅ Número individual analizado exitosamente');
-        
       } catch (error) {
         console.error('❌ Error al analizar número individual:', error);
         resultadoNumero.innerHTML = `
@@ -489,12 +470,8 @@
 
     // Evaluar combinación completa
     btnCombinacion.addEventListener('click', () => {
-      console.log('🎯 Evaluando combinación completa...');
-      
       const inputs = form.querySelectorAll('.combo-input');
       const numeros = Array.from(inputs).map(input => parseInt(input.value)).filter(n => !isNaN(n));
-      
-      console.log('📊 Números capturados:', numeros);
 
       // Validación
       if (numeros.length !== 6) {
@@ -544,7 +521,7 @@
           };
         });
 
-        console.log('📈 Análisis individual completo:', analisisIndividual);
+        // Generar HTML
 
         // Generar HTML
         // Crear HTML para el análisis individual (vista limpia)
@@ -647,8 +624,6 @@
             </div>
           </div>
         `;
-        
-        console.log('✅ Combinación analizada exitosamente');
         
       } catch (error) {
         console.error('❌ Error al analizar combinación:', error);
