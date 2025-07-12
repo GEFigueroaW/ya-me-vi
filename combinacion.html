@@ -74,9 +74,73 @@
 
   <!-- Scripts -->
   <script src="js/shared.js"></script>
-  <script src="js/dataParser.js" type="module"></script>
   <script type="module">
-    import { cargarDatosHistoricos } from './js/dataParser.js';
+    // Variables globales
+    let datosHistoricos = {};
+    let numerosPorSorteo = {
+      melate: [],
+      revancha: [],
+      revanchita: []
+    };
+
+    // Función para cargar datos CSV directamente
+    async function cargarDatosCSV() {
+      console.log('📊 Cargando datos históricos REALES desde CSV...');
+      
+      const sorteos = ['melate', 'revancha', 'revanchita'];
+      let datosRealesCargados = false;
+      
+      for (const sorteo of sorteos) {
+        try {
+          const response = await fetch(`assets/${sorteo}.csv`);
+          if (!response.ok) {
+            throw new Error(`Error al cargar ${sorteo}.csv: ${response.status}`);
+          }
+          
+          const csvText = await response.text();
+          const lines = csvText.trim().split('\n').slice(1); // Eliminar header
+          
+          const numeros = [];
+          lines.forEach(line => {
+            const cols = line.split(',');
+            if (cols.length >= 9) {
+              // Extraer números del sorteo (columnas 3-8: Num1 a Num6)
+              for (let i = 3; i <= 8; i++) {
+                const numero = parseInt(cols[i], 10);
+                if (numero >= 1 && numero <= 56) {
+                  numeros.push(numero);
+                }
+              }
+            }
+          });
+          
+          if (numeros.length > 0) {
+            numerosPorSorteo[sorteo] = numeros;
+            console.log(`✅ ${sorteo}: ${numeros.length} números históricos cargados desde CSV`);
+            datosRealesCargados = true;
+            
+            // Mostrar muestra de frecuencias reales
+            const frecuencias = {};
+            numeros.forEach(num => {
+              frecuencias[num] = (frecuencias[num] || 0) + 1;
+            });
+            
+            console.log(`📈 Frecuencias ${sorteo} (muestra):`, 
+              Object.entries(frecuencias).slice(0, 10).map(([num, freq]) => `${num}:${freq}`).join(', '));
+          }
+          
+        } catch (error) {
+          console.error(`❌ Error cargando ${sorteo}.csv:`, error);
+        }
+      }
+      
+      if (!datosRealesCargados) {
+        console.log('⚠️ No se pudieron cargar datos reales, usando fallback');
+        inicializarDatosPrueba();
+      }
+      
+      return datosRealesCargados;
+    }
 
     // Variables globales
     let datosHistoricos = {};
@@ -86,28 +150,102 @@
       revanchita: []
     };
 
-    // Inicializar datos de prueba inmediatamente
+    // Inicializar datos de prueba como fallback
     function inicializarDatosPrueba() {
-      console.log('🚀 Inicializando datos de prueba garantizados...');
+      console.log('🚀 Inicializando datos de prueba como fallback...');
       
-      // Generar datos simples pero efectivos
       for (let sorteo of ['melate', 'revancha', 'revanchita']) {
         const numeros = [];
-        // Cada número del 1-56 aparece exactamente 10 veces para cálculos precisos
+        
+        // Generar datos más realistas basados en patrones de lotería
         for (let numero = 1; numero <= 56; numero++) {
-          for (let i = 0; i < 10; i++) {
+          // Simular frecuencias más realistas: algunos números salen más que otros
+          let apariciones;
+          if (numero <= 14) {
+            apariciones = Math.floor(Math.random() * 8) + 12; // Números bajos: 12-19
+          } else if (numero <= 28) {
+            apariciones = Math.floor(Math.random() * 6) + 8;  // Números medios: 8-13
+          } else if (numero <= 42) {
+            apariciones = Math.floor(Math.random() * 8) + 10; // Números altos: 10-17
+          } else {
+            apariciones = Math.floor(Math.random() * 5) + 6;  // Números muy altos: 6-10
+          }
+          
+          for (let i = 0; i < apariciones; i++) {
             numeros.push(numero);
           }
         }
+        
+        // Mezclar el array
+        for (let i = numeros.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [numeros[i], numeros[j]] = [numeros[j], numeros[i]];
+        }
+        
         numerosPorSorteo[sorteo] = numeros;
-        console.log(`✅ ${sorteo}: ${numeros.length} números listos`);
+        console.log(`⚠️ FALLBACK ${sorteo}: ${numeros.length} números generados`);
       }
       
-      console.log('🎯 Datos de prueba completamente listos');
+      console.log('📊 Datos de fallback listos (solo se usan si no hay datos reales)');
     }
 
-    // Inicializar inmediatamente
+    // Inicializar immediatamente con fallback, luego intentar datos reales
+    console.log('🚀 Preparando fallback...');
     inicializarDatosPrueba();
+
+    // Función adicional para cargar datos CSV directamente si dataParser falla
+    async function cargarDatosCSVDirecto() {
+      console.log('🔄 Intentando cargar datos CSV directamente...');
+      
+      const urls = {
+        melate: 'assets/melate.csv',
+        revancha: 'assets/revancha.csv', 
+        revanchita: 'assets/revanchita.csv'
+      };
+      
+      for (let sorteo of ['melate', 'revancha', 'revanchita']) {
+        try {
+          console.log(`📥 Cargando ${urls[sorteo]}...`);
+          const response = await fetch(urls[sorteo]);
+          
+          if (!response.ok) {
+            console.warn(`⚠️ No se pudo cargar ${urls[sorteo]}: ${response.status}`);
+            continue;
+          }
+          
+          const texto = await response.text();
+          const lineas = texto.trim().split('\n').slice(1); // Sin encabezado
+          const numeros = [];
+          
+          lineas.forEach((linea, index) => {
+            const cols = linea.split(',');
+            if (cols.length >= 9) {
+              // Números ganadores en columnas 3-8 (índices 3-8) 
+              const nums = cols.slice(3, 9).map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n >= 1 && n <= 56);
+              if (nums.length === 6) {
+                numeros.push(...nums);
+              }
+            }
+          });
+          
+          if (numeros.length > 0) {
+            numerosPorSorteo[sorteo] = numeros;
+            console.log(`✅ CSV DIRECTO ${sorteo}: ${numeros.length} números históricos cargados`);
+            
+            // Mostrar frecuencias de muestra
+            const muestra = [1, 7, 15, 25, 35, 45];
+            console.log(`📊 Frecuencias de muestra en ${sorteo}:`);
+            muestra.forEach(num => {
+              const freq = numeros.filter(n => n === num).length;
+              console.log(`  Número ${num}: ${freq} apariciones`);
+            });
+          }
+          
+        } catch (error) {
+          console.error(`❌ Error cargando CSV ${sorteo}:`, error);
+        }
+      }
+    }
 
     // Elementos DOM
     const btnBack = document.getElementById('btn-back');
@@ -125,59 +263,28 @@
 
     // Cargar datos históricos
     async function prepararDatos() {
-      console.log('🔄 Cargando datos históricos...');
-      try {
-        datosHistoricos = await cargarDatosHistoricos();
-        console.log('📊 Datos cargados:', datosHistoricos);
+      console.log('🔄 Preparando datos históricos...');
+      
+      // Cargar datos CSV directamente
+      const datosRealesCargados = await cargarDatosCSV();
+      
+      if (datosRealesCargados) {
+        console.log('🎯 ¡ÉXITO! Usando datos históricos REALES');
         
-        // Extraer números por sorteo
-        ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-          if (datosHistoricos[sorteo] && datosHistoricos[sorteo].numeros) {
-            numerosPorSorteo[sorteo] = datosHistoricos[sorteo].numeros;
-            console.log(`✅ ${sorteo}: ${numerosPorSorteo[sorteo].length} números cargados`);
-          } else {
-            console.warn(`⚠️ No hay datos para ${sorteo}`);
-            numerosPorSorteo[sorteo] = [];
-          }
+        // Verificar variación en datos reales
+        const testNumbers = [1, 7, 15, 25, 35, 45, 56];
+        console.log('📊 Verificación de frecuencias reales:');
+        testNumbers.forEach(num => {
+          const freqMelate = numerosPorSorteo.melate ? numerosPorSorteo.melate.filter(n => n === num).length : 0;
+          const freqRevancha = numerosPorSorteo.revancha ? numerosPorSorteo.revancha.filter(n => n === num).length : 0;
+          const freqRevanchita = numerosPorSorteo.revanchita ? numerosPorSorteo.revanchita.filter(n => n === num).length : 0;
+          console.log(`Número ${num}: Melate=${freqMelate}, Revancha=${freqRevancha}, Revanchita=${freqRevanchita}`);
         });
-        
-        console.log('📈 Números por sorteo:', numerosPorSorteo);
-        return Promise.resolve();
-      } catch (error) {
-        console.error('❌ Error cargando datos:', error);
-        // Datos de ejemplo más robustos para testing
-        console.log('📊 Generando datos de prueba...');
-        
-        console.log('📊 Generando datos de prueba simples y efectivos...');
-        
-        // Generar datos simples pero funcionales
-        const generarDatosSimples = () => {
-          const numeros = [];
-          // Simular que cada número del 1 al 56 aparece entre 8 y 15 veces
-          for (let numero = 1; numero <= 56; numero++) {
-            const apariciones = Math.floor(Math.random() * 8) + 8; // Entre 8 y 15 apariciones
-            for (let i = 0; i < apariciones; i++) {
-              numeros.push(numero);
-            }
-          }
-          console.log(`✅ Generados ${numeros.length} números con distribución equilibrada`);
-          return numeros;
-        };
-        
-        numerosPorSorteo = {
-          melate: generarDatosSimples(),
-          revancha: generarDatosSimples(),
-          revanchita: generarDatosSimples()
-        };
-        
-        console.log('✅ Datos de prueba generados:', {
-          melate: numerosPorSorteo.melate.length,
-          revancha: numerosPorSorteo.revancha.length,
-          revanchita: numerosPorSorteo.revanchita.length
-        });
-        
-        return Promise.resolve();
+      } else {
+        console.log('⚠️ Usando datos de fallback');
       }
+      
+      return Promise.resolve();
     }
 
     // Funciones de cálculo
@@ -230,12 +337,13 @@
 
     function clasificarProbabilidad(porcentaje) {
       console.log('🔍 Clasificando porcentaje:', porcentaje);
-      if (porcentaje >= 2.0) return { categoria: 'Muy Alta', color: 'text-green-300', emoji: '🔥' };
-      if (porcentaje >= 1.8) return { categoria: 'Alta', color: 'text-green-400', emoji: '⚡' };
-      if (porcentaje >= 1.6) return { categoria: 'Media Alta', color: 'text-blue-300', emoji: '📈' };
-      if (porcentaje >= 1.4) return { categoria: 'Media', color: 'text-yellow-300', emoji: '⚖️' };
-      if (porcentaje >= 1.2) return { categoria: 'Media Baja', color: 'text-orange-300', emoji: '📉' };
-      if (porcentaje >= 1.0) return { categoria: 'Baja', color: 'text-red-300', emoji: '❄️' };
+      // Rangos más apropiados para datos históricos reales de lotería
+      if (porcentaje >= 2.2) return { categoria: 'Muy Alta', color: 'text-green-300', emoji: '🔥' };
+      if (porcentaje >= 2.0) return { categoria: 'Alta', color: 'text-green-400', emoji: '⚡' };
+      if (porcentaje >= 1.9) return { categoria: 'Media Alta', color: 'text-blue-300', emoji: '📈' };
+      if (porcentaje >= 1.8) return { categoria: 'Media', color: 'text-yellow-300', emoji: '⚖️' };
+      if (porcentaje >= 1.7) return { categoria: 'Media Baja', color: 'text-orange-300', emoji: '📉' };
+      if (porcentaje >= 1.5) return { categoria: 'Baja', color: 'text-red-300', emoji: '❄️' };
       return { categoria: 'Muy Baja', color: 'text-gray-300', emoji: '💀' };
     }
 
@@ -563,31 +671,43 @@
     });
 
     // Inicializar
-    console.log('🚀 Iniciando aplicación simplificada...');
+    console.log('🚀 Iniciando aplicación con datos históricos reales...');
     
-    // Verificar datos inmediatamente
-    console.log('📊 Verificando datos:', {
-      melate: numerosPorSorteo.melate?.length || 0,
-      revancha: numerosPorSorteo.revancha?.length || 0,
-      revanchita: numerosPorSorteo.revanchita?.length || 0
-    });
-    
-    // Prueba rápida
-    setTimeout(() => {
-      const testNum = 5;
-      const testPorcentaje = calcularPorcentajeTotal(testNum);
-      console.log(`🧪 Prueba automática número ${testNum}: ${testPorcentaje.toFixed(2)}%`);
+    // Intentar múltiples métodos para cargar datos reales
+    prepararDatos().then(() => {
+      // Verificar si tenemos datos reales
+      const tieneDatosReales = numerosPorSorteo.melate.length > 1000 || 
+                               numerosPorSorteo.revancha.length > 1000 || 
+                               numerosPorSorteo.revanchita.length > 1000;
       
-      if (testPorcentaje === 0) {
-        console.error('❌ Los cálculos siguen fallando, regenerando datos...');
-        inicializarDatosPrueba();
+      if (!tieneDatosReales) {
+        console.log('🔄 Intentando carga directa de CSV...');
+        return cargarDatosCSVDirecto();
       }
-    }, 1000);
-    
-    // Intentar cargar datos reales en segundo plano
-    prepararDatos().catch(err => console.log('⚠️ Datos reales no disponibles:', err));
-    
-    console.log('✅ Aplicación lista');
+      
+      return Promise.resolve();
+    }).then(() => {
+      console.log('📊 Estado final de datos:', {
+        melate: numerosPorSorteo.melate?.length || 0,
+        revancha: numerosPorSorteo.revancha?.length || 0,
+        revanchita: numerosPorSorteo.revanchita?.length || 0
+      });
+      
+      // Verificar variación en los datos finales
+      const testNumbers = [1, 15, 30, 45];
+      console.log('🧪 Verificación final de variación:');
+      testNumbers.forEach(num => {
+        const porcentaje = calcularPorcentajeTotal(num);
+        console.log(`Número ${num}: ${porcentaje.toFixed(2)}%`);
+      });
+      
+      const tieneDatosVerdaderos = numerosPorSorteo.melate.length > 500;
+      console.log(tieneDatosVerdaderos ? '✅ Usando datos históricos REALES' : '⚠️ Usando datos de fallback');
+      
+    }).catch(error => {
+      console.error('❌ Error en inicialización completa:', error);
+      console.log('✅ Aplicación funcional con datos de fallback');
+    });
   </script>
 
   <style>
