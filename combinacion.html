@@ -142,14 +142,6 @@
       return datosRealesCargados;
     }
 
-    // Variables globales
-    let datosHistoricos = {};
-    let numerosPorSorteo = {
-      melate: [],
-      revancha: [],
-      revanchita: []
-    };
-
     // Inicializar datos de prueba como fallback
     function inicializarDatosPrueba() {
       console.log('🚀 Inicializando datos de prueba como fallback...');
@@ -187,64 +179,6 @@
       }
       
       console.log('📊 Datos de fallback listos (solo se usan si no hay datos reales)');
-    }
-
-    // Inicializar immediatamente con fallback, luego intentar datos reales
-    console.log('🚀 Preparando fallback...');
-    inicializarDatosPrueba();
-
-    // Función adicional para cargar datos CSV directamente si dataParser falla
-    async function cargarDatosCSVDirecto() {
-      console.log('🔄 Intentando cargar datos CSV directamente...');
-      
-      const urls = {
-        melate: 'assets/melate.csv',
-        revancha: 'assets/revancha.csv', 
-        revanchita: 'assets/revanchita.csv'
-      };
-      
-      for (let sorteo of ['melate', 'revancha', 'revanchita']) {
-        try {
-          console.log(`📥 Cargando ${urls[sorteo]}...`);
-          const response = await fetch(urls[sorteo]);
-          
-          if (!response.ok) {
-            console.warn(`⚠️ No se pudo cargar ${urls[sorteo]}: ${response.status}`);
-            continue;
-          }
-          
-          const texto = await response.text();
-          const lineas = texto.trim().split('\n').slice(1); // Sin encabezado
-          const numeros = [];
-          
-          lineas.forEach((linea, index) => {
-            const cols = linea.split(',');
-            if (cols.length >= 9) {
-              // Números ganadores en columnas 3-8 (índices 3-8) 
-              const nums = cols.slice(3, 9).map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n >= 1 && n <= 56);
-              if (nums.length === 6) {
-                numeros.push(...nums);
-              }
-            }
-          });
-          
-          if (numeros.length > 0) {
-            numerosPorSorteo[sorteo] = numeros;
-            console.log(`✅ CSV DIRECTO ${sorteo}: ${numeros.length} números históricos cargados`);
-            
-            // Mostrar frecuencias de muestra
-            const muestra = [1, 7, 15, 25, 35, 45];
-            console.log(`📊 Frecuencias de muestra en ${sorteo}:`);
-            muestra.forEach(num => {
-              const freq = numeros.filter(n => n === num).length;
-              console.log(`  Número ${num}: ${freq} apariciones`);
-            });
-          }
-          
-        } catch (error) {
-          console.error(`❌ Error cargando CSV ${sorteo}:`, error);
-        }
-      }
     }
 
     // Elementos DOM
@@ -682,7 +616,7 @@
       
       if (!tieneDatosReales) {
         console.log('🔄 Intentando carga directa de CSV...');
-        return cargarDatosCSVDirecto();
+        return cargarDatosCSV();
       }
       
       return Promise.resolve();
