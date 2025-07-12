@@ -45,10 +45,30 @@
     </div>
 
     <!-- Predicción personalizada -->
-    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-xl mx-auto animate__animated animate__fadeInUp">
-      <h2 class="text-xl font-semibold mb-2">🎯 Tu combinación sugerida por IA:</h2>
-      <p id="combinacion-ia" class="text-2xl font-bold tracking-widest mb-1">-- -- -- -- -- --</p>
-      <p class="text-sm italic">Basado en tu perfil, estadísticas históricas y patrones detectados</p>
+    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp">
+      <h2 class="text-xl font-semibold mb-4 text-center">🎯 Combinaciones Sugeridas por IA</h2>
+      <p class="text-sm italic text-center mb-6">Basado en tu perfil, estadísticas históricas y patrones detectados</p>
+      
+      <!-- Predicciones por sorteo -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Melate -->
+        <div class="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+          <h3 class="font-bold text-blue-600 mb-2">🎲 Melate</h3>
+          <p id="combinacion-melate" class="text-lg font-bold tracking-wider text-blue-800">-- -- -- -- -- --</p>
+        </div>
+        
+        <!-- Revancha -->
+        <div class="text-center p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
+          <h3 class="font-bold text-purple-600 mb-2">🎲 Revancha</h3>
+          <p id="combinacion-revancha" class="text-lg font-bold tracking-wider text-purple-800">-- -- -- -- -- --</p>
+        </div>
+        
+        <!-- Revanchita -->
+        <div class="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
+          <h3 class="font-bold text-green-600 mb-2">🎲 Revanchita</h3>
+          <p id="combinacion-revanchita" class="text-lg font-bold tracking-wider text-green-800">-- -- -- -- -- --</p>
+        </div>
+      </div>
     </div>
 
     <!-- Estadísticas adicionales -->
@@ -101,10 +121,9 @@
         console.log('📊 Datos cargados, generando estadísticas...');
         graficarEstadisticas(datos);
 
-        // Generar predicción basada en los datos combinados
-        console.log('🤖 Generando predicción personalizada...');
-        const prediccion = await generarPrediccionPersonalizada(usuarioID, datos);
-        document.getElementById('combinacion-ia').textContent = prediccion.join(' - ');
+        // Generar predicción para cada sorteo
+        console.log('🤖 Generando predicciones personalizadas por sorteo...');
+        await generarPrediccionesPorSorteo(usuarioID, datos);
         
         console.log('✅ Análisis completado exitosamente');
       } catch (error) {
@@ -118,6 +137,33 @@
               <strong>Error:</strong> No se pudo completar el análisis. ${error.message}
             </div>
           `;
+        }
+      }
+    }
+
+    async function generarPrediccionesPorSorteo(usuarioID, datosCompletos) {
+      const sorteos = ['melate', 'revancha', 'revanchita'];
+      
+      for (const sorteo of sorteos) {
+        try {
+          const datosSorteo = datosCompletos.datosPorSorteo[sorteo];
+          console.log(`🎯 Generando predicción para ${sorteo}...`);
+          
+          const prediccion = await generarPrediccionPersonalizada(usuarioID, datosSorteo);
+          const elementoId = `combinacion-${sorteo}`;
+          const elemento = document.getElementById(elementoId);
+          
+          if (elemento) {
+            elemento.textContent = prediccion.join(' - ');
+            console.log(`✅ Predicción para ${sorteo}:`, prediccion);
+          }
+        } catch (error) {
+          console.error(`❌ Error generando predicción para ${sorteo}:`, error);
+          const elementoId = `combinacion-${sorteo}`;
+          const elemento = document.getElementById(elementoId);
+          if (elemento) {
+            elemento.textContent = 'Error al generar';
+          }
         }
       }
     }
