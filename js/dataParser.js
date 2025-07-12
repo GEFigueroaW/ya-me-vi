@@ -75,26 +75,57 @@ async function cargarTodosSorteos() {
   console.log('🔄 Iniciando carga de TODOS los sorteos...');
   const sorteos = ['melate', 'revancha', 'revanchita'];
   const datosPorSorteo = {};
+  const ultimosSorteos = {};
   
   for (const sorteo of sorteos) {
     console.log(`📥 Cargando sorteo: ${sorteo}`);
     try {
       const datos = await cargarSorteoIndividual(sorteo);
       datosPorSorteo[sorteo] = datos;
+      
+      // Obtener el último sorteo (el más reciente)
+      if (datos.datos.length > 0) {
+        const ultimoSorteo = datos.datos[datos.datos.length - 1];
+        ultimosSorteos[sorteo] = ultimoSorteo;
+      }
+      
       console.log(`✅ ${sorteo} cargado exitosamente:`, datos.datos.length, 'sorteos');
     } catch (error) {
       console.error(`❌ Error cargando ${sorteo}:`, error);
       datosPorSorteo[sorteo] = { datos: [], numeros: [], modo: sorteo };
+      ultimosSorteos[sorteo] = null;
     }
   }
+  
+  // Mostrar información de últimos sorteos
+  mostrarUltimosSorteos(ultimosSorteos);
   
   console.log('🎯 Datos completos por sorteo:', datosPorSorteo);
   
   return { 
     datosPorSorteo, 
+    ultimosSorteos,
     modo: 'todos',
     esComparativo: true 
   };
+}
+
+function mostrarUltimosSorteos(ultimosSorteos) {
+  const container = document.getElementById('ultimos-sorteos');
+  if (!container) return;
+  
+  let html = '';
+  const sorteos = ['melate', 'revancha', 'revanchita'];
+  
+  sorteos.forEach(sorteo => {
+    const ultimo = ultimosSorteos[sorteo];
+    if (ultimo) {
+      const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+      html += `<span class="mx-2"><strong>${nombre}:</strong> ${ultimo.fecha}</span>`;
+    }
+  });
+  
+  container.innerHTML = html || 'No se pudieron cargar los últimos sorteos';
 }
 
 export function graficarEstadisticas(datos) {

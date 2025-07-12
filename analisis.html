@@ -28,12 +28,12 @@
 
     <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown">Análisis de Sorteos</h1>
 
-    <!-- Selector de modo -->
-    <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8 animate__animated animate__fadeInUp">
-      <button class="selector-btn" data-mode="melate">Melate</button>
-      <button class="selector-btn" data-mode="revancha">Revancha</button>
-      <button class="selector-btn" data-mode="revanchita">Revanchita</button>
-      <button class="selector-btn bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold" data-mode="todos">📊 Comparar Todos</button>
+    <!-- Encabezado de sorteos -->
+    <div class="text-center mb-6">
+      <h2 class="text-xl font-semibold text-white mb-2">MELATE | REVANCHA | REVANCHITA</h2>
+      <div id="ultimos-sorteos" class="text-gray-300 text-sm">
+        Cargando información de últimos sorteos...
+      </div>
     </div>
 
     <!-- Contenedor de estadísticas -->
@@ -86,30 +86,26 @@
       if (user) {
         usuarioID = user.uid;
         console.log('👤 Usuario ID:', usuarioID);
-        await analizar('melate');
+        await analizarTodosSorteos();
       } else {
         console.log('❌ Usuario no autenticado, redirigiendo...');
         window.location.href = 'index.html';
       }
     });
 
-    async function analizar(modo) {
-      console.log('🔍 Iniciando análisis para modo:', modo);
+    async function analizarTodosSorteos() {
+      console.log('🔍 Iniciando análisis de todos los sorteos...');
       
       try {
-        const datos = await cargarDatosHistoricos(modo);
+        const datos = await cargarDatosHistoricos('todos');
         console.log('📊 Datos cargados, generando estadísticas...');
         graficarEstadisticas(datos);
 
-        // Solo generar predicción para modos individuales, no para comparativo
-        if (modo !== 'todos') {
-          console.log('🤖 Generando predicción personalizada...');
-          const prediccion = await generarPrediccionPersonalizada(usuarioID, datos);
-          document.getElementById('combinacion-ia').textContent = prediccion.join(' - ');
-        } else {
-          // Para el modo comparativo, ocultar la predicción
-          document.getElementById('combinacion-ia').textContent = 'Comparando todos los sorteos...';
-        }
+        // Generar predicción basada en los datos combinados
+        console.log('🤖 Generando predicción personalizada...');
+        const prediccion = await generarPrediccionPersonalizada(usuarioID, datos);
+        document.getElementById('combinacion-ia').textContent = prediccion.join(' - ');
+        
         console.log('✅ Análisis completado exitosamente');
       } catch (error) {
         console.error('❌ Error en análisis:', error);
@@ -126,42 +122,9 @@
       }
     }
 
-    // Botones de selección de modo
-    document.querySelectorAll('.selector-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const modo = btn.dataset.mode;
-        console.log('🎯 Modo seleccionado:', modo);
-        console.log('🔍 Elemento button:', btn);
-        console.log('🔍 Dataset completo:', btn.dataset);
-        
-        // Destacar botón activo
-        document.querySelectorAll('.selector-btn').forEach(b => {
-          b.classList.remove('bg-blue-600', 'text-white', 'bg-gradient-to-r', 'from-purple-500', 'to-pink-500');
-          b.classList.add('bg-white', 'text-gray-800');
-        });
-        
-        // Aplicar estilos según el botón
-        if (modo === 'todos') {
-          console.log('🔄 Activando modo TODOS - Comparativo');
-          btn.classList.remove('bg-white', 'text-gray-800');
-          btn.classList.add('bg-gradient-to-r', 'from-purple-500', 'to-pink-500', 'text-white');
-        } else {
-          console.log('🔄 Activando modo individual:', modo);
-          btn.classList.remove('bg-white', 'text-gray-800');
-          btn.classList.add('bg-blue-600', 'text-white');
-        }
-        
-        console.log('🚀 Llamando función analizar con modo:', modo);
-        analizar(modo);
-      });
-    });
   </script>
 
   <style>
-    .selector-btn {
-      @apply bg-white text-gray-800 font-semibold px-4 py-2 rounded-full shadow-md hover:bg-gray-200 transition;
-    }
-
     #charts-container canvas {
       background-color: rgba(255, 255, 255, 0.95);
       border-radius: 1rem;
