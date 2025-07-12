@@ -45,20 +45,22 @@ async function cargarSorteoIndividual(modo) {
     
     lineas.forEach((linea, index) => {
       const cols = linea.split(',');
-      if (cols.length >= 8) {
-        // Columnas C a H son índices 2 a 7 (números ganadores)
+      if (cols.length >= 9) { // Ahora incluye NumeroSorteo
         const fecha = cols[0];
-        const nums = cols.slice(2, 8).map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n >= 1 && n <= 56);
+        const numeroSorteo = parseInt(cols[2], 10); // Nueva columna NumeroSorteo
+        // Números ganadores ahora están en las columnas 3 a 8 (índices 3 a 8)
+        const nums = cols.slice(3, 9).map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n >= 1 && n <= 56);
         
-        if (nums.length === 6) {
+        if (nums.length === 6 && !isNaN(numeroSorteo)) {
           todosLosDatos.push({
             fecha,
             numeros: nums,
-            sorteo: nombreSorteo
+            sorteo: nombreSorteo,
+            numeroSorteo: numeroSorteo
           });
           todosLosNumeros.push(...nums);
         } else {
-          console.warn(`⚠️ Línea ${index + 1} de ${archivo} tiene números inválidos:`, nums);
+          console.warn(`⚠️ Línea ${index + 1} de ${archivo} tiene números inválidos:`, nums, 'o número de sorteo inválido:', numeroSorteo);
         }
       }
     });
@@ -111,21 +113,31 @@ async function cargarTodosSorteos() {
 }
 
 function mostrarUltimosSorteos(ultimosSorteos) {
-  const container = document.getElementById('ultimos-sorteos');
+  const container = document.getElementById('ultimo-sorteo');
   if (!container) return;
   
-  let html = '';
+  // Obtener el número de sorteo más alto de todos los sorteos
+  let ultimoNumeroSorteo = 0;
   const sorteos = ['melate', 'revancha', 'revanchita'];
   
   sorteos.forEach(sorteo => {
     const ultimo = ultimosSorteos[sorteo];
-    if (ultimo) {
-      const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
-      html += `<span class="mx-2"><strong>${nombre}:</strong> ${ultimo.fecha}</span>`;
+    if (ultimo && ultimo.numeroSorteo) {
+      ultimoNumeroSorteo = Math.max(ultimoNumeroSorteo, ultimo.numeroSorteo);
     }
   });
   
-  container.innerHTML = html || 'No se pudieron cargar los últimos sorteos';
+  if (ultimoNumeroSorteo > 0) {
+    container.innerHTML = `ULTIMO SORTEO ${ultimoNumeroSorteo}`;
+    
+    // Actualizar también el título de predicción con el siguiente número
+    const prediccionTitle = document.querySelector('#prediccion-container h2');
+    if (prediccionTitle) {
+      prediccionTitle.textContent = `🎯 Combinaciones Sugeridas por IA para el sorteo ${ultimoNumeroSorteo + 1}`;
+    }
+  } else {
+    container.innerHTML = 'ULTIMO SORTEO 0000';
+  }
 }
 
 export function graficarEstadisticas(datos) {
