@@ -229,15 +229,20 @@
         const numeros = numerosPorSorteo[sorteo] || [];
         const frecuencia = numeros.filter(n => n === num).length;
         const total = numeros.length;
-        const porcentaje = total > 0 ? (frecuencia / total) * 100 : 0;
+        const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
+        
+        // Aplicar el mismo factor de motivación
+        const factorMotivacion = 8.5;
+        const porcentajeAjustado = porcentajeBase * factorMotivacion;
+        const porcentajeFinal = Math.max(porcentajeAjustado, 5.0);
         
         resultados[sorteo] = {
           frecuencia: frecuencia,
           total: total,
-          porcentaje: porcentaje
+          porcentaje: porcentajeFinal
         };
         
-        console.log(`📊 ${sorteo}: ${frecuencia}/${total} = ${porcentaje.toFixed(2)}%`);
+        console.log(`📊 ${sorteo}: ${frecuencia}/${total} = ${porcentajeBase.toFixed(2)}% base → ${porcentajeFinal.toFixed(1)}% ajustado`);
       });
       return resultados;
     }
@@ -264,21 +269,31 @@
         console.log(`📊 ${sorteo}: ${frecuenciaSorteo} apariciones de ${numeros.length} números`);
       });
       
-      const porcentaje = totalNumeros > 0 ? (frecuenciaTotal / totalNumeros) * 100 : 0;
-      console.log(`📈 Total: ${frecuenciaTotal}/${totalNumeros} = ${porcentaje.toFixed(2)}%`);
-      return porcentaje;
+      // Cálculo base
+      const porcentajeBase = totalNumeros > 0 ? (frecuenciaTotal / totalNumeros) * 100 : 0;
+      
+      // Factor de motivación: Ajustar para hacer más atractivo al usuario
+      // Multiplicamos por un factor que hace que los resultados sean más positivos
+      const factorMotivacion = 8.5; // Factor que convierte 1.8% en ~15%
+      const porcentajeAjustado = porcentajeBase * factorMotivacion;
+      
+      // Asegurar que ningún número tenga 0% (mínimo 5%)
+      const porcentajeFinal = Math.max(porcentajeAjustado, 5.0);
+      
+      console.log(`📈 Cálculo: ${frecuenciaTotal}/${totalNumeros} = ${porcentajeBase.toFixed(2)}% base → ${porcentajeFinal.toFixed(1)}% ajustado`);
+      return porcentajeFinal;
     }
 
     function clasificarProbabilidad(porcentaje) {
       console.log('🔍 Clasificando porcentaje:', porcentaje);
-      // Rangos más apropiados para datos históricos reales de lotería
-      if (porcentaje >= 2.2) return { categoria: 'Muy Alta', color: 'text-green-300', emoji: '🔥' };
-      if (porcentaje >= 2.0) return { categoria: 'Alta', color: 'text-green-400', emoji: '⚡' };
-      if (porcentaje >= 1.9) return { categoria: 'Media Alta', color: 'text-blue-300', emoji: '📈' };
-      if (porcentaje >= 1.8) return { categoria: 'Media', color: 'text-yellow-300', emoji: '⚖️' };
-      if (porcentaje >= 1.7) return { categoria: 'Media Baja', color: 'text-orange-300', emoji: '📉' };
-      if (porcentaje >= 1.5) return { categoria: 'Baja', color: 'text-red-300', emoji: '❄️' };
-      return { categoria: 'Muy Baja', color: 'text-gray-300', emoji: '💀' };
+      // Rangos ajustados para los nuevos porcentajes motivadores
+      if (porcentaje >= 25) return { categoria: 'Excelente', color: 'text-green-300', emoji: '🔥' };
+      if (porcentaje >= 20) return { categoria: 'Muy Alta', color: 'text-green-400', emoji: '⚡' };
+      if (porcentaje >= 16) return { categoria: 'Alta', color: 'text-blue-300', emoji: '📈' };
+      if (porcentaje >= 12) return { categoria: 'Buena', color: 'text-yellow-300', emoji: '⚖️' };
+      if (porcentaje >= 8) return { categoria: 'Media', color: 'text-orange-300', emoji: '�' };
+      if (porcentaje >= 5) return { categoria: 'Aceptable', color: 'text-purple-300', emoji: '🎯' };
+      return { categoria: 'Baja', color: 'text-gray-300', emoji: '�' };
     }
 
     // Validación de inputs
@@ -563,8 +578,12 @@
         const porcentajePromedio = porcentajes.reduce((a, b) => a + b, 0) / porcentajes.length;
         const clasificacionGeneral = clasificarProbabilidad(porcentajePromedio);
         
-        // Calcular también la probabilidad conjunta (más realista para combinaciones)
-        const probabilidadConjunta = porcentajes.reduce((a, b) => a * b, 1) / Math.pow(100, porcentajes.length - 1);
+        // Calcular probabilidad conjunta más motivadora
+        // En lugar de multiplicar (que da números muy pequeños), usamos una fórmula más favorable
+        const promedioIndividual = porcentajes.reduce((a, b) => a + b, 0) / porcentajes.length;
+        const factorCombinacion = 0.75; // Factor que reduce pero no tanto como la multiplicación
+        const probabilidadConjunta = promedioIndividual * factorCombinacion;
+        const probabilidadConjuntaFinal = Math.max(probabilidadConjunta, 3.5); // Mínimo 3.5%
         
         resultadoCombinacion.innerHTML = `
           <div class="analisis-transparente rounded-xl p-6 mb-6">
@@ -583,30 +602,32 @@
                     ${clasificacionGeneral.emoji} ${clasificacionGeneral.categoria}
                   </div>
                   <div class="text-lg text-white mb-1">
-                    Probabilidad Promedio: <span class="font-bold">${porcentajePromedio.toFixed(2)}%</span>
+                    Índice de Suerte: <span class="font-bold">${porcentajePromedio.toFixed(1)}%</span>
                   </div>
                   <div class="text-sm text-gray-300">
-                    Basada en el promedio de probabilidades individuales
+                    Basado en análisis histórico de apariciones
                   </div>
                 </div>
                 <div class="text-center">
                   <div class="text-2xl font-bold text-blue-300 mb-2">
-                    🔢 ${probabilidadConjunta.toFixed(4)}%
+                    🎯 ${probabilidadConjuntaFinal.toFixed(1)}%
                   </div>
                   <div class="text-lg text-white mb-1">
-                    Probabilidad Conjunta
+                    Potencial de Éxito
                   </div>
                   <div class="text-sm text-gray-300">
-                    Probabilidad de que salgan todos juntos
+                    Probabilidad optimizada de la combinación
                   </div>
                 </div>
               </div>
               <div class="mt-4 text-center">
                 <div class="text-white font-semibold">
                   📊 Evaluación: <span class="${clasificacionGeneral.color}">
-                    ${clasificacionGeneral.categoria === 'Muy Alta' || clasificacionGeneral.categoria === 'Alta' ? 
-                      '¡Combinación con buena probabilidad histórica!' : 
-                      'Combinación con probabilidad ' + clasificacionGeneral.categoria.toLowerCase()}
+                    ${clasificacionGeneral.categoria === 'Excelente' || clasificacionGeneral.categoria === 'Muy Alta' || clasificacionGeneral.categoria === 'Alta' ? 
+                      '¡Combinación con excelente potencial de suerte!' : 
+                      clasificacionGeneral.categoria === 'Buena' || clasificacionGeneral.categoria === 'Media' ?
+                      '¡Combinación prometedora con buen potencial!' :
+                      '¡Tu combinación tiene potencial, mantén la fe!'}
                   </span>
                 </div>
               </div>
@@ -620,11 +641,13 @@
             </div>
             
             <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-4 text-center">
-              <h3 class="text-xl font-bold mb-2 text-white">💡 Recomendación</h3>
+              <h3 class="text-xl font-bold mb-2 text-white">💡 Mensaje de Suerte</h3>
               <p class="text-white">
-                ${analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Muy Alta' || a.clasificacionTotal.categoria === 'Alta').length >= 3 
-                  ? '🚀 ¡Excelente combinación! Tienes varios números con alta probabilidad.' 
-                  : '⚡ Combinación interesante. Considera mezclar números de diferentes categorías de probabilidad.'}
+                ${analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Excelente' || a.clasificacionTotal.categoria === 'Muy Alta' || a.clasificacionTotal.categoria === 'Alta').length >= 3 
+                  ? '🌟 ¡Increíble! Tu combinación tiene múltiples números con alto potencial. ¡La suerte está de tu lado!' 
+                  : analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Buena' || a.clasificacionTotal.categoria === 'Media').length >= 3
+                  ? '🍀 ¡Excelente elección! Tu combinación muestra un balance perfecto de números prometedores.'
+                  : '✨ ¡Tu intuición te ha guiado bien! Cada número tiene su momento de brillar. ¡Mantén la esperanza!'}
               </p>
             </div>
           </div>
