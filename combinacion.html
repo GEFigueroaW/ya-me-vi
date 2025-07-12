@@ -30,14 +30,15 @@
   <div class="relative z-10 min-h-screen text-white p-4 md:p-10">
     
     <!-- Botón de regreso -->
-    <div class="absolute top-4 left-4 z-20">
-      <button id="btn-back" class="border border-white px-4 py-2 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300 flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Volver
-      </button>
-    </div>
+    <button id="btn-back" class="btn-back-improved">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <span class="btn-text">Volver</span>
+    </button>
+
+    <!-- Espaciador para evitar solapamiento en móviles -->
+    <div class="mobile-spacer"></div>
 
     <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown text-center">🎯 Evalúa tus Números de la Suerte</h1>
     
@@ -54,7 +55,7 @@
       
       <!-- Sección de evaluación de número individual -->
       <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white border-opacity-50 shadow-xl">
-        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">🔍 Ingresa tu Número de la Suerte (entre el 1 y el 56)</h2>
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">🔍 Ingresa tu Número de la Suerte entre el 1 y el 56</h2>
         <div class="max-w-md mx-auto">
           <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-6">
             <input type="number" id="numero-individual" class="w-20 sm:w-24 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400" min="1" max="56" placeholder="">
