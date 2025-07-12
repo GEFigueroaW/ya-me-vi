@@ -260,15 +260,55 @@
     }
 
     function clasificarProbabilidad(porcentaje) {
-      // Rangos ajustados para el factor 10.5 (más realistas)
-      if (porcentaje >= 30) return { categoria: 'Excepcional', color: 'text-green-300', emoji: '🔥' };
-      if (porcentaje >= 25) return { categoria: 'Muy Alta', color: 'text-green-400', emoji: '⚡' };
-      if (porcentaje >= 20) return { categoria: 'Alta', color: 'text-blue-300', emoji: '📈' };
-      if (porcentaje >= 16) return { categoria: 'Buena', color: 'text-yellow-300', emoji: '⚖️' };
-      if (porcentaje >= 12) return { categoria: 'Moderada', color: 'text-orange-300', emoji: '🎲' };
-      if (porcentaje >= 10) return { categoria: 'Aceptable', color: 'text-purple-300', emoji: '🎯' };
-      if (porcentaje >= 8) return { categoria: 'Baja', color: 'text-cyan-300', emoji: '💫' };
-      return { categoria: 'Muy Baja', color: 'text-gray-300', emoji: '✨' };
+      // Rangos ajustados para el factor 10.5 con colores más contrastantes y sombras
+      if (porcentaje >= 30) return { 
+        categoria: 'Excepcional', 
+        color: 'text-green-600 font-bold', 
+        bgColor: 'bg-green-100 bg-opacity-80', 
+        emoji: '🔥' 
+      };
+      if (porcentaje >= 25) return { 
+        categoria: 'Muy Alta', 
+        color: 'text-green-700 font-bold', 
+        bgColor: 'bg-green-50 bg-opacity-80', 
+        emoji: '⚡' 
+      };
+      if (porcentaje >= 20) return { 
+        categoria: 'Alta', 
+        color: 'text-blue-700 font-bold', 
+        bgColor: 'bg-blue-50 bg-opacity-80', 
+        emoji: '📈' 
+      };
+      if (porcentaje >= 16) return { 
+        categoria: 'Buena', 
+        color: 'text-yellow-700 font-bold', 
+        bgColor: 'bg-yellow-50 bg-opacity-80', 
+        emoji: '⚖️' 
+      };
+      if (porcentaje >= 12) return { 
+        categoria: 'Moderada', 
+        color: 'text-orange-700 font-bold', 
+        bgColor: 'bg-orange-50 bg-opacity-80', 
+        emoji: '🎲' 
+      };
+      if (porcentaje >= 10) return { 
+        categoria: 'Aceptable', 
+        color: 'text-purple-700 font-bold', 
+        bgColor: 'bg-purple-50 bg-opacity-80', 
+        emoji: '🎯' 
+      };
+      if (porcentaje >= 8) return { 
+        categoria: 'Baja', 
+        color: 'text-cyan-700 font-bold', 
+        bgColor: 'bg-cyan-50 bg-opacity-80', 
+        emoji: '💫' 
+      };
+      return { 
+        categoria: 'Muy Baja', 
+        color: 'text-gray-700 font-bold', 
+        bgColor: 'bg-gray-50 bg-opacity-80', 
+        emoji: '✨' 
+      };
     }
 
     // Validación en tiempo real mejorada
@@ -415,7 +455,7 @@
                 <div class="text-2xl font-bold text-gray-800 mb-1">
                   ${frecuenciaPorSorteo.melate.porcentaje.toFixed(1)}%
                 </div>
-                <div class="text-lg ${clasificacionMelate.color} mb-1">
+                <div class="inline-block px-3 py-1 rounded-full ${clasificacionMelate.bgColor} ${clasificacionMelate.color} mb-1">
                   ${clasificacionMelate.categoria}
                 </div>
                 <div class="text-sm text-gray-600">
@@ -431,7 +471,7 @@
                 <div class="text-2xl font-bold text-gray-800 mb-1">
                   ${frecuenciaPorSorteo.revancha.porcentaje.toFixed(1)}%
                 </div>
-                <div class="text-lg ${clasificacionRevancha.color} mb-1">
+                <div class="inline-block px-3 py-1 rounded-full ${clasificacionRevancha.bgColor} ${clasificacionRevancha.color} mb-1">
                   ${clasificacionRevancha.categoria}
                 </div>
                 <div class="text-sm text-gray-600">
@@ -447,7 +487,7 @@
                 <div class="text-2xl font-bold text-gray-800 mb-1">
                   ${frecuenciaPorSorteo.revanchita.porcentaje.toFixed(1)}%
                 </div>
-                <div class="text-lg ${clasificacionRevanchita.color} mb-1">
+                <div class="inline-block px-3 py-1 rounded-full ${clasificacionRevanchita.bgColor} ${clasificacionRevanchita.color} mb-1">
                   ${clasificacionRevanchita.categoria}
                 </div>
                 <div class="text-sm text-gray-600">
@@ -529,12 +569,15 @@
             <div class="bg-blue-500 bg-opacity-20 rounded-lg p-3 border border-blue-400">
               <div class="flex items-center justify-between">
                 <div class="text-xl font-bold text-gray-800">${analisis.numero}</div>
-                <div class="text-sm ${clasificacion.color}">
-                  ${clasificacion.emoji} ${clasificacion.categoria}
+                <div class="text-sm">
+                  ${clasificacion.emoji}
                 </div>
               </div>
               <div class="text-center mt-2">
                 <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.melate.porcentaje.toFixed(1)}%</div>
+                <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
+                  ${clasificacion.categoria}
+                </div>
                 <div class="text-xs text-gray-600">${analisis.porSorteo.melate.frecuencia} apariciones</div>
               </div>
             </div>
@@ -547,12 +590,15 @@
             <div class="bg-purple-500 bg-opacity-20 rounded-lg p-3 border border-purple-400">
               <div class="flex items-center justify-between">
                 <div class="text-xl font-bold text-gray-800">${analisis.numero}</div>
-                <div class="text-sm ${clasificacion.color}">
-                  ${clasificacion.emoji} ${clasificacion.categoria}
+                <div class="text-sm">
+                  ${clasificacion.emoji}
                 </div>
               </div>
               <div class="text-center mt-2">
                 <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.revancha.porcentaje.toFixed(1)}%</div>
+                <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
+                  ${clasificacion.categoria}
+                </div>
                 <div class="text-xs text-gray-600">${analisis.porSorteo.revancha.frecuencia} apariciones</div>
               </div>
             </div>
@@ -565,12 +611,15 @@
             <div class="bg-green-500 bg-opacity-20 rounded-lg p-3 border border-green-400">
               <div class="flex items-center justify-between">
                 <div class="text-xl font-bold text-gray-800">${analisis.numero}</div>
-                <div class="text-sm ${clasificacion.color}">
-                  ${clasificacion.emoji} ${clasificacion.categoria}
+                <div class="text-sm">
+                  ${clasificacion.emoji}
                 </div>
               </div>
               <div class="text-center mt-2">
                 <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.revanchita.porcentaje.toFixed(1)}%</div>
+                <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
+                  ${clasificacion.categoria}
+                </div>
                 <div class="text-xs text-gray-600">${analisis.porSorteo.revanchita.frecuencia} apariciones</div>
               </div>
             </div>
@@ -607,7 +656,10 @@
                 <div class="bg-blue-500 bg-opacity-20 rounded-lg p-4 text-center border border-blue-400">
                   <h4 class="font-bold text-blue-800 mb-2">🎲 Melate</h4>
                   <div class="text-3xl font-bold ${clasificacionMelate.color} mb-2">
-                    ${clasificacionMelate.emoji} ${clasificacionMelate.categoria}
+                    ${clasificacionMelate.emoji} 
+                    <span class="inline-block px-2 py-1 rounded-full ${clasificacionMelate.bgColor} text-sm">
+                      ${clasificacionMelate.categoria}
+                    </span>
                   </div>
                   <div class="text-lg text-gray-800 mb-1">
                     Índice: <span class="font-bold">${promedioMelate.toFixed(1)}%</span>
@@ -626,7 +678,10 @@
                 <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-400">
                   <h4 class="font-bold text-purple-800 mb-2">🎲 Revancha</h4>
                   <div class="text-3xl font-bold ${clasificacionRevancha.color} mb-2">
-                    ${clasificacionRevancha.emoji} ${clasificacionRevancha.categoria}
+                    ${clasificacionRevancha.emoji} 
+                    <span class="inline-block px-2 py-1 rounded-full ${clasificacionRevancha.bgColor} text-sm">
+                      ${clasificacionRevancha.categoria}
+                    </span>
                   </div>
                   <div class="text-lg text-gray-800 mb-1">
                     Índice: <span class="font-bold">${promedioRevancha.toFixed(1)}%</span>
@@ -645,7 +700,10 @@
                 <div class="bg-green-500 bg-opacity-20 rounded-lg p-4 text-center border border-green-400">
                   <h4 class="font-bold text-green-800 mb-2">🎲 Revanchita</h4>
                   <div class="text-3xl font-bold ${clasificacionRevanchita.color} mb-2">
-                    ${clasificacionRevanchita.emoji} ${clasificacionRevanchita.categoria}
+                    ${clasificacionRevanchita.emoji} 
+                    <span class="inline-block px-2 py-1 rounded-full ${clasificacionRevanchita.bgColor} text-sm">
+                      ${clasificacionRevanchita.categoria}
+                    </span>
                   </div>
                   <div class="text-lg text-gray-800 mb-1">
                     Índice: <span class="font-bold">${promedioRevanchita.toFixed(1)}%</span>
