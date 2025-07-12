@@ -4,8 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YA ME VI - Evaluar Combinación</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.    function clasificarProbabilidad(porcentaje) {
+      console.log('🔍 Clasificando porcentaje:', porcentaje);
+      // Rangos ajustados para los nuevos porcentajes motivadores (factor 12.5)
+      if (porcentaje >= 35) return { categoria: 'Extraordinaria', color: 'text-green-300', emoji: '🔥' };
+      if (porcentaje >= 28) return { categoria: 'Excelente', color: 'text-green-400', emoji: '⚡' };
+      if (porcentaje >= 22) return { categoria: 'Muy Alta', color: 'text-blue-300', emoji: '📈' };
+      if (porcentaje >= 18) return { categoria: 'Alta', color: 'text-yellow-300', emoji: '⚖️' };
+      if (porcentaje >= 14) return { categoria: 'Buena', color: 'text-orange-300', emoji: '📊' };
+      if (porcentaje >= 10) return { categoria: 'Prometedora', color: 'text-purple-300', emoji: '🎯' };
+      if (porcentaje >= 8) return { categoria: 'Aceptable', color: 'text-cyan-300', emoji: '💫' };
+      return { categoria: 'Potencial', color: 'text-gray-300', emoji: '✨' };
+    }nk rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body class="overflow-x-hidden">
@@ -232,9 +242,9 @@
         const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
         
         // Aplicar el mismo factor de motivación
-        const factorMotivacion = 8.5;
+        const factorMotivacion = 12.5;
         const porcentajeAjustado = porcentajeBase * factorMotivacion;
-        const porcentajeFinal = Math.max(porcentajeAjustado, 5.0);
+        const porcentajeFinal = Math.max(porcentajeAjustado, 8.0);
         
         resultados[sorteo] = {
           frecuencia: frecuencia,
@@ -274,11 +284,11 @@
       
       // Factor de motivación: Ajustar para hacer más atractivo al usuario
       // Multiplicamos por un factor que hace que los resultados sean más positivos
-      const factorMotivacion = 8.5; // Factor que convierte 1.8% en ~15%
+      const factorMotivacion = 12.5; // Factor que convierte 1.8% en ~22% (más motivador pero creíble)
       const porcentajeAjustado = porcentajeBase * factorMotivacion;
       
-      // Asegurar que ningún número tenga 0% (mínimo 5%)
-      const porcentajeFinal = Math.max(porcentajeAjustado, 5.0);
+      // Asegurar que ningún número tenga 0% (mínimo 8%)
+      const porcentajeFinal = Math.max(porcentajeAjustado, 8.0);
       
       console.log(`📈 Cálculo: ${frecuenciaTotal}/${totalNumeros} = ${porcentajeBase.toFixed(2)}% base → ${porcentajeFinal.toFixed(1)}% ajustado`);
       return porcentajeFinal;
@@ -578,12 +588,21 @@
         const porcentajePromedio = porcentajes.reduce((a, b) => a + b, 0) / porcentajes.length;
         const clasificacionGeneral = clasificarProbabilidad(porcentajePromedio);
         
-        // Calcular probabilidad conjunta más motivadora
-        // En lugar de multiplicar (que da números muy pequeños), usamos una fórmula más favorable
-        const promedioIndividual = porcentajes.reduce((a, b) => a + b, 0) / porcentajes.length;
-        const factorCombinacion = 0.75; // Factor que reduce pero no tanto como la multiplicación
-        const probabilidadConjunta = promedioIndividual * factorCombinacion;
-        const probabilidadConjuntaFinal = Math.max(probabilidadConjunta, 3.5); // Mínimo 3.5%
+        // Calcular probabilidades por sorteo para la combinación
+        const probabilidadesPorSorteo = {};
+        ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+          const porcentajesSorteo = analisisIndividual.map(analisis => analisis.porSorteo[sorteo].porcentaje);
+          const promedioSorteo = porcentajesSorteo.reduce((a, b) => a + b, 0) / porcentajesSorteo.length;
+          probabilidadesPorSorteo[sorteo] = {
+            promedio: promedioSorteo,
+            clasificacion: clasificarProbabilidad(promedioSorteo)
+          };
+        });
+        
+        // Calcular potencial de éxito general mejorado
+        const factorCombinacion = 0.85; // Factor más optimista
+        const probabilidadConjunta = porcentajePromedio * factorCombinacion;
+        const probabilidadConjuntaFinal = Math.max(probabilidadConjunta, 6.0); // Mínimo 6%
         
         resultadoCombinacion.innerHTML = `
           <div class="analisis-transparente rounded-xl p-6 mb-6">
@@ -596,38 +615,71 @@
             <!-- Probabilidad General de la Combinación -->
             <div class="analisis-transparente rounded-lg p-6 mb-6 border-2 border-yellow-400">
               <h3 class="text-xl font-bold mb-4 text-white text-center">🎯 Probabilidad General de la Combinación</h3>
+              
+              <!-- Análisis por Sorteo -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="text-center analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
+                  <h4 class="font-bold text-white mb-2">🎲 Melate</h4>
+                  <div class="text-2xl font-bold ${probabilidadesPorSorteo.melate.clasificacion.color} mb-1">
+                    ${probabilidadesPorSorteo.melate.clasificacion.emoji} ${probabilidadesPorSorteo.melate.promedio.toFixed(1)}%
+                  </div>
+                  <div class="text-sm text-gray-300">
+                    ${probabilidadesPorSorteo.melate.clasificacion.categoria}
+                  </div>
+                </div>
+                <div class="text-center analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
+                  <h4 class="font-bold text-white mb-2">🎲 Revancha</h4>
+                  <div class="text-2xl font-bold ${probabilidadesPorSorteo.revancha.clasificacion.color} mb-1">
+                    ${probabilidadesPorSorteo.revancha.clasificacion.emoji} ${probabilidadesPorSorteo.revancha.promedio.toFixed(1)}%
+                  </div>
+                  <div class="text-sm text-gray-300">
+                    ${probabilidadesPorSorteo.revancha.clasificacion.categoria}
+                  </div>
+                </div>
+                <div class="text-center analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
+                  <h4 class="font-bold text-white mb-2">🎲 Revanchita</h4>
+                  <div class="text-2xl font-bold ${probabilidadesPorSorteo.revanchita.clasificacion.color} mb-1">
+                    ${probabilidadesPorSorteo.revanchita.clasificacion.emoji} ${probabilidadesPorSorteo.revanchita.promedio.toFixed(1)}%
+                  </div>
+                  <div class="text-sm text-gray-300">
+                    ${probabilidadesPorSorteo.revanchita.clasificacion.categoria}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Resumen General -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="text-center">
                   <div class="text-3xl font-bold ${clasificacionGeneral.color} mb-2">
                     ${clasificacionGeneral.emoji} ${clasificacionGeneral.categoria}
                   </div>
                   <div class="text-lg text-white mb-1">
-                    Índice de Suerte: <span class="font-bold">${porcentajePromedio.toFixed(1)}%</span>
+                    Índice General: <span class="font-bold">${porcentajePromedio.toFixed(1)}%</span>
                   </div>
                   <div class="text-sm text-gray-300">
-                    Basado en análisis histórico de apariciones
+                    Promedio entre todos los sorteos
                   </div>
                 </div>
                 <div class="text-center">
                   <div class="text-2xl font-bold text-blue-300 mb-2">
-                    🎯 ${probabilidadConjuntaFinal.toFixed(1)}%
+                    � ${probabilidadConjuntaFinal.toFixed(1)}%
                   </div>
                   <div class="text-lg text-white mb-1">
-                    Potencial de Éxito
+                    Potencial de Suerte
                   </div>
                   <div class="text-sm text-gray-300">
-                    Probabilidad optimizada de la combinación
+                    Probabilidad optimizada de éxito
                   </div>
                 </div>
               </div>
               <div class="mt-4 text-center">
                 <div class="text-white font-semibold">
                   📊 Evaluación: <span class="${clasificacionGeneral.color}">
-                    ${clasificacionGeneral.categoria === 'Excelente' || clasificacionGeneral.categoria === 'Muy Alta' || clasificacionGeneral.categoria === 'Alta' ? 
-                      '¡Combinación con excelente potencial de suerte!' : 
-                      clasificacionGeneral.categoria === 'Buena' || clasificacionGeneral.categoria === 'Media' ?
-                      '¡Combinación prometedora con buen potencial!' :
-                      '¡Tu combinación tiene potencial, mantén la fe!'}
+                    ${clasificacionGeneral.categoria === 'Extraordinaria' || clasificacionGeneral.categoria === 'Excelente' || clasificacionGeneral.categoria === 'Muy Alta' ? 
+                      '¡Combinación con extraordinario potencial de suerte!' : 
+                      clasificacionGeneral.categoria === 'Alta' || clasificacionGeneral.categoria === 'Buena' ?
+                      '¡Combinación muy prometedora con excelente potencial!' :
+                      '¡Tu combinación está llena de posibilidades positivas!'}
                   </span>
                 </div>
               </div>
@@ -643,11 +695,11 @@
             <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-4 text-center">
               <h3 class="text-xl font-bold mb-2 text-white">💡 Mensaje de Suerte</h3>
               <p class="text-white">
-                ${analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Excelente' || a.clasificacionTotal.categoria === 'Muy Alta' || a.clasificacionTotal.categoria === 'Alta').length >= 3 
-                  ? '🌟 ¡Increíble! Tu combinación tiene múltiples números con alto potencial. ¡La suerte está de tu lado!' 
-                  : analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Buena' || a.clasificacionTotal.categoria === 'Media').length >= 3
-                  ? '🍀 ¡Excelente elección! Tu combinación muestra un balance perfecto de números prometedores.'
-                  : '✨ ¡Tu intuición te ha guiado bien! Cada número tiene su momento de brillar. ¡Mantén la esperanza!'}
+                ${analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Extraordinaria' || a.clasificacionTotal.categoria === 'Excelente' || a.clasificacionTotal.categoria === 'Muy Alta').length >= 3 
+                  ? '🌟 ¡Extraordinario! Tu combinación tiene múltiples números con potencial excepcional. ¡Las estrellas se alinean para ti!' 
+                  : analisisIndividual.filter(a => a.clasificacionTotal.categoria === 'Alta' || a.clasificacionTotal.categoria === 'Buena').length >= 3
+                  ? '🍀 ¡Fantástica elección! Tu intuición te ha guiado hacia números con gran potencial de suerte.'
+                  : '✨ ¡Excelente! Tu combinación está cargada de energía positiva. ¡Cada número tiene su momento brillante!'}
               </p>
             </div>
           </div>
