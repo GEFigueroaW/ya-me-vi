@@ -192,7 +192,7 @@ export function graficarEstadisticas(datos) {
 }
 
 function mostrarEstadisticasComparativas(datosPorSorteo) {
-  console.log('🔍 Generando análisis por bloques para cada sorteo...');
+  console.log('🔍 Generando análisis estadístico para cada sorteo...');
   
   const sorteos = ['melate', 'revancha', 'revanchita'];
   const colores = {
@@ -201,14 +201,12 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
     revanchita: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', title: 'text-green-600' }
   };
   
-  // Definir bloques (1-9, 10-18, 19-27, 28-36, 37-45, 46-56)
+  // Definir 4 bloques (1-14, 15-28, 29-42, 43-56)
   const bloques = [
-    { inicio: 1, fin: 9, nombre: '1-9' },
-    { inicio: 10, fin: 18, nombre: '10-18' },
-    { inicio: 19, fin: 27, nombre: '19-27' },
-    { inicio: 28, fin: 36, nombre: '28-36' },
-    { inicio: 37, fin: 45, nombre: '37-45' },
-    { inicio: 46, fin: 56, nombre: '46-56' }
+    { inicio: 1, fin: 14, nombre: '1-14' },
+    { inicio: 15, fin: 28, nombre: '15-28' },
+    { inicio: 29, fin: 42, nombre: '29-42' },
+    { inicio: 43, fin: 56, nombre: '43-56' }
   ];
   
   const estadisticasPorSorteo = {};
@@ -218,22 +216,46 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
     const datos = datosPorSorteo[sorteo];
     const sorteosDatos = datos.datos || [];
     
-    console.log(`📊 Analizando bloques para ${sorteo}:`, { 
+    console.log(`📊 Analizando ${sorteo}:`, { 
       totalSorteos: sorteosDatos.length,
       primerSorteo: sorteosDatos[0],
       ultimoSorteo: sorteosDatos[sorteosDatos.length - 1]
     });
     
     if (sorteosDatos.length > 0) {
-      // Analizar cada sorteo para contar números por bloque
+      // Calcular frecuencia de números (1-56)
+      const frecuencia = Array(56).fill(0);
+      let totalNumeros = 0;
+      
+      sorteosDatos.forEach(sorteoData => {
+        const numeros = sorteoData.numeros || [];
+        numeros.forEach(num => {
+          if (num >= 1 && num <= 56) {
+            frecuencia[num - 1]++;
+            totalNumeros++;
+          }
+        });
+      });
+      
+      // Top 10 más frecuentes
+      const top10Mas = frecuencia
+        .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
+        .sort((a, b) => b.frecuencia - a.frecuencia)
+        .slice(0, 10);
+      
+      // Top 10 menos frecuentes
+      const top10Menos = frecuencia
+        .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
+        .sort((a, b) => a.frecuencia - b.frecuencia)
+        .slice(0, 10);
+      
+      // Análisis por bloques
       const numerosPorBloque = bloques.map(() => []);
       
       sorteosDatos.forEach(sorteoData => {
         const numeros = sorteoData.numeros || [];
-        console.log(`🔍 Procesando sorteo con números:`, numeros);
+        const contadorBloque = Array(4).fill(0);
         
-        // Contar números por bloque en este sorteo
-        const contadorBloque = Array(6).fill(0);
         numeros.forEach(num => {
           bloques.forEach((bloque, index) => {
             if (num >= bloque.inicio && num <= bloque.fin) {
@@ -242,9 +264,6 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
           });
         });
         
-        console.log(`📈 Contadores para este sorteo:`, contadorBloque);
-        
-        // Guardar contadores de este sorteo
         contadorBloque.forEach((count, index) => {
           numerosPorBloque[index].push(count);
         });
@@ -264,14 +283,18 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       });
       
       estadisticasPorSorteo[sorteo] = {
+        top10Mas,
+        top10Menos,
         bloques: estadisticasBloques,
         totalSorteos: sorteosDatos.length
       };
       
-      console.log(`✅ ${sorteo} procesado:`, estadisticasBloques);
+      console.log(`✅ ${sorteo} procesado:`, { top10Mas, top10Menos, bloques: estadisticasBloques });
     } else {
       console.warn(`⚠️ No hay datos para ${sorteo}`);
       estadisticasPorSorteo[sorteo] = {
+        top10Mas: [],
+        top10Menos: [],
         bloques: bloques.map(bloque => ({
           bloque: bloque.nombre,
           promedio: 0,
@@ -282,21 +305,76 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
     }
   });
   
-  // Generar HTML con análisis por bloques
+  // Generar HTML
   const contenedorCharts = document.getElementById('charts-container');
   if (contenedorCharts) {
-    // Crear HTML para cada sorteo
-    let htmlSorteos = '';
+    let htmlContent = `
+      <div class="mb-6 text-center">
+        <h2 class="text-2xl font-bold text-white mb-2">📊 Análisis Estadístico Completo</h2>
+        <p class="text-gray-300">Números más y menos frecuentes + Análisis por bloques</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    `;
+    
     sorteos.forEach(sorteo => {
       const stats = estadisticasPorSorteo[sorteo];
       const color = colores[sorteo];
       const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
       
-      // Crear HTML para bloques
-      let htmlBloques = '';
+      htmlContent += `
+        <div class="analisis-transparente rounded-xl p-6 text-white">
+          <div class="text-center mb-4">
+            <h3 class="text-xl font-bold text-white mb-2">🎲 ${nombre}</h3>
+            <p class="text-gray-300 text-sm">${stats.totalSorteos} sorteos analizados</p>
+          </div>
+          
+          <!-- Top 10 MÁS frecuentes -->
+          <div class="mb-4">
+            <h4 class="text-lg font-semibold text-white mb-2">🔥 Top 10 MÁS frecuentes</h4>
+            <div class="grid grid-cols-5 gap-2">
+      `;
+      
+      stats.top10Mas.forEach(item => {
+        htmlContent += `
+          <div class="analisis-transparente rounded-lg p-2 text-center border border-white border-opacity-30">
+            <div class="text-lg font-bold text-white">${item.numero}</div>
+            <div class="text-xs text-gray-300">${item.frecuencia}</div>
+          </div>
+        `;
+      });
+      
+      htmlContent += `
+            </div>
+          </div>
+          
+          <!-- Top 10 MENOS frecuentes -->
+          <div class="mb-4">
+            <h4 class="text-lg font-semibold text-white mb-2">❄️ Top 10 MENOS frecuentes</h4>
+            <div class="grid grid-cols-5 gap-2">
+      `;
+      
+      stats.top10Menos.forEach(item => {
+        htmlContent += `
+          <div class="analisis-transparente rounded-lg p-2 text-center border border-white border-opacity-30">
+            <div class="text-lg font-bold text-white">${item.numero}</div>
+            <div class="text-xs text-gray-300">${item.frecuencia}</div>
+          </div>
+        `;
+      });
+      
+      htmlContent += `
+            </div>
+          </div>
+          
+          <!-- Análisis por bloques -->
+          <div class="mb-4">
+            <h4 class="text-lg font-semibold text-white mb-2">📈 Análisis por Bloques</h4>
+            <div class="space-y-2">
+      `;
+      
       stats.bloques.forEach(bloque => {
-        htmlBloques += `
-          <div class="bg-white bg-opacity-20 rounded-lg p-3 border border-white border-opacity-30">
+        htmlContent += `
+          <div class="analisis-transparente rounded-lg p-3 border border-white border-opacity-30">
             <div class="flex justify-between items-center">
               <span class="font-semibold text-white">Bloque ${bloque.bloque}</span>
               <div class="text-right">
@@ -315,40 +393,21 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
         `;
       });
       
-      htmlSorteos += `
-        <div class="analisis-transparente rounded-xl p-6 text-white">
-          <div class="text-center mb-4">
-            <h3 class="text-xl font-bold text-white mb-2">
-              🎲 ${nombre}
-            </h3>
-            <p class="text-gray-300 text-sm">${stats.totalSorteos} sorteos analizados</p>
-          </div>
-          
-          <div class="space-y-3">
-            ${htmlBloques}
-          </div>
-          
-          <div class="mt-4 text-center">
-            <p class="text-xs text-gray-300">
-              Promedio: números por bloque | Porcentaje: probabilidad relativa
-            </p>
+      htmlContent += `
+            </div>
           </div>
         </div>
       `;
     });
     
-    contenedorCharts.innerHTML = `
-      <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold text-white mb-2">📊 Análisis por Bloques Numéricos</h2>
-        <p class="text-gray-300">Probabilidad de números por rangos (1-56 dividido en 6 bloques)</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        ${htmlSorteos}
+    htmlContent += `
       </div>
     `;
+    
+    contenedorCharts.innerHTML = htmlContent;
   }
   
-  console.log('✅ Análisis por bloques mostrado exitosamente');
+  console.log('✅ Análisis estadístico completo mostrado exitosamente');
 }
 
 function mostrarEstadisticasCompletas(frecuencia, totalNumeros, totalSorteos, modo) {
