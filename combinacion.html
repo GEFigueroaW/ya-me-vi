@@ -588,17 +588,6 @@
         const porcentajePromedio = porcentajes.reduce((a, b) => a + b, 0) / porcentajes.length;
         const clasificacionGeneral = clasificarProbabilidad(porcentajePromedio);
         
-        // Calcular probabilidades por sorteo para la combinación
-        const probabilidadesPorSorteo = {};
-        ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-          const porcentajesSorteo = analisisIndividual.map(analisis => analisis.porSorteo[sorteo].porcentaje);
-          const promedioSorteo = porcentajesSorteo.reduce((a, b) => a + b, 0) / porcentajesSorteo.length;
-          probabilidadesPorSorteo[sorteo] = {
-            promedio: promedioSorteo,
-            clasificacion: clasificarProbabilidad(promedioSorteo)
-          };
-        });
-        
         // Calcular potencial de éxito general mejorado
         const factorCombinacion = 0.85; // Factor más optimista
         const probabilidadConjunta = porcentajePromedio * factorCombinacion;
@@ -615,60 +604,27 @@
             <!-- Probabilidad General de la Combinación -->
             <div class="analisis-transparente rounded-lg p-6 mb-6 border-2 border-yellow-400">
               <h3 class="text-xl font-bold mb-4 text-white text-center">🎯 Probabilidad General de la Combinación</h3>
-              
-              <!-- Análisis por Sorteo -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="text-center analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
-                  <h4 class="font-bold text-white mb-2">🎲 Melate</h4>
-                  <div class="text-2xl font-bold ${probabilidadesPorSorteo.melate.clasificacion.color} mb-1">
-                    ${probabilidadesPorSorteo.melate.clasificacion.emoji} ${probabilidadesPorSorteo.melate.promedio.toFixed(1)}%
-                  </div>
-                  <div class="text-sm text-gray-300">
-                    ${probabilidadesPorSorteo.melate.clasificacion.categoria}
-                  </div>
-                </div>
-                <div class="text-center analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
-                  <h4 class="font-bold text-white mb-2">🎲 Revancha</h4>
-                  <div class="text-2xl font-bold ${probabilidadesPorSorteo.revancha.clasificacion.color} mb-1">
-                    ${probabilidadesPorSorteo.revancha.clasificacion.emoji} ${probabilidadesPorSorteo.revancha.promedio.toFixed(1)}%
-                  </div>
-                  <div class="text-sm text-gray-300">
-                    ${probabilidadesPorSorteo.revancha.clasificacion.categoria}
-                  </div>
-                </div>
-                <div class="text-center analisis-transparente rounded-lg p-4 border border-white border-opacity-30">
-                  <h4 class="font-bold text-white mb-2">🎲 Revanchita</h4>
-                  <div class="text-2xl font-bold ${probabilidadesPorSorteo.revanchita.clasificacion.color} mb-1">
-                    ${probabilidadesPorSorteo.revanchita.clasificacion.emoji} ${probabilidadesPorSorteo.revanchita.promedio.toFixed(1)}%
-                  </div>
-                  <div class="text-sm text-gray-300">
-                    ${probabilidadesPorSorteo.revanchita.clasificacion.categoria}
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Resumen General -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="text-center">
                   <div class="text-3xl font-bold ${clasificacionGeneral.color} mb-2">
                     ${clasificacionGeneral.emoji} ${clasificacionGeneral.categoria}
                   </div>
                   <div class="text-lg text-white mb-1">
-                    Índice General: <span class="font-bold">${porcentajePromedio.toFixed(1)}%</span>
+                    Índice de Suerte: <span class="font-bold">${porcentajePromedio.toFixed(1)}%</span>
                   </div>
                   <div class="text-sm text-gray-300">
-                    Promedio entre todos los sorteos
+                    Basado en análisis histórico de apariciones
                   </div>
                 </div>
                 <div class="text-center">
                   <div class="text-2xl font-bold text-blue-300 mb-2">
-                    � ${probabilidadConjuntaFinal.toFixed(1)}%
+                    🌟 ${probabilidadConjuntaFinal.toFixed(1)}%
                   </div>
                   <div class="text-lg text-white mb-1">
-                    Potencial de Suerte
+                    Potencial de Éxito
                   </div>
                   <div class="text-sm text-gray-300">
-                    Probabilidad optimizada de éxito
+                    Probabilidad optimizada de la combinación
                   </div>
                 </div>
               </div>
