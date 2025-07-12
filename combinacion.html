@@ -558,12 +558,58 @@
           `;
         });
 
+        // Calcular probabilidad general de la combinación
+        const porcentajes = analisisIndividual.map(a => a.porcentajeTotal);
+        const porcentajePromedio = porcentajes.reduce((a, b) => a + b, 0) / porcentajes.length;
+        const clasificacionGeneral = clasificarProbabilidad(porcentajePromedio);
+        
+        // Calcular también la probabilidad conjunta (más realista para combinaciones)
+        const probabilidadConjunta = porcentajes.reduce((a, b) => a * b, 1) / Math.pow(100, porcentajes.length - 1);
+        
         resultadoCombinacion.innerHTML = `
           <div class="analisis-transparente rounded-xl p-6 mb-6">
             <h2 class="text-2xl font-bold mb-4 text-white">🎯 Análisis de tu Combinación</h2>
             <div class="text-center mb-6">
               <div class="text-4xl font-bold text-white mb-2">${numeros.join(' - ')}</div>
               <p class="text-gray-300">Tu combinación seleccionada</p>
+            </div>
+            
+            <!-- Probabilidad General de la Combinación -->
+            <div class="analisis-transparente rounded-lg p-6 mb-6 border-2 border-yellow-400">
+              <h3 class="text-xl font-bold mb-4 text-white text-center">🎯 Probabilidad General de la Combinación</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="text-center">
+                  <div class="text-3xl font-bold ${clasificacionGeneral.color} mb-2">
+                    ${clasificacionGeneral.emoji} ${clasificacionGeneral.categoria}
+                  </div>
+                  <div class="text-lg text-white mb-1">
+                    Probabilidad Promedio: <span class="font-bold">${porcentajePromedio.toFixed(2)}%</span>
+                  </div>
+                  <div class="text-sm text-gray-300">
+                    Basada en el promedio de probabilidades individuales
+                  </div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-blue-300 mb-2">
+                    🔢 ${probabilidadConjunta.toFixed(4)}%
+                  </div>
+                  <div class="text-lg text-white mb-1">
+                    Probabilidad Conjunta
+                  </div>
+                  <div class="text-sm text-gray-300">
+                    Probabilidad de que salgan todos juntos
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 text-center">
+                <div class="text-white font-semibold">
+                  📊 Evaluación: <span class="${clasificacionGeneral.color}">
+                    ${clasificacionGeneral.categoria === 'Muy Alta' || clasificacionGeneral.categoria === 'Alta' ? 
+                      '¡Combinación con buena probabilidad histórica!' : 
+                      'Combinación con probabilidad ' + clasificacionGeneral.categoria.toLowerCase()}
+                  </span>
+                </div>
+              </div>
             </div>
             
             <div class="mb-6">
