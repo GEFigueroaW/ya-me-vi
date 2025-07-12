@@ -110,45 +110,170 @@
     async function cargarDatosCSV() {
       const sorteos = ['melate', 'revancha', 'revanchita'];
       let datosRealesCargados = false;
+      let estadisticasCarga = {
+        melate: { cargado: false, sorteos: 0, error: null },
+        revancha: { cargado: false, sorteos: 0, error: null },
+        revanchita: { cargado: false, sorteos: 0, error: null }
+      };
+      
+      console.log('🔄 Intentando cargar datos históricos reales...');
       
       for (const sorteo of sorteos) {
         try {
+          console.log(`📊 Cargando ${sorteo}.csv...`);
           const response = await fetch(`assets/${sorteo}.csv`);
+          
           if (!response.ok) {
-            throw new Error(`Error al cargar ${sorteo}.csv: ${response.status}`);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
           
           const csvText = await response.text();
-          const lines = csvText.trim().split('\n').slice(1); // Eliminar header
+          const lines = csvText.trim().split('\n');
+          
+          if (lines.length <= 1) {
+            throw new Error('Archivo CSV vacío o solo con encabezados');
+          }
+          
+          // Detectar formato del CSV
+          const header = lines[0].toLowerCase();
+          let formatoDetectado = '';
+          
+          if (header.includes('date,sorteo,tipo,num1')) {
+            formatoDetectado = 'simple';
+          } else if (header.includes('fecha,sorteo,numerosorteo,num1') || header.includes('fecha,sorteo,num1')) {
+            formatoDetectado = 'completo';
+          } else {
+            throw new Error('Formato de CSV no reconocido');
+          }
+          
+          console.log(`🔍 Formato detectado para ${sorteo}: ${formatoDetectado}`);
           
           const numeros = [];
-          lines.forEach(line => {
+          let sorteosValidos = 0;
+          
+          // Procesar líneas según el formato
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
             const cols = line.split(',');
-            if (cols.length >= 9) {
-              // Extraer números del sorteo (columnas 3-8: Num1 a Num6)
-              for (let i = 3; i <= 8; i++) {
-                const num = parseInt(cols[i]);
-                if (!isNaN(num) && num >= 1 && num <= 56) {
-                  numeros.push(num);
+            let numerosLinea = [];
+            let lineaValida = true;
+            
+            if (formatoDetectado === 'simple') {
+              // Formato: Date,Sorteo,Tipo,Num1,Num2,Num3,Num4,Num5,Num6
+              if (cols.length >= 9) {
+                for (let j = 3; j <= 8; j++) {
+                  const num = parseInt(cols[j]);
+                  if (!isNaN(num) && num >= 1 && num <= 56) {
+                    numerosLinea.push(num);
+                  } else {
+                    lineaValida = false;
+                    break;
+                  }
                 }
+              } else {
+                lineaValida = false;
+              }
+            } else if (formatoDetectado === 'completo') {
+              // Formato: Fecha,Sorteo,NumeroSorteo,Num1,Num2,Num3,Num4,Num5,Num6,Adicional,Extra,Fecha_Sorteo,Fecha_Caducidad
+              if (cols.length >= 9) {
+                for (let j = 3; j <= 8; j++) {
+                  const num = parseInt(cols[j]);
+                  if (!isNaN(num) && num >= 1 && num <= 56) {
+                    numerosLinea.push(num);
+                  } else {
+                    lineaValida = false;
+                    break;
+                  }
+                }
+              } else {
+                lineaValida = false;
               }
             }
-          });
+            
+            if (lineaValida && numerosLinea.length === 6) {
+              numeros.push(...numerosLinea);
+              sorteosValidos++;
+            } else {
+              console.warn(`⚠️ Línea ${i + 1} inválida en ${sorteo}.csv: ${line}`);
+            }
+          }
           
           if (numeros.length > 0) {
             numerosPorSorteo[sorteo] = numeros;
+            estadisticasCarga[sorteo] = {
+              cargado: true,
+              sorteos: sorteosValidos,
+              totalNumeros: numeros.length,
+              formato: formatoDetectado,
+              error: null
+            };
             datosRealesCargados = true;
+            console.log(`✅ ${sorteo}: ${sorteosValidos} sorteos cargados (${numeros.length} números) - Formato: ${formatoDetectado}`);
+          } else {
+            throw new Error('No se encontraron números válidos en el archivo');
           }
+          
         } catch (error) {
-          console.error(`Error cargando ${sorteo}:`, error);
+          console.error(`❌ Error cargando ${sorteo}:`, error.message);
+          estadisticasCarga[sorteo].error = error.message;
         }
       }
       
+      // Mostrar resumen de carga
+      console.log('\n📋 RESUMEN DE CARGA DE DATOS:');
+      console.log('═══════════════════════════════════');
+      
+      const archivosReales = Object.values(estadisticasCarga).filter(e => e.cargado).length;
+      
+      if (archivosReales > 0) {
+        console.log(`✅ DATOS HISTÓRICOS REALES CARGADOS (${archivosReales}/3 archivos)`);
+        Object.entries(estadisticasCarga).forEach(([sorteo, stats]) => {
+          if (stats.cargado) {
+            console.log(`   📊 ${sorteo.toUpperCase()}: ${stats.sorteos} sorteos históricos (${stats.formato})`);
+          } else {
+            console.log(`   ❌ ${sorteo.toUpperCase()}: ${stats.error || 'No disponible'}`);
+          }
+        });
+        
+        // Mostrar estadísticas de distribución
+        console.log('\n🔢 ANÁLISIS DE DISTRIBUCIÓN:');
+        Object.entries(estadisticasCarga).forEach(([sorteo, stats]) => {
+          if (stats.cargado) {
+            const numeros = numerosPorSorteo[sorteo];
+            const frecuencias = {};
+            
+            numeros.forEach(num => {
+              frecuencias[num] = (frecuencias[num] || 0) + 1;
+            });
+            
+            const numerosUnicos = Object.keys(frecuencias).length;
+            const maxFrecuencia = Math.max(...Object.values(frecuencias));
+            const minFrecuencia = Math.min(...Object.values(frecuencias));
+            
+            console.log(`   🎲 ${sorteo.toUpperCase()}: ${numerosUnicos} números únicos (freq: ${minFrecuencia}-${maxFrecuencia})`);
+          }
+        });
+      } else {
+        console.log('❌ NO SE CARGARON DATOS REALES');
+        console.log('   Usando datos de prueba generados automáticamente');
+        console.log('   Para usar datos reales, sigue las instrucciones en:');
+        console.log('   📄 INSTRUCCIONES-DATOS-REALES.md');
+      }
+      
+      console.log('═══════════════════════════════════\n');
+      
       if (!datosRealesCargados) {
+        console.log('🔄 Generando datos de prueba...');
         inicializarDatosPrueba();
       }
       
-      return datosRealesCargados;
+      return {
+        datosReales: datosRealesCargados,
+        estadisticas: estadisticasCarga,
+        totalSorteos: Object.values(estadisticasCarga).reduce((sum, e) => sum + (e.sorteos || 0), 0)
+      };
     }
 
     // Inicializar datos de prueba como fallback
@@ -188,20 +313,104 @@
     // Función para preparar datos históricos
     async function prepararDatosHistoricos() {
       try {
-        const datosReales = await cargarDatosCSV();
-        if (datosReales && numerosPorSorteo.melate.length > 0) {
-          // Verificar que tenemos datos para al menos algunos números
-          const frecuenciaTest = [1, 15, 30, 45].map(num => {
-            const freqMelate = numerosPorSorteo.melate.filter(n => n === num).length;
-            const freqRevancha = numerosPorSorteo.revancha.filter(n => n === num).length;
-            const freqRevanchita = numerosPorSorteo.revanchita.filter(n => n === num).length;
-            return { num, freqMelate, freqRevancha, freqRevanchita };
-          });
+        const resultadoCarga = await cargarDatosCSV();
+        
+        if (resultadoCarga.datosReales && numerosPorSorteo.melate.length > 0) {
+          // Verificar calidad de los datos
+          const calidadDatos = verificarCalidadDatos();
+          
+          if (calidadDatos.esValido) {
+            console.log('✅ Datos históricos validados correctamente');
+            console.log(`📊 Análisis de calidad: ${calidadDatos.score}/100 puntos`);
+            
+            // Mostrar información adicional en la interfaz
+            mostrarIndicadorDatosReales(resultadoCarga.estadisticas);
+          } else {
+            console.warn('⚠️ Calidad de datos por debajo del estándar');
+            console.log('💡 Considera actualizar los archivos CSV con más datos');
+          }
+        } else {
+          console.log('🔄 Usando datos de prueba para demostración');
+          mostrarIndicadorDatosPrueba();
         }
       } catch (error) {
-        console.error('Error preparando datos históricos:', error);
+        console.error('❌ Error preparando datos históricos:', error);
         inicializarDatosPrueba();
+        mostrarIndicadorDatosPrueba();
       }
+    }
+
+    // Función para verificar calidad de datos
+    function verificarCalidadDatos() {
+      let score = 0;
+      let observaciones = [];
+      
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        
+        if (numeros.length >= 300) score += 20; // Cantidad suficiente
+        else if (numeros.length >= 150) score += 15;
+        else if (numeros.length >= 60) score += 10;
+        else observaciones.push(`${sorteo}: pocos datos (${numeros.length/6} sorteos)`);
+        
+        // Verificar distribución
+        const distribucion = {};
+        numeros.forEach(n => distribucion[n] = (distribucion[n] || 0) + 1);
+        
+        const valores = Object.values(distribucion);
+        const promedio = valores.reduce((a,b) => a+b, 0) / valores.length;
+        const varianza = valores.reduce((sum, val) => sum + Math.pow(val - promedio, 2), 0) / valores.length;
+        
+        if (varianza > 0.5) score += 10; // Buena varianza
+        else observaciones.push(`${sorteo}: distribución muy uniforme (posible datos sintéticos)`);
+      });
+      
+      return {
+        esValido: score >= 60,
+        score,
+        observaciones
+      };
+    }
+
+    // Funciones para mostrar indicadores en la interfaz
+    function mostrarIndicadorDatosReales(estadisticas) {
+      const indicador = document.createElement('div');
+      indicador.className = 'fixed top-20 right-4 bg-green-500 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm z-20';
+      indicador.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="animate-pulse">🟢</span>
+          <span>Datos Reales</span>
+        </div>
+      `;
+      
+      document.body.appendChild(indicador);
+      
+      // Remover después de 5 segundos
+      setTimeout(() => {
+        if (indicador.parentNode) {
+          indicador.remove();
+        }
+      }, 5000);
+    }
+
+    function mostrarIndicadorDatosPrueba() {
+      const indicador = document.createElement('div');
+      indicador.className = 'fixed top-20 right-4 bg-orange-500 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm z-20';
+      indicador.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="animate-pulse">🟠</span>
+          <span>Datos de Prueba</span>
+        </div>
+      `;
+      
+      document.body.appendChild(indicador);
+      
+      // Remover después de 7 segundos
+      setTimeout(() => {
+        if (indicador.parentNode) {
+          indicador.remove();
+        }
+      }, 7000);
     }
 
     function calcularFrecuenciaPorSorteo(num) {
