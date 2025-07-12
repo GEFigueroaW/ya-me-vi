@@ -29,6 +29,7 @@
     <h1 class="text-3xl font-bold mb-6 animate__animated animate__fadeInDown">
       🎯 Evalúa tu Combinación Ganadora
     </h1>
+    <!-- Versión actualizada con validación completa -->
 
     <!-- Sección de evaluación de número individual -->
     <div class="mb-8 max-w-md mx-auto">
@@ -120,12 +121,33 @@
         console.log('📈 Números por sorteo:', numerosPorSorteo);
       } catch (error) {
         console.error('❌ Error cargando datos:', error);
-        // Datos de ejemplo para testing
-        numerosPorSorteo = {
-          melate: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40],
-          revancha: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
-          revanchita: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29]
+        // Datos de ejemplo más robustos para testing
+        console.log('📊 Generando datos de prueba...');
+        
+        // Generar datos de prueba más realistas
+        const generarDatosPrueba = () => {
+          const numeros = [];
+          for (let i = 1; i <= 56; i++) {
+            // Simular diferentes frecuencias
+            const frecuencia = Math.floor(Math.random() * 20) + 1;
+            for (let j = 0; j < frecuencia; j++) {
+              numeros.push(i);
+            }
+          }
+          return numeros;
         };
+        
+        numerosPorSorteo = {
+          melate: generarDatosPrueba(),
+          revancha: generarDatosPrueba(),
+          revanchita: generarDatosPrueba()
+        };
+        
+        console.log('✅ Datos de prueba generados:', {
+          melate: numerosPorSorteo.melate.length,
+          revancha: numerosPorSorteo.revancha.length,
+          revanchita: numerosPorSorteo.revanchita.length
+        });
       }
     }
 
@@ -175,10 +197,14 @@
       
       // Limpiar estilos previos
       input.classList.remove('error-rango', 'error-duplicado');
+      input.style.borderColor = '#e5e7eb';
+      input.style.backgroundColor = 'white';
       
       // Validar rango
       if (isNaN(valor) || valor < 1 || valor > 56) {
         input.classList.add('error-rango');
+        input.style.borderColor = '#ef4444';
+        input.style.backgroundColor = '#fef2f2';
         return false;
       }
       
@@ -193,26 +219,69 @@
         
         if (duplicados.includes(valor)) {
           input.classList.add('error-duplicado');
+          input.style.borderColor = '#f59e0b';
+          input.style.backgroundColor = '#fef3c7';
           return false;
         }
       }
       
+      // Si llegamos aquí, es válido
+      input.style.borderColor = '#3b82f6';
+      input.style.backgroundColor = 'white';
       return true;
     }
 
-    // Eventos de validación
+    // Eventos de validación en tiempo real
     form.addEventListener('input', (e) => {
       if (e.target.classList.contains('combo-input')) {
         validarInput(e.target);
+        
+        // Validar todos los inputs para duplicados
+        const inputs = form.querySelectorAll('.combo-input');
+        inputs.forEach(input => {
+          if (input !== e.target && input.value.trim() !== '') {
+            validarInput(input);
+          }
+        });
       }
     });
 
-    // Limitar entrada a 56
+    // Validación para número individual
+    inputNumero.addEventListener('input', (e) => {
+      const valor = parseInt(e.target.value);
+      
+      if (isNaN(valor) || valor < 1 || valor > 56) {
+        e.target.style.borderColor = '#ef4444';
+        e.target.style.backgroundColor = '#fef2f2';
+      } else {
+        e.target.style.borderColor = '#3b82f6';
+        e.target.style.backgroundColor = 'white';
+      }
+    });
+
+    // Limitar entrada a 56 y prevenir caracteres no válidos
     function limitarEntrada(input) {
       input.addEventListener('input', (e) => {
         let valor = parseInt(e.target.value);
         if (valor > 56) {
           e.target.value = 56;
+        }
+        
+        // Validar después de limitar
+        if (input.classList.contains('combo-input')) {
+          validarInput(input);
+        }
+      });
+      
+      input.addEventListener('keypress', (e) => {
+        // Solo permitir números
+        if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          e.preventDefault();
+        }
+        
+        // Limitar a 2 dígitos
+        if (input.value.length >= 2 && !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          e.preventDefault();
         }
       });
     }
@@ -446,7 +515,12 @@
     });
 
     // Inicializar
+    console.log('🚀 Iniciando aplicación...');
     prepararDatos();
+    
+    // Mensaje de depuración
+    console.log('✅ Aplicación inicializada correctamente');
+    console.log('📱 Versión:', new Date().toISOString());
   </script>
 
   <style>
@@ -486,6 +560,33 @@
     .combo-input.error-duplicado {
       border-color: #f59e0b;
       background-color: #fef3c7;
+    }
+
+    /* Capas de fondo dinámico */
+    .background-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+      z-index: 1;
+    }
+    
+    .background-layer.active {
+      opacity: 1;
+    }
+    
+    /* Fondo inicial por defecto */
+    #background {
+      background-image: url('assets/vg1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
   </style>
 </body>

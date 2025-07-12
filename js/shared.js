@@ -117,18 +117,17 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error('Error precargando imágenes:', err);
     inicializarFondo(); // Continuar aunque haya errores
   });
-});
-
-// Cargar fondo inicial (vg1.jpg ya está como valor por defecto en el CSS)
-
-// === FOOTER AUTOMÁTICO (en caso de que se use vía JS en páginas secundarias) ===
-document.addEventListener("DOMContentLoaded", () => {
+  
+  // === FOOTER AUTOMÁTICO ===
   const footerContainer = document.getElementById("footer-container");
   if (footerContainer) {
     fetch("footer.html")
       .then(res => res.text())
       .then(data => {
         footerContainer.innerHTML = data;
+      })
+      .catch(err => {
+        console.warn('No se pudo cargar el footer:', err);
       });
   }
 });
