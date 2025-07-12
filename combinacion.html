@@ -138,7 +138,9 @@
           const header = lines[0].toLowerCase();
           let formatoDetectado = '';
           
-          if (header.includes('date,sorteo,tipo,num1')) {
+          if (header.includes('nproducto,concurso,r1,r2,r3,r4,r5,r6')) {
+            formatoDetectado = 'historico_real';
+          } else if (header.includes('date,sorteo,tipo,num1')) {
             formatoDetectado = 'simple';
           } else if (header.includes('fecha,sorteo,numerosorteo,num1') || header.includes('fecha,sorteo,num1')) {
             formatoDetectado = 'completo';
@@ -150,6 +152,7 @@
           
           const numeros = [];
           let sorteosValidos = 0;
+          const fechaLimite = new Date('2022-11-01'); // Filtrar últimos 30 meses desde julio 2025
           
           // Procesar líneas según el formato
           for (let i = 1; i < lines.length; i++) {
@@ -159,8 +162,43 @@
             const cols = line.split(',');
             let numerosLinea = [];
             let lineaValida = true;
+            let fechaSorteo = null;
             
-            if (formatoDetectado === 'simple') {
+            if (formatoDetectado === 'historico_real') {
+              // Formato: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
+              // Los números están en las columnas R1-R6 (índices 2-7)
+              // La fecha está en la columna FECHA (índice 10)
+              if (cols.length >= 11) {
+                // Verificar fecha - últimos 30 meses
+                const fechaStr = cols[10].trim();
+                if (fechaStr) {
+                  const partesFecha = fechaStr.split('/');
+                  if (partesFecha.length === 3) {
+                    const dia = parseInt(partesFecha[0]);
+                    const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+                    const año = parseInt(partesFecha[2]);
+                    fechaSorteo = new Date(año, mes, dia);
+                    
+                    if (fechaSorteo < fechaLimite) {
+                      continue; // Saltar sorteos más antiguos de 30 meses
+                    }
+                  }
+                }
+                
+                // Extraer números R1-R6 (columnas 2-7)
+                for (let j = 2; j <= 7; j++) {
+                  const num = parseInt(cols[j]);
+                  if (!isNaN(num) && num >= 1 && num <= 56) {
+                    numerosLinea.push(num);
+                  } else {
+                    lineaValida = false;
+                    break;
+                  }
+                }
+              } else {
+                lineaValida = false;
+              }
+            } else if (formatoDetectado === 'simple') {
               // Formato: Date,Sorteo,Tipo,Num1,Num2,Num3,Num4,Num5,Num6
               if (cols.length >= 9) {
                 for (let j = 3; j <= 8; j++) {
@@ -196,7 +234,9 @@
               numeros.push(...numerosLinea);
               sorteosValidos++;
             } else {
-              console.warn(`⚠️ Línea ${i + 1} inválida en ${sorteo}.csv: ${line}`);
+              if (formatoDetectado === 'historico_real' && fechaSorteo && fechaSorteo >= fechaLimite) {
+                console.warn(`⚠️ Línea ${i + 1} inválida en ${sorteo}.csv: ${line}`);
+              }
             }
           }
           
@@ -231,7 +271,8 @@
         console.log(`✅ DATOS HISTÓRICOS REALES CARGADOS (${archivosReales}/3 archivos)`);
         Object.entries(estadisticasCarga).forEach(([sorteo, stats]) => {
           if (stats.cargado) {
-            console.log(`   📊 ${sorteo.toUpperCase()}: ${stats.sorteos} sorteos históricos (${stats.formato})`);
+            const periodo = stats.formato === 'historico_real' ? ' - Últimos 30 meses' : '';
+            console.log(`   📊 ${sorteo.toUpperCase()}: ${stats.sorteos} sorteos históricos (${stats.formato}${periodo})`);
           } else {
             console.log(`   ❌ ${sorteo.toUpperCase()}: ${stats.error || 'No disponible'}`);
           }
@@ -259,7 +300,7 @@
         console.log('❌ NO SE CARGARON DATOS REALES');
         console.log('   Usando datos de prueba generados automáticamente');
         console.log('   Para usar datos reales, sigue las instrucciones en:');
-        console.log('   📄 INSTRUCCIONES-DATOS-REALES.md');
+        console.log('   📄 GUIA-DATOS-REALES.md');
       }
       
       console.log('═══════════════════════════════════\n');
