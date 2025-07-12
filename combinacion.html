@@ -26,7 +26,7 @@
       </button>
     </div>
 
-    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-6 animate__animated animate__fadeInDown leading-tight px-4 text-center">
+    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-6 animate__animated animate__fadeInDown leading-relaxed px-4 text-center break-words">
       🎯 Evalúa tus Números de la Suerte
     </h1>
     <!-- Versión actualizada con validación completa -->
@@ -34,7 +34,7 @@
     <!-- Sección de evaluación de número individual -->
     <div class="mb-8 max-w-md mx-auto">
       <div class="analisis-transparente rounded-xl p-6 mb-6">
-        <h2 class="text-base sm:text-lg md:text-xl font-bold mb-4 text-white leading-tight text-center">🔍 Ingresa un número para evaluar posibilidad</h2>
+        <h2 class="text-base sm:text-lg md:text-xl font-bold mb-4 text-white leading-relaxed text-center break-words">🔍 Ingresa un número para evaluar posibilidad</h2>
         <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
           <input type="number" id="numero-individual" class="numero-input" min="1" max="56" placeholder="">
           <button id="evaluar-numero-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300 font-semibold whitespace-nowrap">
@@ -48,7 +48,7 @@
     <!-- Sección de evaluación de combinación completa -->
     <div class="max-w-2xl mx-auto">
       <div class="analisis-transparente rounded-xl p-6 mb-6">
-        <h2 class="text-base sm:text-lg md:text-xl font-bold mb-4 text-white leading-tight text-center">🎲 Ingresa tu combinación (6 números)</h2>
+        <h2 class="text-base sm:text-lg md:text-xl font-bold mb-4 text-white leading-relaxed text-center break-words">🎲 Ingresa tu combinación (6 números)</h2>
         
         <form id="combo-form" class="flex flex-wrap justify-center gap-3 mb-6">
           <input type="number" class="combo-input" min="1" max="56" placeholder="" data-pos="1">
@@ -119,6 +119,7 @@
         });
         
         console.log('📈 Números por sorteo:', numerosPorSorteo);
+        return Promise.resolve();
       } catch (error) {
         console.error('❌ Error cargando datos:', error);
         // Datos de ejemplo más robustos para testing
@@ -126,19 +127,21 @@
         
         // Generar datos de prueba más realistas
         const generarDatosPrueba = () => {
+          console.log('📊 Generando datos de prueba mejorados...');
           const numeros = [];
-          const totalSorteos = 200; // Simular 200 sorteos
+          const totalSorteos = 100; // Reducir a 100 sorteos para mejor distribución
           
           for (let sorteo = 0; sorteo < totalSorteos; sorteo++) {
-            // Cada sorteo genera 6 números (como en Melate)
+            // Cada sorteo genera 6 números únicos (como en Melate)
             const numerosDelSorteo = new Set();
             while (numerosDelSorteo.size < 6) {
               const numeroAleatorio = Math.floor(Math.random() * 56) + 1;
               numerosDelSorteo.add(numeroAleatorio);
             }
-            numeros.push(...numerosDelSorteo);
+            numeros.push(...Array.from(numerosDelSorteo));
           }
           
+          console.log(`📈 Datos generados: ${numeros.length} números totales de ${totalSorteos} sorteos`);
           return numeros;
         };
         
@@ -153,19 +156,28 @@
           revancha: numerosPorSorteo.revancha.length,
           revanchita: numerosPorSorteo.revanchita.length
         });
+        
+        return Promise.resolve();
       }
     }
 
     // Funciones de cálculo
     function calcularFrecuenciaPorSorteo(num) {
+      console.log(`🔍 Calculando frecuencia para número ${num}`);
       const resultados = {};
       ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
         const numeros = numerosPorSorteo[sorteo] || [];
+        const frecuencia = numeros.filter(n => n === num).length;
+        const total = numeros.length;
+        const porcentaje = total > 0 ? (frecuencia / total) * 100 : 0;
+        
         resultados[sorteo] = {
-          frecuencia: numeros.filter(n => n === num).length,
-          total: numeros.length,
-          porcentaje: numeros.length > 0 ? (numeros.filter(n => n === num).length / numeros.length) * 100 : 0
+          frecuencia: frecuencia,
+          total: total,
+          porcentaje: porcentaje
         };
+        
+        console.log(`📊 ${sorteo}: ${frecuencia}/${total} = ${porcentaje.toFixed(2)}%`);
       });
       return resultados;
     }
@@ -180,19 +192,29 @@
     }
 
     function calcularPorcentajeTotal(num) {
+      console.log(`🔍 Calculando porcentaje total para número ${num}`);
       let totalNumeros = 0;
+      let frecuenciaTotal = 0;
+      
       ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-        totalNumeros += numerosPorSorteo[sorteo].length;
+        const numeros = numerosPorSorteo[sorteo] || [];
+        totalNumeros += numeros.length;
+        const frecuenciaSorteo = numeros.filter(n => n === num).length;
+        frecuenciaTotal += frecuenciaSorteo;
+        console.log(`📊 ${sorteo}: ${frecuenciaSorteo} apariciones de ${numeros.length} números`);
       });
-      const frecuencia = calcularFrecuenciaTotal(num);
-      return totalNumeros > 0 ? (frecuencia / totalNumeros) * 100 : 0;
+      
+      const porcentaje = totalNumeros > 0 ? (frecuenciaTotal / totalNumeros) * 100 : 0;
+      console.log(`📈 Total: ${frecuenciaTotal}/${totalNumeros} = ${porcentaje.toFixed(2)}%`);
+      return porcentaje;
     }
 
     function clasificarProbabilidad(porcentaje) {
-      if (porcentaje >= 3.0) return { categoria: 'Muy Alta', color: 'text-green-300', emoji: '🔥' };
-      if (porcentaje >= 2.5) return { categoria: 'Alta', color: 'text-green-400', emoji: '⚡' };
-      if (porcentaje >= 2.0) return { categoria: 'Media', color: 'text-yellow-300', emoji: '⚖️' };
-      if (porcentaje >= 1.5) return { categoria: 'Baja', color: 'text-orange-300', emoji: '❄️' };
+      console.log('🔍 Clasificando porcentaje:', porcentaje);
+      if (porcentaje >= 2.5) return { categoria: 'Muy Alta', color: 'text-green-300', emoji: '🔥' };
+      if (porcentaje >= 2.0) return { categoria: 'Alta', color: 'text-green-400', emoji: '⚡' };
+      if (porcentaje >= 1.5) return { categoria: 'Media', color: 'text-yellow-300', emoji: '⚖️' };
+      if (porcentaje >= 1.0) return { categoria: 'Baja', color: 'text-orange-300', emoji: '❄️' };
       return { categoria: 'Muy Baja', color: 'text-red-300', emoji: '💀' };
     }
 
@@ -521,7 +543,19 @@
 
     // Inicializar
     console.log('🚀 Iniciando aplicación...');
-    prepararDatos();
+    prepararDatos().then(() => {
+      console.log('✅ Datos preparados, verificando...');
+      console.log('📊 Estado final de numerosPorSorteo:', {
+        melate: numerosPorSorteo.melate?.length || 0,
+        revancha: numerosPorSorteo.revancha?.length || 0,
+        revanchita: numerosPorSorteo.revanchita?.length || 0
+      });
+      
+      // Prueba rápida con el número 1
+      const testNum = 1;
+      const testPorcentaje = calcularPorcentajeTotal(testNum);
+      console.log(`🧪 Prueba rápida número ${testNum}: ${testPorcentaje.toFixed(2)}%`);
+    });
     
     // Mensaje de depuración
     console.log('✅ Aplicación inicializada correctamente');
@@ -535,6 +569,7 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       word-wrap: break-word;
       overflow-wrap: break-word;
+      hyphens: none;
     }
     
     .combo-input, .numero-input {
@@ -583,6 +618,33 @@
     .combo-input.error-duplicado {
       border-color: #f59e0b;
       background-color: #fef3c7;
+    }
+
+    /* Prevenir corte de palabras */
+    h1, h2, h3, h4, h5, h6 {
+      word-break: keep-all;
+      overflow-wrap: normal;
+      hyphens: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* En pantallas muy pequeñas, permitir wrap pero evitar corte de palabras */
+    @media (max-width: 480px) {
+      h1, h2, h3, h4, h5, h6 {
+        white-space: normal;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+        hyphens: none;
+        overflow: visible;
+        text-overflow: unset;
+      }
+      
+      .text-responsive {
+        font-size: 0.875rem;
+        line-height: 1.25;
+      }
     }
 
     /* Responsive text adjustments */
