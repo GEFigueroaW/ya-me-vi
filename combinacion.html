@@ -7,6 +7,19 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* Ocultar los botones de incremento/decremento en inputs de tipo number */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+  </style>
 </head>
 <body class="overflow-x-hidden">
 
@@ -258,13 +271,14 @@
       return { categoria: 'Muy Baja', color: 'text-gray-300', emoji: '✨' };
     }
 
-    // Validación de inputs
+    // Validación de inputs mejorada
     function validarInput(input) {
       const valor = parseInt(input.value);
       
       // Limpiar estilos previos
       input.classList.remove('border-red-500', 'border-green-500');
       
+      // Validar rango
       if (isNaN(valor) || valor < 1 || valor > 56) {
         input.classList.add('border-red-500');
         return false;
@@ -272,6 +286,27 @@
         input.classList.add('border-green-500');
         return true;
       }
+    }
+
+    // Validar duplicados en combinación
+    function validarCombinacion() {
+      const valores = Array.from(inputsCombinacion)
+        .map(input => parseInt(input.value))
+        .filter(num => !isNaN(num));
+      
+      // Verificar duplicados
+      const duplicados = valores.filter((item, index) => valores.indexOf(item) !== index);
+      
+      // Marcar inputs con duplicados
+      inputsCombinacion.forEach(input => {
+        const valor = parseInt(input.value);
+        if (!isNaN(valor) && duplicados.includes(valor)) {
+          input.classList.add('border-red-500');
+          input.classList.remove('border-green-500');
+        }
+      });
+      
+      return duplicados.length === 0;
     }
 
     // Elementos DOM
@@ -391,7 +426,7 @@
       if (sinDuplicados.size !== 6) {
         resultadoCombinacion.innerHTML = `
           <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-6">
-            <p class="text-red-300 font-semibold text-lg">❌ No se permiten números duplicados.</p>
+            <p class="text-red-300 font-semibold text-lg">❌ No se permiten números duplicados. Por favor, ingresa números únicos.</p>
           </div>
         `;
         return;
@@ -401,7 +436,7 @@
       if (numeros.some(n => n < 1 || n > 56)) {
         resultadoCombinacion.innerHTML = `
           <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-6">
-            <p class="text-red-300 font-semibold text-lg">❌ Los números deben estar entre 1 y 56.</p>
+            <p class="text-red-300 font-semibold text-lg">❌ Los números deben estar entre 1 y 56. Por favor, verifica tu combinación.</p>
           </div>
         `;
         return;
@@ -424,23 +459,40 @@
           };
         });
 
-        // Crear HTML para el análisis individual (vista limpia)
+        // Crear HTML para el análisis individual (con análisis separado por sorteo)
         const htmlAnalisis = analisisIndividual.map(analisis => {
+          const clasificacionMelate = clasificarProbabilidad(analisis.porSorteo.melate.porcentaje);
+          const clasificacionRevancha = clasificarProbabilidad(analisis.porSorteo.revancha.porcentaje);
+          const clasificacionRevanchita = clasificarProbabilidad(analisis.porSorteo.revanchita.porcentaje);
+          
           return `
             <div class="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-30">
-              <div class="flex items-center justify-between mb-2">
-                <div class="text-2xl font-bold text-white">${analisis.numero}</div>
+              <div class="text-center mb-3">
+                <div class="text-2xl font-bold text-white mb-2">${analisis.numero}</div>
                 <div class="text-lg ${analisis.clasificacionTotal.color}">
                   ${analisis.clasificacionTotal.emoji} ${analisis.clasificacionTotal.categoria}
                 </div>
-              </div>
-              <div class="text-sm text-gray-300">
-                <div class="flex justify-between">
-                  <span>Índice de Suerte:</span>
-                  <span class="font-bold text-white">${analisis.porcentajeTotal.toFixed(1)}%</span>
+                <div class="text-sm text-gray-300 mt-1">
+                  Índice General: ${analisis.porcentajeTotal.toFixed(1)}%
                 </div>
-                <div class="text-xs text-gray-400 mt-1">
-                  ${analisis.frecuenciaTotal} apariciones en el historial
+              </div>
+              
+              <!-- Análisis por sorteo individual -->
+              <div class="space-y-2">
+                <div class="flex justify-between items-center p-2 bg-blue-500 bg-opacity-20 rounded">
+                  <span class="text-blue-300 font-semibold">Melate</span>
+                  <span class="text-white font-bold">${analisis.porSorteo.melate.porcentaje.toFixed(1)}%</span>
+                  <span class="${clasificacionMelate.color}">${clasificacionMelate.emoji}</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-purple-500 bg-opacity-20 rounded">
+                  <span class="text-purple-300 font-semibold">Revancha</span>
+                  <span class="text-white font-bold">${analisis.porSorteo.revancha.porcentaje.toFixed(1)}%</span>
+                  <span class="${clasificacionRevancha.color}">${clasificacionRevancha.emoji}</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-green-500 bg-opacity-20 rounded">
+                  <span class="text-green-300 font-semibold">Revanchita</span>
+                  <span class="text-white font-bold">${analisis.porSorteo.revanchita.porcentaje.toFixed(1)}%</span>
+                  <span class="${clasificacionRevanchita.color}">${clasificacionRevanchita.emoji}</span>
                 </div>
               </div>
             </div>
@@ -506,31 +558,9 @@
             </div>
             
             <div class="mb-6">
-              <h3 class="text-xl font-bold mb-3 text-white">📊 Análisis Individual por Número</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <h3 class="text-xl font-bold mb-3 text-white">📊 Análisis Detallado por Número</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 ${htmlAnalisis}
-              </div>
-            </div>
-            
-            <!-- Análisis por sorteo de la combinación -->
-            <div class="mb-6">
-              <h3 class="text-xl font-bold mb-3 text-white">🎲 Potencial por Sorteo</h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-blue-500 bg-opacity-20 rounded-lg p-4 text-center border border-blue-400">
-                  <h4 class="font-bold text-blue-300 mb-2">🎲 Melate</h4>
-                  <div class="text-2xl font-bold text-white">${(analisisIndividual.reduce((sum, a) => sum + a.porSorteo.melate.porcentaje, 0) / 6).toFixed(1)}%</div>
-                  <div class="text-sm text-gray-300">Promedio de la combinación</div>
-                </div>
-                <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-400">
-                  <h4 class="font-bold text-purple-300 mb-2">🎲 Revancha</h4>
-                  <div class="text-2xl font-bold text-white">${(analisisIndividual.reduce((sum, a) => sum + a.porSorteo.revancha.porcentaje, 0) / 6).toFixed(1)}%</div>
-                  <div class="text-sm text-gray-300">Promedio de la combinación</div>
-                </div>
-                <div class="bg-green-500 bg-opacity-20 rounded-lg p-4 text-center border border-green-400">
-                  <h4 class="font-bold text-green-300 mb-2">🎲 Revanchita</h4>
-                  <div class="text-2xl font-bold text-white">${(analisisIndividual.reduce((sum, a) => sum + a.porSorteo.revanchita.porcentaje, 0) / 6).toFixed(1)}%</div>
-                  <div class="text-sm text-gray-300">Promedio de la combinación</div>
-                </div>
               </div>
             </div>
             
@@ -560,7 +590,10 @@
     // Validación en tiempo real
     inputNumero.addEventListener('input', () => validarInput(inputNumero));
     inputsCombinacion.forEach(input => {
-      input.addEventListener('input', () => validarInput(input));
+      input.addEventListener('input', () => {
+        validarInput(input);
+        validarCombinacion(); // Validar duplicados en tiempo real
+      });
     });
 
     // Inicializar la aplicación
