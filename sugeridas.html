@@ -39,6 +39,16 @@
       </p>
     </div>
 
+    <!-- Selector de cantidad -->
+    <div class="mb-6">
+      <p class="text-white text-sm mb-3">¿Cuántas combinaciones deseas?</p>
+      <div class="flex justify-center gap-3">
+        <button id="btn-1" class="cantidad-btn active" data-cantidad="1">1</button>
+        <button id="btn-3" class="cantidad-btn" data-cantidad="3">3</button>
+        <button id="btn-5" class="cantidad-btn" data-cantidad="5">5</button>
+      </div>
+    </div>
+
     <!-- Botón para generar combinaciones -->
     <div class="mb-8">
       <button id="btn-generar" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
@@ -67,10 +77,25 @@
     import { app } from './js/firebase-init.js';
 
     const auth = getAuth(app);
+    let cantidadSeleccionada = 1; // Cantidad por defecto
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
       window.location.href = 'home.html';
+    });
+
+    // Manejo de botones de cantidad
+    document.querySelectorAll('.cantidad-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remover clase active de todos los botones
+        document.querySelectorAll('.cantidad-btn').forEach(b => b.classList.remove('active'));
+        
+        // Agregar clase active al botón seleccionado
+        btn.classList.add('active');
+        
+        // Actualizar cantidad seleccionada
+        cantidadSeleccionada = parseInt(btn.dataset.cantidad);
+      });
     });
 
     // Verificar autenticación
@@ -97,11 +122,11 @@
     }
 
     // Función para generar múltiples combinaciones
-    function generarCombinaciones() {
+    function generarCombinaciones(cantidad = cantidadSeleccionada) {
       const combinaciones = [];
       
-      // Generar 9 combinaciones (3x3 grid)
-      for (let i = 0; i < 9; i++) {
+      // Generar la cantidad seleccionada de combinaciones
+      for (let i = 0; i < cantidad; i++) {
         combinaciones.push(generarCombinacion());
       }
       
@@ -111,20 +136,29 @@
     // Función para mostrar las combinaciones en la UI
     function mostrarCombinaciones(combinaciones) {
       const container = document.getElementById('combinaciones-container');
+      const cantidad = combinaciones.length;
+      
+      // Determinar el grid según la cantidad
+      let gridClass = 'grid-cols-1';
+      if (cantidad === 3) {
+        gridClass = 'grid-cols-1 md:grid-cols-3';
+      } else if (cantidad === 5) {
+        gridClass = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+      }
       
       let html = `
         <div class="mb-6">
-          <h2 class="text-2xl font-bold mb-4 text-white">🎲 Tus Combinaciones Aleatorias</h2>
-          <p class="text-gray-300 mb-6">Combinaciones generadas completamente al azar • ¡Elige la que más te guste!</p>
+          <h2 class="text-2xl font-bold mb-4 text-white">🎲 ${cantidad === 1 ? 'Tu Combinación Aleatoria' : `Tus ${cantidad} Combinaciones Aleatorias`}</h2>
+          <p class="text-gray-300 mb-6">Combinación${cantidad > 1 ? 'es' : ''} generada${cantidad > 1 ? 's' : ''} completamente al azar • ¡Elige la que más te guste!</p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid ${gridClass} gap-6 mb-8 justify-center">
       `;
       
       combinaciones.forEach((combinacion, index) => {
         html += `
-          <div class="analisis-transparente rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition-all duration-300 hover:transform hover:scale-105">
-            <h3 class="text-lg font-semibold mb-4 text-white">Combinación ${index + 1}</h3>
+          <div class="analisis-transparente rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition-all duration-300 hover:transform hover:scale-105 max-w-sm mx-auto">
+            <h3 class="text-lg font-semibold mb-4 text-white">${cantidad === 1 ? 'Tu Combinación' : `Combinación ${index + 1}`}</h3>
             <div class="text-center">
               <div class="text-2xl font-bold text-white mb-2">
                 ${combinacion.join(' - ')}
@@ -133,7 +167,7 @@
                 6 números aleatorios del 1 al 56
               </div>
             </div>
-            <div class="mt-4">
+            <div class="mt-4 text-center">
               <button onclick="copiarCombinacion('${combinacion.join(', ')}')" class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full transition-all duration-300">
                 📋 Copiar
               </button>
@@ -202,6 +236,33 @@
     .analisis-transparente {
       background-color: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
+    }
+    
+    .cantidad-btn {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .cantidad-btn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.05);
+    }
+    
+    .cantidad-btn.active {
+      background-color: rgba(147, 51, 234, 0.8);
+      border-color: rgb(147, 51, 234);
+      box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
     }
   </style>
 </body>
