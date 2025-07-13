@@ -794,12 +794,13 @@
         if (duplicados) {
           input.classList.add('border-red-500');
           mostrarErrorTemporal(input, 'Número duplicado no permitido');
+          validarCombinacionCompleta(); // Validar inmediatamente
           return false;
         }
       }
       
       input.classList.add('border-green-500');
-      validarCombinacionCompleta(); // Validar combinación completa cada vez
+      validarCombinacionCompleta(); // Validar inmediatamente
       return true;
     }
 
@@ -880,7 +881,11 @@
         }
         
         e.target.value = valor;
-        validarInputEnTiempoReal(input);
+        
+        // Validar inmediatamente después de cambiar el valor
+        setTimeout(() => {
+          validarInputEnTiempoReal(input);
+        }, 0);
       });
     }
 
@@ -902,6 +907,19 @@
     prevenirEntradaInvalida(inputNumero);
     inputsCombinacion.forEach(input => {
       prevenirEntradaInvalida(input);
+      
+      // Agregar eventos adicionales para validación más rápida
+      input.addEventListener('keyup', () => {
+        setTimeout(() => validarCombinacionCompleta(), 0);
+      });
+      
+      input.addEventListener('blur', () => {
+        setTimeout(() => validarCombinacionCompleta(), 0);
+      });
+      
+      input.addEventListener('paste', () => {
+        setTimeout(() => validarCombinacionCompleta(), 100);
+      });
     });
 
     // Validar combinación completa al inicio
