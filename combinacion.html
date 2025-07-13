@@ -127,6 +127,15 @@
             </button>
           </div>
         </div>
+        
+        <!-- Botón para mostrar explicación (siempre visible y más sutil) -->
+        <div class="mt-4 text-center">
+          <button id="mostrar-explicacion-btn" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-white border-opacity-30">
+            <span id="explicacion-text">💡 ¿Cómo interpretar resultados?</span>
+            <span id="explicacion-icon">👁️</span>
+          </button>
+        </div>
+        
         <div id="resultado-numero" class="mt-6"></div>
       </div>
 
@@ -149,11 +158,20 @@
             </button>
           </div>
         </div>
+        
+        <!-- Botón para mostrar explicación (siempre visible y más sutil) -->
+        <div class="mt-4 text-center">
+          <button id="mostrar-explicacion-btn-combo" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-white border-opacity-30">
+            <span id="explicacion-combo-text">💡 ¿Cómo interpretar resultados?</span>
+            <span id="explicacion-combo-icon">👁️</span>
+          </button>
+        </div>
+        
         <div id="resultado-combinacion" class="mt-6"></div>
         
-        <!-- Botón para mostrar explicación después del resultado -->
+        <!-- Botón para mostrar explicación después del resultado (ahora oculto) -->
         <div id="explicacion-boton-container" class="mt-6 text-center hidden">
-          <button id="mostrar-explicacion-btn" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300">
+          <button id="mostrar-explicacion-btn-old" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300">
             ¿CÓMO INTERPRETAR LOS RESULTADOS?
           </button>
         </div>
@@ -609,6 +627,24 @@
       return resultados;
     }
 
+    // Función para calcular índice real (sin factor 10.5x) por sorteo
+    function calcularIndicePorSorteo(num) {
+      const resultados = {};
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        const frecuencia = numeros.filter(n => n === num).length;
+        const total = numeros.length;
+        const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
+        
+        resultados[sorteo] = {
+          frecuencia: frecuencia,
+          total: total,
+          porcentaje: porcentajeBase
+        };
+      });
+      return resultados;
+    }
+
     function calcularFrecuenciaTotal(num) {
       let total = 0;
       ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
@@ -816,6 +852,7 @@
       
       try {
         const frecuenciaPorSorteo = calcularFrecuenciaPorSorteo(numero);
+        const indicePorSorteo = calcularIndicePorSorteo(numero);
         const frecuenciaTotal = calcularFrecuenciaTotal(numero);
         const porcentajeTotal = calcularPorcentajeTotal(numero);
         const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
@@ -836,7 +873,10 @@
                 <div class="text-4xl font-bold ${clasificacionMelate.color} mb-2">
                   ${clasificacionMelate.emoji}
                 </div>
-                <div class="text-2xl font-bold text-gray-800 mb-1">
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-yellow-600">🎯 Índice:</span> ${indicePorSorteo.melate.porcentaje.toFixed(1)}%
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
                   <span class="text-green-600">⭐ Potencial:</span> ${frecuenciaPorSorteo.melate.porcentaje.toFixed(1)}%
                 </div>
                 <div class="inline-block px-3 py-1 rounded-full ${clasificacionMelate.bgColor} ${clasificacionMelate.color} mb-1">
@@ -852,7 +892,10 @@
                 <div class="text-4xl font-bold ${clasificacionRevancha.color} mb-2">
                   ${clasificacionRevancha.emoji}
                 </div>
-                <div class="text-2xl font-bold text-gray-800 mb-1">
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-yellow-600">🎯 Índice:</span> ${indicePorSorteo.revancha.porcentaje.toFixed(1)}%
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
                   <span class="text-green-600">⭐ Potencial:</span> ${frecuenciaPorSorteo.revancha.porcentaje.toFixed(1)}%
                 </div>
                 <div class="inline-block px-3 py-1 rounded-full ${clasificacionRevancha.bgColor} ${clasificacionRevancha.color} mb-1">
@@ -868,7 +911,10 @@
                 <div class="text-4xl font-bold ${clasificacionRevanchita.color} mb-2">
                   ${clasificacionRevanchita.emoji}
                 </div>
-                <div class="text-2xl font-bold text-gray-800 mb-1">
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-yellow-600">🎯 Índice:</span> ${indicePorSorteo.revanchita.porcentaje.toFixed(1)}%
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
                   <span class="text-green-600">⭐ Potencial:</span> ${frecuenciaPorSorteo.revanchita.porcentaje.toFixed(1)}%
                 </div>
                 <div class="inline-block px-3 py-1 rounded-full ${clasificacionRevanchita.bgColor} ${clasificacionRevanchita.color} mb-1">
@@ -882,8 +928,7 @@
           </div>
         `;
         
-        // Mostrar el botón de explicación después de obtener resultados exitosos
-        mostrarBotonExplicacion();
+        // Los botones de explicación ahora están siempre visibles
         
       } catch (error) {
         console.error('❌ Error al analizar número individual:', error);
@@ -1168,8 +1213,7 @@
           </div>
         `;
         
-        // Mostrar el botón de explicación después de obtener resultados exitosos
-        mostrarBotonExplicacion();
+        // Los botones de explicación ahora están siempre visibles
         
       } catch (error) {
         console.error('❌ Error al analizar combinación:', error);
@@ -1183,40 +1227,55 @@
 
     // Función para mostrar el botón de explicación después de obtener resultados
     function mostrarBotonExplicacion() {
-      const botonContainer = document.getElementById('explicacion-boton-container');
-      botonContainer.classList.remove('hidden');
-      
-      // Agregar animación de entrada
-      setTimeout(() => {
-        botonContainer.classList.add('animate__animated', 'animate__fadeInUp');
-      }, 100);
+      // Los botones ahora están siempre visibles, no se necesita mostrar/ocultar
     }
     
     // Función para ocultar el botón de explicación
     function ocultarBotonExplicacion() {
-      const botonContainer = document.getElementById('explicacion-boton-container');
-      const explicacionExpandible = document.getElementById('explicacion-expandible');
-      
-      botonContainer.classList.add('hidden');
-      explicacionExpandible.classList.add('hidden');
+      // Los botones ahora están siempre visibles, no se necesita mostrar/ocultar
     }
     
-    // Event listeners para el botón expandible
+    // Event listeners para los botones expandibles
     document.addEventListener('DOMContentLoaded', () => {
+      // Botón para números individuales
       const mostrarExplicacionBtn = document.getElementById('mostrar-explicacion-btn');
       const explicacionExpandible = document.getElementById('explicacion-expandible');
+      const explicacionText = document.getElementById('explicacion-text');
+      const explicacionIcon = document.getElementById('explicacion-icon');
       
-      mostrarExplicacionBtn.addEventListener('click', () => {
+      // Botón para combinaciones
+      const mostrarExplicacionBtnCombo = document.getElementById('mostrar-explicacion-btn-combo');
+      const explicacionComboText = document.getElementById('explicacion-combo-text');
+      const explicacionComboIcon = document.getElementById('explicacion-combo-icon');
+      
+      // Función para alternar explicación
+      function toggleExplicacion() {
         if (explicacionExpandible.classList.contains('hidden')) {
           explicacionExpandible.classList.remove('hidden');
           explicacionExpandible.classList.add('animate__animated', 'animate__fadeInDown');
-          mostrarExplicacionBtn.textContent = 'OCULTAR EXPLICACIÓN';
-          mostrarExplicacionBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Actualizar ambos botones
+          explicacionText.textContent = '🔼 Ocultar explicación';
+          explicacionIcon.textContent = '👁️‍🗨️';
+          explicacionComboText.textContent = '🔼 Ocultar explicación';
+          explicacionComboIcon.textContent = '👁️‍🗨️';
+          
+          // Scroll suave hacia la explicación
+          explicacionExpandible.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else {
           explicacionExpandible.classList.add('hidden');
-          mostrarExplicacionBtn.textContent = '¿CÓMO INTERPRETAR LOS RESULTADOS?';
+          
+          // Restaurar ambos botones
+          explicacionText.textContent = '💡 ¿Cómo interpretar resultados?';
+          explicacionIcon.textContent = '👁️';
+          explicacionComboText.textContent = '💡 ¿Cómo interpretar resultados?';
+          explicacionComboIcon.textContent = '👁️';
         }
-      });
+      }
+      
+      // Event listeners para ambos botones
+      mostrarExplicacionBtn.addEventListener('click', toggleExplicacion);
+      mostrarExplicacionBtnCombo.addEventListener('click', toggleExplicacion);
       
       // Funcionalidad del botón de ayuda expandible dentro de la explicación
       const toggleHelpExpandibleBtn = document.getElementById('toggle-help-expandible');
