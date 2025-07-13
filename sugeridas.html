@@ -56,15 +56,22 @@
       </button>
     </div>
 
+    <!-- Contenedor de combinaciones generadas aleatorias -->
+    <div id="combinaciones-container" class="max-w-6xl mx-auto mb-8">
+      <div class="text-center py-12">
+        <div class="text-6xl mb-4">🎯</div>
+        <p class="text-white text-lg">¡Presiona el botón para generar tus combinaciones de la suerte!</p>
+      </div>
+    </div>
+
     <!-- Combinaciones sugeridas por IA -->
-    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300" onclick="togglePrediccionIA()">
+    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300" style="opacity: 0.5;" onclick="togglePrediccionIA()">
       <div class="text-center">
         <h2 class="text-xl font-semibold mb-4">🎯 <span id="titulo-sorteo">Combinaciones sugeridas por IA para TI para el sorteo "---"</span></h2>
-        <p class="text-sm italic mb-4">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
         
         <!-- Indicador de expansión -->
         <div class="flex justify-center items-center">
-          <span class="text-sm text-gray-500 mr-2">Haz clic para generar</span>
+          <span class="text-sm text-gray-500 mr-2">Haz clic para ver</span>
           <svg id="arrow-icon" class="w-5 h-5 text-gray-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
@@ -73,6 +80,8 @@
       
       <!-- Contenido expandible (oculto por defecto) -->
       <div id="contenido-predicciones" class="hidden mt-6">
+        <p class="text-sm italic text-center mb-6">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
+        
         <!-- Predicciones por sorteo -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <!-- Melate -->
@@ -98,14 +107,6 @@
         <div id="mensaje-estado" class="text-center text-sm text-gray-600 italic">
           Generando predicciones personalizadas...
         </div>
-      </div>
-    </div>
-
-    <!-- Contenedor de combinaciones generadas -->
-    <div id="combinaciones-container" class="max-w-6xl mx-auto">
-      <div class="text-center py-12">
-        <div class="text-6xl mb-4">🎯</div>
-        <p class="text-white text-lg">¡Presiona el botón para generar tus combinaciones de la suerte!</p>
       </div>
     </div>
 
@@ -157,11 +158,13 @@
     function togglePrediccionIA() {
       const contenido = document.getElementById('contenido-predicciones');
       const arrow = document.getElementById('arrow-icon');
+      const container = document.getElementById('prediccion-container');
       
       if (contenido.classList.contains('hidden')) {
         // Expandir
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
+        container.style.opacity = '1'; // Cambiar opacidad a 100%
         
         // Generar predicciones si no se han generado aún
         if (!prediccionesGeneradas) {
@@ -172,6 +175,7 @@
         // Colapsar
         contenido.classList.add('hidden');
         arrow.style.transform = 'rotate(0deg)';
+        container.style.opacity = '0.5'; // Volver a opacidad 50%
       }
     }
 
