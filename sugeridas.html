@@ -56,6 +56,40 @@
       </button>
     </div>
 
+    <!-- Combinaciones sugeridas por IA -->
+    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8">
+      <h2 class="text-xl font-semibold mb-4 text-center">🎯 Combinaciones sugeridas por IA para TI para el sorteo</h2>
+      <p class="text-sm italic text-center mb-6">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
+      
+      <!-- Predicciones por sorteo -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <!-- Melate -->
+        <div class="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+          <h3 class="font-bold text-blue-600 mb-2">🎲 Melate</h3>
+          <p id="combinacion-melate" class="text-lg font-bold tracking-wider text-blue-800">-- -- -- -- -- --</p>
+        </div>
+        
+        <!-- Revancha -->
+        <div class="text-center p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
+          <h3 class="font-bold text-purple-600 mb-2">🎲 Revancha</h3>
+          <p id="combinacion-revancha" class="text-lg font-bold tracking-wider text-purple-800">-- -- -- -- -- --</p>
+        </div>
+        
+        <!-- Revanchita -->
+        <div class="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
+          <h3 class="font-bold text-green-600 mb-2">🎲 Revanchita</h3>
+          <p id="combinacion-revanchita" class="text-lg font-bold tracking-wider text-green-800">-- -- -- -- -- --</p>
+        </div>
+      </div>
+      
+      <!-- Botón para generar nuevas predicciones -->
+      <div class="text-center">
+        <button id="btn-generar-ia" class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-full font-semibold hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+          🤖 Generar Nuevas Predicciones IA
+        </button>
+      </div>
+    </div>
+
     <!-- Contenedor de combinaciones generadas -->
     <div id="combinaciones-container" class="max-w-6xl mx-auto">
       <div class="text-center py-12">
@@ -72,12 +106,19 @@
 
   <!-- Scripts -->
   <script src="js/shared.js"></script>
+  <script src="js/firebase-init.js" type="module"></script>
+  <script src="js/dataParser.js" type="module"></script>
+  <script src="js/mlPredictor.js" type="module"></script>
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { app } from './js/firebase-init.js';
+    import { cargarDatosHistoricos } from './js/dataParser.js';
+    import { generarPrediccionPersonalizada } from './js/mlPredictor.js';
 
     const auth = getAuth(app);
     let cantidadSeleccionada = 1; // Cantidad por defecto
+    let usuarioID = null;
+    let datosHistoricos = null;
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
@@ -98,12 +139,59 @@
       });
     });
 
-    // Verificar autenticación
-    onAuthStateChanged(auth, (user) => {
+    // Verificar autenticación y cargar datos
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
+      } else {
+        usuarioID = user.uid;
+        try {
+          datosHistoricos = await cargarDatosHistoricos('todos');
+          console.log('📊 Datos históricos cargados para predicciones IA');
+        } catch (error) {
+          console.error('❌ Error cargando datos históricos:', error);
+        }
       }
     });
+
+    // Función para generar predicciones IA por sorteo
+    async function generarPrediccionesPorSorteo() {
+      if (!usuarioID || !datosHistoricos) {
+        console.error('❌ Faltan datos para generar predicciones IA');
+        return;
+      }
+
+      const sorteos = ['melate', 'revancha', 'revanchita'];
+      
+      for (const sorteo of sorteos) {
+        try {
+          const datosSorteo = datosHistoricos.datosPorSorteo[sorteo];
+          console.log(`🎯 Generando predicción IA para ${sorteo}...`);
+          
+          // Agregar información del sorteo a los datos
+          const datosSorteoConTipo = {
+            ...datosSorteo,
+            sorteo: sorteo
+          };
+          
+          const prediccion = await generarPrediccionPersonalizada(usuarioID, datosSorteoConTipo);
+          const elementoId = `combinacion-${sorteo}`;
+          const elemento = document.getElementById(elementoId);
+          
+          if (elemento) {
+            elemento.textContent = prediccion.join(' - ');
+            console.log(`✅ Predicción IA para ${sorteo}:`, prediccion);
+          }
+        } catch (error) {
+          console.error(`❌ Error generando predicción IA para ${sorteo}:`, error);
+          const elementoId = `combinacion-${sorteo}`;
+          const elemento = document.getElementById(elementoId);
+          if (elemento) {
+            elemento.textContent = 'Error al generar';
+          }
+        }
+      }
+    }
 
     // Función para generar un número aleatorio entre min y max (inclusive)
     function numeroAleatorio(min, max) {
@@ -225,9 +313,14 @@
       mostrarCombinaciones(combinaciones);
     }
 
-    // Event listener para el botón principal
+    // Event listener para el botón principal (aleatorio)
     document.getElementById('btn-generar').addEventListener('click', () => {
       generarYMostrarCombinaciones();
+    });
+
+    // Event listener para el botón de predicciones IA
+    document.getElementById('btn-generar-ia').addEventListener('click', () => {
+      generarPrediccionesPorSorteo();
     });
 
   </script>

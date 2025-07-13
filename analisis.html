@@ -45,30 +45,6 @@
       </div>
     </div>
 
-    <!-- Combinaciones sugeridas - Redirección -->
-    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp cursor-pointer hover:transform hover:scale-105 transition-all duration-300 hover:shadow-xl" onclick="window.location.href='sugeridas.html'">
-      <h2 class="text-xl font-semibold mb-4 text-center">🎯 Combinaciones sugeridas</h2>
-      <p class="text-sm italic text-center mb-6">Genera combinaciones aleatorias para tus sorteos favoritos</p>
-      
-      <!-- Descripción visual -->
-      <div class="text-center py-8">
-        <div class="text-6xl mb-4">🎲</div>
-        <p class="text-lg font-semibold text-gray-700 mb-2">¡Haz clic aquí para generar!</p>
-        <p class="text-sm text-gray-500">Combinaciones completamente aleatorias</p>
-      </div>
-      
-      <!-- Indicador de acción -->
-      <div class="text-center">
-        <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold">
-          <span class="mr-2">🎯</span>
-          <span>Generar Combinaciones</span>
-          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </div>
-      </div>
-    </div>
-
     <!-- Estadísticas adicionales -->
     <div id="estadisticas-extra" class="animate__animated animate__fadeInUp"></div>
     
@@ -119,7 +95,6 @@
         console.log('📊 Datos cargados, generando estadísticas...');
         graficarEstadisticas(datos);
 
-        // Ya no generamos predicciones aquí, solo mostramos estadísticas
         console.log('✅ Análisis completado exitosamente');
       } catch (error) {
         console.error('❌ Error en análisis:', error);
