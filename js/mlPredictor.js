@@ -14,12 +14,188 @@ export async function generarPrediccionPersonalizada(userId, datos) {
     return [3, 7, 15, 23, 31, 42];
   }
 
-  // Usar predicción avanzada con múltiples algoritmos
-  return generarPrediccionAvanzada(userId, datos);
+  // Usar el nuevo sistema de 1000 combinaciones aleatorias
+  return generarCombinacionPersonalizada(userId, datos);
 }
 
-// Función principal para predicción avanzada con IA
-function generarPrediccionAvanzada(userId, datos) {
+// Sistema de 1000 combinaciones aleatorias consistentes
+function generarCombinacionPersonalizada(userId, datos) {
+  console.log('🎯 Generando combinación personalizada del pool de 1000 para usuario:', userId);
+  
+  // Generar el pool de 1000 combinaciones basadas en datos históricos
+  const poolCombinaciones = generarPoolCombinaciones(datos);
+  
+  // Seleccionar una combinación específica para este usuario
+  const hashUsuario = hashCode(userId);
+  const indiceCombinacion = hashUsuario % poolCombinaciones.length;
+  
+  const combinacionSeleccionada = poolCombinaciones[indiceCombinacion];
+  
+  console.log(`✅ Combinación ${indiceCombinacion + 1}/1000 seleccionada para usuario ${userId}:`, combinacionSeleccionada);
+  return combinacionSeleccionada;
+}
+
+// Generar pool de 1000 combinaciones inteligentes
+function generarPoolCombinaciones(datos) {
+  console.log('🏭 Generando pool de 1000 combinaciones inteligentes...');
+  
+  const pool = [];
+  const todosLosNumeros = datos.numeros || [];
+  
+  // Análisis base una sola vez
+  const frecuencia = calcularFrecuencia(todosLosNumeros);
+  const patrones = analizarPatrones(datos.datos || []);
+  const deltaAnalisis = analizarNumerosDelta(datos.datos || []);
+  
+  // Generar 1000 combinaciones variadas
+  for (let i = 0; i < 1000; i++) {
+    const semilla = i * 7919; // Número primo para mejor distribución
+    const combinacion = generarCombinacionInteligente(frecuencia, patrones, deltaAnalisis, semilla);
+    pool.push(combinacion);
+  }
+  
+  console.log('✅ Pool de 1000 combinaciones generado exitosamente');
+  return pool;
+}
+
+// Generar una combinación inteligente con semilla
+function generarCombinacionInteligente(frecuencia, patrones, deltaAnalisis, semilla) {
+  const rng = crearGeneradorAleatorio(semilla);
+  const combinacion = [];
+  
+  // Estrategia mixta para mayor variabilidad
+  const estrategia = rng() % 4;
+  
+  switch (estrategia) {
+    case 0: // Basado en frecuencia alta
+      return seleccionarPorFrecuencia(frecuencia, rng, 0.7);
+    case 1: // Basado en patrones
+      return seleccionarPorPatrones(patrones, rng);
+    case 2: // Basado en análisis delta
+      return seleccionarPorDelta(deltaAnalisis, rng);
+    case 3: // Estrategia mixta
+      return seleccionarEstrategiaMixta(frecuencia, patrones, rng);
+  }
+}
+
+// Generador de números aleatorios con semilla (LCG)
+function crearGeneradorAleatorio(semilla) {
+  let seed = semilla;
+  return function() {
+    seed = (seed * 1664525 + 1013904223) % (2**32);
+    return seed;
+  };
+}
+
+// Selección por frecuencia
+function seleccionarPorFrecuencia(frecuencia, rng, factorFrecuencia = 0.6) {
+  const numerosConPeso = frecuencia.map((item, index) => ({
+    numero: index + 1,
+    peso: item.score * factorFrecuencia + (rng() / (2**32)) * (1 - factorFrecuencia)
+  }));
+  
+  numerosConPeso.sort((a, b) => b.peso - a.peso);
+  
+  const seleccionados = [];
+  for (let i = 0; i < Math.min(6, numerosConPeso.length); i++) {
+    seleccionados.push(numerosConPeso[i].numero);
+  }
+  
+  return seleccionados.sort((a, b) => a - b);
+}
+
+// Selección por patrones
+function seleccionarPorPatrones(patrones, rng) {
+  const numeros = [];
+  const usado = new Set();
+  
+  // Intentar usar números de patrones detectados
+  if (patrones.secuencias && patrones.secuencias.length > 0) {
+    const secuenciaAleatoria = patrones.secuencias[rng() % patrones.secuencias.length];
+    for (const num of secuenciaAleatoria) {
+      if (numeros.length < 6 && !usado.has(num) && num >= 1 && num <= 56) {
+        numeros.push(num);
+        usado.add(num);
+      }
+    }
+  }
+  
+  // Completar con números aleatorios
+  while (numeros.length < 6) {
+    const numero = (rng() % 56) + 1;
+    if (!usado.has(numero)) {
+      numeros.push(numero);
+      usado.add(numero);
+    }
+  }
+  
+  return numeros.sort((a, b) => a - b);
+}
+
+// Selección por análisis delta
+function seleccionarPorDelta(deltaAnalisis, rng) {
+  const numeros = [];
+  const usado = new Set();
+  
+  // Usar números con buenos scores delta
+  if (deltaAnalisis.scores && deltaAnalisis.scores.length > 0) {
+    const deltaOrdenado = deltaAnalisis.scores
+      .map((score, index) => ({ numero: index + 1, score }))
+      .sort((a, b) => b.score - a.score);
+    
+    for (let i = 0; i < Math.min(6, deltaOrdenado.length); i++) {
+      const numero = deltaOrdenado[i].numero;
+      if (!usado.has(numero)) {
+        numeros.push(numero);
+        usado.add(numero);
+      }
+    }
+  }
+  
+  // Completar si es necesario
+  while (numeros.length < 6) {
+    const numero = (rng() % 56) + 1;
+    if (!usado.has(numero)) {
+      numeros.push(numero);
+      usado.add(numero);
+    }
+  }
+  
+  return numeros.sort((a, b) => a - b);
+}
+
+// Estrategia mixta
+function seleccionarEstrategiaMixta(frecuencia, patrones, rng) {
+  const numeros = [];
+  const usado = new Set();
+  
+  // 3 números de alta frecuencia
+  const frecuenciaOrdenada = frecuencia
+    .map((item, index) => ({ numero: index + 1, score: item.score }))
+    .sort((a, b) => b.score - a.score);
+  
+  for (let i = 0; i < Math.min(3, frecuenciaOrdenada.length); i++) {
+    const numero = frecuenciaOrdenada[i].numero;
+    if (!usado.has(numero)) {
+      numeros.push(numero);
+      usado.add(numero);
+    }
+  }
+  
+  // 3 números aleatorios
+  while (numeros.length < 6) {
+    const numero = (rng() % 56) + 1;
+    if (!usado.has(numero)) {
+      numeros.push(numero);
+      usado.add(numero);
+    }
+  }
+  
+  return numeros.sort((a, b) => a - b);
+}
+
+// Función principal para predicción avanzada con IA (LEGACY - mantenida por compatibilidad)
+function generarPrediccionAvanzada_Legacy(userId, datos) {
   console.log('🧠 Generando predicción con IA avanzada para usuario:', userId);
   
   const todosLosNumeros = datos.numeros || [];
