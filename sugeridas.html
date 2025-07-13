@@ -57,36 +57,47 @@
     </div>
 
     <!-- Combinaciones sugeridas por IA -->
-    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8">
-      <h2 class="text-xl font-semibold mb-4 text-center">🎯 Combinaciones sugeridas por IA para TI para el sorteo</h2>
-      <p class="text-sm italic text-center mb-6">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
-      
-      <!-- Predicciones por sorteo -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <!-- Melate -->
-        <div class="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-          <h3 class="font-bold text-blue-600 mb-2">🎲 Melate</h3>
-          <p id="combinacion-melate" class="text-lg font-bold tracking-wider text-blue-800">-- -- -- -- -- --</p>
-        </div>
+    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300" onclick="togglePrediccionIA()">
+      <div class="text-center">
+        <h2 class="text-xl font-semibold mb-4">🎯 <span id="titulo-sorteo">Combinaciones sugeridas por IA para TI para el sorteo "---"</span></h2>
+        <p class="text-sm italic mb-4">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
         
-        <!-- Revancha -->
-        <div class="text-center p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
-          <h3 class="font-bold text-purple-600 mb-2">🎲 Revancha</h3>
-          <p id="combinacion-revancha" class="text-lg font-bold tracking-wider text-purple-800">-- -- -- -- -- --</p>
-        </div>
-        
-        <!-- Revanchita -->
-        <div class="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
-          <h3 class="font-bold text-green-600 mb-2">🎲 Revanchita</h3>
-          <p id="combinacion-revanchita" class="text-lg font-bold tracking-wider text-green-800">-- -- -- -- -- --</p>
+        <!-- Indicador de expansión -->
+        <div class="flex justify-center items-center">
+          <span class="text-sm text-gray-500 mr-2">Haz clic para generar</span>
+          <svg id="arrow-icon" class="w-5 h-5 text-gray-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
         </div>
       </div>
       
-      <!-- Botón para generar nuevas predicciones -->
-      <div class="text-center">
-        <button id="btn-generar-ia" class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-full font-semibold hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl">
-          🤖 Generar Nuevas Predicciones IA
-        </button>
+      <!-- Contenido expandible (oculto por defecto) -->
+      <div id="contenido-predicciones" class="hidden mt-6">
+        <!-- Predicciones por sorteo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- Melate -->
+          <div class="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+            <h3 class="font-bold text-blue-600 mb-2">🎲 Melate</h3>
+            <p id="combinacion-melate" class="text-lg font-bold tracking-wider text-blue-800">-- -- -- -- -- --</p>
+          </div>
+          
+          <!-- Revancha -->
+          <div class="text-center p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
+            <h3 class="font-bold text-purple-600 mb-2">🎲 Revancha</h3>
+            <p id="combinacion-revancha" class="text-lg font-bold tracking-wider text-purple-800">-- -- -- -- -- --</p>
+          </div>
+          
+          <!-- Revanchita -->
+          <div class="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
+            <h3 class="font-bold text-green-600 mb-2">🎲 Revanchita</h3>
+            <p id="combinacion-revanchita" class="text-lg font-bold tracking-wider text-green-800">-- -- -- -- -- --</p>
+          </div>
+        </div>
+        
+        <!-- Mensaje de estado -->
+        <div id="mensaje-estado" class="text-center text-sm text-gray-600 italic">
+          Generando predicciones personalizadas...
+        </div>
       </div>
     </div>
 
@@ -119,6 +130,53 @@
     let cantidadSeleccionada = 1; // Cantidad por defecto
     let usuarioID = null;
     let datosHistoricos = null;
+    let prediccionesGeneradas = false;
+
+    // Función para obtener el número de sorteo actual
+    function obtenerNumeroSorteoActual() {
+      // Simulamos obtener el número de sorteo actual
+      // En producción, esto vendría de una API o base de datos
+      const fecha = new Date();
+      const year = fecha.getFullYear();
+      const month = fecha.getMonth() + 1;
+      const day = fecha.getDate();
+      
+      // Generar número de sorteo basado en fecha (ejemplo: 5678)
+      const numeroSorteo = Math.floor(5000 + (month * 100) + day);
+      return numeroSorteo;
+    }
+
+    // Función para actualizar el título con el número de sorteo
+    function actualizarTituloSorteo() {
+      const numeroSorteo = obtenerNumeroSorteoActual();
+      const tituloElement = document.getElementById('titulo-sorteo');
+      tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo "${numeroSorteo}"`;
+    }
+
+    // Función para toggle (expandir/colapsar) la predicción IA
+    function togglePrediccionIA() {
+      const contenido = document.getElementById('contenido-predicciones');
+      const arrow = document.getElementById('arrow-icon');
+      
+      if (contenido.classList.contains('hidden')) {
+        // Expandir
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        
+        // Generar predicciones si no se han generado aún
+        if (!prediccionesGeneradas) {
+          generarPrediccionesPorSorteo();
+          prediccionesGeneradas = true;
+        }
+      } else {
+        // Colapsar
+        contenido.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // Hacer la función global para el onclick
+    window.togglePrediccionIA = togglePrediccionIA;
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
@@ -145,6 +203,10 @@
         window.location.href = "index.html";
       } else {
         usuarioID = user.uid;
+        
+        // Actualizar título con número de sorteo
+        actualizarTituloSorteo();
+        
         try {
           datosHistoricos = await cargarDatosHistoricos('todos');
           console.log('📊 Datos históricos cargados para predicciones IA');
@@ -158,10 +220,15 @@
     async function generarPrediccionesPorSorteo() {
       if (!usuarioID || !datosHistoricos) {
         console.error('❌ Faltan datos para generar predicciones IA');
+        document.getElementById('mensaje-estado').textContent = 'Error: No se pueden generar predicciones';
         return;
       }
 
+      const mensajeEstado = document.getElementById('mensaje-estado');
+      mensajeEstado.textContent = 'Generando predicciones personalizadas...';
+
       const sorteos = ['melate', 'revancha', 'revanchita'];
+      let prediccionesCompletadas = 0;
       
       for (const sorteo of sorteos) {
         try {
@@ -181,6 +248,7 @@
           if (elemento) {
             elemento.textContent = prediccion.join(' - ');
             console.log(`✅ Predicción IA para ${sorteo}:`, prediccion);
+            prediccionesCompletadas++;
           }
         } catch (error) {
           console.error(`❌ Error generando predicción IA para ${sorteo}:`, error);
@@ -190,6 +258,13 @@
             elemento.textContent = 'Error al generar';
           }
         }
+      }
+      
+      // Actualizar mensaje de estado
+      if (prediccionesCompletadas === sorteos.length) {
+        mensajeEstado.textContent = '✅ Predicciones generadas exitosamente';
+      } else {
+        mensajeEstado.textContent = `⚠️ ${prediccionesCompletadas}/${sorteos.length} predicciones generadas`;
       }
     }
 
@@ -316,11 +391,6 @@
     // Event listener para el botón principal (aleatorio)
     document.getElementById('btn-generar').addEventListener('click', () => {
       generarYMostrarCombinaciones();
-    });
-
-    // Event listener para el botón de predicciones IA
-    document.getElementById('btn-generar-ia').addEventListener('click', () => {
-      generarPrediccionesPorSorteo();
     });
 
   </script>
