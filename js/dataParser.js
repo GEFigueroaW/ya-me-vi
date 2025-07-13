@@ -133,7 +133,7 @@ function mostrarUltimosSorteos(ultimosSorteos) {
     // Actualizar también el título de predicción con el siguiente número
     const prediccionTitle = document.querySelector('#prediccion-container h2');
     if (prediccionTitle) {
-      prediccionTitle.textContent = `🎯 Combinaciones Sugeridas por IA para el sorteo ${ultimoNumeroSorteo + 1}`;
+      prediccionTitle.textContent = `🎯 Combinaciones Sugeridas por IA para TI para el sorteo ${ultimoNumeroSorteo + 1}`;
     }
   } else {
     container.innerHTML = 'ULTIMO SORTEO 0000';
