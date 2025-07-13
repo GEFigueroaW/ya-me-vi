@@ -50,6 +50,69 @@
       </div>
     </div>
 
+    <!-- Explicación intuitiva -->
+    <div class="max-w-4xl mx-auto mb-8">
+      <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
+        <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Qué significan los resultados?</h3>
+        <div class="grid md:grid-cols-2 gap-6 text-white">
+          <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+            <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE</h4>
+            <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial:</p>
+            <ul class="text-xs space-y-1 text-gray-200">
+              <li>• Cuántas veces salió tu número</li>
+              <li>• Basado en sorteos reales</li>
+              <li>• Datos de los últimos 30 meses</li>
+            </ul>
+          </div>
+          <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+            <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
+            <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar:</p>
+            <ul class="text-xs space-y-1 text-gray-200">
+              <li>• Aplica factor matemático 10.5x</li>
+              <li>• Ajusta expectativas realistas</li>
+              <li>• Garantiza mínimo 8% siempre</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <div class="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
+            <p class="text-sm text-yellow-200">
+              <strong>🔥 Mientras más alto el porcentaje, mejor tu número</strong>
+            </p>
+            <p class="text-xs text-gray-300 mt-1">
+              Si Índice = Potencial → Máxima confianza | Si Índice > Potencial → Buena recomendación
+            </p>
+          </div>
+        </div>
+        
+        <!-- Botón para mostrar/ocultar ayuda adicional -->
+        <div class="mt-4 text-center">
+          <button id="toggle-help" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300">
+            <span id="help-text">Ver ejemplo práctico</span>
+            <span id="help-icon">👁️</span>
+          </button>
+        </div>
+        
+        <!-- Ayuda expandible -->
+        <div id="help-content" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
+          <h4 class="font-semibold mb-3 text-yellow-300">🧮 Ejemplo con el número 15:</h4>
+          <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+            <ul class="text-gray-200 space-y-1">
+              <li>📊 <strong>Frecuencia:</strong> 12 apariciones en 1,668 números históricos</li>
+              <li>📈 <strong>Porcentaje base:</strong> (12 ÷ 1,668) × 100 = 0.72%</li>
+              <li>⚡ <strong>Factor 10.5x:</strong> 0.72% × 10.5 = 7.56%</li>
+              <li>🎯 <strong>Resultado final:</strong> Máximo entre 7.56% y 8% = 8.0%</li>
+            </ul>
+            <p class="text-white mt-2 font-medium text-center">
+              <span class="text-yellow-300">🎯 Índice = 8.0%</span> | 
+              <span class="text-green-300">⭐ Potencial = 8.0%</span>
+              <span class="text-purple-200"> (¡Máxima confianza!)</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Contenedor principal -->
     <div class="max-w-6xl mx-auto">
       
@@ -913,16 +976,16 @@
                     </span>
                   </div>
                   <div class="text-lg text-gray-800 mb-1">
-                    Índice: <span class="font-bold">${promedioMelate.toFixed(1)}%</span>
+                    <span class="text-yellow-600">🎯 Índice:</span> <span class="font-bold">${promedioMelate.toFixed(1)}%</span>
                   </div>
-                  <div class="text-sm text-gray-600 mb-2">
-                    Basado en análisis histórico
+                  <div class="text-xs text-gray-600 mb-2">
+                    Apariciones reales en sorteos históricos
                   </div>
                   <div class="text-lg font-bold text-blue-600">
-                    🌟 ${potencialMelate.toFixed(1)}%
+                    <span class="text-green-600">⭐ Potencial:</span> ${potencialMelate.toFixed(1)}%
                   </div>
-                  <div class="text-sm text-gray-600">
-                    Potencial de Éxito
+                  <div class="text-xs text-gray-600">
+                    Tu probabilidad real de éxito
                   </div>
                 </div>
                 
@@ -935,16 +998,16 @@
                     </span>
                   </div>
                   <div class="text-lg text-gray-800 mb-1">
-                    Índice: <span class="font-bold">${promedioRevancha.toFixed(1)}%</span>
+                    <span class="text-yellow-600">🎯 Índice:</span> <span class="font-bold">${promedioRevancha.toFixed(1)}%</span>
                   </div>
-                  <div class="text-sm text-gray-600 mb-2">
-                    Basado en análisis histórico
+                  <div class="text-xs text-gray-600 mb-2">
+                    Apariciones reales en sorteos históricos
                   </div>
                   <div class="text-lg font-bold text-purple-600">
-                    🌟 ${potencialRevancha.toFixed(1)}%
+                    <span class="text-green-600">⭐ Potencial:</span> ${potencialRevancha.toFixed(1)}%
                   </div>
-                  <div class="text-sm text-gray-600">
-                    Potencial de Éxito
+                  <div class="text-xs text-gray-600">
+                    Tu probabilidad real de éxito
                   </div>
                 </div>
                 
@@ -957,16 +1020,16 @@
                     </span>
                   </div>
                   <div class="text-lg text-gray-800 mb-1">
-                    Índice: <span class="font-bold">${promedioRevanchita.toFixed(1)}%</span>
+                    <span class="text-yellow-600">🎯 Índice:</span> <span class="font-bold">${promedioRevanchita.toFixed(1)}%</span>
                   </div>
-                  <div class="text-sm text-gray-600 mb-2">
-                    Basado en análisis histórico
+                  <div class="text-xs text-gray-600 mb-2">
+                    Apariciones reales en sorteos históricos
                   </div>
                   <div class="text-lg font-bold text-green-600">
-                    🌟 ${potencialRevanchita.toFixed(1)}%
+                    <span class="text-green-600">⭐ Potencial:</span> ${potencialRevanchita.toFixed(1)}%
                   </div>
-                  <div class="text-sm text-gray-600">
-                    Potencial de Éxito
+                  <div class="text-xs text-gray-600">
+                    Tu probabilidad real de éxito
                   </div>
                 </div>
               </div>
@@ -997,6 +1060,25 @@
               </div>
             </div>
             
+            <!-- Ejemplo explicativo -->
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-20 rounded-lg p-4 mb-4 border border-blue-400">
+              <h3 class="text-lg font-bold mb-3 text-gray-800 text-center">💡 ¿Cómo funciona el análisis?</h3>
+              <div class="bg-white bg-opacity-30 rounded-lg p-3 text-sm">
+                <p class="text-gray-800 mb-2"><strong>Ejemplo con el número 15:</strong></p>
+                <ul class="text-gray-700 space-y-1">
+                  <li>📊 <strong>Frecuencia:</strong> 12 apariciones en 1,668 números históricos</li>
+                  <li>📈 <strong>Porcentaje base:</strong> (12 ÷ 1,668) × 100 = 0.72%</li>
+                  <li>⚡ <strong>Factor 10.5x:</strong> 0.72% × 10.5 = 7.56%</li>
+                  <li>🎯 <strong>Resultado final:</strong> Máximo entre 7.56% y 8% = 8.0%</li>
+                </ul>
+                <p class="text-gray-800 mt-2 font-medium">
+                  <span class="text-yellow-600">🎯 Índice = 8.0%</span> | 
+                  <span class="text-green-600">⭐ Potencial = 8.0%</span>
+                  <span class="text-purple-600"> (¡Máxima confianza!)</span>
+                </p>
+              </div>
+            </div>
+            
             <div class="bg-gradient-to-r from-purple-500 to-pink-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-400">
               <h3 class="text-xl font-bold mb-2 text-gray-800">💡 Mensaje de Suerte</h3>
               <p class="text-gray-700">
@@ -1024,6 +1106,24 @@
     prevenirEntradaInvalida(inputNumero);
     inputsCombinacion.forEach(input => {
       prevenirEntradaInvalida(input);
+    });
+
+    // Funcionalidad del botón de ayuda expandible
+    const toggleHelpBtn = document.getElementById('toggle-help');
+    const helpContent = document.getElementById('help-content');
+    const helpText = document.getElementById('help-text');
+    const helpIcon = document.getElementById('help-icon');
+
+    toggleHelpBtn.addEventListener('click', () => {
+      if (helpContent.classList.contains('hidden')) {
+        helpContent.classList.remove('hidden');
+        helpText.textContent = 'Ocultar ejemplo';
+        helpIcon.textContent = '👁️‍🗨️';
+      } else {
+        helpContent.classList.add('hidden');
+        helpText.textContent = 'Ver ejemplo práctico';
+        helpIcon.textContent = '👁️';
+      }
     });
 
     // Inicializar la aplicación
