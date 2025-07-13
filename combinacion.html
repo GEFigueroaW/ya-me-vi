@@ -50,8 +50,8 @@
       </div>
     </div>
 
-    <!-- Explicación intuitiva -->
-    <div class="max-w-4xl mx-auto mb-8">
+    <!-- Explicación intuitiva - Oculta inicialmente -->
+    <div id="explicacion-inicial" class="max-w-4xl mx-auto mb-8 hidden">
       <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
         <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Qué significan los resultados?</h3>
         <div class="grid md:grid-cols-2 gap-6 text-white">
@@ -150,6 +150,76 @@
           </div>
         </div>
         <div id="resultado-combinacion" class="mt-6"></div>
+        
+        <!-- Botón para mostrar explicación después del resultado -->
+        <div id="explicacion-boton-container" class="mt-6 text-center hidden">
+          <button id="mostrar-explicacion-btn" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300">
+            ¿QUÉ SIGNIFICAN LOS RESULTADOS?
+          </button>
+        </div>
+        
+        <!-- Sección de explicación expandible -->
+        <div id="explicacion-expandible" class="mt-6 hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
+            <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Qué significan los resultados?</h3>
+            <div class="grid md:grid-cols-2 gap-6 text-white">
+              <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+                <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE</h4>
+                <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial:</p>
+                <ul class="text-xs space-y-1 text-gray-200">
+                  <li>• Cuántas veces salió tu número</li>
+                  <li>• Basado en sorteos reales</li>
+                  <li>• Datos de los últimos 30 meses</li>
+                </ul>
+              </div>
+              <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+                <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
+                <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar:</p>
+                <ul class="text-xs space-y-1 text-gray-200">
+                  <li>• Aplica factor matemático 10.5x</li>
+                  <li>• Ajusta expectativas realistas</li>
+                  <li>• Garantiza mínimo 8% siempre</li>
+                </ul>
+              </div>
+            </div>
+            <div class="mt-4 text-center">
+              <div class="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
+                <p class="text-sm text-yellow-200">
+                  <strong>🔥 Mientras más alto el porcentaje, mejor tu número</strong>
+                </p>
+                <p class="text-xs text-gray-300 mt-1">
+                  Si Índice = Potencial → Máxima confianza | Si Índice > Potencial → Buena recomendación
+                </p>
+              </div>
+            </div>
+            
+            <!-- Botón para mostrar/ocultar ayuda adicional -->
+            <div class="mt-4 text-center">
+              <button id="toggle-help-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300">
+                <span id="help-text-expandible">Ver ejemplo práctico</span>
+                <span id="help-icon-expandible">👁️</span>
+              </button>
+            </div>
+            
+            <!-- Ayuda expandible -->
+            <div id="help-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
+              <h4 class="font-semibold mb-3 text-yellow-300">🧮 Ejemplo con el número 15:</h4>
+              <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+                <ul class="text-gray-200 space-y-1">
+                  <li>📊 <strong>Frecuencia:</strong> 12 apariciones en 1,668 números históricos</li>
+                  <li>📈 <strong>Porcentaje base:</strong> (12 ÷ 1,668) × 100 = 0.72%</li>
+                  <li>⚡ <strong>Factor 10.5x:</strong> 0.72% × 10.5 = 7.56%</li>
+                  <li>🎯 <strong>Resultado final:</strong> Máximo entre 7.56% y 8% = 8.0%</li>
+                </ul>
+                <p class="text-white mt-2 font-medium text-center">
+                  <span class="text-yellow-300">🎯 Índice = 8.0%</span> | 
+                  <span class="text-green-300">⭐ Potencial = 8.0%</span>
+                  <span class="text-purple-200"> (¡Máxima confianza!)</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -812,6 +882,9 @@
           </div>
         `;
         
+        // Mostrar el botón de explicación después de obtener resultados exitosos
+        mostrarBotonExplicacion();
+        
       } catch (error) {
         console.error('❌ Error al analizar número individual:', error);
         resultadoNumero.innerHTML = `
@@ -1092,6 +1165,9 @@
           </div>
         `;
         
+        // Mostrar el botón de explicación después de obtener resultados exitosos
+        mostrarBotonExplicacion();
+        
       } catch (error) {
         console.error('❌ Error al analizar combinación:', error);
         resultadoCombinacion.innerHTML = `
@@ -1102,30 +1178,65 @@
       }
     });
 
-    // Validación en tiempo real
-    prevenirEntradaInvalida(inputNumero);
-    inputsCombinacion.forEach(input => {
-      prevenirEntradaInvalida(input);
-    });
+    // Función para mostrar el botón de explicación después de obtener resultados
+    function mostrarBotonExplicacion() {
+      const botonContainer = document.getElementById('explicacion-boton-container');
+      botonContainer.classList.remove('hidden');
+      
+      // Agregar animación de entrada
+      setTimeout(() => {
+        botonContainer.classList.add('animate__animated', 'animate__fadeInUp');
+      }, 100);
+    }
+    
+    // Función para ocultar el botón de explicación
+    function ocultarBotonExplicacion() {
+      const botonContainer = document.getElementById('explicacion-boton-container');
+      const explicacionExpandible = document.getElementById('explicacion-expandible');
+      
+      botonContainer.classList.add('hidden');
+      explicacionExpandible.classList.add('hidden');
+    }
+    
+    // Event listeners para el botón expandible
+    document.addEventListener('DOMContentLoaded', () => {
+      const mostrarExplicacionBtn = document.getElementById('mostrar-explicacion-btn');
+      const explicacionExpandible = document.getElementById('explicacion-expandible');
+      
+      mostrarExplicacionBtn.addEventListener('click', () => {
+        if (explicacionExpandible.classList.contains('hidden')) {
+          explicacionExpandible.classList.remove('hidden');
+          explicacionExpandible.classList.add('animate__animated', 'animate__fadeInDown');
+          mostrarExplicacionBtn.textContent = 'OCULTAR EXPLICACIÓN';
+          mostrarExplicacionBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          explicacionExpandible.classList.add('hidden');
+          mostrarExplicacionBtn.textContent = '¿QUÉ SIGNIFICAN LOS RESULTADOS?';
+        }
+      });
+      
+      // Funcionalidad del botón de ayuda expandible dentro de la explicación
+      const toggleHelpExpandibleBtn = document.getElementById('toggle-help-expandible');
+      const helpContentExpandible = document.getElementById('help-content-expandible');
+      const helpTextExpandible = document.getElementById('help-text-expandible');
+      const helpIconExpandible = document.getElementById('help-icon-expandible');
 
-    // Funcionalidad del botón de ayuda expandible
-    const toggleHelpBtn = document.getElementById('toggle-help');
-    const helpContent = document.getElementById('help-content');
-    const helpText = document.getElementById('help-text');
-    const helpIcon = document.getElementById('help-icon');
-
-    toggleHelpBtn.addEventListener('click', () => {
-      if (helpContent.classList.contains('hidden')) {
-        helpContent.classList.remove('hidden');
-        helpText.textContent = 'Ocultar ejemplo';
-        helpIcon.textContent = '👁️‍🗨️';
-      } else {
-        helpContent.classList.add('hidden');
-        helpText.textContent = 'Ver ejemplo práctico';
-        helpIcon.textContent = '👁️';
+      if (toggleHelpExpandibleBtn) {
+        toggleHelpExpandibleBtn.addEventListener('click', () => {
+          if (helpContentExpandible.classList.contains('hidden')) {
+            helpContentExpandible.classList.remove('hidden');
+            helpContentExpandible.classList.add('animate__animated', 'animate__fadeInDown');
+            helpTextExpandible.textContent = 'Ocultar ejemplo';
+            helpIconExpandible.textContent = '👁️‍🗨️';
+          } else {
+            helpContentExpandible.classList.add('hidden');
+            helpTextExpandible.textContent = 'Ver ejemplo práctico';
+            helpIconExpandible.textContent = '👁️';
+          }
+        });
       }
     });
-
+    
     // Inicializar la aplicación
     prepararDatosHistoricos();
   </script>
