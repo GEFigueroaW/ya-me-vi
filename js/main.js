@@ -44,14 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Referencias DOM ===
   const btnAnalizar = document.getElementById('btn-analizar');
   const btnCombinacion = document.getElementById('btn-combinacion');
+  const btnSugeridas = document.getElementById('btn-sugeridas');
 
   // === Botones: alternar visibilidad y redirigir ===
-  if (btnAnalizar && btnCombinacion) {
+  if (btnAnalizar && btnCombinacion && btnSugeridas) {
     btnAnalizar.addEventListener('click', (e) => {
       e.preventDefault();
       console.log('Botón Analizar clickeado');
       btnAnalizar.classList.add('hidden');
       btnCombinacion.classList.remove('hidden');
+      btnSugeridas.classList.remove('hidden');
       window.location.href = "analisis.html";
     });
 
@@ -60,7 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Botón Combinación clickeado');
       btnCombinacion.classList.add('hidden');
       btnAnalizar.classList.remove('hidden');
+      btnSugeridas.classList.remove('hidden');
       window.location.href = "combinacion.html";
+    });
+
+    btnSugeridas.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Botón Sugeridas clickeado');
+      btnSugeridas.classList.add('hidden');
+      btnAnalizar.classList.remove('hidden');
+      btnCombinacion.classList.remove('hidden');
+      window.location.href = "sugeridas.html";
     });
   } else {
     console.warn('No se encontraron los botones principales');

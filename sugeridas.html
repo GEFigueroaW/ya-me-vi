@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Combinaciones Sugeridas</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="overflow-x-hidden">
+
+  <!-- Fondo -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
+
+    <!-- Botón de regreso -->
+    <button id="btn-back" class="btn-back-improved">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <span class="btn-text">Volver</span>
+    </button>
+
+    <!-- Espaciador para evitar solapamiento en móviles -->
+    <div class="mobile-spacer"></div>
+
+    <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown">Combinaciones Sugeridas</h1>
+
+    <!-- Descripción -->
+    <div class="text-center mb-8">
+      <p class="text-lg text-gray-300 mb-4">
+        Genera combinaciones de números completamente al azar
+      </p>
+      <p class="text-sm text-gray-400">
+        Números aleatorios del 1 al 56 • Sin análisis • Sin patrones • Solo suerte
+      </p>
+    </div>
+
+    <!-- Botón para generar combinaciones -->
+    <div class="mb-8">
+      <button id="btn-generar" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+        🎲 Generar Combinaciones Aleatorias
+      </button>
+    </div>
+
+    <!-- Contenedor de combinaciones generadas -->
+    <div id="combinaciones-container" class="max-w-6xl mx-auto">
+      <div class="text-center py-12">
+        <div class="text-6xl mb-4">🎯</div>
+        <p class="text-white text-lg">¡Presiona el botón para generar tus combinaciones de la suerte!</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-xs text-gray-400 max-w-4xl mx-auto">
+      Este sistema genera números completamente al azar. No garantiza premios. Juega con responsabilidad.
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { app } from './js/firebase-init.js';
+
+    const auth = getAuth(app);
+
+    // Botón de regreso
+    document.getElementById('btn-back').addEventListener('click', () => {
+      window.location.href = 'home.html';
+    });
+
+    // Verificar autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+      }
+    });
+
+    // Función para generar un número aleatorio entre min y max (inclusive)
+    function numeroAleatorio(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Función para generar una combinación de 6 números únicos
+    function generarCombinacion() {
+      const numeros = new Set();
+      
+      while (numeros.size < 6) {
+        numeros.add(numeroAleatorio(1, 56));
+      }
+      
+      return Array.from(numeros).sort((a, b) => a - b);
+    }
+
+    // Función para generar múltiples combinaciones
+    function generarCombinaciones() {
+      const combinaciones = [];
+      
+      // Generar 9 combinaciones (3x3 grid)
+      for (let i = 0; i < 9; i++) {
+        combinaciones.push(generarCombinacion());
+      }
+      
+      return combinaciones;
+    }
+
+    // Función para mostrar las combinaciones en la UI
+    function mostrarCombinaciones(combinaciones) {
+      const container = document.getElementById('combinaciones-container');
+      
+      let html = `
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-4 text-white">🎲 Tus Combinaciones Aleatorias</h2>
+          <p class="text-gray-300 mb-6">Combinaciones generadas completamente al azar • ¡Elige la que más te guste!</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      `;
+      
+      combinaciones.forEach((combinacion, index) => {
+        html += `
+          <div class="analisis-transparente rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition-all duration-300 hover:transform hover:scale-105">
+            <h3 class="text-lg font-semibold mb-4 text-white">Combinación ${index + 1}</h3>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-white mb-2">
+                ${combinacion.join(' - ')}
+              </div>
+              <div class="text-sm text-gray-300">
+                6 números aleatorios del 1 al 56
+              </div>
+            </div>
+            <div class="mt-4">
+              <button onclick="copiarCombinacion('${combinacion.join(', ')}')" class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full transition-all duration-300">
+                📋 Copiar
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += `
+        </div>
+        
+        <div class="text-center">
+          <button id="btn-generar-nuevas" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+            🔄 Generar Nuevas Combinaciones
+          </button>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+      
+      // Agregar evento al botón de generar nuevas
+      document.getElementById('btn-generar-nuevas').addEventListener('click', () => {
+        generarYMostrarCombinaciones();
+      });
+    }
+
+    // Función para copiar combinación al portapapeles
+    window.copiarCombinacion = function(combinacion) {
+      navigator.clipboard.writeText(combinacion).then(() => {
+        // Mostrar mensaje de éxito
+        const mensaje = document.createElement('div');
+        mensaje.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg z-50';
+        mensaje.textContent = '✅ Combinación copiada';
+        document.body.appendChild(mensaje);
+        
+        setTimeout(() => {
+          mensaje.remove();
+        }, 2000);
+      }).catch(() => {
+        // Fallback si no se puede copiar
+        const mensaje = document.createElement('div');
+        mensaje.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg z-50';
+        mensaje.textContent = '❌ Error al copiar';
+        document.body.appendChild(mensaje);
+        
+        setTimeout(() => {
+          mensaje.remove();
+        }, 2000);
+      });
+    };
+
+    // Función principal para generar y mostrar combinaciones
+    function generarYMostrarCombinaciones() {
+      const combinaciones = generarCombinaciones();
+      mostrarCombinaciones(combinaciones);
+    }
+
+    // Event listener para el botón principal
+    document.getElementById('btn-generar').addEventListener('click', () => {
+      generarYMostrarCombinaciones();
+    });
+
+  </script>
+
+  <style>
+    .analisis-transparente {
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</body>
+</html>
