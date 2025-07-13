@@ -150,7 +150,13 @@
           const datosSorteo = datosCompletos.datosPorSorteo[sorteo];
           console.log(`🎯 Generando predicción para ${sorteo}...`);
           
-          const prediccion = await generarPrediccionPersonalizada(usuarioID, datosSorteo);
+          // Agregar información del sorteo a los datos
+          const datosSorteoConTipo = {
+            ...datosSorteo,
+            sorteo: sorteo
+          };
+          
+          const prediccion = await generarPrediccionPersonalizada(usuarioID, datosSorteoConTipo);
           const elementoId = `combinacion-${sorteo}`;
           const elemento = document.getElementById(elementoId);
           

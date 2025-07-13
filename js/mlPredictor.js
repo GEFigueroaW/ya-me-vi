@@ -25,14 +25,37 @@ function generarCombinacionPersonalizada(userId, datos) {
   // Generar el pool de 1000 combinaciones basadas en datos históricos
   const poolCombinaciones = generarPoolCombinaciones(datos);
   
-  // Seleccionar una combinación específica para este usuario
+  // Determinar qué sorteo es basado en el contexto de los datos
+  const tipoSorteo = determinarTipoSorteo(datos);
+  
+  // Seleccionar una combinación específica para este usuario y sorteo
   const hashUsuario = hashCode(userId);
-  const indiceCombinacion = hashUsuario % poolCombinaciones.length;
+  const hashSorteo = hashCode(tipoSorteo);
+  const indiceCombinacion = (hashUsuario + hashSorteo) % poolCombinaciones.length;
   
   const combinacionSeleccionada = poolCombinaciones[indiceCombinacion];
   
-  console.log(`✅ Combinación ${indiceCombinacion + 1}/1000 seleccionada para usuario ${userId}:`, combinacionSeleccionada);
+  console.log(`✅ Combinación ${indiceCombinacion + 1}/1000 seleccionada para usuario ${userId} en ${tipoSorteo}:`, combinacionSeleccionada);
   return combinacionSeleccionada;
+}
+
+// Determinar el tipo de sorteo basado en los datos
+function determinarTipoSorteo(datos) {
+  // Si hay información del sorteo en los datos, usarla
+  if (datos.sorteo) {
+    return datos.sorteo;
+  }
+  
+  // Si no, intentar determinar por el contexto
+  if (datos.datos && datos.datos.length > 0) {
+    const primerDato = datos.datos[0];
+    if (primerDato.sorteo) {
+      return primerDato.sorteo;
+    }
+  }
+  
+  // Fallback por defecto
+  return 'melate';
 }
 
 // Generar pool de 1000 combinaciones inteligentes

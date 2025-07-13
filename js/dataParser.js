@@ -392,8 +392,8 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
           
           <!-- Análisis por bloques -->
           <div class="mb-4">
-            <h4 class="text-lg font-semibold text-white mb-2">🎯 Predicción por Zonas Numéricas</h4>
-            <p class="text-xs text-gray-300 mb-3">¿Cuántos números saldrán de cada zona? (Total: 6 números)</p>
+            <h4 class="text-lg font-semibold text-white mb-2">🎯 Predicción por Rangos Numéricos</h4>
+            <p class="text-xs text-gray-300 mb-3">¿Cuántos números saldrán de cada rango? (Total: 6 números)</p>
             <div class="space-y-2">
       `;
       
@@ -402,7 +402,7 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
         htmlContent += `
           <div class="analisis-transparente rounded-lg p-3 border border-white border-opacity-30">
             <div class="flex justify-between items-center">
-              <span class="font-semibold text-white">Zona ${bloque.bloque}</span>
+              <span class="font-semibold text-white">Rango ${bloque.bloque}</span>
               <div class="text-right">
                 <div class="text-lg font-bold text-green-300">${numeroTexto}</div>
                 <div class="text-sm text-gray-300">${bloque.porcentaje}% probabilidad</div>
@@ -426,7 +426,7 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
             </div>
             <div class="mt-3 p-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg text-center">
               <p class="text-sm font-semibold text-white">
-                💡 Esta predicción sugiere de qué zonas saldrán los 6 números ganadores
+                💡 Esta predicción sugiere de qué rangos saldrán los 6 números ganadores
               </p>
             </div>
           </div>
