@@ -219,6 +219,14 @@
               </button>
             </div>
             
+            <!-- Nuevo botón para "CÓMO FUNCIONA EL ANÁLISIS" -->
+            <div class="mt-3 text-center">
+              <button id="toggle-analisis-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-white border-opacity-30">
+                <span id="analisis-text-expandible">⚙️ ¿Cómo funciona el análisis?</span>
+                <span id="analisis-icon-expandible">🔍</span>
+              </button>
+            </div>
+            
             <!-- Ayuda expandible -->
             <div id="help-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
               <h4 class="font-semibold mb-3 text-yellow-300">🧮 Ejemplo con el número 15:</h4>
@@ -234,6 +242,31 @@
                   <span class="text-green-300">⭐ Potencial = 8.0%</span>
                   <span class="text-purple-200"> (¡Máxima confianza!)</span>
                 </p>
+              </div>
+            </div>
+            
+            <!-- Contenido del análisis expandible -->
+            <div id="analisis-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
+              <h4 class="font-semibold mb-3 text-blue-300">⚙️ ¿Cómo funciona el análisis?</h4>
+              <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+                <div class="space-y-3">
+                  <div class="border-l-4 border-yellow-400 pl-3">
+                    <h5 class="font-semibold text-yellow-300">🔍 Recolección de datos</h5>
+                    <p class="text-gray-200 text-xs mt-1">Analizamos más de 1,668 números ganadores de los últimos 30 meses de Melate, Revancha y Revanchita.</p>
+                  </div>
+                  <div class="border-l-4 border-green-400 pl-3">
+                    <h5 class="font-semibold text-green-300">📊 Cálculo estadístico</h5>
+                    <p class="text-gray-200 text-xs mt-1">Calculamos la frecuencia real de cada número y aplicamos algoritmos de probabilidad avanzados.</p>
+                  </div>
+                  <div class="border-l-4 border-blue-400 pl-3">
+                    <h5 class="font-semibold text-blue-300">🎯 Factor de ajuste</h5>
+                    <p class="text-gray-200 text-xs mt-1">Multiplicamos por 10.5x para generar expectativas realistas, garantizando mínimo 8% de potencial.</p>
+                  </div>
+                  <div class="border-l-4 border-purple-400 pl-3">
+                    <h5 class="font-semibold text-purple-300">✨ Resultado final</h5>
+                    <p class="text-gray-200 text-xs mt-1">Te mostramos tanto el dato histórico real (ÍNDICE) como tu probabilidad ajustada (POTENCIAL).</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -837,6 +870,12 @@
       window.history.back();
     });
 
+    // Aplicar validación en tiempo real a todos los inputs
+    prevenirEntradaInvalida(inputNumero);
+    inputsCombinacion.forEach(input => {
+      prevenirEntradaInvalida(input);
+    });
+
     // Evaluar número individual
     btnNumero.addEventListener('click', () => {
       const numero = parseInt(inputNumero.value);
@@ -997,6 +1036,7 @@
         // Crear HTML para el análisis agrupado por sorteo
         const htmlMelate = analisisIndividual.map(analisis => {
           const clasificacion = clasificarProbabilidad(analisis.porSorteo.melate.porcentaje);
+          const indicePorSorteo = calcularIndicePorSorteo(analisis.numero);
           return `
             <div class="bg-blue-500 bg-opacity-20 rounded-lg p-3 border border-blue-400">
               <div class="flex items-center justify-between">
@@ -1006,7 +1046,9 @@
                 </div>
               </div>
               <div class="text-center mt-2">
-                <div class="text-xs text-green-600 font-medium">⭐ Potencial</div>
+                <div class="text-xs text-yellow-600 font-medium">🎯 Índice</div>
+                <div class="text-sm font-bold text-gray-700">${indicePorSorteo.melate.toFixed(1)}%</div>
+                <div class="text-xs text-green-600 font-medium mt-1">⭐ Potencial</div>
                 <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.melate.porcentaje.toFixed(1)}%</div>
                 <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
                   ${clasificacion.categoria}
@@ -1019,6 +1061,7 @@
         
         const htmlRevancha = analisisIndividual.map(analisis => {
           const clasificacion = clasificarProbabilidad(analisis.porSorteo.revancha.porcentaje);
+          const indicePorSorteo = calcularIndicePorSorteo(analisis.numero);
           return `
             <div class="bg-purple-500 bg-opacity-20 rounded-lg p-3 border border-purple-400">
               <div class="flex items-center justify-between">
@@ -1028,7 +1071,9 @@
                 </div>
               </div>
               <div class="text-center mt-2">
-                <div class="text-xs text-green-600 font-medium">⭐ Potencial</div>
+                <div class="text-xs text-yellow-600 font-medium">🎯 Índice</div>
+                <div class="text-sm font-bold text-gray-700">${indicePorSorteo.revancha.toFixed(1)}%</div>
+                <div class="text-xs text-green-600 font-medium mt-1">⭐ Potencial</div>
                 <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.revancha.porcentaje.toFixed(1)}%</div>
                 <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
                   ${clasificacion.categoria}
@@ -1041,6 +1086,7 @@
         
         const htmlRevanchita = analisisIndividual.map(analisis => {
           const clasificacion = clasificarProbabilidad(analisis.porSorteo.revanchita.porcentaje);
+          const indicePorSorteo = calcularIndicePorSorteo(analisis.numero);
           return `
             <div class="bg-green-500 bg-opacity-20 rounded-lg p-3 border border-green-400">
               <div class="flex items-center justify-between">
@@ -1050,7 +1096,9 @@
                 </div>
               </div>
               <div class="text-center mt-2">
-                <div class="text-xs text-green-600 font-medium">⭐ Potencial</div>
+                <div class="text-xs text-yellow-600 font-medium">🎯 Índice</div>
+                <div class="text-sm font-bold text-gray-700">${indicePorSorteo.revanchita.toFixed(1)}%</div>
+                <div class="text-xs text-green-600 font-medium mt-1">⭐ Potencial</div>
                 <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.revanchita.porcentaje.toFixed(1)}%</div>
                 <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
                   ${clasificacion.categoria}
@@ -1294,6 +1342,27 @@
             helpContentExpandible.classList.add('hidden');
             helpTextExpandible.textContent = 'Ver ejemplo práctico';
             helpIconExpandible.textContent = '👁️';
+          }
+        });
+      }
+      
+      // Funcionalidad del botón de análisis expandible dentro de la explicación
+      const toggleAnalisisExpandibleBtn = document.getElementById('toggle-analisis-expandible');
+      const analisisContentExpandible = document.getElementById('analisis-content-expandible');
+      const analisisTextExpandible = document.getElementById('analisis-text-expandible');
+      const analisisIconExpandible = document.getElementById('analisis-icon-expandible');
+
+      if (toggleAnalisisExpandibleBtn) {
+        toggleAnalisisExpandibleBtn.addEventListener('click', () => {
+          if (analisisContentExpandible.classList.contains('hidden')) {
+            analisisContentExpandible.classList.remove('hidden');
+            analisisContentExpandible.classList.add('animate__animated', 'animate__fadeInDown');
+            analisisTextExpandible.textContent = '🔼 Ocultar análisis';
+            analisisIconExpandible.textContent = '🔍‍🗨️';
+          } else {
+            analisisContentExpandible.classList.add('hidden');
+            analisisTextExpandible.textContent = '⚙️ ¿Cómo funciona el análisis?';
+            analisisIconExpandible.textContent = '🔍';
           }
         });
       }
