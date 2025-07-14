@@ -130,15 +130,20 @@ function mostrarUltimosSorteos(ultimosSorteos) {
   let ultimoNumeroSorteo = 0;
   const sorteos = ['melate', 'revancha', 'revanchita'];
   
+  console.log('🔍 Buscando último sorteo en:', ultimosSorteos);
+  
   sorteos.forEach(sorteo => {
     const ultimo = ultimosSorteos[sorteo];
+    console.log(`📊 ${sorteo}:`, ultimo);
     if (ultimo && ultimo.numeroSorteo) {
       ultimoNumeroSorteo = Math.max(ultimoNumeroSorteo, ultimo.numeroSorteo);
+      console.log(`📈 Número más alto encontrado: ${ultimoNumeroSorteo}`);
     }
   });
   
   if (ultimoNumeroSorteo > 0) {
     container.innerHTML = `ULTIMO SORTEO ${ultimoNumeroSorteo}`;
+    console.log(`✅ Último sorteo actualizado: ${ultimoNumeroSorteo}`);
     
     // Actualizar también el título de predicción con el siguiente número
     const prediccionTitle = document.querySelector('#prediccion-container h2');
@@ -146,12 +151,13 @@ function mostrarUltimosSorteos(ultimosSorteos) {
       prediccionTitle.textContent = `🎯 Combinaciones sugeridas`;
     }
   } else {
+    console.warn('⚠️ No se encontró número de sorteo válido');
     container.innerHTML = 'ULTIMO SORTEO 0000';
   }
 }
 
 export function graficarEstadisticas(datos) {
-  console.log('🔍 Datos recibidos:', datos);
+  console.log('🔍 Datos recibidos en graficarEstadisticas:', datos);
   
   // Si es modo comparativo (todos los sorteos)
   if (datos.esComparativo) {
@@ -198,6 +204,7 @@ export function graficarEstadisticas(datos) {
   });
 
   // Mostrar las estadísticas en la UI
+  console.log('📊 Mostrando estadísticas completas...');
   mostrarEstadisticasCompletas(frecuencia, numeros.length, sorteos.length, modo);
 }
 
@@ -239,6 +246,7 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       
       sorteosDatos.forEach(sorteoData => {
         const numeros = sorteoData.numeros || [];
+        console.log(`📋 ${sorteo} - Números en sorteo:`, numeros);
         numeros.forEach(num => {
           if (num >= 1 && num <= 56) {
             frecuencia[num - 1]++;
@@ -247,17 +255,28 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
         });
       });
       
+      console.log(`📊 ${sorteo} - Frecuencias calculadas:`, { 
+        totalNumeros, 
+        primerasFrec: frecuencia.slice(0, 10),
+        maxFrec: Math.max(...frecuencia),
+        minFrec: Math.min(...frecuencia)
+      });
+      
       // Top 10 más frecuentes
       const top10Mas = frecuencia
         .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
         .sort((a, b) => b.frecuencia - a.frecuencia)
         .slice(0, 10);
       
-      // Top 10 menos frecuentes
+      // Top 10 menos frecuentes (filtrar los que tienen frecuencia > 0)
       const top10Menos = frecuencia
         .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
+        .filter(item => item.frecuencia > 0) // Solo números que han salido
         .sort((a, b) => a.frecuencia - b.frecuencia)
         .slice(0, 10);
+      
+      console.log(`📈 ${sorteo} - Top 10 más:`, top10Mas);
+      console.log(`📉 ${sorteo} - Top 10 menos:`, top10Menos);
       
       // Análisis por bloques
       const numerosPorBloque = bloques.map(() => []);
