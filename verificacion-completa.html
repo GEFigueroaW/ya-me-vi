@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YA ME VI - Verificación Final</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    .verificacion-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .status-ok { color: #22c55e; }
+    .status-error { color: #ef4444; }
+    .status-warning { color: #f59e0b; }
+    .status-loading { color: #3b82f6; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-600 to-blue-800 min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-white mb-4">🔍 YA ME VI - Verificación Final</h1>
+      <p class="text-white text-lg">Comprobando el estado completo del sistema</p>
+    </div>
+
+    <!-- Test de archivos JS -->
+    <div class="verificacion-card rounded-lg p-6 mb-6">
+      <h2 class="text-2xl font-bold text-white mb-4">📄 Estado de Archivos JavaScript</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-black bg-opacity-30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-white mb-2">dataParser.js</h3>
+          <div id="dataparser-status" class="status-loading">🔄 Verificando...</div>
+        </div>
+        <div class="bg-black bg-opacity-30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-white mb-2">mlPredictor.js</h3>
+          <div id="mlpredictor-status" class="status-loading">🔄 Verificando...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test de páginas HTML -->
+    <div class="verificacion-card rounded-lg p-6 mb-6">
+      <h2 class="text-2xl font-bold text-white mb-4">🌐 Estado de Páginas HTML</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-black bg-opacity-30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-white mb-2">analisis.html</h3>
+          <div id="analisis-status" class="status-loading">🔄 Verificando...</div>
+        </div>
+        <div class="bg-black bg-opacity-30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-white mb-2">combinacion.html</h3>
+          <div id="combinacion-status" class="status-loading">🔄 Verificando...</div>
+        </div>
+        <div class="bg-black bg-opacity-30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-white mb-2">sugeridas.html</h3>
+          <div id="sugeridas-status" class="status-loading">🔄 Verificando...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test de datos CSV -->
+    <div class="verificacion-card rounded-lg p-6 mb-6">
+      <h2 class="text-2xl font-bold text-white mb-4">📊 Estado de Datos CSV</h2>
+      <div id="csv-results" class="space-y-2">
+        <div class="status-loading">🔄 Verificando archivos CSV...</div>
+      </div>
+    </div>
+
+    <!-- Test de navegación -->
+    <div class="verificacion-card rounded-lg p-6 mb-6">
+      <h2 class="text-2xl font-bold text-white mb-4">🧭 Test de Navegación</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button onclick="testNavegacion('analisis.html')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Ir a Análisis
+        </button>
+        <button onclick="testNavegacion('combinacion.html')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+          Ir a Combinación
+        </button>
+        <button onclick="testNavegacion('sugeridas.html')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          Ir a Sugeridas
+        </button>
+      </div>
+    </div>
+
+    <!-- Resultado final -->
+    <div class="verificacion-card rounded-lg p-6">
+      <h2 class="text-2xl font-bold text-white mb-4">🎯 Resultado Final</h2>
+      <div id="resultado-final" class="text-center">
+        <div class="status-loading text-xl">🔄 Ejecutando verificaciones...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    let erroresEncontrados = 0;
+    let verificacionesCompletas = 0;
+    const totalVerificaciones = 7;
+
+    function actualizarStatus(elementId, mensaje, tipo) {
+      const element = document.getElementById(elementId);
+      element.textContent = mensaje;
+      element.className = `status-${tipo}`;
+      
+      verificacionesCompletas++;
+      if (verificacionesCompletas === totalVerificaciones) {
+        mostrarResultadoFinal();
+      }
+    }
+
+    function mostrarResultadoFinal() {
+      const resultadoElement = document.getElementById('resultado-final');
+      
+      if (erroresEncontrados === 0) {
+        resultadoElement.innerHTML = `
+          <div class="status-ok text-2xl mb-4">✅ Sistema Completamente Funcional</div>
+          <div class="text-white">Todas las verificaciones han sido exitosas. La aplicación está lista para uso.</div>
+        `;
+      } else {
+        resultadoElement.innerHTML = `
+          <div class="status-error text-2xl mb-4">❌ Se encontraron ${erroresEncontrados} errores</div>
+          <div class="text-white">Algunos componentes requieren atención. Revisa los detalles arriba.</div>
+        `;
+      }
+    }
+
+    // Verificar dataParser.js
+    try {
+      import('./js/dataParser.js').then(module => {
+        if (module.cargarDatosHistoricos) {
+          actualizarStatus('dataparser-status', '✅ Cargado correctamente', 'ok');
+        } else {
+          actualizarStatus('dataparser-status', '❌ Función principal no encontrada', 'error');
+          erroresEncontrados++;
+        }
+      }).catch(error => {
+        actualizarStatus('dataparser-status', `❌ Error: ${error.message}`, 'error');
+        erroresEncontrados++;
+      });
+    } catch (error) {
+      actualizarStatus('dataparser-status', `❌ Error: ${error.message}`, 'error');
+      erroresEncontrados++;
+    }
+
+    // Verificar mlPredictor.js
+    try {
+      import('./js/mlPredictor.js').then(module => {
+        if (module.generarPrediccionPersonalizada) {
+          actualizarStatus('mlpredictor-status', '✅ Cargado correctamente', 'ok');
+        } else {
+          actualizarStatus('mlpredictor-status', '❌ Función principal no encontrada', 'error');
+          erroresEncontrados++;
+        }
+      }).catch(error => {
+        actualizarStatus('mlpredictor-status', `❌ Error: ${error.message}`, 'error');
+        erroresEncontrados++;
+      });
+    } catch (error) {
+      actualizarStatus('mlpredictor-status', `❌ Error: ${error.message}`, 'error');
+      erroresEncontrados++;
+    }
+
+    // Verificar páginas HTML
+    const paginas = ['analisis.html', 'combinacion.html', 'sugeridas.html'];
+    paginas.forEach(pagina => {
+      const statusId = pagina.replace('.html', '-status');
+      
+      fetch(pagina)
+        .then(response => {
+          if (response.ok) {
+            return response.text();
+          }
+          throw new Error(`HTTP ${response.status}`);
+        })
+        .then(html => {
+          // Verificar que contiene elementos básicos
+          if (html.includes('btn-back') && html.includes('YA ME VI')) {
+            actualizarStatus(statusId, '✅ Página válida', 'ok');
+          } else {
+            actualizarStatus(statusId, '⚠️ Página incompleta', 'warning');
+          }
+        })
+        .catch(error => {
+          actualizarStatus(statusId, `❌ Error: ${error.message}`, 'error');
+          erroresEncontrados++;
+        });
+    });
+
+    // Verificar archivos CSV
+    const csvFiles = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
+    let csvResults = [];
+    let csvCompleted = 0;
+
+    csvFiles.forEach(file => {
+      fetch(file)
+        .then(response => {
+          if (response.ok) {
+            return response.text();
+          }
+          throw new Error(`HTTP ${response.status}`);
+        })
+        .then(text => {
+          const lines = text.trim().split('\n');
+          const fileName = file.split('/').pop();
+          csvResults.push(`✅ ${fileName}: ${lines.length - 1} registros`);
+          csvCompleted++;
+          
+          if (csvCompleted === csvFiles.length) {
+            document.getElementById('csv-results').innerHTML = csvResults.join('<br>');
+            actualizarStatus('csv-results', '', 'ok'); // Marcar como completado
+          }
+        })
+        .catch(error => {
+          const fileName = file.split('/').pop();
+          csvResults.push(`❌ ${fileName}: ${error.message}`);
+          csvCompleted++;
+          erroresEncontrados++;
+          
+          if (csvCompleted === csvFiles.length) {
+            document.getElementById('csv-results').innerHTML = csvResults.join('<br>');
+            actualizarStatus('csv-results', '', 'error'); // Marcar como completado con error
+          }
+        });
+    });
+
+    // Función para test de navegación
+    window.testNavegacion = function(pagina) {
+      window.open(pagina, '_blank');
+    };
+
+    // Verificar que al menos una función esté trabajando
+    setTimeout(() => {
+      if (verificacionesCompletas === 0) {
+        document.getElementById('resultado-final').innerHTML = `
+          <div class="status-error text-2xl mb-4">❌ Error de Sistema</div>
+          <div class="text-white">No se pudieron ejecutar las verificaciones. Revisa la consola del navegador.</div>
+        `;
+      }
+    }, 10000);
+  </script>
+</body>
+</html>
