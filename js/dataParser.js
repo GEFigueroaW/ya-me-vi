@@ -50,6 +50,15 @@ async function cargarSorteoIndividual(modo) {
 
     const nombreSorteo = modo.charAt(0).toUpperCase() + modo.slice(1);
     
+    // Calcular fecha límite - últimos 30 meses
+    const fechaActual = new Date();
+    const fechaLimite = new Date();
+    fechaLimite.setMonth(fechaActual.getMonth() - 30);
+    
+    console.log(`📅 Filtrando datos desde: ${fechaLimite.toLocaleDateString()} hasta hoy`);
+    
+    let ultimoSorteo = 0;
+    
     // Procesar cada línea según el formato específico del archivo
     lineas.slice(1).forEach((linea, index) => {
       if (!linea.trim()) return; // Saltar líneas vacías
@@ -58,12 +67,30 @@ async function cargarSorteoIndividual(modo) {
       let numeros = [];
       let concurso = 0;
       let fecha = '';
+      let fechaSorteo = null;
       
       if (modo === 'melate') {
         // Melate: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
         // Índices:    0       1      2  3  4  5  6  7  8     9     10
         concurso = parseInt(cols[1], 10);
         fecha = cols[10] ? cols[10].trim() : 'Sin fecha';
+        
+        // Validar fecha y filtrar últimos 30 meses
+        if (fecha && fecha !== 'Sin fecha') {
+          const partesFecha = fecha.split('/');
+          if (partesFecha.length === 3) {
+            const dia = parseInt(partesFecha[0]);
+            const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+            const año = parseInt(partesFecha[2]);
+            fechaSorteo = new Date(año, mes, dia);
+            
+            // Saltar sorteos más antiguos de 30 meses
+            if (fechaSorteo < fechaLimite) {
+              return;
+            }
+          }
+        }
+        
         numeros = [
           parseInt(cols[2], 10), // R1
           parseInt(cols[3], 10), // R2  
@@ -72,11 +99,32 @@ async function cargarSorteoIndividual(modo) {
           parseInt(cols[6], 10), // R5
           parseInt(cols[7], 10)  // R6
         ];
+        
+        // Actualizar el último sorteo (el más reciente)
+        if (index === 0) ultimoSorteo = concurso;
+        
       } else if (modo === 'revancha') {
         // Revancha: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,BOLSA,FECHA
         // Índices:     0       1      2  3  4  5  6  7    8     9
         concurso = parseInt(cols[1], 10);
         fecha = cols[9] ? cols[9].trim() : 'Sin fecha';
+        
+        // Validar fecha y filtrar últimos 30 meses
+        if (fecha && fecha !== 'Sin fecha') {
+          const partesFecha = fecha.split('/');
+          if (partesFecha.length === 3) {
+            const dia = parseInt(partesFecha[0]);
+            const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+            const año = parseInt(partesFecha[2]);
+            fechaSorteo = new Date(año, mes, dia);
+            
+            // Saltar sorteos más antiguos de 30 meses
+            if (fechaSorteo < fechaLimite) {
+              return;
+            }
+          }
+        }
+        
         numeros = [
           parseInt(cols[2], 10), // R1
           parseInt(cols[3], 10), // R2  
@@ -85,11 +133,29 @@ async function cargarSorteoIndividual(modo) {
           parseInt(cols[6], 10), // R5
           parseInt(cols[7], 10)  // R6
         ];
+        
       } else if (modo === 'revanchita') {
         // Revanchita: NPRODUCTO,CONCURSO,F1,F2,F3,F4,F5,F6,BOLSA,FECHA
         // Índices:       0       1      2  3  4  5  6  7    8     9
         concurso = parseInt(cols[1], 10);
         fecha = cols[9] ? cols[9].trim() : 'Sin fecha';
+        
+        // Validar fecha y filtrar últimos 30 meses
+        if (fecha && fecha !== 'Sin fecha') {
+          const partesFecha = fecha.split('/');
+          if (partesFecha.length === 3) {
+            const dia = parseInt(partesFecha[0]);
+            const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+            const año = parseInt(partesFecha[2]);
+            fechaSorteo = new Date(año, mes, dia);
+            
+            // Saltar sorteos más antiguos de 30 meses
+            if (fechaSorteo < fechaLimite) {
+              return;
+            }
+          }
+        }
+        
         numeros = [
           parseInt(cols[2], 10), // F1
           parseInt(cols[3], 10), // F2  
@@ -111,7 +177,7 @@ async function cargarSorteoIndividual(modo) {
           numeros: numerosValidos
         });
         todosLosNumeros.push(...numerosValidos);
-        console.log(`✅ ${modo} - Sorteo ${concurso} agregado:`, numerosValidos);
+        console.log(`✅ ${modo} - Sorteo ${concurso} agregado (${fecha}):`, numerosValidos);
       } else {
         console.warn(`⚠️ ${modo} - Línea ${index + 1} ignorada: números inválidos o faltantes`);
       }
@@ -128,12 +194,13 @@ async function cargarSorteoIndividual(modo) {
     return { datos: [], numeros: [], modo };
   }
 
-  console.log(`📊 ${modo}: ${todosLosDatos.length} sorteos cargados, ${todosLosNumeros.length} números totales`);
+  console.log(`📊 ${modo}: ${todosLosDatos.length} sorteos cargados (últimos 30 meses), ${todosLosNumeros.length} números totales`);
   
   return {
     datos: todosLosDatos,
     numeros: todosLosNumeros,
-    totalSorteos: todosLosDatos.length
+    totalSorteos: todosLosDatos.length,
+    ultimoSorteo: ultimoSorteo
   };
 }
 
@@ -152,8 +219,8 @@ async function cargarTodosSorteos() {
       if (datos && datos.datos && datos.datos.length > 0) {
         datosPorSorteo[sorteo] = datos;
         
-        // Obtener el último sorteo (el más reciente)
-        const ultimoSorteo = datos.datos[datos.datos.length - 1];
+        // Obtener el último sorteo (el más reciente está en la primera posición)
+        const ultimoSorteo = datos.datos[0]; // Primero es el más reciente
         ultimosSorteos[sorteo] = ultimoSorteo;
         console.log(`✅ ${sorteo} cargado exitosamente: ${datos.datos.length} sorteos, último: ${ultimoSorteo.numeroSorteo}`);
       } else {
@@ -162,7 +229,8 @@ async function cargarTodosSorteos() {
         datosPorSorteo[sorteo] = { 
           datos: [], 
           numeros: [], 
-          modo: sorteo 
+          modo: sorteo,
+          ultimoSorteo: 0
         };
         ultimosSorteos[sorteo] = null;
       }

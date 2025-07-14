@@ -33,7 +33,7 @@
     <div class="text-center mb-6">
       <h2 class="text-xl font-semibold text-white mb-2">MELATE | REVANCHA | REVANCHITA</h2>
       <div id="ultimo-sorteo" class="text-gray-300 text-sm">
-        ULTIMO SORTEO 0000
+        <span id="ultimo-sorteo-texto">Cargando último sorteo...</span>
       </div>
     </div>
 
@@ -93,6 +93,15 @@
       try {
         const datos = await cargarDatosHistoricos('todos');
         console.log('📊 Datos cargados, generando estadísticas...');
+        
+        // Mostrar último sorteo de Melate
+        if (datos.melate && datos.melate.ultimoSorteo) {
+          const ultimoSorteoTexto = document.getElementById('ultimo-sorteo-texto');
+          if (ultimoSorteoTexto) {
+            ultimoSorteoTexto.textContent = `ULTIMO SORTEO ${datos.melate.ultimoSorteo}`;
+          }
+        }
+        
         graficarEstadisticas(datos);
 
         console.log('✅ Análisis completado exitosamente');

@@ -22,6 +22,9 @@ export async function generarPrediccionPersonalizada(userId, datos) {
 function generarCombinacionPersonalizada(userId, datos) {
   console.log('🎯 Generando combinación personalizada del pool de 1000 para usuario:', userId);
   
+  // Generar hash único basado en los datos para garantizar consistencia
+  const hashDatos = generarHashDatos(datos);
+  
   // Generar el pool de 1000 combinaciones basadas en datos históricos
   const poolCombinaciones = generarPoolCombinaciones(datos);
   
@@ -29,14 +32,33 @@ function generarCombinacionPersonalizada(userId, datos) {
   const tipoSorteo = determinarTipoSorteo(datos);
   
   // Seleccionar una combinación específica para este usuario y sorteo
+  // La combinación será la misma mientras no cambien los datos históricos
   const hashUsuario = hashCode(userId);
   const hashSorteo = hashCode(tipoSorteo);
-  const indiceCombinacion = (hashUsuario + hashSorteo) % poolCombinaciones.length;
+  const hashCompleto = hashUsuario + hashSorteo + hashDatos;
+  const indiceCombinacion = hashCompleto % poolCombinaciones.length;
   
   const combinacionSeleccionada = poolCombinaciones[indiceCombinacion];
   
   console.log(`✅ Combinación ${indiceCombinacion + 1}/1000 seleccionada para usuario ${userId} en ${tipoSorteo}:`, combinacionSeleccionada);
+  console.log(`🔒 Hash datos: ${hashDatos} (garantiza consistencia hasta actualización)`);
   return combinacionSeleccionada;
+}
+
+// Generar hash de los datos para garantizar consistencia
+function generarHashDatos(datos) {
+  let hashString = '';
+  
+  if (datos.datos && datos.datos.length > 0) {
+    // Usar los primeros 10 sorteos como "firma" de los datos
+    const sorteosMuestra = datos.datos.slice(0, 10);
+    hashString = sorteosMuestra.map(s => `${s.numeroSorteo}-${s.numeros.join('')}`).join('|');
+  } else if (datos.numeros && datos.numeros.length > 0) {
+    // Usar los primeros 60 números como "firma"
+    hashString = datos.numeros.slice(0, 60).join('');
+  }
+  
+  return hashCode(hashString);
 }
 
 // Determinar el tipo de sorteo basado en los datos
@@ -58,46 +80,97 @@ function determinarTipoSorteo(datos) {
   return 'melate';
 }
 
-// Generar pool de 1000 combinaciones inteligentes
+// Generar pool de 1000 combinaciones inteligentes con los 5 métodos
 function generarPoolCombinaciones(datos) {
-  console.log('🏭 Generando pool de 1000 combinaciones inteligentes...');
+  console.log('🏭 Generando pool de 1000 combinaciones con 5 métodos de análisis...');
   
   const pool = [];
   const todosLosNumeros = datos.numeros || [];
   
-  // Análisis base una sola vez
-  const frecuencia = calcularFrecuencia(todosLosNumeros);
-  const patrones = analizarPatrones(datos.datos || []);
-  const deltaAnalisis = analizarNumerosDelta(datos.datos || []);
+  // Análisis completo una sola vez - LOS 5 MÉTODOS
+  const frecuencia = calcularFrecuencia(todosLosNumeros);                    // 1. Estadística
+  const probabilidad = calcularProbabilidades(todosLosNumeros);              // 2. Probabilidad
+  const patrones = analizarPatrones(datos.datos || []);                      // 3. Patrones
+  const deltaAnalisis = analizarNumerosDelta(datos.datos || []);             // 4. Números Delta
+  const desviacionAnalisis = analizarDesviacionEstandar(datos.datos || []);  // 5. Desviación Estándar
   
-  // Generar 1000 combinaciones variadas
+  console.log('📊 Análisis completo: Frecuencia, Probabilidad, Patrones, Delta, Desviación');
+  
+  // Generar 1000 combinaciones variadas usando los 5 métodos
   for (let i = 0; i < 1000; i++) {
     const semilla = i * 7919; // Número primo para mejor distribución
-    const combinacion = generarCombinacionInteligente(frecuencia, patrones, deltaAnalisis, semilla);
+    const combinacion = generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAnalisis, desviacionAnalisis, semilla);
     pool.push(combinacion);
   }
   
-  console.log('✅ Pool de 1000 combinaciones generado exitosamente');
+  console.log('✅ Pool de 1000 combinaciones generado con análisis completo');
   return pool;
 }
 
-// Generar una combinación inteligente con semilla
-function generarCombinacionInteligente(frecuencia, patrones, deltaAnalisis, semilla) {
+// Generar combinación avanzada con los 5 métodos
+function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAnalisis, desviacionAnalisis, semilla) {
   const rng = crearGeneradorAleatorio(semilla);
-  const combinacion = [];
   
-  // Estrategia mixta para mayor variabilidad
-  const estrategia = rng() % 4;
+  // Distribuir estrategias uniformemente
+  const estrategia = semilla % 5;
   
   switch (estrategia) {
-    case 0: // Basado en frecuencia alta
+    case 0: // Basado en estadística/frecuencia
       return seleccionarPorFrecuencia(frecuencia, rng, 0.7);
-    case 1: // Basado en patrones
+    case 1: // Basado en probabilidad
+      return seleccionarPorProbabilidad(probabilidad, rng);
+    case 2: // Basado en patrones
       return seleccionarPorPatrones(patrones, rng);
-    case 2: // Basado en análisis delta
+    case 3: // Basado en análisis delta
       return seleccionarPorDelta(deltaAnalisis, rng);
-    case 3: // Estrategia mixta
+    case 4: // Basado en desviación estándar
+      return seleccionarPorDesviacion(desviacionAnalisis, rng);
+    default:
       return seleccionarEstrategiaMixta(frecuencia, patrones, rng);
+  }
+}
+
+// Nuevo método: Calcular probabilidades
+function calcularProbabilidades(numeros) {
+  console.log('📈 Calculando probabilidades...');
+  const probabilidades = Array(56).fill(0);
+  const total = numeros.length;
+  
+  for (let i = 1; i <= 56; i++) {
+    const apariciones = numeros.filter(n => n === i).length;
+    probabilidades[i - 1] = apariciones / total;
+  }
+  
+  return probabilidades;
+}
+
+// Nuevo método: Seleccionar por probabilidad
+function seleccionarPorProbabilidad(probabilidad, rng) {
+  const candidatos = [];
+  
+  for (let i = 0; i < 56; i++) {
+    candidatos.push({
+      numero: i + 1,
+      probabilidad: probabilidad[i],
+      peso: probabilidad[i] * 100 + (rng() % 30) // Añadir variabilidad
+    });
+  }
+  
+  candidatos.sort((a, b) => b.peso - a.peso);
+  return candidatos.slice(0, 6).map(c => c.numero).sort((a, b) => a - b);
+}
+
+// Nuevo método: Seleccionar por desviación estándar
+function seleccionarPorDesviacion(desviacionAnalisis, rng) {
+  const candidatos = desviacionAnalisis.map((item, index) => ({
+    numero: index + 1,
+    desviacion: item.desviacion,
+    peso: item.score * 100 + (rng() % 20)
+  }));
+  
+  candidatos.sort((a, b) => b.peso - a.peso);
+  return candidatos.slice(0, 6).map(c => c.numero).sort((a, b) => a - b);
+}
   }
 }
 
