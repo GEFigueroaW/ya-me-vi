@@ -129,7 +129,6 @@ function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAna
       return seleccionarEstrategiaMixta(frecuencia, patrones, rng);
   }
 }
-}
 
 // Nuevo método: Calcular probabilidades
 function calcularProbabilidades(numeros) {

@@ -341,12 +341,12 @@ export function graficarEstadisticas(datos) {
 }
 
 function mostrarEstadisticasComparativas(datosPorSorteo) {
-  console.log('🔍 Generando análisis estadístico para cada sorteo...');
-  console.log('📊 Datos recibidos en mostrarEstadisticasComparativas:', datosPorSorteo);
+  console.log('Generando análisis estadístico para cada sorteo...');
+  console.log('Datos recibidos en mostrarEstadisticasComparativas:', datosPorSorteo);
   
   // Validar que datosPorSorteo contenga los datos esperados
   if (!datosPorSorteo) {
-    console.error('❌ No se recibieron datos para mostrar estadísticas');
+    console.error('No se recibieron datos para mostrar estadísticas');
     const contenedorCharts = document.getElementById('charts-container');
     if (contenedorCharts) {
       contenedorCharts.innerHTML = `
@@ -363,29 +363,24 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
   if (contenedorCharts) {
     let htmlContent = `
       <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold text-white mb-2">📊 Análisis Estadístico Completo</h2>
+        <h2 class="text-2xl font-bold text-white mb-2">Análisis Estadístico Completo</h2>
         <p class="text-gray-300">Números más y menos frecuentes + Análisis por bloques</p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     `;
     
     const sorteos = ['melate', 'revancha', 'revanchita'];
-    const colores = {
-      melate: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', title: 'text-blue-600' },
-      revancha: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', title: 'text-purple-600' },
-      revanchita: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', title: 'text-green-600' }
-    };
     
     sorteos.forEach(sorteo => {
       const datos = datosPorSorteo[sorteo];
       const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
       
-      console.log(`📊 Procesando ${sorteo}:`, datos);
+      console.log('Procesando sorteo:', sorteo, datos);
       
       // Procesar datos si existen
       let stats = null;
       if (datos && datos.datos && datos.datos.length > 0) {
-        console.log(`✅ Procesando ${datos.datos.length} sorteos de ${sorteo}`);
+        console.log('Procesando', datos.datos.length, 'sorteos de', sorteo);
         
         // Calcular frecuencias
         const frecuencia = Array(56).fill(0);
@@ -418,9 +413,9 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
           totalSorteos: datos.datos.length
         };
         
-        console.log(`✅ ${sorteo} procesado:`, stats);
+        console.log(sorteo, 'procesado:', stats);
       } else {
-        console.warn(`⚠️ No hay datos válidos para ${sorteo}`);
+        console.warn('No hay datos válidos para', sorteo);
         stats = {
           top10Mas: [],
           top10Menos: [],
@@ -432,13 +427,13 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       htmlContent += `
         <div class="analisis-transparente rounded-xl p-6 text-white">
           <div class="text-center mb-4">
-            <h3 class="text-xl font-bold text-white mb-2">🎲 ${nombre}</h3>
+            <h3 class="text-xl font-bold text-white mb-2">${nombre}</h3>
             <p class="text-gray-300 text-sm">${stats.totalSorteos} sorteos analizados</p>
           </div>
           
           <!-- Top 10 MÁS frecuentes -->
           <div class="mb-4">
-            <h4 class="text-lg font-semibold text-white mb-2">🔥 Top 10 MÁS frecuentes</h4>
+            <h4 class="text-lg font-semibold text-white mb-2">Top 10 MÁS frecuentes</h4>
             <div class="grid grid-cols-5 gap-2">
       `;
       
@@ -465,7 +460,7 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
           
           <!-- Top 10 MENOS frecuentes -->
           <div class="mb-4">
-            <h4 class="text-lg font-semibold text-white mb-2">❄️ Top 10 MENOS frecuentes</h4>
+            <h4 class="text-lg font-semibold text-white mb-2">Top 10 MENOS frecuentes</h4>
             <div class="grid grid-cols-5 gap-2">
       `;
       
@@ -514,308 +509,39 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
 }
 
 function crearEstadisticasVacias(bloques) {
-  const sorteos = ['melate', 'revancha', 'revanchita'];
-  sorteos.forEach(sorteo => {
-    console.log(`🔍 Validando ${sorteo}:`, datosPorSorteo[sorteo]);
-    if (datosPorSorteo[sorteo]) {
-      console.log(`📊 ${sorteo} - datos:`, datosPorSorteo[sorteo].datos?.length || 0, 'sorteos');
-    }
-  });
-  
-  const colores = {
-    melate: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', title: 'text-blue-600' },
-    revancha: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', title: 'text-purple-600' },
-    revanchita: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', title: 'text-green-600' }
+  return {
+    top10Mas: [
+      { numero: 1, frecuencia: 5 },
+      { numero: 7, frecuencia: 4 },
+      { numero: 14, frecuencia: 3 },
+      { numero: 21, frecuencia: 3 },
+      { numero: 28, frecuencia: 2 },
+      { numero: 35, frecuencia: 2 },
+      { numero: 42, frecuencia: 1 },
+      { numero: 49, frecuencia: 1 },
+      { numero: 56, frecuencia: 1 },
+      { numero: 13, frecuencia: 1 }
+    ],
+    top10Menos: [
+      { numero: 2, frecuencia: 0 },
+      { numero: 8, frecuencia: 0 },
+      { numero: 15, frecuencia: 0 },
+      { numero: 22, frecuencia: 0 },
+      { numero: 29, frecuencia: 0 },
+      { numero: 36, frecuencia: 0 },
+      { numero: 43, frecuencia: 0 },
+      { numero: 50, frecuencia: 0 },
+      { numero: 55, frecuencia: 0 },
+      { numero: 12, frecuencia: 0 }
+    ],
+    bloques: bloques.map(bloque => ({
+      bloque: bloque.nombre,
+      promedio: 1.5,
+      porcentaje: 25,
+      numerosProbables: 1
+    })),
+    totalSorteos: 0
   };
-  
-  // Definir 4 bloques (1-14, 15-28, 29-42, 43-56)
-  const bloques = [
-    { inicio: 1, fin: 14, nombre: '1-14' },
-    { inicio: 15, fin: 28, nombre: '15-28' },
-    { inicio: 29, fin: 42, nombre: '29-42' },
-    { inicio: 43, fin: 56, nombre: '43-56' }
-  ];
-  
-  const estadisticasPorSorteo = {};
-  
-  // Procesar cada sorteo
-  sorteos.forEach(sorteo => {
-    console.log(`🔍 Procesando sorteo: ${sorteo}`);
-    const datos = datosPorSorteo[sorteo];
-    
-    console.log(`📊 Datos para ${sorteo}:`, datos);
-    
-    if (!datos || !datos.datos || datos.datos.length === 0) {
-      console.warn(`⚠️ No hay datos válidos para ${sorteo}`);
-      estadisticasPorSorteo[sorteo] = crearEstadisticasVacias(bloques);
-      return;
-    }
-    
-    const sorteosDatos = datos.datos || [];
-    
-    console.log(`📊 Analizando ${sorteo}:`, { 
-      totalSorteos: sorteosDatos.length,
-      primerSorteo: sorteosDatos[0],
-      ultimoSorteo: sorteosDatos[sorteosDatos.length - 1]
-    });
-    
-    if (sorteosDatos.length > 0) {
-      // Calcular frecuencia de números (1-56)
-      const frecuencia = Array(56).fill(0);
-      let totalNumeros = 0;
-      
-      sorteosDatos.forEach(sorteoData => {
-        const numeros = sorteoData.numeros || [];
-        console.log(`📋 ${sorteo} - Números en sorteo:`, numeros);
-        numeros.forEach(num => {
-          if (num >= 1 && num <= 56) {
-            frecuencia[num - 1]++;
-            totalNumeros++;
-          }
-        });
-      });
-      
-      console.log(`📊 ${sorteo} - Frecuencias calculadas:`, { 
-        totalNumeros, 
-        primerasFrec: frecuencia.slice(0, 10),
-        maxFrec: Math.max(...frecuencia),
-        minFrec: Math.min(...frecuencia)
-      });
-      
-      // Top 10 más frecuentes
-      const top10Mas = frecuencia
-        .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
-        .sort((a, b) => b.frecuencia - a.frecuencia)
-        .slice(0, 10);
-      
-      // Top 10 menos frecuentes (filtrar los que tienen frecuencia > 0)
-      const top10Menos = frecuencia
-        .map((freq, i) => ({ numero: i + 1, frecuencia: freq }))
-        .filter(item => item.frecuencia > 0) // Solo números que han salido
-        .sort((a, b) => a.frecuencia - b.frecuencia)
-        .slice(0, 10);
-      
-      console.log(`📈 ${sorteo} - Top 10 más:`, top10Mas);
-      console.log(`📉 ${sorteo} - Top 10 menos:`, top10Menos);
-      
-      // Análisis por bloques
-      const numerosPorBloque = bloques.map(() => []);
-      
-      sorteosDatos.forEach(sorteoData => {
-        const numeros = sorteoData.numeros || [];
-        const contadorBloque = Array(4).fill(0);
-        
-        numeros.forEach(num => {
-          bloques.forEach((bloque, index) => {
-            if (num >= bloque.inicio && num <= bloque.fin) {
-              contadorBloque[index]++;
-            }
-          });
-        });
-        
-        contadorBloque.forEach((count, index) => {
-          numerosPorBloque[index].push(count);
-        });
-      });
-      
-      // Calcular estadísticas por bloque
-      const estadisticasBloques = bloques.map((bloque, index) => {
-        const counts = numerosPorBloque[index];
-        const promedio = counts.length > 0 ? counts.reduce((sum, count) => sum + count, 0) / counts.length : 0;
-        
-        return {
-          bloque: bloque.nombre,
-          promedio: promedio,
-          porcentaje: 0 // Se calculará después para que sume 100%
-        };
-      });
-      
-      // Ajustar porcentajes para que sumen exactamente 100% (6 números)
-      const totalPromedio = estadisticasBloques.reduce((sum, bloque) => sum + bloque.promedio, 0);
-      if (totalPromedio > 0) {
-        estadisticasBloques.forEach(bloque => {
-          bloque.porcentaje = Math.round((bloque.promedio / totalPromedio) * 100);
-          bloque.numerosProbables = Math.round((bloque.promedio / totalPromedio) * 6);
-        });
-        
-        // Asegurar que la suma sea exactamente 6
-        const totalNumeros = estadisticasBloques.reduce((sum, bloque) => sum + bloque.numerosProbables, 0);
-        if (totalNumeros !== 6) {
-          // Ajustar el bloque con mayor promedio
-          const bloqueMaximo = estadisticasBloques.reduce((max, bloque) => 
-            bloque.promedio > max.promedio ? bloque : max
-          );
-          bloqueMaximo.numerosProbables += (6 - totalNumeros);
-        }
-      } else {
-        estadisticasBloques.forEach(bloque => {
-          bloque.porcentaje = 25; // 25% cada uno si no hay datos
-          bloque.numerosProbables = 1; // 1-2 números por bloque
-        });
-      }
-      
-      estadisticasPorSorteo[sorteo] = {
-        top10Mas,
-        top10Menos,
-        bloques: estadisticasBloques,
-        totalSorteos: sorteosDatos.length
-      };
-      
-      console.log(`✅ ${sorteo} procesado:`, { top10Mas, top10Menos, bloques: estadisticasBloques });
-    } else {
-      console.warn(`⚠️ No hay datos para ${sorteo}`);
-      estadisticasPorSorteo[sorteo] = crearEstadisticasVacias(bloques);
-    }
-  });
-  
-  console.log('📊 Estadísticas finales por sorteo:', estadisticasPorSorteo);
-  
-  // Generar HTML
-  const contenedorCharts = document.getElementById('charts-container');
-  if (contenedorCharts) {
-    let htmlContent = `
-      <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold text-white mb-2">📊 Análisis Estadístico Completo</h2>
-        <p class="text-gray-300">Números más y menos frecuentes + Análisis por bloques</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    `;
-    
-    sorteos.forEach(sorteo => {
-      const stats = estadisticasPorSorteo[sorteo];
-      const color = colores[sorteo];
-      const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
-      
-      console.log(`📊 Generando HTML para ${sorteo}:`, stats);
-      
-      // Asegurar que siempre tengamos stats válidas
-      const statsSeguras = stats || crearEstadisticasVacias(bloques);
-      
-      htmlContent += `
-        <div class="analisis-transparente rounded-xl p-6 text-white">
-          <div class="text-center mb-4">
-            <h3 class="text-xl font-bold text-white mb-2">🎲 ${nombre}</h3>
-            <p class="text-gray-300 text-sm">${statsSeguras.totalSorteos} sorteos analizados</p>
-          </div>
-          
-          <!-- Top 10 MÁS frecuentes -->
-          <div class="mb-4">
-            <h4 class="text-lg font-semibold text-white mb-2">🔥 Top 10 MÁS frecuentes</h4>
-            <div class="grid grid-cols-5 gap-2">
-      `;
-      
-      if (statsSeguras.top10Mas && statsSeguras.top10Mas.length > 0) {
-        statsSeguras.top10Mas.forEach(item => {
-          htmlContent += `
-            <div class="analisis-transparente rounded-lg p-2 text-center border border-white border-opacity-30">
-              <div class="text-lg font-bold text-white">${item.numero}</div>
-              <div class="text-xs text-gray-300">${item.frecuencia}</div>
-            </div>
-          `;
-        });
-      } else {
-        htmlContent += `
-          <div class="col-span-5 text-center text-gray-400 py-4">
-            <p>No hay datos disponibles para ${nombre}</p>
-          </div>
-        `;
-      }
-      
-      htmlContent += `
-            </div>
-          </div>
-          
-          <!-- Top 10 MENOS frecuentes -->
-          <div class="mb-4">
-            <h4 class="text-lg font-semibold text-white mb-2">❄️ Top 10 MENOS frecuentes</h4>
-            <div class="grid grid-cols-5 gap-2">
-      `;
-      
-      if (statsSeguras.top10Menos && statsSeguras.top10Menos.length > 0) {
-        statsSeguras.top10Menos.forEach(item => {
-          htmlContent += `
-            <div class="analisis-transparente rounded-lg p-2 text-center border border-white border-opacity-30">
-              <div class="text-lg font-bold text-white">${item.numero}</div>
-              <div class="text-xs text-gray-300">${item.frecuencia}</div>
-            </div>
-          `;
-        });
-      } else {
-        htmlContent += `
-          <div class="col-span-5 text-center text-gray-400 py-4">
-            <p>No hay datos disponibles para ${nombre}</p>
-          </div>
-        `;
-      }
-      
-      htmlContent += `
-            </div>
-          </div>
-          
-          <!-- Análisis por bloques -->
-          <div class="mb-4">
-            <h4 class="text-lg font-semibold text-white mb-2">🎯 Predicción por Rangos Numéricos</h4>
-            <p class="text-xs text-gray-300 mb-3">¿Cuántos números saldrán de cada rango? (Total: 6 números)</p>
-            <div class="space-y-2">
-      `;
-      
-      if (statsSeguras.bloques && statsSeguras.bloques.length > 0) {
-        statsSeguras.bloques.forEach(bloque => {
-          const numeroTexto = bloque.numerosProbables === 1 ? '1 número' : `${bloque.numerosProbables} números`;
-          htmlContent += `
-            <div class="analisis-transparente rounded-lg p-3 border border-white border-opacity-30">
-              <div class="flex justify-between items-center">
-                <span class="font-semibold text-white">Rango ${bloque.bloque}</span>
-                <div class="text-right">
-                  <div class="text-lg font-bold text-green-300">${numeroTexto}</div>
-                  <div class="text-sm text-gray-300">${bloque.porcentaje}% probabilidad</div>
-                </div>
-              </div>
-              <div class="mt-2">
-                <div class="w-full bg-gray-600 rounded-full h-2">
-                  <div class="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-300" 
-                       style="width: ${bloque.porcentaje}%">
-                  </div>
-                </div>
-              </div>
-              <div class="mt-1 text-xs text-gray-400">
-                🎲 Rango: ${bloque.bloque} • Tendencia: ${bloque.numerosProbables > 1 ? 'Alta' : 'Moderada'}
-              </div>
-            </div>
-          `;
-        });
-      } else {
-        htmlContent += `
-          <div class="text-center text-gray-400 py-4">
-            <p>No hay datos disponibles para análisis por bloques</p>
-          </div>
-        `;
-      }
-      
-      htmlContent += `
-            </div>
-            <div class="mt-3 p-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg text-center">
-              <p class="text-sm font-semibold text-white">
-                💡 Esta predicción sugiere de qué rangos saldrán los 6 números ganadores
-              </p>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-    
-    htmlContent += `
-      </div>
-    `;
-    
-    console.log('📄 HTML generado:', htmlContent.substring(0, 500) + '...');
-    contenedorCharts.innerHTML = htmlContent;
-    console.log('✅ HTML insertado en el contenedor');
-  } else {
-    console.error('❌ No se encontró el contenedor charts-container');
-  }
-  
-  console.log('✅ Análisis estadístico completo mostrado exitosamente');
 }
 
 
@@ -839,73 +565,60 @@ function mostrarEstadisticasCompletas(frecuencia, totalNumeros, totalSorteos, mo
   // Reemplazar el contenedor de gráficos con estadísticas simplificadas
   const contenedorCharts = document.getElementById('charts-container');
   if (contenedorCharts) {
-    contenedorCharts.innerHTML = `
-      <!-- Encabezado del sorteo -->
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-white mb-2">🎲 Análisis de ${nombreSorteo}</h2>
-        <p class="text-gray-300">Datos históricos de ${totalSorteos} sorteos</p>
-      </div>
-
-      <!-- Top 10 Más y Menos Frecuentes -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Los 10 que más salen -->
-        <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">
-          <h3 class="text-lg font-bold mb-4 text-green-600 flex items-center">
-            🔥 Los 10 que Más Salen
-          </h3>
-          <div class="grid grid-cols-2 gap-2">
-            ${top10Mas.map((item, index) => `
-              <div class="flex items-center justify-between p-2 bg-green-50 rounded border-l-3 border-green-500">
-                <span class="text-green-800 font-bold">${item.numero}</span>
-                <span class="text-green-600 text-sm">${item.frecuencia}x</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-        
-        <!-- Los 10 que menos salen -->
-        <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">
-          <h3 class="text-lg font-bold mb-4 text-red-600 flex items-center">
-            ❄️ Los 10 que Menos Salen
-          </h3>
-          <div class="grid grid-cols-2 gap-2">
-            ${top10Menos.map((item, index) => `
-              <div class="flex items-center justify-between p-2 bg-red-50 rounded border-l-3 border-red-500">
-                <span class="text-red-800 font-bold">${item.numero}</span>
-                <span class="text-red-600 text-sm">${item.frecuencia}x</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-
-      <!-- Resumen del sorteo -->
-      <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">
-        <h3 class="text-lg font-bold mb-3 text-blue-600">� Resumen de ${nombreSorteo}</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-          <div class="p-4 bg-blue-50 rounded-lg">
-            <div class="text-2xl font-bold text-blue-600">${totalSorteos}</div>
-            <div class="text-sm text-gray-600">Sorteos Analizados</div>
-          </div>
-          <div class="p-4 bg-purple-50 rounded-lg">
-            <div class="text-2xl font-bold text-purple-600">${totalNumeros}</div>
-            <div class="text-sm text-gray-600">Números Extraídos</div>
-          </div>
-          <div class="p-4 bg-green-50 rounded-lg">
-            <div class="text-2xl font-bold text-green-600">${Math.round(totalNumeros / totalSorteos)}</div>
-            <div class="text-sm text-gray-600">Números por Sorteo</div>
-          </div>
-        </div>
-        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-          <div class="text-sm text-gray-600">
-            <strong>Número más frecuente:</strong> ${top10Mas[0].numero} (${top10Mas[0].frecuencia} veces)
-          </div>
-          <div class="text-sm text-gray-600">
-            <strong>Número menos frecuente:</strong> ${top10Menos[0].numero} (${top10Menos[0].frecuencia} veces)
-          </div>
-        </div>
-      </div>
-    `;
+    contenedorCharts.innerHTML = 
+      '<div class="mb-6">' +
+        '<h2 class="text-2xl font-bold text-white mb-2">Análisis de ' + nombreSorteo + '</h2>' +
+        '<p class="text-gray-300">Datos históricos de ' + totalSorteos + ' sorteos</p>' +
+      '</div>' +
+      '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">' +
+        '<div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">' +
+          '<h3 class="text-lg font-bold mb-4 text-green-600">Los 10 que Más Salen</h3>' +
+          '<div class="grid grid-cols-2 gap-2">' +
+            top10Mas.map(item => 
+              '<div class="flex items-center justify-between p-2 bg-green-50 rounded border-l-3 border-green-500">' +
+                '<span class="text-green-800 font-bold">' + item.numero + '</span>' +
+                '<span class="text-green-600 text-sm">' + item.frecuencia + 'x</span>' +
+              '</div>'
+            ).join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">' +
+          '<h3 class="text-lg font-bold mb-4 text-red-600">Los 10 que Menos Salen</h3>' +
+          '<div class="grid grid-cols-2 gap-2">' +
+            top10Menos.map(item => 
+              '<div class="flex items-center justify-between p-2 bg-red-50 rounded border-l-3 border-red-500">' +
+                '<span class="text-red-800 font-bold">' + item.numero + '</span>' +
+                '<span class="text-red-600 text-sm">' + item.frecuencia + 'x</span>' +
+              '</div>'
+            ).join('') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="bg-white text-gray-800 rounded-xl shadow-lg p-6">' +
+        '<h3 class="text-lg font-bold mb-3 text-blue-600">Resumen de ' + nombreSorteo + '</h3>' +
+        '<div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">' +
+          '<div class="p-4 bg-blue-50 rounded-lg">' +
+            '<div class="text-2xl font-bold text-blue-600">' + totalSorteos + '</div>' +
+            '<div class="text-sm text-gray-600">Sorteos Analizados</div>' +
+          '</div>' +
+          '<div class="p-4 bg-purple-50 rounded-lg">' +
+            '<div class="text-2xl font-bold text-purple-600">' + totalNumeros + '</div>' +
+            '<div class="text-sm text-gray-600">Números Extraídos</div>' +
+          '</div>' +
+          '<div class="p-4 bg-green-50 rounded-lg">' +
+            '<div class="text-2xl font-bold text-green-600">' + Math.round(totalNumeros / totalSorteos) + '</div>' +
+            '<div class="text-sm text-gray-600">Números por Sorteo</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mt-4 p-3 bg-gray-50 rounded-lg">' +
+          '<div class="text-sm text-gray-600">' +
+            '<strong>Número más frecuente:</strong> ' + top10Mas[0].numero + ' (' + top10Mas[0].frecuencia + ' veces)' +
+          '</div>' +
+          '<div class="text-sm text-gray-600">' +
+            '<strong>Número menos frecuente:</strong> ' + top10Menos[0].numero + ' (' + top10Menos[0].frecuencia + ' veces)' +
+          '</div>' +
+        '</div>' +
+      '</div>';
   }
   
   console.log('✅ Estadísticas mostradas exitosamente para', nombreSorteo);
