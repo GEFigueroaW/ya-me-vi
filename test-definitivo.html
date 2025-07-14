@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YA ME VI - Test Definitivo</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .loading { background: #3b82f6; }
+        .success { background: #10b981; }
+        .error { background: #ef4444; }
+        .warning { background: #f59e0b; }
+        .info { background: #8b5cf6; }
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 25px;
+        }
+        .card h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .numbers {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        .number {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .number .freq {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        .summary {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 YA ME VI - Test Definitivo</h1>
+            <p>Verificación completa del sistema</p>
+        </div>
+        
+        <div id="status" class="status loading">
+            🔄 Iniciando verificación del sistema...
+        </div>
+        
+        <div id="results" class="results"></div>
+        
+        <div id="summary" class="summary" style="display: none;">
+            <h2>📊 Resumen de Verificación</h2>
+            <div id="summary-content"></div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn" onclick="location.reload()">🔄 Ejecutar Nuevamente</button>
+            <button class="btn" onclick="window.open('analisis.html', '_blank')">📊 Ir a Análisis</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { cargarDatosHistoricos, graficarEstadisticas } from './js/dataParser.js';
+        
+        const statusEl = document.getElementById('status');
+        const resultsEl = document.getElementById('results');
+        const summaryEl = document.getElementById('summary');
+        const summaryContent = document.getElementById('summary-content');
+        
+        let totalTests = 0;
+        let passedTests = 0;
+        let failedTests = 0;
+        
+        function updateStatus(message, type = 'loading') {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        function addResult(title, data, type = 'info') {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <h3>${title}</h3>
+                <div>${data}</div>
+            `;
+            resultsEl.appendChild(card);
+        }
+        
+        function addTest(name, success) {
+            totalTests++;
+            if (success) {
+                passedTests++;
+            } else {
+                failedTests++;
+            }
+        }
+        
+        async function runCompleteTest() {
+            try {
+                updateStatus('🔄 Iniciando verificación completa...', 'loading');
+                
+                // Test 1: Cargar datos individuales
+                updateStatus('📊 Test 1: Cargando datos individuales...', 'info');
+                
+                const sorteos = ['melate', 'revancha', 'revanchita'];
+                const resultadosIndividuales = {};
+                
+                for (const sorteo of sorteos) {
+                    try {
+                        const datos = await cargarDatosHistoricos(sorteo);
+                        
+                        if (datos && datos.datos && datos.datos.length > 0) {
+                            resultadosIndividuales[sorteo] = datos;
+                            addTest(`Cargar ${sorteo}`, true);
+                            
+                            // Mostrar resultados
+                            const frecuencias = {};
+                            datos.numeros.forEach(num => {
+                                frecuencias[num] = (frecuencias[num] || 0) + 1;
+                            });
+                            
+                            const top5 = Object.entries(frecuencias)
+                                .map(([num, freq]) => ({ numero: parseInt(num), frecuencia: freq }))
+                                .sort((a, b) => b.frecuencia - a.frecuencia)
+                                .slice(0, 5);
+                            
+                            const numbersHtml = top5.map(item => `
+                                <div class="number">
+                                    <div>${item.numero}</div>
+                                    <div class="freq">${item.frecuencia}</div>
+                                </div>
+                            `).join('');
+                            
+                            addResult(
+                                `✅ ${sorteo.toUpperCase()}`,
+                                `
+                                <p><strong>Sorteos:</strong> ${datos.datos.length}</p>
+                                <p><strong>Números:</strong> ${datos.numeros.length}</p>
+                                <p><strong>Top 5 más frecuentes:</strong></p>
+                                <div class="numbers">${numbersHtml}</div>
+                                `
+                            );
+                        } else {
+                            addTest(`Cargar ${sorteo}`, false);
+                            addResult(`❌ ${sorteo.toUpperCase()}`, '<p>No se cargaron datos</p>');
+                        }
+                    } catch (error) {
+                        addTest(`Cargar ${sorteo}`, false);
+                        addResult(`❌ ${sorteo.toUpperCase()}`, `<p>Error: ${error.message}</p>`);
+                    }
+                }
+                
+                // Test 2: Cargar todos los datos
+                updateStatus('📊 Test 2: Cargando todos los datos...', 'info');
+                
+                try {
+                    const todosDatos = await cargarDatosHistoricos('todos');
+                    
+                    if (todosDatos && todosDatos.datosPorSorteo) {
+                        addTest('Cargar todos los datos', true);
+                        
+                        let totalSorteos = 0;
+                        let totalNumeros = 0;
+                        
+                        for (const [sorteo, data] of Object.entries(todosDatos.datosPorSorteo)) {
+                            if (data && data.datos) {
+                                totalSorteos += data.datos.length;
+                                totalNumeros += data.numeros.length;
+                            }
+                        }
+                        
+                        addResult(
+                            '✅ Datos Combinados',
+                            `
+                            <p><strong>Total sorteos:</strong> ${totalSorteos}</p>
+                            <p><strong>Total números:</strong> ${totalNumeros}</p>
+                            <p><strong>Sorteos cargados:</strong> ${Object.keys(todosDatos.datosPorSorteo).length}</p>
+                            `
+                        );
+                    } else {
+                        addTest('Cargar todos los datos', false);
+                        addResult('❌ Datos Combinados', '<p>No se cargaron datos combinados</p>');
+                    }
+                } catch (error) {
+                    addTest('Cargar todos los datos', false);
+                    addResult('❌ Datos Combinados', `<p>Error: ${error.message}</p>`);
+                }
+                
+                // Test 3: Función de graficación
+                updateStatus('📊 Test 3: Probando graficación...', 'info');
+                
+                try {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.id = 'charts-container';
+                    tempDiv.style.display = 'none';
+                    document.body.appendChild(tempDiv);
+                    
+                    const todosDatos = await cargarDatosHistoricos('todos');
+                    graficarEstadisticas(todosDatos);
+                    
+                    if (tempDiv.innerHTML.length > 0) {
+                        addTest('Función de graficación', true);
+                        addResult('✅ Graficación', '<p>Función de graficación operativa</p>');
+                    } else {
+                        addTest('Función de graficación', false);
+                        addResult('❌ Graficación', '<p>No se generó contenido</p>');
+                    }
+                    
+                    document.body.removeChild(tempDiv);
+                } catch (error) {
+                    addTest('Función de graficación', false);
+                    addResult('❌ Graficación', `<p>Error: ${error.message}</p>`);
+                }
+                
+                // Test 4: Verificar archivos CSV
+                updateStatus('📊 Test 4: Verificando archivos CSV...', 'info');
+                
+                const csvFiles = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
+                
+                for (const file of csvFiles) {
+                    try {
+                        const response = await fetch(file);
+                        if (response.ok) {
+                            const content = await response.text();
+                            const lines = content.split('\n').filter(line => line.trim());
+                            addTest(`Archivo ${file}`, true);
+                            addResult(`✅ ${file}`, `<p>${lines.length} líneas disponibles</p>`);
+                        } else {
+                            addTest(`Archivo ${file}`, false);
+                            addResult(`❌ ${file}`, `<p>Error HTTP: ${response.status}</p>`);
+                        }
+                    } catch (error) {
+                        addTest(`Archivo ${file}`, false);
+                        addResult(`❌ ${file}`, `<p>Error: ${error.message}</p>`);
+                    }
+                }
+                
+                // Mostrar resumen final
+                updateStatus('✅ Verificación completada', 'success');
+                
+                summaryContent.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
+                        <div style="background: rgba(16,185,129,0.2); padding: 20px; border-radius: 10px;">
+                            <h3 style="color: #10b981; margin: 0;">✅ Exitosos</h3>
+                            <p style="font-size: 24px; margin: 10px 0;">${passedTests}</p>
+                        </div>
+                        <div style="background: rgba(239,68,68,0.2); padding: 20px; border-radius: 10px;">
+                            <h3 style="color: #ef4444; margin: 0;">❌ Fallidos</h3>
+                            <p style="font-size: 24px; margin: 10px 0;">${failedTests}</p>
+                        </div>
+                        <div style="background: rgba(59,130,246,0.2); padding: 20px; border-radius: 10px;">
+                            <h3 style="color: #3b82f6; margin: 0;">📊 Total</h3>
+                            <p style="font-size: 24px; margin: 10px 0;">${totalTests}</p>
+                        </div>
+                    </div>
+                    <h3 style="color: ${failedTests === 0 ? '#10b981' : '#f59e0b'};">
+                        ${failedTests === 0 ? '🎉 ¡Sistema 100% Funcional!' : '⚠️ Algunas funciones requieren atención'}
+                    </h3>
+                `;
+                
+                summaryEl.style.display = 'block';
+                
+            } catch (error) {
+                updateStatus(`❌ Error crítico: ${error.message}`, 'error');
+                console.error('Error completo:', error);
+            }
+        }
+        
+        // Ejecutar verificación
+        runCompleteTest();
+    </script>
+</body>
+</html>
