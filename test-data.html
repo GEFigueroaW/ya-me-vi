@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Data Loading</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Test Data Loading</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        import { cargarDatosHistoricos } from './js/dataParser.js';
+        
+        console.log('🔄 Probando carga de datos...');
+        
+        async function testData() {
+            try {
+                console.log('📊 Cargando datos históricos...');
+                const datos = await cargarDatosHistoricos('todos');
+                console.log('✅ Datos cargados:', datos);
+                
+                const resultsDiv = document.getElementById('results');
+                
+                if (datos && datos.datosPorSorteo) {
+                    let html = '<h2>Datos Cargados:</h2>';
+                    
+                    for (const [sorteo, data] of Object.entries(datos.datosPorSorteo)) {
+                        html += `<h3>${sorteo}: ${data.datos.length} sorteos</h3>`;
+                        
+                        if (data.datos.length > 0) {
+                            html += '<ul>';
+                            data.datos.slice(0, 5).forEach(sorteoData => {
+                                html += `<li>Sorteo ${sorteoData.numeroSorteo}: ${sorteoData.numeros.join(', ')}</li>`;
+                            });
+                            html += '</ul>';
+                        }
+                    }
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = '<p>❌ No se cargaron datos</p>';
+                }
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                document.getElementById('results').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        testData();
+    </script>
+</body>
+</html>

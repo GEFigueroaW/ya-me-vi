@@ -63,125 +63,91 @@ async function cargarSorteoIndividual(modo) {
     lineas.slice(1).forEach((linea, index) => {
       if (!linea.trim()) return; // Saltar líneas vacías
       
-      const cols = linea.split(',');
-      let numeros = [];
-      let concurso = 0;
-      let fecha = '';
-      let fechaSorteo = null;
-      
-      if (modo === 'melate') {
-        // Melate: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
-        // Índices:    0       1      2  3  4  5  6  7  8     9     10
-        concurso = parseInt(cols[1], 10);
-        fecha = cols[10] ? cols[10].trim() : 'Sin fecha';
+      try {
+        const cols = linea.split(',');
+        let numeros = [];
+        let concurso = 0;
+        let fecha = '';
         
-        // Validar fecha y filtrar últimos 30 meses
-        if (fecha && fecha !== 'Sin fecha') {
-          const partesFecha = fecha.split('/');
-          if (partesFecha.length === 3) {
-            const dia = parseInt(partesFecha[0]);
-            const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
-            const año = parseInt(partesFecha[2]);
-            fechaSorteo = new Date(año, mes, dia);
-            
-            // Saltar sorteos más antiguos de 30 meses
-            if (fechaSorteo < fechaLimite) {
-              return;
-            }
-          }
+        // Validar que tengamos suficientes columnas
+        if (cols.length < 8) {
+          console.warn(`⚠️ Línea ${index + 1} tiene pocas columnas:`, cols.length);
+          return;
         }
         
-        numeros = [
-          parseInt(cols[2], 10), // R1
-          parseInt(cols[3], 10), // R2  
-          parseInt(cols[4], 10), // R3
-          parseInt(cols[5], 10), // R4
-          parseInt(cols[6], 10), // R5
-          parseInt(cols[7], 10)  // R6
-        ];
-        
-        // Actualizar el último sorteo (el más reciente)
-        if (index === 0) ultimoSorteo = concurso;
-        
-      } else if (modo === 'revancha') {
-        // Revancha: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,BOLSA,FECHA
-        // Índices:     0       1      2  3  4  5  6  7    8     9
-        concurso = parseInt(cols[1], 10);
-        fecha = cols[9] ? cols[9].trim() : 'Sin fecha';
-        
-        // Validar fecha y filtrar últimos 30 meses
-        if (fecha && fecha !== 'Sin fecha') {
-          const partesFecha = fecha.split('/');
-          if (partesFecha.length === 3) {
-            const dia = parseInt(partesFecha[0]);
-            const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
-            const año = parseInt(partesFecha[2]);
-            fechaSorteo = new Date(año, mes, dia);
-            
-            // Saltar sorteos más antiguos de 30 meses
-            if (fechaSorteo < fechaLimite) {
-              return;
-            }
-          }
+        if (modo === 'melate') {
+          // Melate: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
+          // Índices:    0       1      2  3  4  5  6  7  8     9     10
+          concurso = parseInt(cols[1], 10);
+          fecha = cols[10] ? cols[10].trim() : 'Sin fecha';
+          
+          numeros = [
+            parseInt(cols[2], 10), // R1
+            parseInt(cols[3], 10), // R2  
+            parseInt(cols[4], 10), // R3
+            parseInt(cols[5], 10), // R4
+            parseInt(cols[6], 10), // R5
+            parseInt(cols[7], 10)  // R6
+          ];
+          
+          // Actualizar el último sorteo (el más reciente)
+          if (index === 0) ultimoSorteo = concurso;
+          
+        } else if (modo === 'revancha') {
+          // Revancha: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,BOLSA,FECHA
+          // Índices:     0       1      2  3  4  5  6  7    8     9
+          concurso = parseInt(cols[1], 10);
+          fecha = cols[9] ? cols[9].trim() : 'Sin fecha';
+          
+          numeros = [
+            parseInt(cols[2], 10), // R1
+            parseInt(cols[3], 10), // R2  
+            parseInt(cols[4], 10), // R3
+            parseInt(cols[5], 10), // R4
+            parseInt(cols[6], 10), // R5
+            parseInt(cols[7], 10)  // R6
+          ];
+          
+        } else if (modo === 'revanchita') {
+          // Revanchita: NPRODUCTO,CONCURSO,F1,F2,F3,F4,F5,F6,BOLSA,FECHA
+          // Índices:       0       1      2  3  4  5  6  7    8     9
+          concurso = parseInt(cols[1], 10);
+          fecha = cols[9] ? cols[9].trim() : 'Sin fecha';
+          
+          numeros = [
+            parseInt(cols[2], 10), // F1
+            parseInt(cols[3], 10), // F2  
+            parseInt(cols[4], 10), // F3
+            parseInt(cols[5], 10), // F4
+            parseInt(cols[6], 10), // F5
+            parseInt(cols[7], 10)  // F6
+          ];
         }
         
-        numeros = [
-          parseInt(cols[2], 10), // R1
-          parseInt(cols[3], 10), // R2  
-          parseInt(cols[4], 10), // R3
-          parseInt(cols[5], 10), // R4
-          parseInt(cols[6], 10), // R5
-          parseInt(cols[7], 10)  // R6
-        ];
+        // Validar que tengamos exactamente 6 números válidos
+        const numerosValidos = numeros.filter(num => !isNaN(num) && num >= 1 && num <= 56);
         
-      } else if (modo === 'revanchita') {
-        // Revanchita: NPRODUCTO,CONCURSO,F1,F2,F3,F4,F5,F6,BOLSA,FECHA
-        // Índices:       0       1      2  3  4  5  6  7    8     9
-        concurso = parseInt(cols[1], 10);
-        fecha = cols[9] ? cols[9].trim() : 'Sin fecha';
-        
-        // Validar fecha y filtrar últimos 30 meses
-        if (fecha && fecha !== 'Sin fecha') {
-          const partesFecha = fecha.split('/');
-          if (partesFecha.length === 3) {
-            const dia = parseInt(partesFecha[0]);
-            const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
-            const año = parseInt(partesFecha[2]);
-            fechaSorteo = new Date(año, mes, dia);
-            
-            // Saltar sorteos más antiguos de 30 meses
-            if (fechaSorteo < fechaLimite) {
-              return;
-            }
-          }
+        if (numerosValidos.length === 6 && !isNaN(concurso) && concurso > 0) {
+          todosLosDatos.push({
+            fecha: fecha,
+            numeroSorteo: concurso,
+            sorteo: nombreSorteo,
+            numeros: numerosValidos
+          });
+          todosLosNumeros.push(...numerosValidos);
+          console.log(`✅ ${modo} - Sorteo ${concurso} agregado (${fecha}):`, numerosValidos);
+        } else {
+          console.warn(`⚠️ Datos inválidos en línea ${index + 1}:`, { concurso, numerosValidos });
         }
         
-        numeros = [
-          parseInt(cols[2], 10), // F1
-          parseInt(cols[3], 10), // F2  
-          parseInt(cols[4], 10), // F3
-          parseInt(cols[5], 10), // F4
-          parseInt(cols[6], 10), // F5
-          parseInt(cols[7], 10)  // F6
-        ];
-      }
-      
-      // Validar que tengamos exactamente 6 números válidos
-      const numerosValidos = numeros.filter(num => !isNaN(num) && num >= 1 && num <= 56);
-      
-      if (numerosValidos.length === 6 && !isNaN(concurso) && concurso > 0) {
-        todosLosDatos.push({
-          fecha: fecha,
-          numeroSorteo: concurso,
-          sorteo: nombreSorteo,
-          numeros: numerosValidos
-        });
-        todosLosNumeros.push(...numerosValidos);
-        console.log(`✅ ${modo} - Sorteo ${concurso} agregado (${fecha}):`, numerosValidos);
-      } else {
-        console.warn(`⚠️ ${modo} - Línea ${index + 1} ignorada: números inválidos o faltantes`);
+      } catch (error) {
+        console.error(`❌ Error procesando línea ${index + 1}:`, error.message);
       }
     });
+    
+    // Eliminar filtro de fechas por ahora para obtener todos los datos
+    console.log(`📊 ${modo}: ${todosLosDatos.length} sorteos procesados exitosamente`);
+    
   } catch (error) {
     console.error(`❌ Error cargando ${archivo}:`, error);
     
@@ -194,7 +160,7 @@ async function cargarSorteoIndividual(modo) {
     return { datos: [], numeros: [], modo };
   }
 
-  console.log(`📊 ${modo}: ${todosLosDatos.length} sorteos cargados (últimos 30 meses), ${todosLosNumeros.length} números totales`);
+  console.log(`📊 ${modo}: ${todosLosDatos.length} sorteos cargados, ${todosLosNumeros.length} números totales`);
   
   return {
     datos: todosLosDatos,
