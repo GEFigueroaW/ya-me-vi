@@ -58,21 +58,18 @@
 
     <!-- Contenedor de combinaciones generadas aleatorias -->
     <div id="combinaciones-container" class="max-w-6xl mx-auto mb-8">
-      <div class="text-center py-12">
-        <div class="text-6xl mb-4">🎯</div>
-        <p class="text-white text-lg">¡Presiona el botón para generar tus combinaciones de la suerte!</p>
-      </div>
+      <!-- Contenido se genera dinámicamente aquí -->
     </div>
 
     <!-- Combinaciones sugeridas por IA -->
-    <div id="prediccion-container" class="bg-white text-gray-800 rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300" style="opacity: 0.5;" onclick="togglePrediccionIA()">
+    <div id="prediccion-container" class="rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300 analisis-transparente" style="opacity: 0.5;" onclick="togglePrediccionIA()">
       <div class="text-center">
-        <h2 class="text-xl font-semibold mb-4">🎯 <span id="titulo-sorteo">Combinaciones sugeridas por IA para TI para el sorteo "---"</span></h2>
+        <h2 class="text-xl font-semibold mb-4 text-white">🎯 <span id="titulo-sorteo">Combinaciones sugeridas por IA para TI para el sorteo "---"</span></h2>
         
         <!-- Indicador de expansión -->
         <div class="flex justify-center items-center">
-          <span class="text-sm text-gray-500 mr-2">Haz clic para ver</span>
-          <svg id="arrow-icon" class="w-5 h-5 text-gray-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <span class="text-sm text-gray-300 mr-2">Haz clic para ver</span>
+          <svg id="arrow-icon" class="w-5 h-5 text-gray-300 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
@@ -80,7 +77,7 @@
       
       <!-- Contenido expandible (oculto por defecto) -->
       <div id="contenido-predicciones" class="hidden mt-6">
-        <p class="text-sm italic text-center mb-6">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
+        <p class="text-sm italic text-center mb-6 text-gray-300">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
         
         <!-- Predicciones por sorteo -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -104,7 +101,7 @@
         </div>
         
         <!-- Mensaje de estado -->
-        <div id="mensaje-estado" class="text-center text-sm text-gray-600 italic">
+        <div id="mensaje-estado" class="text-center text-sm text-gray-300 italic">
           Generando predicciones personalizadas...
         </div>
       </div>
@@ -316,7 +313,6 @@
       let html = `
         <div class="mb-6">
           <h2 class="text-2xl font-bold mb-4 text-white">🎲 ${cantidad === 1 ? 'Tu Combinación Aleatoria' : `Tus ${cantidad} Combinaciones Aleatorias`}</h2>
-          <p class="text-gray-300 mb-6">Combinación${cantidad > 1 ? 'es' : ''} generada${cantidad > 1 ? 's' : ''} completamente al azar • ¡Elige la que más te guste!</p>
         </div>
         
         <div class="grid ${gridClass} gap-6 mb-8 justify-center">
@@ -327,14 +323,9 @@
           <div class="analisis-transparente rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition-all duration-300 hover:transform hover:scale-105 max-w-sm mx-auto">
             <h3 class="text-lg font-semibold mb-4 text-white">${cantidad === 1 ? 'Tu Combinación' : `Combinación ${index + 1}`}</h3>
             <div class="text-center">
-              <div class="text-2xl font-bold text-white mb-2">
+              <div class="text-2xl font-bold text-white mb-4">
                 ${combinacion.join(' - ')}
               </div>
-              <div class="text-sm text-gray-300">
-                6 números aleatorios del 1 al 56
-              </div>
-            </div>
-            <div class="mt-4 text-center">
               <button onclick="copiarCombinacion('${combinacion.join(', ')}')" class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full transition-all duration-300">
                 📋 Copiar
               </button>
