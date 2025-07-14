@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Análisis Rápido</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f0f0f0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    .result {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f9f9f9;
+      border-left: 4px solid #4CAF50;
+    }
+    .error {
+      margin: 10px 0;
+      padding: 10px;
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+      color: #c62828;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Test Análisis Rápido</h1>
+    <div id="status" class="loading">Cargando datos...</div>
+    <div id="resultados"></div>
+  </div>
+
+  <script type="module">
+    import { cargarDatosHistoricos, graficarEstadisticas } from './js/dataParser.js';
+    
+    const status = document.getElementById('status');
+    const resultados = document.getElementById('resultados');
+    
+    async function testAnalisis() {
+      try {
+        status.textContent = '🔍 Iniciando test...';
+        
+        // Test 1: Cargar datos de Melate
+        console.log('🔍 Test 1: Cargar datos de Melate');
+        const datosMelate = await cargarDatosHistoricos('melate');
+        
+        resultados.innerHTML += `
+          <div class="result">
+            <h3>📊 Melate</h3>
+            <p><strong>Sorteos cargados:</strong> ${datosMelate.datos ? datosMelate.datos.length : 0}</p>
+            <p><strong>Último sorteo:</strong> ${datosMelate.ultimoSorteo || 'No disponible'}</p>
+            <p><strong>Números totales:</strong> ${datosMelate.numeros ? datosMelate.numeros.length : 0}</p>
+          </div>
+        `;
+        
+        // Test 2: Cargar todos los datos
+        console.log('🔍 Test 2: Cargar todos los datos');
+        status.textContent = '📊 Cargando datos de todos los sorteos...';
+        
+        const todosDatos = await cargarDatosHistoricos('todos');
+        
+        resultados.innerHTML += `
+          <div class="result">
+            <h3>📈 Todos los sorteos</h3>
+            <p><strong>Melate:</strong> ${todosDatos.melate ? todosDatos.melate.datos.length : 0} sorteos</p>
+            <p><strong>Revancha:</strong> ${todosDatos.revancha ? todosDatos.revancha.datos.length : 0} sorteos</p>
+            <p><strong>Revanchita:</strong> ${todosDatos.revanchita ? todosDatos.revanchita.datos.length : 0} sorteos</p>
+            <p><strong>Último sorteo Melate:</strong> ${todosDatos.melate ? todosDatos.melate.ultimoSorteo : 'No disponible'}</p>
+          </div>
+        `;
+        
+        // Test 3: Intentar generar estadísticas
+        console.log('🔍 Test 3: Generar estadísticas');
+        status.textContent = '📊 Generando estadísticas...';
+        
+        // Crear contenedor temporal para las estadísticas
+        const chartsContainer = document.createElement('div');
+        chartsContainer.id = 'charts-container';
+        resultados.appendChild(chartsContainer);
+        
+        graficarEstadisticas(todosDatos);
+        
+        status.textContent = '✅ Test completado exitosamente';
+        
+      } catch (error) {
+        console.error('❌ Error en test:', error);
+        status.textContent = '❌ Error en el test';
+        resultados.innerHTML += `
+          <div class="error">
+            <h3>Error</h3>
+            <p>${error.message}</p>
+            <pre>${error.stack}</pre>
+          </div>
+        `;
+      }
+    }
+    
+    // Ejecutar test
+    testAnalisis();
+  </script>
+</body>
+</html>

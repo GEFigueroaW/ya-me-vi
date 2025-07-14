@@ -358,7 +358,162 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
     return;
   }
   
-  // Validar específicamente cada sorteo
+  // Versión simplificada para debug
+  const contenedorCharts = document.getElementById('charts-container');
+  if (contenedorCharts) {
+    let htmlContent = `
+      <div class="mb-6 text-center">
+        <h2 class="text-2xl font-bold text-white mb-2">📊 Análisis Estadístico Completo</h2>
+        <p class="text-gray-300">Números más y menos frecuentes + Análisis por bloques</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    `;
+    
+    const sorteos = ['melate', 'revancha', 'revanchita'];
+    const colores = {
+      melate: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', title: 'text-blue-600' },
+      revancha: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', title: 'text-purple-600' },
+      revanchita: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', title: 'text-green-600' }
+    };
+    
+    sorteos.forEach(sorteo => {
+      const datos = datosPorSorteo[sorteo];
+      const nombre = sorteo.charAt(0).toUpperCase() + sorteo.slice(1);
+      
+      console.log(`📊 Procesando ${sorteo}:`, datos);
+      
+      // Procesar datos si existen
+      let stats = null;
+      if (datos && datos.datos && datos.datos.length > 0) {
+        console.log(`✅ Procesando ${datos.datos.length} sorteos de ${sorteo}`);
+        
+        // Calcular frecuencias
+        const frecuencia = Array(56).fill(0);
+        datos.datos.forEach(sorteoData => {
+          const numeros = sorteoData.numeros || [];
+          numeros.forEach(num => {
+            if (num >= 1 && num <= 56) {
+              frecuencia[num - 1]++;
+            }
+          });
+        });
+        
+        // Top 10 más y menos frecuentes
+        const numerosConFrecuencia = frecuencia.map((freq, index) => ({
+          numero: index + 1,
+          frecuencia: freq
+        }));
+        
+        const top10Mas = numerosConFrecuencia
+          .sort((a, b) => b.frecuencia - a.frecuencia)
+          .slice(0, 10);
+        
+        const top10Menos = numerosConFrecuencia
+          .sort((a, b) => a.frecuencia - b.frecuencia)
+          .slice(0, 10);
+        
+        stats = {
+          top10Mas,
+          top10Menos,
+          totalSorteos: datos.datos.length
+        };
+        
+        console.log(`✅ ${sorteo} procesado:`, stats);
+      } else {
+        console.warn(`⚠️ No hay datos válidos para ${sorteo}`);
+        stats = {
+          top10Mas: [],
+          top10Menos: [],
+          totalSorteos: 0
+        };
+      }
+      
+      // Generar HTML
+      htmlContent += `
+        <div class="analisis-transparente rounded-xl p-6 text-white">
+          <div class="text-center mb-4">
+            <h3 class="text-xl font-bold text-white mb-2">🎲 ${nombre}</h3>
+            <p class="text-gray-300 text-sm">${stats.totalSorteos} sorteos analizados</p>
+          </div>
+          
+          <!-- Top 10 MÁS frecuentes -->
+          <div class="mb-4">
+            <h4 class="text-lg font-semibold text-white mb-2">🔥 Top 10 MÁS frecuentes</h4>
+            <div class="grid grid-cols-5 gap-2">
+      `;
+      
+      if (stats.top10Mas && stats.top10Mas.length > 0) {
+        stats.top10Mas.forEach(item => {
+          htmlContent += `
+            <div class="analisis-transparente rounded-lg p-2 text-center border border-white border-opacity-30">
+              <div class="text-lg font-bold text-white">${item.numero}</div>
+              <div class="text-xs text-gray-300">${item.frecuencia}</div>
+            </div>
+          `;
+        });
+      } else {
+        htmlContent += `
+          <div class="col-span-5 text-center text-gray-400 py-4">
+            <p>No hay datos disponibles</p>
+          </div>
+        `;
+      }
+      
+      htmlContent += `
+            </div>
+          </div>
+          
+          <!-- Top 10 MENOS frecuentes -->
+          <div class="mb-4">
+            <h4 class="text-lg font-semibold text-white mb-2">❄️ Top 10 MENOS frecuentes</h4>
+            <div class="grid grid-cols-5 gap-2">
+      `;
+      
+      if (stats.top10Menos && stats.top10Menos.length > 0) {
+        stats.top10Menos.forEach(item => {
+          htmlContent += `
+            <div class="analisis-transparente rounded-lg p-2 text-center border border-white border-opacity-30">
+              <div class="text-lg font-bold text-white">${item.numero}</div>
+              <div class="text-xs text-gray-300">${item.frecuencia}</div>
+            </div>
+          `;
+        });
+      } else {
+        htmlContent += `
+          <div class="col-span-5 text-center text-gray-400 py-4">
+            <p>No hay datos disponibles</p>
+          </div>
+        `;
+      }
+      
+      htmlContent += `
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    htmlContent += `
+      </div>
+    `;
+    
+    contenedorCharts.innerHTML = htmlContent;
+    console.log('✅ Análisis estadístico simplificado mostrado exitosamente');
+  } else {
+    console.error('❌ No se encontró el contenedor charts-container');
+  }
+}
+    if (contenedorCharts) {
+      contenedorCharts.innerHTML = `
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <strong>Error:</strong> No se recibieron datos para el análisis estadístico.
+    console.log('✅ Análisis estadístico simplificado mostrado exitosamente');
+  } else {
+    console.error('❌ No se encontró el contenedor charts-container');
+  }
+}
+
+function crearEstadisticasVacias(bloques) {
   const sorteos = ['melate', 'revancha', 'revanchita'];
   sorteos.forEach(sorteo => {
     console.log(`🔍 Validando ${sorteo}:`, datosPorSorteo[sorteo]);
@@ -663,44 +818,7 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
   console.log('✅ Análisis estadístico completo mostrado exitosamente');
 }
 
-function crearEstadisticasVacias(bloques) {
-  // Crear algunos datos de prueba para debug
-  const datosPrueba = {
-    top10Mas: [
-      { numero: 1, frecuencia: 10 },
-      { numero: 7, frecuencia: 9 },
-      { numero: 14, frecuencia: 8 },
-      { numero: 21, frecuencia: 7 },
-      { numero: 28, frecuencia: 6 },
-      { numero: 35, frecuencia: 5 },
-      { numero: 42, frecuencia: 4 },
-      { numero: 49, frecuencia: 3 },
-      { numero: 56, frecuencia: 2 },
-      { numero: 13, frecuencia: 1 }
-    ],
-    top10Menos: [
-      { numero: 2, frecuencia: 1 },
-      { numero: 8, frecuencia: 2 },
-      { numero: 15, frecuencia: 3 },
-      { numero: 22, frecuencia: 4 },
-      { numero: 29, frecuencia: 5 },
-      { numero: 36, frecuencia: 6 },
-      { numero: 43, frecuencia: 7 },
-      { numero: 50, frecuencia: 8 },
-      { numero: 55, frecuencia: 9 },
-      { numero: 12, frecuencia: 10 }
-    ],
-    bloques: bloques.map(bloque => ({
-      bloque: bloque.nombre,
-      promedio: 1.5,
-      porcentaje: 25,
-      numerosProbables: 1
-    })),
-    totalSorteos: 0
-  };
-  
-  return datosPrueba;
-}
+
 
 function mostrarEstadisticasCompletas(frecuencia, totalNumeros, totalSorteos, modo) {
   // Top 10 números más frecuentes

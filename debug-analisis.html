@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Análisis</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f0f0f0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .step {
+      margin: 10px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-left: 4px solid #2196F3;
+    }
+    .error {
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+      color: #c62828;
+    }
+    .success {
+      background: #e8f5e8;
+      border-left: 4px solid #4CAF50;
+      color: #2e7d32;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Debug Análisis de Sorteos</h1>
+    <div id="progress"></div>
+  </div>
+
+  <script type="module">
+    import { cargarDatosHistoricos } from './js/dataParser.js';
+    
+    const progress = document.getElementById('progress');
+    
+    function addStep(message, type = 'step', data = null) {
+      const div = document.createElement('div');
+      div.className = `step ${type}`;
+      div.innerHTML = `
+        <strong>${message}</strong>
+        ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+      `;
+      progress.appendChild(div);
+    }
+    
+    async function debugAnalisis() {
+      try {
+        addStep('🚀 Iniciando debug del análisis');
+        
+        // Paso 1: Cargar datos individuales
+        addStep('📊 Paso 1: Cargando datos de Melate');
+        const melateData = await cargarDatosHistoricos('melate');
+        addStep('✅ Melate cargado', 'success', {
+          totalSorteos: melateData.datos?.length || 0,
+          ultimoSorteo: melateData.ultimoSorteo,
+          primerosNumeros: melateData.numeros?.slice(0, 10) || []
+        });
+        
+        addStep('📊 Paso 2: Cargando datos de Revancha');
+        const revanchaData = await cargarDatosHistoricos('revancha');
+        addStep('✅ Revancha cargado', 'success', {
+          totalSorteos: revanchaData.datos?.length || 0,
+          ultimoSorteo: revanchaData.ultimoSorteo,
+          primerosNumeros: revanchaData.numeros?.slice(0, 10) || []
+        });
+        
+        addStep('📊 Paso 3: Cargando datos de Revanchita');
+        const revanchitaData = await cargarDatosHistoricos('revanchita');
+        addStep('✅ Revanchita cargado', 'success', {
+          totalSorteos: revanchitaData.datos?.length || 0,
+          ultimoSorteo: revanchitaData.ultimoSorteo,
+          primerosNumeros: revanchitaData.numeros?.slice(0, 10) || []
+        });
+        
+        // Paso 4: Cargar todos los datos
+        addStep('📊 Paso 4: Cargando todos los datos');
+        const todosLosDatos = await cargarDatosHistoricos('todos');
+        addStep('✅ Todos los datos cargados', 'success', {
+          estructura: Object.keys(todosLosDatos),
+          esComparativo: todosLosDatos.esComparativo,
+          datosPorSorteo: Object.keys(todosLosDatos.datosPorSorteo || {})
+        });
+        
+        // Paso 5: Verificar estructura de datos
+        addStep('📊 Paso 5: Verificando estructura de datos');
+        const { datosPorSorteo } = todosLosDatos;
+        
+        if (datosPorSorteo) {
+          ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+            const datos = datosPorSorteo[sorteo];
+            addStep(`🔍 ${sorteo.toUpperCase()}`, 'step', {
+              tienedatos: !!datos,
+              totalSorteos: datos?.datos?.length || 0,
+              ultimoSorteo: datos?.ultimoSorteo || 'No disponible',
+              primerSorteo: datos?.datos?.[0] || 'No disponible'
+            });
+          });
+        }
+        
+        // Paso 6: Simular análisis estadístico básico
+        addStep('📊 Paso 6: Análisis estadístico básico');
+        
+        if (datosPorSorteo && datosPorSorteo.melate && datosPorSorteo.melate.datos) {
+          const melateNums = datosPorSorteo.melate.datos.flatMap(s => s.numeros || []);
+          const frecuencia = {};
+          
+          melateNums.forEach(num => {
+            frecuencia[num] = (frecuencia[num] || 0) + 1;
+          });
+          
+          const top5 = Object.entries(frecuencia)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([num, freq]) => ({ numero: num, frecuencia: freq }));
+          
+          addStep('📈 Top 5 números Melate', 'success', top5);
+        }
+        
+        addStep('🎉 Debug completado exitosamente', 'success');
+        
+      } catch (error) {
+        addStep(`❌ Error: ${error.message}`, 'error', {
+          stack: error.stack
+        });
+      }
+    }
+    
+    // Ejecutar debug
+    debugAnalisis();
+  </script>
+</body>
+</html>

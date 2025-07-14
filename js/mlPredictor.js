@@ -129,6 +129,7 @@ function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAna
       return seleccionarEstrategiaMixta(frecuencia, patrones, rng);
   }
 }
+}
 
 // Nuevo método: Calcular probabilidades
 function calcularProbabilidades(numeros) {
@@ -170,8 +171,6 @@ function seleccionarPorDesviacion(desviacionAnalisis, rng) {
   
   candidatos.sort((a, b) => b.peso - a.peso);
   return candidatos.slice(0, 6).map(c => c.numero).sort((a, b) => a - b);
-}
-  }
 }
 
 // Generador de números aleatorios con semilla (LCG)
