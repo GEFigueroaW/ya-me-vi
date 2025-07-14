@@ -20,9 +20,9 @@ export async function cargarDatosHistoricos(modo) {
 
 async function cargarSorteoIndividual(modo) {
   const urls = {
-    melate: 'assets/melate.csv',
-    revancha: 'assets/revancha.csv',
-    revanchita: 'assets/revanchita.csv'
+    melate: 'assets/Melate.csv',
+    revancha: 'assets/Revancha.csv',
+    revanchita: 'assets/Revanchita.csv'
   };
 
   const archivo = urls[modo];
@@ -44,26 +44,26 @@ async function cargarSorteoIndividual(modo) {
       throw new Error(`El archivo ${archivo} está vacío`);
     }
     
-    const lineas = texto.trim().split('\n').slice(1); // sin encabezado
-    console.log(`📄 ${archivo}: ${lineas.length} líneas procesadas`);
+    const lineas = texto.trim().split('\n');
+    const headers = lineas[0].split(',');
+    console.log(`📄 ${archivo}: ${lineas.length - 1} líneas de datos, Headers:`, headers);
 
     const nombreSorteo = modo.charAt(0).toUpperCase() + modo.slice(1);
     
-    lineas.forEach((linea, index) => {
+    // Procesar cada línea según el formato específico del archivo
+    lineas.slice(1).forEach((linea, index) => {
       if (!linea.trim()) return; // Saltar líneas vacías
       
       const cols = linea.split(',');
-      console.log(`📋 Línea ${index + 1}: ${cols.length} columnas -`, cols.slice(0, 3), '...');
-      
-      // Verificar diferentes formatos posibles
       let numeros = [];
       let concurso = 0;
       let fecha = '';
       
-      if (cols.length === 11) { 
-        // Formato esperado: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
+      if (modo === 'melate') {
+        // Melate: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
+        // Índices:    0       1      2  3  4  5  6  7  8     9     10
         concurso = parseInt(cols[1], 10);
-        fecha = cols[10].trim(); // La fecha está en la columna 10
+        fecha = cols[10] ? cols[10].trim() : 'Sin fecha';
         numeros = [
           parseInt(cols[2], 10), // R1
           parseInt(cols[3], 10), // R2  
@@ -72,18 +72,32 @@ async function cargarSorteoIndividual(modo) {
           parseInt(cols[6], 10), // R5
           parseInt(cols[7], 10)  // R6
         ];
-        console.log(`📊 Formato detectado - Concurso: ${concurso}, Números: [${numeros.join(',')}], Fecha: ${fecha}`);
-      } else if (cols.length >= 8) {
-        // Formato alternativo: podrían ser los números en columnas diferentes
-        // Intentar extraer números de las columnas disponibles
-        for (let i = 1; i < Math.min(cols.length, 7); i++) {
-          const num = parseInt(cols[i], 10);
-          if (!isNaN(num) && num >= 1 && num <= 56) {
-            numeros.push(num);
-          }
-        }
-        concurso = index + 1; // usar índice como número de sorteo
-        fecha = new Date().toISOString().split('T')[0]; // fecha actual
+      } else if (modo === 'revancha') {
+        // Revancha: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,BOLSA,FECHA
+        // Índices:     0       1      2  3  4  5  6  7    8     9
+        concurso = parseInt(cols[1], 10);
+        fecha = cols[9] ? cols[9].trim() : 'Sin fecha';
+        numeros = [
+          parseInt(cols[2], 10), // R1
+          parseInt(cols[3], 10), // R2  
+          parseInt(cols[4], 10), // R3
+          parseInt(cols[5], 10), // R4
+          parseInt(cols[6], 10), // R5
+          parseInt(cols[7], 10)  // R6
+        ];
+      } else if (modo === 'revanchita') {
+        // Revanchita: NPRODUCTO,CONCURSO,F1,F2,F3,F4,F5,F6,BOLSA,FECHA
+        // Índices:       0       1      2  3  4  5  6  7    8     9
+        concurso = parseInt(cols[1], 10);
+        fecha = cols[9] ? cols[9].trim() : 'Sin fecha';
+        numeros = [
+          parseInt(cols[2], 10), // F1
+          parseInt(cols[3], 10), // F2  
+          parseInt(cols[4], 10), // F3
+          parseInt(cols[5], 10), // F4
+          parseInt(cols[6], 10), // F5
+          parseInt(cols[7], 10)  // F6
+        ];
       }
       
       // Validar que tengamos exactamente 6 números válidos
@@ -97,9 +111,9 @@ async function cargarSorteoIndividual(modo) {
           numeros: numerosValidos
         });
         todosLosNumeros.push(...numerosValidos);
-        console.log(`✅ Sorteo ${concurso} agregado:`, numerosValidos);
+        console.log(`✅ ${modo} - Sorteo ${concurso} agregado:`, numerosValidos);
       } else {
-        console.warn(`⚠️ Línea ${index + 2} descartada - Números válidos: ${numerosValidos.length}/6, Concurso: ${concurso}, Números: [${numeros.join(',')}]`);
+        console.warn(`⚠️ ${modo} - Línea ${index + 1} ignorada: números inválidos o faltantes`);
       }
     });
   } catch (error) {
@@ -114,11 +128,13 @@ async function cargarSorteoIndividual(modo) {
     return { datos: [], numeros: [], modo };
   }
 
-  console.log(`✅ Carga completada para ${modo}: ${todosLosDatos.length} sorteos, ${todosLosNumeros.length} números`);
-  console.log(`📋 Primer sorteo:`, todosLosDatos[0]);
-  console.log(`📋 Último sorteo:`, todosLosDatos[todosLosDatos.length - 1]);
+  console.log(`📊 ${modo}: ${todosLosDatos.length} sorteos cargados, ${todosLosNumeros.length} números totales`);
   
-  return { datos: todosLosDatos, numeros: todosLosNumeros, modo };
+  return {
+    datos: todosLosDatos,
+    numeros: todosLosNumeros,
+    totalSorteos: todosLosDatos.length
+  };
 }
 
 async function cargarTodosSorteos() {

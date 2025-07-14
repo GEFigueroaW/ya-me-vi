@@ -304,8 +304,14 @@
       
       for (const sorteo of sorteos) {
         try {
-          console.log(`📊 Cargando ${sorteo}.csv...`);
-          const response = await fetch(`assets/${sorteo}.csv`);
+          const archivoCSV = {
+            melate: 'assets/Melate.csv',
+            revancha: 'assets/Revancha.csv',
+            revanchita: 'assets/Revanchita.csv'
+          };
+          
+          console.log(`📊 Cargando ${archivoCSV[sorteo]}...`);
+          const response = await fetch(archivoCSV[sorteo]);
           
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -349,38 +355,106 @@
             let fechaSorteo = null;
             
             if (formatoDetectado === 'historico_real') {
-              // Formato: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
-              // Los números están en las columnas R1-R6 (índices 2-7)
-              // La fecha está en la columna FECHA (índice 10)
-              if (cols.length >= 11) {
-                // Verificar fecha - últimos 30 meses
-                const fechaStr = cols[10].trim();
-                if (fechaStr) {
-                  const partesFecha = fechaStr.split('/');
-                  if (partesFecha.length === 3) {
-                    const dia = parseInt(partesFecha[0]);
-                    const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
-                    const año = parseInt(partesFecha[2]);
-                    fechaSorteo = new Date(año, mes, dia);
-                    
-                    if (fechaSorteo < fechaLimite) {
-                      continue; // Saltar sorteos más antiguos de 30 meses
+              // Manejar los diferentes formatos por archivo
+              if (sorteo === 'melate') {
+                // Melate: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
+                // Índices:    0       1      2  3  4  5  6  7  8     9     10
+                if (cols.length >= 11) {
+                  // Verificar fecha - últimos 30 meses
+                  const fechaStr = cols[10].trim();
+                  if (fechaStr) {
+                    const partesFecha = fechaStr.split('/');
+                    if (partesFecha.length === 3) {
+                      const dia = parseInt(partesFecha[0]);
+                      const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+                      const año = parseInt(partesFecha[2]);
+                      fechaSorteo = new Date(año, mes, dia);
+                      
+                      if (fechaSorteo < fechaLimite) {
+                        continue; // Saltar sorteos más antiguos de 30 meses
+                      }
                     }
                   }
-                }
-                
-                // Extraer números R1-R6 (columnas 2-7)
-                for (let j = 2; j <= 7; j++) {
-                  const num = parseInt(cols[j]);
-                  if (!isNaN(num) && num >= 1 && num <= 56) {
-                    numerosLinea.push(num);
-                  } else {
-                    lineaValida = false;
-                    break;
+                  
+                  // Extraer números R1-R6 (columnas 2-7)
+                  for (let j = 2; j <= 7; j++) {
+                    const num = parseInt(cols[j]);
+                    if (!isNaN(num) && num >= 1 && num <= 56) {
+                      numerosLinea.push(num);
+                    } else {
+                      lineaValida = false;
+                      break;
+                    }
                   }
+                } else {
+                  lineaValida = false;
                 }
-              } else {
-                lineaValida = false;
+              } else if (sorteo === 'revancha') {
+                // Revancha: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,BOLSA,FECHA
+                // Índices:     0       1      2  3  4  5  6  7    8     9
+                if (cols.length >= 10) {
+                  // Verificar fecha - últimos 30 meses
+                  const fechaStr = cols[9].trim();
+                  if (fechaStr) {
+                    const partesFecha = fechaStr.split('/');
+                    if (partesFecha.length === 3) {
+                      const dia = parseInt(partesFecha[0]);
+                      const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+                      const año = parseInt(partesFecha[2]);
+                      fechaSorteo = new Date(año, mes, dia);
+                      
+                      if (fechaSorteo < fechaLimite) {
+                        continue; // Saltar sorteos más antiguos de 30 meses
+                      }
+                    }
+                  }
+                  
+                  // Extraer números R1-R6 (columnas 2-7)
+                  for (let j = 2; j <= 7; j++) {
+                    const num = parseInt(cols[j]);
+                    if (!isNaN(num) && num >= 1 && num <= 56) {
+                      numerosLinea.push(num);
+                    } else {
+                      lineaValida = false;
+                      break;
+                    }
+                  }
+                } else {
+                  lineaValida = false;
+                }
+              } else if (sorteo === 'revanchita') {
+                // Revanchita: NPRODUCTO,CONCURSO,F1,F2,F3,F4,F5,F6,BOLSA,FECHA
+                // Índices:       0       1      2  3  4  5  6  7    8     9
+                if (cols.length >= 10) {
+                  // Verificar fecha - últimos 30 meses
+                  const fechaStr = cols[9].trim();
+                  if (fechaStr) {
+                    const partesFecha = fechaStr.split('/');
+                    if (partesFecha.length === 3) {
+                      const dia = parseInt(partesFecha[0]);
+                      const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+                      const año = parseInt(partesFecha[2]);
+                      fechaSorteo = new Date(año, mes, dia);
+                      
+                      if (fechaSorteo < fechaLimite) {
+                        continue; // Saltar sorteos más antiguos de 30 meses
+                      }
+                    }
+                  }
+                  
+                  // Extraer números F1-F6 (columnas 2-7)
+                  for (let j = 2; j <= 7; j++) {
+                    const num = parseInt(cols[j]);
+                    if (!isNaN(num) && num >= 1 && num <= 56) {
+                      numerosLinea.push(num);
+                    } else {
+                      lineaValida = false;
+                      break;
+                    }
+                  }
+                } else {
+                  lineaValida = false;
+                }
               }
             } else if (formatoDetectado === 'simple') {
               // Formato: Date,Sorteo,Tipo,Num1,Num2,Num3,Num4,Num5,Num6
@@ -419,7 +493,7 @@
               sorteosValidos++;
             } else {
               if (formatoDetectado === 'historico_real' && fechaSorteo && fechaSorteo >= fechaLimite) {
-                console.warn(`⚠️ Línea ${i + 1} inválida en ${sorteo}.csv: ${line}`);
+                console.warn(`⚠️ Línea ${i + 1} inválida en ${archivoCSV[sorteo]}: ${line}`);
               }
             }
           }
