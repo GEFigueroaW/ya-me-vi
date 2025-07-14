@@ -45,23 +45,33 @@ async function cargarSorteoIndividual(modo) {
     
     lineas.forEach((linea, index) => {
       const cols = linea.split(',');
-      if (cols.length >= 9) { // Ahora incluye NumeroSorteo
-        const fecha = cols[0];
-        const numeroSorteo = parseInt(cols[2], 10); // Nueva columna NumeroSorteo
-        // Números ganadores ahora están en las columnas 3 a 8 (índices 3 a 8)
-        const nums = cols.slice(3, 9).map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n >= 1 && n <= 56);
+      if (cols.length >= 10) { // Nuevo formato: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
+        const nproducto = cols[0];
+        const concurso = parseInt(cols[1], 10); // CONCURSO es el número de sorteo
+        const fecha = cols[10]; // FECHA está al final
+        const numeros = [
+          parseInt(cols[2], 10), // R1
+          parseInt(cols[3], 10), // R2  
+          parseInt(cols[4], 10), // R3
+          parseInt(cols[5], 10), // R4
+          parseInt(cols[6], 10), // R5
+          parseInt(cols[7], 10)  // R6 (ignoramos R7 ya que solo usamos 6 números)
+        ];
         
-        if (nums.length === 6 && !isNaN(numeroSorteo)) {
+        // Validar que todos los números sean válidos
+        if (numeros.every(num => !isNaN(num) && num >= 1 && num <= 56) && !isNaN(concurso)) {
           todosLosDatos.push({
-            fecha,
-            numeros: nums,
+            fecha: fecha,
+            numeroSorteo: concurso,
             sorteo: nombreSorteo,
-            numeroSorteo: numeroSorteo
+            numeros: numeros
           });
-          todosLosNumeros.push(...nums);
+          todosLosNumeros.push(...numeros);
         } else {
-          console.warn(`⚠️ Línea ${index + 1} de ${archivo} tiene números inválidos:`, nums, 'o número de sorteo inválido:', numeroSorteo);
+          console.warn(`⚠️ Línea ${index + 2} de ${archivo} tiene números inválidos:`, numeros, 'o número de sorteo inválido:', concurso);
         }
+      } else {
+        console.warn(`⚠️ Formato incorrecto en línea ${index + 2}:`, linea);
       }
     });
   } catch (error) {
