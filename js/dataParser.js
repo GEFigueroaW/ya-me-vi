@@ -35,9 +35,15 @@ async function cargarSorteoIndividual(modo) {
     console.log(`📥 Cargando ${archivo}...`);
     const response = await fetch(archivo);
     if (!response.ok) {
-      throw new Error(`Error al cargar ${archivo}: ${response.status}`);
+      throw new Error(`Error al cargar ${archivo}: ${response.status} - ${response.statusText}`);
     }
     const texto = await response.text();
+    console.log(`📄 Texto cargado de ${archivo}:`, texto.substring(0, 200) + '...');
+    
+    if (!texto.trim()) {
+      throw new Error(`El archivo ${archivo} está vacío`);
+    }
+    
     const lineas = texto.trim().split('\n').slice(1); // sin encabezado
     console.log(`📄 ${archivo}: ${lineas.length} líneas procesadas`);
 
@@ -143,15 +149,20 @@ async function cargarTodosSorteos() {
     console.log(`📥 Cargando sorteo: ${sorteo}`);
     try {
       const datos = await cargarSorteoIndividual(sorteo);
-      datosPorSorteo[sorteo] = datos;
+      console.log(`📊 Datos cargados para ${sorteo}:`, datos);
       
-      // Obtener el último sorteo (el más reciente)
-      if (datos.datos.length > 0) {
+      if (datos && datos.datos && datos.datos.length > 0) {
+        datosPorSorteo[sorteo] = datos;
+        
+        // Obtener el último sorteo (el más reciente)
         const ultimoSorteo = datos.datos[datos.datos.length - 1];
         ultimosSorteos[sorteo] = ultimoSorteo;
+        console.log(`✅ ${sorteo} cargado exitosamente: ${datos.datos.length} sorteos, último: ${ultimoSorteo.numeroSorteo}`);
+      } else {
+        console.warn(`⚠️ ${sorteo} no tiene datos válidos`);
+        datosPorSorteo[sorteo] = { datos: [], numeros: [], modo: sorteo };
+        ultimosSorteos[sorteo] = null;
       }
-      
-      console.log(`✅ ${sorteo} cargado exitosamente:`, datos.datos.length, 'sorteos');
     } catch (error) {
       console.error(`❌ Error cargando ${sorteo}:`, error);
       datosPorSorteo[sorteo] = { datos: [], numeros: [], modo: sorteo };
@@ -260,6 +271,20 @@ export function graficarEstadisticas(datos) {
 
 function mostrarEstadisticasComparativas(datosPorSorteo) {
   console.log('🔍 Generando análisis estadístico para cada sorteo...');
+  console.log('📊 Datos recibidos en mostrarEstadisticasComparativas:', datosPorSorteo);
+  
+  if (!datosPorSorteo) {
+    console.error('❌ No se recibieron datos para mostrar estadísticas');
+    const contenedorCharts = document.getElementById('charts-container');
+    if (contenedorCharts) {
+      contenedorCharts.innerHTML = `
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <strong>Error:</strong> No se recibieron datos para el análisis estadístico.
+        </div>
+      `;
+    }
+    return;
+  }
   
   const sorteos = ['melate', 'revancha', 'revanchita'];
   const colores = {
@@ -280,7 +305,15 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
   
   // Procesar cada sorteo
   sorteos.forEach(sorteo => {
+    console.log(`🔍 Procesando sorteo: ${sorteo}`);
     const datos = datosPorSorteo[sorteo];
+    
+    if (!datos) {
+      console.warn(`⚠️ No hay datos para ${sorteo}`);
+      estadisticasPorSorteo[sorteo] = crearEstadisticasVacias(bloques);
+      return;
+    }
+    
     const sorteosDatos = datos.datos || [];
     
     console.log(`📊 Analizando ${sorteo}:`, { 
@@ -394,19 +427,11 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       console.log(`✅ ${sorteo} procesado:`, { top10Mas, top10Menos, bloques: estadisticasBloques });
     } else {
       console.warn(`⚠️ No hay datos para ${sorteo}`);
-      estadisticasPorSorteo[sorteo] = {
-        top10Mas: [],
-        top10Menos: [],
-        bloques: bloques.map(bloque => ({
-          bloque: bloque.nombre,
-          promedio: 0,
-          porcentaje: 25,
-          numerosProbables: 1
-        })),
-        totalSorteos: 0
-      };
+      estadisticasPorSorteo[sorteo] = crearEstadisticasVacias(bloques);
     }
   });
+  
+  console.log('📊 Estadísticas finales por sorteo:', estadisticasPorSorteo);
   
   // Generar HTML
   const contenedorCharts = document.getElementById('charts-container');
@@ -517,10 +542,28 @@ function mostrarEstadisticasComparativas(datosPorSorteo) {
       </div>
     `;
     
+    console.log('📄 HTML generado:', htmlContent.substring(0, 500) + '...');
     contenedorCharts.innerHTML = htmlContent;
+    console.log('✅ HTML insertado en el contenedor');
+  } else {
+    console.error('❌ No se encontró el contenedor charts-container');
   }
   
   console.log('✅ Análisis estadístico completo mostrado exitosamente');
+}
+
+function crearEstadisticasVacias(bloques) {
+  return {
+    top10Mas: [],
+    top10Menos: [],
+    bloques: bloques.map(bloque => ({
+      bloque: bloque.nombre,
+      promedio: 0,
+      porcentaje: 25,
+      numerosProbables: 1
+    })),
+    totalSorteos: 0
+  };
 }
 
 function mostrarEstadisticasCompletas(frecuencia, totalNumeros, totalSorteos, modo) {
