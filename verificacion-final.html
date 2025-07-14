@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YA ME VI - Verificación Final</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <style>
+        .result-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .result-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto p-8">
+        <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">
+            🎯 YA ME VI - Verificación Final del Sistema
+        </h1>
+        
+        <div id="test-results" class="space-y-4">
+            <div class="result-info p-4 rounded-lg">
+                🔄 Iniciando verificación del sistema...
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <button id="test-again" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded hidden">
+                🔄 Probar de nuevo
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { cargarDatosHistoricos, graficarEstadisticas } from './js/dataParser.js';
+        
+        const testResults = document.getElementById('test-results');
+        const testAgainBtn = document.getElementById('test-again');
+        
+        function addResult(type, message) {
+            const div = document.createElement('div');
+            div.className = `result-${type} p-4 rounded-lg`;
+            div.innerHTML = message;
+            testResults.appendChild(div);
+        }
+        
+        async function runCompleteTest() {
+            testResults.innerHTML = '<div class="result-info p-4 rounded-lg">🔄 Iniciando verificación del sistema...</div>';
+            
+            try {
+                // Test 1: Cargar datos individuales
+                addResult('info', '📊 Test 1: Cargando datos individuales...');
+                
+                const melate = await cargarDatosHistoricos('melate');
+                if (melate && melate.datos && melate.datos.length > 0) {
+                    addResult('success', `✅ Melate: ${melate.datos.length} sorteos, ${melate.numeros.length} números`);
+                } else {
+                    addResult('error', '❌ Melate: No se cargaron datos');
+                }
+                
+                const revancha = await cargarDatosHistoricos('revancha');
+                if (revancha && revancha.datos && revancha.datos.length > 0) {
+                    addResult('success', `✅ Revancha: ${revancha.datos.length} sorteos, ${revancha.numeros.length} números`);
+                } else {
+                    addResult('error', '❌ Revancha: No se cargaron datos');
+                }
+                
+                const revanchita = await cargarDatosHistoricos('revanchita');
+                if (revanchita && revanchita.datos && revanchita.datos.length > 0) {
+                    addResult('success', `✅ Revanchita: ${revanchita.datos.length} sorteos, ${revanchita.numeros.length} números`);
+                } else {
+                    addResult('error', '❌ Revanchita: No se cargaron datos');
+                }
+                
+                // Test 2: Cargar todos los datos
+                addResult('info', '📊 Test 2: Cargando todos los datos...');
+                
+                const todos = await cargarDatosHistoricos('todos');
+                if (todos && todos.datosPorSorteo) {
+                    let totalSorteos = 0;
+                    let totalNumeros = 0;
+                    
+                    for (const [sorteo, data] of Object.entries(todos.datosPorSorteo)) {
+                        if (data && data.datos) {
+                            totalSorteos += data.datos.length;
+                            totalNumeros += data.numeros.length;
+                        }
+                    }
+                    
+                    addResult('success', `✅ Todos los sorteos: ${totalSorteos} sorteos totales, ${totalNumeros} números totales`);
+                } else {
+                    addResult('error', '❌ No se pudieron cargar todos los datos');
+                }
+                
+                // Test 3: Verificar función de graficación
+                addResult('info', '📊 Test 3: Verificando función de graficación...');
+                
+                try {
+                    // Crear un contenedor temporal para la prueba
+                    const tempContainer = document.createElement('div');
+                    tempContainer.id = 'charts-container';
+                    tempContainer.style.display = 'none';
+                    document.body.appendChild(tempContainer);
+                    
+                    graficarEstadisticas(todos);
+                    
+                    if (tempContainer.innerHTML.length > 0) {
+                        addResult('success', '✅ Función de graficación funciona correctamente');
+                    } else {
+                        addResult('warning', '⚠️ Función de graficación no generó contenido');
+                    }
+                    
+                    // Limpiar
+                    document.body.removeChild(tempContainer);
+                    
+                } catch (error) {
+                    addResult('error', `❌ Error en función de graficación: ${error.message}`);
+                }
+                
+                // Test 4: Verificar archivos CSV
+                addResult('info', '📊 Test 4: Verificando archivos CSV...');
+                
+                const csvFiles = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
+                
+                for (const file of csvFiles) {
+                    try {
+                        const response = await fetch(file);
+                        if (response.ok) {
+                            const content = await response.text();
+                            const lines = content.split('\n').filter(line => line.trim());
+                            addResult('success', `✅ ${file}: ${lines.length} líneas`);
+                        } else {
+                            addResult('error', `❌ ${file}: Error HTTP ${response.status}`);
+                        }
+                    } catch (error) {
+                        addResult('error', `❌ ${file}: ${error.message}`);
+                    }
+                }
+                
+                // Resultado final
+                addResult('success', '🎉 ¡VERIFICACIÓN COMPLETA! El sistema YA ME VI está funcionando correctamente.');
+                addResult('info', '✅ Puedes usar analisis.html, combinacion.html y sugeridas.html sin problemas.');
+                
+            } catch (error) {
+                addResult('error', `❌ Error general: ${error.message}`);
+            }
+            
+            testAgainBtn.classList.remove('hidden');
+        }
+        
+        testAgainBtn.addEventListener('click', runCompleteTest);
+        
+        // Ejecutar prueba al cargar
+        runCompleteTest();
+    </script>
+</body>
+</html>

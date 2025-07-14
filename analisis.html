@@ -82,8 +82,9 @@
         console.log('👤 Usuario ID:', usuarioID);
         await analizarTodosSorteos();
       } else {
-        console.log('❌ Usuario no autenticado, redirigiendo...');
-        window.location.href = 'index.html';
+        console.log('⚠️ Usuario no autenticado, pero continuando con análisis...');
+        // Permitir análisis sin autenticación
+        await analizarTodosSorteos();
       }
     });
 

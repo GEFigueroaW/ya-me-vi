@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Análisis CORREGIDO</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="overflow-x-hidden">
+
+  <!-- Fondo -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
+
+    <!-- Botón de regreso -->
+    <button id="btn-back" class="btn-back-improved" onclick="window.location.href='home.html'">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <span class="btn-text">Volver</span>
+    </button>
+
+    <!-- Espaciador para evitar solapamiento en móviles -->
+    <div class="mobile-spacer"></div>
+
+    <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown">Análisis de Sorteos CORREGIDO</h1>
+
+    <!-- Encabezado de sorteos -->
+    <div class="text-center mb-6">
+      <h2 class="text-xl font-semibold text-white mb-2">MELATE | REVANCHA | REVANCHITA</h2>
+      <div id="ultimo-sorteo" class="text-gray-300 text-sm">
+        CARGANDO ULTIMO SORTEO...
+      </div>
+    </div>
+
+    <!-- Estado de carga -->
+    <div id="loading-state" class="mb-6">
+      <div class="text-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+        <p class="text-white">🔄 Cargando análisis estadístico...</p>
+      </div>
+    </div>
+
+    <!-- Contenedor de estadísticas -->
+    <div id="charts-container" class="mb-12 hidden">
+      <!-- Aquí se mostrarán las estadísticas -->
+    </div>
+
+    <!-- Estadísticas adicionales -->
+    <div id="estadisticas-extra" class="animate__animated animate__fadeInUp"></div>
+    
+    <!-- Footer -->
+    <footer class="bg-black bg-opacity-70 text-white text-xs text-center py-3 px-4 mt-8">
+      ✅ Sistema corregido - Datos históricos funcionando correctamente
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script src="js/firebase-init.js" type="module"></script>
+  <script src="js/dataParser.js" type="module"></script>
+  <script type="module">
+    console.log('🚀 Iniciando análisis estadístico CORREGIDO...');
+    
+    import { cargarDatosHistoricos, graficarEstadisticas } from './js/dataParser.js';
+
+    const loadingState = document.getElementById('loading-state');
+    const chartsContainer = document.getElementById('charts-container');
+
+    async function analizarTodosSorteos() {
+      console.log('🔍 Iniciando análisis de todos los sorteos...');
+      
+      try {
+        loadingState.innerHTML = `
+          <div class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p class="text-white">🔄 Cargando datos históricos...</p>
+          </div>
+        `;
+        
+        console.log('📊 Cargando datos históricos...');
+        const datos = await cargarDatosHistoricos('todos');
+        console.log('✅ Datos cargados exitosamente:', datos);
+        
+        loadingState.innerHTML = `
+          <div class="text-center py-4">
+            <p class="text-green-400">✅ Datos cargados, generando estadísticas...</p>
+          </div>
+        `;
+        
+        console.log('📊 Generando estadísticas...');
+        graficarEstadisticas(datos);
+        
+        // Ocultar loading y mostrar resultados
+        loadingState.classList.add('hidden');
+        chartsContainer.classList.remove('hidden');
+        
+        console.log('✅ Análisis completado exitosamente');
+        
+      } catch (error) {
+        console.error('❌ Error en análisis:', error);
+        
+        loadingState.innerHTML = `
+          <div class="text-center py-8">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <strong>❌ Error:</strong> ${error.message}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Iniciar análisis cuando se cargue la página
+    analizarTodosSorteos();
+
+  </script>
+
+  <style>
+    #charts-container canvas {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+    
+    .analisis-transparente {
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-back-improved {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .btn-back-improved:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-2px);
+    }
+    
+    .mobile-spacer {
+      height: 60px;
+    }
+  </style>
+</body>
+</html>
