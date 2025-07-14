@@ -62,36 +62,27 @@
   <script type="module">
     console.log('🚀 Iniciando análisis estadístico...');
     
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { app } from './js/firebase-init.js';
-    import { cargarDatosHistoricos, graficarEstadisticas } from './js/dataParser.js';
-    import { generarPrediccionPersonalizada } from './js/mlPredictor.js';
-
-    const auth = getAuth(app);
-    let usuarioID = null;
+    import { cargarDatosHistoricos, graficarEstadisticas, mostrarEstadisticasComparativas } from './js/dataParser.js';
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
       window.location.href = 'home.html';
     });
 
-    onAuthStateChanged(auth, async (user) => {
-      console.log('🔐 Estado de autenticación:', user ? 'Autenticado' : 'No autenticado');
-      if (user) {
-        usuarioID = user.uid;
-        console.log('👤 Usuario ID:', usuarioID);
-        await analizarTodosSorteos();
-      } else {
-        console.log('⚠️ Usuario no autenticado, pero continuando con análisis...');
-        // Permitir análisis sin autenticación
-        await analizarTodosSorteos();
-      }
-    });
-
+    // Función principal de análisis
     async function analizarTodosSorteos() {
-      console.log('🔍 Iniciando análisis de todos los sorteos...');
+      console.log('� Iniciando análisis de todos los sorteos...');
+      
+      const loadingDiv = document.querySelector('.text-center.py-12');
+      if (loadingDiv) {
+        loadingDiv.innerHTML = `
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p class="text-white">🔄 Cargando datos históricos...</p>
+        `;
+      }
       
       try {
+        console.log('� Cargando datos históricos...');
         const datos = await cargarDatosHistoricos('todos');
         console.log('📊 Datos cargados, generando estadísticas...');
         
@@ -104,6 +95,7 @@
         }
         
         graficarEstadisticas(datos);
+        mostrarEstadisticasComparativas(datos);
 
         console.log('✅ Análisis completado exitosamente');
       } catch (error) {
@@ -118,12 +110,19 @@
             </div>
           `;
         }
+        
+        if (loadingDiv) {
+          loadingDiv.innerHTML = `
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <strong>Error:</strong> ${error.message}
+            </div>
+          `;
+        }
       }
     }
 
-    // Función eliminada - ya no se necesita generar predicciones aquí
-    // Las combinaciones se generan en sugeridas.html
-
+    // Ejecutar análisis directamente
+    analizarTodosSorteos();
   </script>
 
   <style>

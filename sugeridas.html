@@ -133,27 +133,20 @@
       });
   </script>
   <script type="module">
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { app } from './js/firebase-init.js';
-    import { cargarDatosHistoricos } from './js/dataParser.js';
+    import { cargarDatosHistoricos, generarCombinacionesAleatorias } from './js/dataParser.js';
     import { generarPrediccionPersonalizada } from './js/mlPredictor.js';
 
-    const auth = getAuth(app);
-    let cantidadSeleccionada = 1; // Cantidad por defecto
-    let usuarioID = null;
+    let cantidadSeleccionada = 1;
     let datosHistoricos = null;
     let prediccionesGeneradas = false;
 
     // Función para obtener el número de sorteo actual
     function obtenerNumeroSorteoActual() {
-      // Simulamos obtener el número de sorteo actual
-      // En producción, esto vendría de una API o base de datos
       const fecha = new Date();
       const year = fecha.getFullYear();
       const month = fecha.getMonth() + 1;
       const day = fecha.getDate();
       
-      // Generar número de sorteo basado en fecha (ejemplo: 5678)
       const numeroSorteo = Math.floor(5000 + (month * 100) + day);
       return numeroSorteo;
     }
@@ -162,7 +155,9 @@
     function actualizarTituloSorteo() {
       const numeroSorteo = obtenerNumeroSorteoActual();
       const tituloElement = document.getElementById('titulo-sorteo');
-      tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo "${numeroSorteo}"`;
+      if (tituloElement) {
+        tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo "${numeroSorteo}"`;
+      }
     }
 
     // Función para toggle (expandir/colapsar) la predicción IA
@@ -172,21 +167,18 @@
       const container = document.getElementById('prediccion-container');
       
       if (contenido.classList.contains('hidden')) {
-        // Expandir
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
-        container.style.opacity = '1'; // Cambiar opacidad a 100%
+        container.style.opacity = '1';
         
-        // Generar predicciones si no se han generado aún
         if (!prediccionesGeneradas) {
           generarPrediccionesPorSorteo();
           prediccionesGeneradas = true;
         }
       } else {
-        // Colapsar
         contenido.classList.add('hidden');
         arrow.style.transform = 'rotate(0deg)';
-        container.style.opacity = '0.5'; // Volver a opacidad 50%
+        container.style.opacity = '0.5';
       }
     }
 
@@ -201,13 +193,125 @@
     // Manejo de botones de cantidad
     document.querySelectorAll('.cantidad-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        // Remover clase active de todos los botones
         document.querySelectorAll('.cantidad-btn').forEach(b => b.classList.remove('active'));
-        
-        // Agregar clase active al botón seleccionado
         btn.classList.add('active');
+        cantidadSeleccionada = parseInt(btn.dataset.cantidad);
+      });
+    });
+
+    // Botón para generar combinaciones aleatorias
+    document.getElementById('btn-generar').addEventListener('click', async () => {
+      console.log(`🎲 Generando ${cantidadSeleccionada} combinaciones aleatorias...`);
+      
+      const container = document.getElementById('combinaciones-container');
+      container.innerHTML = `
+        <div class="text-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p class="text-white">Generando combinaciones...</p>
+        </div>
+      `;
+      
+      try {
+        const combinaciones = generarCombinacionesAleatorias(cantidadSeleccionada);
+        mostrarCombinaciones(combinaciones);
+      } catch (error) {
+        console.error('❌ Error generando combinaciones:', error);
+        container.innerHTML = `
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong>Error:</strong> No se pudieron generar las combinaciones. ${error.message}
+          </div>
+        `;
+      }
+    });
+
+    // Función para mostrar combinaciones
+    function mostrarCombinaciones(combinaciones) {
+      const container = document.getElementById('combinaciones-container');
+      
+      const html = `
+        <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
+          <h3 class="text-xl font-bold text-white mb-4 text-center">
+            🎲 ${combinaciones.length} Combinación${combinaciones.length > 1 ? 'es' : ''} Aleatoria${combinaciones.length > 1 ? 's' : ''}
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${combinaciones.map((combo, index) => `
+              <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center">
+                <h4 class="text-lg font-semibold text-white mb-2">Combinación ${index + 1}</h4>
+                <div class="flex justify-center space-x-2">
+                  ${combo.map(num => `
+                    <span class="bg-white text-purple-600 font-bold py-1 px-2 rounded text-sm">
+                      ${num}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+    }
+
+    // Función para generar predicciones por sorteo
+    async function generarPrediccionesPorSorteo() {
+      console.log('🤖 Generando predicciones por IA...');
+      
+      const mensajeEstado = document.getElementById('mensaje-estado');
+      if (mensajeEstado) {
+        mensajeEstado.textContent = 'Generando predicciones personalizadas...';
+      }
+      
+      try {
+        // Cargar datos históricos si no están cargados
+        if (!datosHistoricos) {
+          datosHistoricos = await cargarDatosHistoricos('todos');
+        }
         
-        // Actualizar cantidad seleccionada
+        // Generar predicciones para cada sorteo
+        const sorteos = ['melate', 'revancha', 'revanchita'];
+        
+        for (const sorteo of sorteos) {
+          try {
+            const prediccion = await generarPrediccionPersonalizada(datosHistoricos[sorteo], 'usuario123');
+            
+            const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+            if (elementoCombo && prediccion && prediccion.length === 6) {
+              elementoCombo.textContent = prediccion.join(' - ');
+            }
+          } catch (error) {
+            console.error(`❌ Error generando predicción para ${sorteo}:`, error);
+            const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+            if (elementoCombo) {
+              elementoCombo.textContent = 'Error al generar';
+            }
+          }
+        }
+        
+        if (mensajeEstado) {
+          mensajeEstado.textContent = 'Predicciones generadas exitosamente';
+        }
+        
+      } catch (error) {
+        console.error('❌ Error generando predicciones:', error);
+        if (mensajeEstado) {
+          mensajeEstado.textContent = 'Error al generar predicciones';
+        }
+      }
+    }
+
+    // Inicializar
+    actualizarTituloSorteo();
+    
+    // Cargar datos históricos al inicio
+    cargarDatosHistoricos('todos').then(datos => {
+      datosHistoricos = datos;
+      console.log('✅ Datos históricos cargados en sugeridas.html');
+    }).catch(error => {
+      console.error('❌ Error cargando datos históricos:', error);
+    });
+
+  </script>
         cantidadSeleccionada = parseInt(btn.dataset.cantidad);
       });
     });
