@@ -29,31 +29,34 @@
 
     <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown">Combinaciones Sugeridas</h1>
 
-    <!-- Descripción -->
-    <div class="text-center mb-8">
-      <p class="text-lg text-gray-300 mb-4">
-        Genera combinaciones de números completamente al azar
-      </p>
-      <p class="text-sm text-gray-400">
-        Números aleatorios del 1 al 56 • Sin análisis • Sin patrones • Solo suerte
-      </p>
-    </div>
-
-    <!-- Selector de cantidad -->
-    <div class="mb-6">
-      <p class="text-white text-sm mb-3">¿Cuántas combinaciones deseas?</p>
-      <div class="flex justify-center gap-3">
-        <button id="btn-1" class="cantidad-btn active" data-cantidad="1">1</button>
-        <button id="btn-3" class="cantidad-btn" data-cantidad="3">3</button>
-        <button id="btn-5" class="cantidad-btn" data-cantidad="5">5</button>
+    <!-- Sección de combinaciones aleatorias -->
+    <div class="analisis-transparente rounded-xl p-6 max-w-4xl mx-auto mb-8">
+      <!-- Descripción -->
+      <div class="text-center mb-8">
+        <p class="text-lg text-white mb-4">
+          Genera TUS combinaciones de números completamente al azar
+        </p>
+        <p class="text-sm text-gray-300">
+          Números aleatorios del 1 al 56 • Sin análisis • Sin patrones • Solo suerte
+        </p>
       </div>
-    </div>
 
-    <!-- Botón para generar combinaciones -->
-    <div class="mb-8">
-      <button id="btn-generar" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-        🎲 Generar Combinaciones Aleatorias
-      </button>
+      <!-- Selector de cantidad -->
+      <div class="mb-6">
+        <p class="text-white text-sm mb-3">¿Cuántas combinaciones deseas?</p>
+        <div class="flex justify-center gap-3">
+          <button id="btn-1" class="cantidad-btn active" data-cantidad="1">1</button>
+          <button id="btn-3" class="cantidad-btn" data-cantidad="3">3</button>
+          <button id="btn-5" class="cantidad-btn" data-cantidad="5">5</button>
+        </div>
+      </div>
+
+      <!-- Botón para generar combinaciones -->
+      <div class="text-center">
+        <button id="btn-generar" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+          🎲 Generar Combinaciones Aleatorias
+        </button>
+      </div>
     </div>
 
     <!-- Contenedor de combinaciones generadas aleatorias -->
@@ -113,11 +116,22 @@
     </footer>
   </div>
 
+  <!-- Footer legal -->
+  <div id="footer-container" class="w-full z-10 mt-8"></div>
+
   <!-- Scripts -->
   <script src="js/shared.js"></script>
   <script src="js/firebase-init.js" type="module"></script>
   <script src="js/dataParser.js" type="module"></script>
   <script src="js/mlPredictor.js" type="module"></script>
+  <script>
+    // Cargar footer legal en todas las páginas
+    fetch("footer.html")
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("footer-container").innerHTML = data;
+      });
+  </script>
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { app } from './js/firebase-init.js';
