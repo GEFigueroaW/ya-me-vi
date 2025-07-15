@@ -163,11 +163,12 @@
       background-color: rgba(59, 130, 246, 0.2) !important;
     }
     
-    /* Altura fija para las cajas del lado izquierdo */
+    /* Altura más compacta para las cajas del lado izquierdo */
     #contenedor-cajas > div {
-      height: 120px; /* Altura fija */
-      min-height: 120px;
-      max-height: 120px;
+      height: 80px; /* Altura más compacta como cuando están cerradas */
+      min-height: 80px;
+      max-height: 80px;
+      margin-bottom: 1rem; /* Espaciado similar al formato móvil */
     }
     
     /* Cuando las cajas están en layout original, mantener altura flexible */
@@ -175,6 +176,7 @@
       height: auto !important;
       min-height: auto !important;
       max-height: none !important;
+      margin-bottom: 1rem !important; /* Espaciado normal en layout horizontal */
     }
   </style>
 </body>
