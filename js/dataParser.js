@@ -161,7 +161,7 @@ async function cargarSorteoIndividual(sorteo) {
 }
 
 export function graficarEstadisticas(datos) {
-  console.log('📊 Generando estadísticas...');
+  console.log('📊 Generando estadísticas unificadas...');
   
   const container = document.getElementById('charts-container');
   if (!container) {
@@ -171,22 +171,89 @@ export function graficarEstadisticas(datos) {
   
   container.innerHTML = '';
   
-  const statsContainer = document.createElement('div');
-  statsContainer.className = 'space-y-8';
+  // Crear tarjeta unificada
+  const tarjetaUnificada = document.createElement('div');
+  tarjetaUnificada.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30';
   
-  Object.entries(datos).forEach(([sorteo, datosIndividuales]) => {
+  const botonTitulo = document.createElement('button');
+  botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
+  botonTitulo.onclick = () => toggleAnalisis('frecuencias-unificadas');
+  botonTitulo.innerHTML = `
+    <h3 class="text-2xl font-bold text-white text-center">📊 Análisis de Frecuencias - Todos los Sorteos</h3>
+    <div class="text-center mt-2">
+      <span class="text-gray-300 text-sm">Clic para expandir</span>
+    </div>
+  `;
+  
+  const contenidoExpandible = document.createElement('div');
+  contenidoExpandible.id = 'frecuencias-unificadas-content';
+  contenidoExpandible.className = 'hidden px-6 pb-6';
+  
+  // Generar contenido para cada sorteo
+  const sorteos = ['melate', 'revancha', 'revanchita'];
+  let contenidoHTML = '';
+  
+  sorteos.forEach(sorteo => {
+    const datosIndividuales = datos[sorteo];
     if (!datosIndividuales || !datosIndividuales.numeros || datosIndividuales.numeros.length === 0) {
       console.warn(`⚠️ No hay datos para ${sorteo}`);
       return;
     }
     
     const frecuencias = calcularFrecuencias(datosIndividuales.numeros);
-    const estadisticas = generarEstadisticas(frecuencias, sorteo);
+    const frecuenciasArray = Object.entries(frecuencias).map(([num, freq]) => ({
+      numero: parseInt(num),
+      frecuencia: freq
+    }));
     
-    statsContainer.appendChild(estadisticas);
+    frecuenciasArray.sort((a, b) => b.frecuencia - a.frecuencia);
+    
+    const topFrecuentes = frecuenciasArray.slice(0, 10);
+    const menosFrecuentes = frecuenciasArray.slice(-10).reverse();
+    
+    contenidoHTML += `
+      <div class="mb-8 ${sorteo !== 'revanchita' ? 'border-b border-white border-opacity-30 pb-8' : ''}">
+        <h4 class="text-xl font-bold text-white text-center mb-6">${sorteo.toUpperCase()}</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Los 10 que más salen -->
+          <div>
+            <h5 class="text-lg font-semibold text-green-400 mb-4 text-center">🔥 Los 10 que más salen</h5>
+            <div class="space-y-2">
+              ${topFrecuentes.map((item, index) => `
+                <div class="flex items-center justify-between bg-green-500 bg-opacity-50 rounded-lg p-3">
+                  <span class="text-white font-bold">${index + 1}</span>
+                  <span class="text-white text-2xl font-bold">${item.numero}</span>
+                  <span class="text-green-400 font-semibold">${item.frecuencia}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Los 10 que menos salen -->
+          <div>
+            <h5 class="text-lg font-semibold text-blue-400 mb-4 text-center">❄️ Los 10 que menos salen</h5>
+            <div class="space-y-2">
+              ${menosFrecuentes.map((item, index) => `
+                <div class="flex items-center justify-between bg-blue-500 bg-opacity-50 rounded-lg p-3">
+                  <span class="text-white font-bold">${index + 1}</span>
+                  <span class="text-white text-2xl font-bold">${item.numero}</span>
+                  <span class="text-blue-400 font-semibold">${item.frecuencia}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   });
   
-  container.appendChild(statsContainer);
+  contenidoExpandible.innerHTML = contenidoHTML;
+  
+  tarjetaUnificada.appendChild(botonTitulo);
+  tarjetaUnificada.appendChild(contenidoExpandible);
+  
+  container.appendChild(tarjetaUnificada);
   
   const loadingDiv = document.querySelector('.animate-spin');
   if (loadingDiv && loadingDiv.parentElement) {
@@ -208,76 +275,6 @@ function calcularFrecuencias(numeros) {
   });
   
   return frecuencias;
-}
-
-function generarEstadisticas(frecuencias, sorteo) {
-  const sorteoContainer = document.createElement('div');
-  sorteoContainer.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30';
-  
-  const botonTitulo = document.createElement('button');
-  botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
-  botonTitulo.onclick = () => toggleAnalisis(`frecuencia-${sorteo}`);
-  botonTitulo.innerHTML = `
-    <h3 class="text-2xl font-bold text-white text-center">${sorteo.toUpperCase()} - Análisis de Frecuencias</h3>
-    <div class="text-center mt-2">
-      <span class="text-gray-300 text-sm">Clic para expandir</span>
-    </div>
-  `;
-  
-  const contenidoExpandible = document.createElement('div');
-  contenidoExpandible.id = `frecuencia-${sorteo}-content`;
-  contenidoExpandible.className = 'hidden px-6 pb-6';
-  
-  const frecuenciasArray = Object.entries(frecuencias).map(([num, freq]) => ({
-    numero: parseInt(num),
-    frecuencia: freq
-  }));
-  
-  frecuenciasArray.sort((a, b) => b.frecuencia - a.frecuencia);
-  
-  const topFrecuentes = frecuenciasArray.slice(0, 10);
-  const menosFrecuentes = frecuenciasArray.slice(-10).reverse();
-  
-  const columnasContainer = document.createElement('div');
-  columnasContainer.className = 'grid grid-cols-1 md:grid-cols-2 gap-8';
-  
-  const columnaIzquierda = document.createElement('div');
-  columnaIzquierda.innerHTML = `
-    <h4 class="text-lg font-semibold text-green-400 mb-4">🔥 Top 10 Más Frecuentes</h4>
-    <div class="space-y-2">
-      ${topFrecuentes.map((item, index) => `
-        <div class="flex items-center justify-between bg-green-500 bg-opacity-50 rounded-lg p-3">
-          <span class="text-white font-bold">#${index + 1}</span>
-          <span class="text-white text-xl font-bold">${item.numero}</span>
-          <span class="text-green-400 font-semibold">${item.frecuencia} veces</span>
-        </div>
-      `).join('')}
-    </div>
-  `;
-  
-  const columnaDerecha = document.createElement('div');
-  columnaDerecha.innerHTML = `
-    <h4 class="text-lg font-semibold text-blue-400 mb-4">❄️ Top 10 Menos Frecuentes</h4>
-    <div class="space-y-2">
-      ${menosFrecuentes.map((item, index) => `
-        <div class="flex items-center justify-between bg-blue-500 bg-opacity-50 rounded-lg p-3">
-          <span class="text-white font-bold">#${index + 1}</span>
-          <span class="text-white text-xl font-bold">${item.numero}</span>
-          <span class="text-blue-400 font-semibold">${item.frecuencia} veces</span>
-        </div>
-      `).join('')}
-    </div>
-  `;
-  
-  columnasContainer.appendChild(columnaIzquierda);
-  columnasContainer.appendChild(columnaDerecha);
-  
-  contenidoExpandible.appendChild(columnasContainer);
-  
-  sorteoContainer.appendChild(botonTitulo);
-  sorteoContainer.appendChild(contenidoExpandible);
-  
-  return sorteoContainer;
 }
 
 export function mostrarEstadisticasComparativas(datos) {
