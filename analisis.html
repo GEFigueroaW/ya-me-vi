@@ -140,7 +140,14 @@
     // Función para toggle de análisis expandibles
     window.toggleAnalisis = function(tipo) {
       const content = document.getElementById(tipo + '-content');
-      const allContents = ['suma-content', 'pares-content', 'decada-content'];
+      const allContents = [
+        'suma-content', 
+        'pares-content', 
+        'decada-content',
+        'frecuencia-melate-content',
+        'frecuencia-revancha-content',
+        'frecuencia-revanchita-content'
+      ];
       
       // Cerrar todos los demás
       allContents.forEach(id => {

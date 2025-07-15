@@ -5,7 +5,14 @@ export async function cargarDatosHistoricos(modo = 'todos') {
   console.log('🚀 Cargando datos históricos, modo:', modo);
   
   if (modo === 'todos') {
-    return await cargarTodosSorteos();
+    return export function mostrarEstadisticasComparativas(datos) {
+  console.log('📊 Función mostrarEstadisticasComparativas deshabilitada - Resumen general eliminado');
+  
+  const container = document.getElementById('estadisticas-extra');
+  if (container) {
+    container.innerHTML = '';
+  }
+}orteos();
   } else {
     return await cargarSorteoIndividual(modo);
   }
@@ -212,11 +219,21 @@ function calcularFrecuencias(numeros) {
 
 function generarEstadisticas(frecuencias, sorteo) {
   const sorteoContainer = document.createElement('div');
-  sorteoContainer.className = 'bg-white bg-opacity-50 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-30';
+  sorteoContainer.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30';
   
-  const titulo = document.createElement('h3');
-  titulo.className = 'text-2xl font-bold text-white mb-6 text-center';
-  titulo.textContent = `${sorteo.toUpperCase()} - Análisis de Frecuencias`;
+  const botonTitulo = document.createElement('button');
+  botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
+  botonTitulo.onclick = () => toggleAnalisis(`frecuencia-${sorteo}`);
+  botonTitulo.innerHTML = `
+    <h3 class="text-2xl font-bold text-white text-center">${sorteo.toUpperCase()} - Análisis de Frecuencias</h3>
+    <div class="text-center mt-2">
+      <span class="text-gray-300 text-sm">Clic para expandir</span>
+    </div>
+  `;
+  
+  const contenidoExpandible = document.createElement('div');
+  contenidoExpandible.id = `frecuencia-${sorteo}-content`;
+  contenidoExpandible.className = 'hidden px-6 pb-6';
   
   const frecuenciasArray = Object.entries(frecuencias).map(([num, freq]) => ({
     numero: parseInt(num),
@@ -236,7 +253,7 @@ function generarEstadisticas(frecuencias, sorteo) {
     <h4 class="text-lg font-semibold text-green-400 mb-4">🔥 Top 10 Más Frecuentes</h4>
     <div class="space-y-2">
       ${topFrecuentes.map((item, index) => `
-        <div class="flex items-center justify-between bg-green-500 bg-opacity-20 rounded-lg p-3">
+        <div class="flex items-center justify-between bg-green-500 bg-opacity-50 rounded-lg p-3">
           <span class="text-white font-bold">#${index + 1}</span>
           <span class="text-white text-xl font-bold">${item.numero}</span>
           <span class="text-green-400 font-semibold">${item.frecuencia} veces</span>
@@ -250,7 +267,7 @@ function generarEstadisticas(frecuencias, sorteo) {
     <h4 class="text-lg font-semibold text-blue-400 mb-4">❄️ Top 10 Menos Frecuentes</h4>
     <div class="space-y-2">
       ${menosFrecuentes.map((item, index) => `
-        <div class="flex items-center justify-between bg-blue-500 bg-opacity-20 rounded-lg p-3">
+        <div class="flex items-center justify-between bg-blue-500 bg-opacity-50 rounded-lg p-3">
           <span class="text-white font-bold">#${index + 1}</span>
           <span class="text-white text-xl font-bold">${item.numero}</span>
           <span class="text-blue-400 font-semibold">${item.frecuencia} veces</span>
@@ -262,8 +279,10 @@ function generarEstadisticas(frecuencias, sorteo) {
   columnasContainer.appendChild(columnaIzquierda);
   columnasContainer.appendChild(columnaDerecha);
   
-  sorteoContainer.appendChild(titulo);
-  sorteoContainer.appendChild(columnasContainer);
+  contenidoExpandible.appendChild(columnasContainer);
+  
+  sorteoContainer.appendChild(botonTitulo);
+  sorteoContainer.appendChild(contenidoExpandible);
   
   return sorteoContainer;
 }
@@ -284,25 +303,7 @@ export function mostrarEstadisticasComparativas(datos) {
     }
   });
   
-  container.innerHTML = `
-    <div class="bg-white bg-opacity-50 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-30">
-      <h3 class="text-xl font-bold text-white mb-4 text-center">📈 Resumen General</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-        <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4">
-          <div class="text-2xl font-bold text-white">${totalSorteos}</div>
-          <div class="text-purple-300">Sorteos Analizados</div>
-        </div>
-        <div class="bg-blue-500 bg-opacity-20 rounded-lg p-4">
-          <div class="text-2xl font-bold text-white">${totalNumeros}</div>
-          <div class="text-blue-300">Números Procesados</div>
-        </div>
-        <div class="bg-green-500 bg-opacity-20 rounded-lg p-4">
-          <div class="text-2xl font-bold text-white">56</div>
-          <div class="text-green-300">Números Posibles</div>
-        </div>
-      </div>
-    </div>
-  `;
+  container.innerHTML = '';
 }
 
 export function generarCombinacionesAleatorias(cantidad = 1) {
@@ -539,7 +540,7 @@ export function mostrarAnalisisAvanzados(datos) {
     };
     
     htmlContent += `
-      <div class="${colores[sorteo]} bg-opacity-20 rounded-lg p-4">
+      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
         <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
         <div class="text-sm text-gray-300">
           <p><strong>Suma promedio:</strong> ${datos.sumaPromedio}</p>
@@ -579,7 +580,7 @@ export function mostrarAnalisisAvanzados(datos) {
     };
     
     htmlContent += `
-      <div class="${colores[sorteo]} bg-opacity-20 rounded-lg p-4">
+      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
         <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
         <div class="text-sm text-gray-300">
           <p><strong>Distribución más frecuente:</strong> ${datos.distribucionMasFrecuente[0]} (${datos.distribucionMasFrecuente[1]} veces)</p>
@@ -618,7 +619,7 @@ export function mostrarAnalisisAvanzados(datos) {
     };
     
     htmlContent += `
-      <div class="${colores[sorteo]} bg-opacity-20 rounded-lg p-4">
+      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
         <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
         <div class="text-sm text-gray-300">
           <p><strong>Década más frecuente:</strong> ${datos.decadaMasFrecuente[0]} (${datos.decadaMasFrecuente[1]} veces)</p>
