@@ -83,7 +83,7 @@
 
     // Función principal de análisis
     async function analizarTodosSorteos() {
-      console.log('� Iniciando análisis de todos los sorteos...');
+      console.log('🔍 Iniciando análisis de todos los sorteos...');
       
       const loadingDiv = document.querySelector('.text-center.py-12');
       if (loadingDiv) {
@@ -94,7 +94,7 @@
       }
       
       try {
-        console.log('� Cargando datos históricos...');
+        console.log('📊 Cargando datos históricos...');
         const datos = await cargarDatosHistoricos('todos');
         console.log('📊 Datos cargados, generando estadísticas...');
         

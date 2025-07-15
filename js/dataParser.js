@@ -5,14 +5,7 @@ export async function cargarDatosHistoricos(modo = 'todos') {
   console.log('🚀 Cargando datos históricos, modo:', modo);
   
   if (modo === 'todos') {
-    return export function mostrarEstadisticasComparativas(datos) {
-  console.log('📊 Función mostrarEstadisticasComparativas deshabilitada - Resumen general eliminado');
-  
-  const container = document.getElementById('estadisticas-extra');
-  if (container) {
-    container.innerHTML = '';
-  }
-}orteos();
+    return await cargarTodosSorteos();
   } else {
     return await cargarSorteoIndividual(modo);
   }
@@ -288,7 +281,7 @@ function generarEstadisticas(frecuencias, sorteo) {
 }
 
 export function mostrarEstadisticasComparativas(datos) {
-  console.log('� Mostrando estadísticas comparativas...');
+  console.log('📊 Mostrando estadísticas comparativas...');
   
   const container = document.getElementById('estadisticas-extra');
   if (!container) return;
