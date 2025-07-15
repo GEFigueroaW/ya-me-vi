@@ -136,6 +136,27 @@
 
     // Ejecutar análisis directamente
     analizarTodosSorteos();
+
+    // Función para toggle de análisis expandibles
+    window.toggleAnalisis = function(tipo) {
+      const content = document.getElementById(tipo + '-content');
+      const allContents = ['suma-content', 'pares-content', 'decada-content'];
+      
+      // Cerrar todos los demás
+      allContents.forEach(id => {
+        if (id !== tipo + '-content') {
+          const element = document.getElementById(id);
+          if (element) {
+            element.classList.add('hidden');
+          }
+        }
+      });
+      
+      // Toggle el seleccionado
+      if (content) {
+        content.classList.toggle('hidden');
+      }
+    }
   </script>
 
   <style>
