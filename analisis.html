@@ -65,7 +65,7 @@
   <script type="module">
     console.log('🚀 Iniciando análisis estadístico...');
     
-    import { cargarDatosHistoricos, graficarEstadisticas, mostrarEstadisticasComparativas, mostrarAnalisisAvanzados } from './js/dataParser.js';
+    import { cargarDatosHistoricos, graficarEstadisticas, mostrarEstadisticasComparativas, mostrarAnalisisAvanzados, expandirCaja, manejarClicCaja } from './js/dataParser.js';
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
@@ -135,9 +135,7 @@
     window.toggleAnalisis = function(tipo) {
       // Esta función ahora redirige a expandirCaja
       const datosGlobales = window.datosAnalisis || {};
-      if (window.expandirCaja) {
-        window.expandirCaja(tipo, datosGlobales);
-      }
+      expandirCaja(tipo, datosGlobales);
     }
   </script>
 

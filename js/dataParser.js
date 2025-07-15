@@ -10,15 +10,10 @@ export async function cargarDatosHistoricos(modo = 'todos') {
   if (modo === 'todos') {
     return await cargarTodosSorteos();
   } else {
-    return await cargarSorteoIndividual(modo);    contenidoHTML += `
-      <div class="space-y-6">
-        <!-- Título del sorteo -->
-        <div class="text-center">
-          <h4 class="text-2xl font-bold text-white mb-4">🎲 ${sorteo.toUpperCase()}</h4>
-        </div>
-        
-        <!-- Top 10 MÁS frecuentes -->
-        <div>`
+    return await cargarSorteoIndividual(modo);
+  }
+}
+
 async function cargarTodosSorteos() {
   console.log('📊 Cargando todos los sorteos...');
   
@@ -306,7 +301,7 @@ function manejarResize() {
 window.addEventListener('resize', manejarResize);
 
 // Función para expandir una caja
-function expandirCaja(tipo, datos) {
+export function expandirCaja(tipo, datos) {
   const contenedorCajas = document.getElementById('contenedor-cajas');
   const contenedorContenido = document.getElementById('contenedor-contenido');
   const contenedorPrincipal = document.getElementById('contenedor-principal');
@@ -913,7 +908,7 @@ function generarContenidoDecada(decadaTerminacionAnalisis) {
 }
 
 // Función principal para manejar clics en cajas
-function manejarClicCaja(tipo, datos) {
+export function manejarClicCaja(tipo, datos) {
   // Si se hace clic en la misma caja que está abierta, cerrarla
   if (cajaActualmenteAbierta === tipo) {
     cerrarTodasLasCajas();
