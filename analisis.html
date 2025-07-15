@@ -163,6 +163,16 @@
       background-color: rgba(59, 130, 246, 0.2) !important;
     }
     
+    /* Contenedor de cajas con layout estable */
+    #contenedor-cajas {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem; /* Espaciado consistente */
+      min-height: calc(3 * 80px + 2 * 0.25rem); /* Altura mínima fija */
+      width: fit-content; /* Ancho ajustado al contenido */
+      max-width: 250px; /* Máximo basado en el texto más largo */
+    }
+    
     /* Altura más compacta para las cajas del lado izquierdo */
     #contenedor-cajas > div {
       height: 80px; /* Altura más compacta como cuando están cerradas */
@@ -171,14 +181,8 @@
       margin-bottom: 0.25rem; /* Espaciado mucho más pequeño entre cajas */
       position: relative; /* Posición estable */
       flex-shrink: 0; /* Evita que se reduzcan */
-    }
-    
-    /* Contenedor de cajas con layout estable */
-    #contenedor-cajas {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem; /* Espaciado consistente */
-      min-height: calc(3 * 80px + 2 * 0.25rem); /* Altura mínima fija */
+      width: 100%; /* Ocupa todo el ancho del contenedor */
+      min-width: 200px; /* Mínimo para que quepa el texto */
     }
     
     /* Cuando las cajas están en layout original, mantener altura flexible */
