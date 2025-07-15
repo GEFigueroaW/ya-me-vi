@@ -179,9 +179,9 @@ export function graficarEstadisticas(datos) {
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
   botonTitulo.onclick = () => toggleAnalisis('frecuencias-unificadas');
   botonTitulo.innerHTML = `
-    <h3 class="text-2xl font-bold text-white text-center">📊 Análisis de Frecuencias - Todos los Sorteos</h3>
+    <h3 class="text-2xl font-bold text-white text-center">📊 ANÁLISIS DE FRECUENCIAS</h3>
     <div class="text-center mt-2">
-      <span class="text-gray-300 text-sm">Clic para expandir</span>
+      <span class="text-gray-300 text-sm">👁️ Clic para ver</span>
     </div>
   `;
   
@@ -204,6 +204,8 @@ export function graficarEstadisticas(datos) {
       console.warn(`⚠️ No hay datos para ${sorteo}`);
       return;
     }
+    
+    console.log(`📊 ${sorteo}: ${datosIndividuales.sorteos ? datosIndividuales.sorteos.length : 0} sorteos, ${datosIndividuales.numeros.length} números`);
     
     const frecuencias = calcularFrecuencias(datosIndividuales.numeros);
     const frecuenciasArray = Object.entries(frecuencias).map(([num, freq]) => ({
@@ -229,7 +231,7 @@ export function graficarEstadisticas(datos) {
           <h5 class="text-lg font-semibold text-orange-400 mb-4 text-center">🔥 Top 10 MÁS frecuentes</h5>
           <div class="grid grid-cols-5 sm:grid-cols-5 gap-3">
             ${topFrecuentes.map((item, index) => `
-              <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-30 transition-all">
+              <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
                 <div class="text-white text-2xl font-bold mb-1">${item.numero}</div>
                 <div class="text-orange-400 text-sm font-semibold">${item.frecuencia}</div>
               </div>
@@ -239,10 +241,10 @@ export function graficarEstadisticas(datos) {
         
         <!-- Top 10 MENOS frecuentes -->
         <div>
-          <h5 class="text-lg font-semibold text-blue-400 mb-4 text-center">❄️ Top 10 MENOS frecuentes</h5>
+          <h5 class="text-lg font-semibold text-white mb-4 text-center">❄️ Top 10 MENOS frecuentes</h5>
           <div class="grid grid-cols-5 sm:grid-cols-5 gap-3">
             ${menosFrecuentes.map((item, index) => `
-              <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-30 transition-all">
+              <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
                 <div class="text-white text-2xl font-bold mb-1">${item.numero}</div>
                 <div class="text-blue-400 text-sm font-semibold">${item.frecuencia}</div>
               </div>
