@@ -164,6 +164,20 @@
     .caja-abierta:hover {
       background-color: rgba(59, 130, 246, 0.2) !important;
     }
+    
+    /* Altura fija para las cajas del lado izquierdo */
+    #contenedor-cajas > div {
+      height: 120px; /* Altura fija */
+      min-height: 120px;
+      max-height: 120px;
+    }
+    
+    /* Cuando las cajas están en layout original, mantener altura flexible */
+    .lg\:col-span-4 > div {
+      height: auto !important;
+      min-height: auto !important;
+      max-height: none !important;
+    }
   </style>
 </body>
 </html>

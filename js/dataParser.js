@@ -10,10 +10,15 @@ export async function cargarDatosHistoricos(modo = 'todos') {
   if (modo === 'todos') {
     return await cargarTodosSorteos();
   } else {
-    return await cargarSorteoIndividual(modo);
-  }
-}
-
+    return await cargarSorteoIndividual(modo);    contenidoHTML += `
+      <div class="space-y-6">
+        <!-- Título del sorteo -->
+        <div class="text-center">
+          <h4 class="text-2xl font-bold text-white mb-4">🎲 ${sorteo.toUpperCase()}</h4>
+        </div>
+        
+        <!-- Top 10 MÁS frecuentes -->
+        <div>`
 async function cargarTodosSorteos() {
   console.log('📊 Cargando todos los sorteos...');
   
@@ -254,9 +259,13 @@ function manejarResize() {
       contenedorContenido.classList.add('hidden');
     }
     
-    // Resetear layout a móvil
+    // Resetear layout a móvil y mostrar todas las cajas
     contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
     contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+    
+    // Mostrar todas las cajas en móvil
+    const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
+    todasLasCajas.forEach(caja => caja.style.display = '');
     
     // Si hay una caja abierta, mostrar su contenido móvil
     if (cajaAbierta) {
@@ -274,14 +283,21 @@ function manejarResize() {
       contenedorContenido.className = 'lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
       contenedorContenido.classList.remove('hidden');
       
+      // Ocultar la caja abierta del lado izquierdo
+      cajaAbierta.style.display = 'none';
+      
       // Cerrar contenido móvil
       const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
       cajasMobile.forEach(caja => caja.classList.add('hidden'));
     } else {
-      // No hay cajas abiertas, layout normal
+      // No hay cajas abiertas, layout normal y mostrar todas las cajas
       contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
       contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
       contenedorContenido.classList.add('hidden');
+      
+      // Mostrar todas las cajas
+      const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
+      todasLasCajas.forEach(caja => caja.style.display = '');
     }
   }
 }
@@ -313,9 +329,14 @@ function expandirCaja(tipo, datos) {
     return;
   }
   
-  // Marcar la caja actual como abierta
+  // Marcar la caja actual como abierta y ocultarla del lado izquierdo
   if (cajaActual) {
     cajaActual.classList.add('caja-abierta');
+    
+    // En desktop, ocultar la caja abierta del lado izquierdo
+    if (window.innerWidth >= 1024) {
+      cajaActual.style.display = 'none';
+    }
   }
   
   // Generar contenido según el tipo
@@ -365,9 +386,12 @@ function cerrarTodasLasCajas() {
   const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
   cajasMobile.forEach(caja => caja.classList.add('hidden'));
   
-  // Remover clase 'caja-abierta' de todas las cajas
+  // Remover clase 'caja-abierta' de todas las cajas y restaurar visibilidad
   const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
-  todasLasCajas.forEach(caja => caja.classList.remove('caja-abierta'));
+  todasLasCajas.forEach(caja => {
+    caja.classList.remove('caja-abierta');
+    caja.style.display = ''; // Restaurar visibilidad
+  });
   
   // Volver al layout original (4 cajas horizontales)
   contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
@@ -464,8 +488,7 @@ function generarContenidoFrecuencias(datos) {
       <div class="space-y-6">
         <!-- Título del sorteo -->
         <div class="text-center">
-          <h4 class="text-2xl font-bold text-white mb-2">🎲 ${sorteo.toUpperCase()}</h4>
-          <p class="text-gray-300 text-sm">Análisis de los últimos 30 meses (${sorteosFiltrados.length} sorteos)</p>
+          <h4 class="text-2xl font-bold text-white mb-4">🎲 ${sorteo.toUpperCase()}</h4>
         </div>
         
         <!-- Top 10 MÁS frecuentes -->
