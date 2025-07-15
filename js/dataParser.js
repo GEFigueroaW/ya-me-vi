@@ -180,10 +180,11 @@ export function graficarEstadisticas(datos) {
   botonTitulo.onclick = () => toggleAnalisis('frecuencias-unificadas');
   botonTitulo.innerHTML = `
     <div class="flex items-center justify-between">
+      <div class="text-2xl">📊</div>
       <div class="flex-1">
-        <h3 class="text-2xl font-bold text-white text-center">📊 ANÁLISIS DE FRECUENCIAS</h3>
+        <h3 class="text-2xl font-bold text-white text-center">ANÁLISIS DE FRECUENCIAS</h3>
       </div>
-      <div class="text-2xl">👁️</div>
+      <div class="text-2xl">�</div>
     </div>
   `;
   
@@ -527,10 +528,11 @@ export function mostrarAnalisisAvanzados(datos) {
     <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
       <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('suma')">
         <div class="flex items-center justify-between">
+          <div class="text-2xl">🔢</div>
           <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">🔢 Análisis de Suma de Números</h3>
+            <h3 class="text-xl font-bold text-white text-center">Análisis de Suma de Números</h3>
           </div>
-          <div class="text-2xl">👁️</div>
+          <div class="text-2xl">�</div>
         </div>
       </button>
       <div id="suma-content" class="hidden px-6 pb-6">
@@ -569,10 +571,11 @@ export function mostrarAnalisisAvanzados(datos) {
     <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
       <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('pares')">
         <div class="flex items-center justify-between">
+          <div class="text-2xl">⚖️</div>
           <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">⚖️ Análisis de Pares e Impares</h3>
+            <h3 class="text-xl font-bold text-white text-center">Análisis de Pares e Impares</h3>
           </div>
-          <div class="text-2xl">👁️</div>
+          <div class="text-2xl">�</div>
         </div>
       </button>
       <div id="pares-content" class="hidden px-6 pb-6">
@@ -610,10 +613,11 @@ export function mostrarAnalisisAvanzados(datos) {
     <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
       <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('decada')">
         <div class="flex items-center justify-between">
+          <div class="text-2xl">🎯</div>
           <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">🎯 Análisis de Década y Terminación</h3>
+            <h3 class="text-xl font-bold text-white text-center">Análisis de Década y Terminación</h3>
           </div>
-          <div class="text-2xl">👁️</div>
+          <div class="text-2xl">�</div>
         </div>
       </button>
       <div id="decada-content" class="hidden px-6 pb-6">
