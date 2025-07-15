@@ -193,6 +193,11 @@ export function graficarEstadisticas(datos) {
   const sorteos = ['melate', 'revancha', 'revanchita'];
   let contenidoHTML = '';
   
+  // Contenedor principal responsive
+  contenidoHTML += `
+    <div class="grid grid-cols-1 xl:grid-cols-3 lg:grid-cols-2 gap-8">
+  `;
+  
   sorteos.forEach(sorteo => {
     const datosIndividuales = datos[sorteo];
     if (!datosIndividuales || !datosIndividuales.numeros || datosIndividuales.numeros.length === 0) {
@@ -212,41 +217,45 @@ export function graficarEstadisticas(datos) {
     const menosFrecuentes = frecuenciasArray.slice(-10).reverse();
     
     contenidoHTML += `
-      <div class="mb-8 ${sorteo !== 'revanchita' ? 'border-b border-white border-opacity-30 pb-8' : ''}">
-        <h4 class="text-xl font-bold text-white text-center mb-6">${sorteo.toUpperCase()}</h4>
+      <div class="space-y-8">
+        <!-- Título del sorteo -->
+        <div class="text-center">
+          <h4 class="text-2xl font-bold text-white mb-2">🎲 ${sorteo.toUpperCase()}</h4>
+          <p class="text-gray-300 text-sm">${datosIndividuales.sorteos ? datosIndividuales.sorteos.length : 0} sorteos analizados</p>
+        </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Los 10 que más salen -->
-          <div>
-            <h5 class="text-lg font-semibold text-green-400 mb-4 text-center">🔥 Los 10 que más salen</h5>
-            <div class="space-y-2">
-              ${topFrecuentes.map((item, index) => `
-                <div class="flex items-center justify-between bg-green-500 bg-opacity-50 rounded-lg p-3">
-                  <span class="text-white font-bold">${index + 1}</span>
-                  <span class="text-white text-2xl font-bold">${item.numero}</span>
-                  <span class="text-green-400 font-semibold">${item.frecuencia}</span>
-                </div>
-              `).join('')}
-            </div>
+        <!-- Top 10 MÁS frecuentes -->
+        <div>
+          <h5 class="text-lg font-semibold text-orange-400 mb-4 text-center">🔥 Top 10 MÁS frecuentes</h5>
+          <div class="grid grid-cols-5 sm:grid-cols-5 gap-3">
+            ${topFrecuentes.map((item, index) => `
+              <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-30 transition-all">
+                <div class="text-white text-2xl font-bold mb-1">${item.numero}</div>
+                <div class="text-orange-400 text-sm font-semibold">${item.frecuencia}</div>
+              </div>
+            `).join('')}
           </div>
-          
-          <!-- Los 10 que menos salen -->
-          <div>
-            <h5 class="text-lg font-semibold text-blue-400 mb-4 text-center">❄️ Los 10 que menos salen</h5>
-            <div class="space-y-2">
-              ${menosFrecuentes.map((item, index) => `
-                <div class="flex items-center justify-between bg-blue-500 bg-opacity-50 rounded-lg p-3">
-                  <span class="text-white font-bold">${index + 1}</span>
-                  <span class="text-white text-2xl font-bold">${item.numero}</span>
-                  <span class="text-blue-400 font-semibold">${item.frecuencia}</span>
-                </div>
-              `).join('')}
-            </div>
+        </div>
+        
+        <!-- Top 10 MENOS frecuentes -->
+        <div>
+          <h5 class="text-lg font-semibold text-blue-400 mb-4 text-center">❄️ Top 10 MENOS frecuentes</h5>
+          <div class="grid grid-cols-5 sm:grid-cols-5 gap-3">
+            ${menosFrecuentes.map((item, index) => `
+              <div class="bg-white bg-opacity-20 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-30 transition-all">
+                <div class="text-white text-2xl font-bold mb-1">${item.numero}</div>
+                <div class="text-blue-400 text-sm font-semibold">${item.frecuencia}</div>
+              </div>
+            `).join('')}
           </div>
         </div>
       </div>
     `;
   });
+  
+  contenidoHTML += `
+    </div>
+  `;
   
   contenidoExpandible.innerHTML = contenidoHTML;
   
