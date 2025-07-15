@@ -363,3 +363,269 @@ export function generarPrediccionPorFrecuencia(userId, datos) {
 function hashCode(str) {
   return str.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 }
+
+// === NUEVAS FUNCIONES DE ANÁLISIS AVANZADO ===
+
+// Análisis de Suma de Números
+export function analizarSumaNumeros(datos) {
+  console.log('🔢 Analizando suma de números...');
+  
+  const resultados = {};
+  
+  Object.entries(datos).forEach(([sorteo, datosIndividuales]) => {
+    if (!datosIndividuales || !datosIndividuales.sorteos) return;
+    
+    const sumas = datosIndividuales.sorteos.map(sorteoData => {
+      const suma = sorteoData.numeros.reduce((acc, num) => acc + num, 0);
+      return suma;
+    });
+    
+    // Agrupar por rangos de suma
+    const rangos = {
+      '50-99': 0,
+      '100-149': 0,
+      '150-199': 0,
+      '200-249': 0,
+      '250-299': 0,
+      '300+': 0
+    };
+    
+    sumas.forEach(suma => {
+      if (suma < 100) rangos['50-99']++;
+      else if (suma < 150) rangos['100-149']++;
+      else if (suma < 200) rangos['150-199']++;
+      else if (suma < 250) rangos['200-249']++;
+      else if (suma < 300) rangos['250-299']++;
+      else rangos['300+']++;
+    });
+    
+    const sumaPromedio = sumas.reduce((acc, suma) => acc + suma, 0) / sumas.length;
+    const rangoMasFrecuente = Object.entries(rangos).reduce((a, b) => rangos[a[0]] > rangos[b[0]] ? a : b);
+    
+    resultados[sorteo] = {
+      sumaPromedio: sumaPromedio.toFixed(1),
+      rangos: rangos,
+      rangoMasFrecuente: rangoMasFrecuente,
+      totalSorteos: sumas.length
+    };
+  });
+  
+  return resultados;
+}
+
+// Análisis de Pares e Impares
+export function analizarParesImpares(datos) {
+  console.log('⚖️ Analizando pares e impares...');
+  
+  const resultados = {};
+  
+  Object.entries(datos).forEach(([sorteo, datosIndividuales]) => {
+    if (!datosIndividuales || !datosIndividuales.sorteos) return;
+    
+    const distribuciones = {
+      '6p-0i': 0,
+      '5p-1i': 0,
+      '4p-2i': 0,
+      '3p-3i': 0,
+      '2p-4i': 0,
+      '1p-5i': 0,
+      '0p-6i': 0
+    };
+    
+    datosIndividuales.sorteos.forEach(sorteoData => {
+      const pares = sorteoData.numeros.filter(num => num % 2 === 0).length;
+      const impares = 6 - pares;
+      const clave = `${pares}p-${impares}i`;
+      distribuciones[clave]++;
+    });
+    
+    const distribucionMasFrecuente = Object.entries(distribuciones).reduce((a, b) => distribuciones[a[0]] > distribuciones[b[0]] ? a : b);
+    
+    resultados[sorteo] = {
+      distribuciones: distribuciones,
+      distribucionMasFrecuente: distribucionMasFrecuente,
+      totalSorteos: datosIndividuales.sorteos.length
+    };
+  });
+  
+  return resultados;
+}
+
+// Análisis de Frecuencia por Década y Terminación
+export function analizarDecadaTerminacion(datos) {
+  console.log('🎯 Analizando década y terminación...');
+  
+  const resultados = {};
+  
+  Object.entries(datos).forEach(([sorteo, datosIndividuales]) => {
+    if (!datosIndividuales || !datosIndividuales.numeros) return;
+    
+    // Análisis por década
+    const decadas = {
+      '1-10': 0,
+      '11-20': 0,
+      '21-30': 0,
+      '31-40': 0,
+      '41-50': 0,
+      '51-56': 0
+    };
+    
+    // Análisis por terminación
+    const terminaciones = {};
+    for (let i = 0; i <= 9; i++) {
+      terminaciones[i] = 0;
+    }
+    
+    datosIndividuales.numeros.forEach(num => {
+      // Década
+      if (num <= 10) decadas['1-10']++;
+      else if (num <= 20) decadas['11-20']++;
+      else if (num <= 30) decadas['21-30']++;
+      else if (num <= 40) decadas['31-40']++;
+      else if (num <= 50) decadas['41-50']++;
+      else decadas['51-56']++;
+      
+      // Terminación
+      const terminacion = num % 10;
+      terminaciones[terminacion]++;
+    });
+    
+    const decadaMasFrecuente = Object.entries(decadas).reduce((a, b) => decadas[a[0]] > decadas[b[0]] ? a : b);
+    const terminacionMasFrecuente = Object.entries(terminaciones).reduce((a, b) => terminaciones[a[0]] > terminaciones[b[0]] ? a : b);
+    
+    resultados[sorteo] = {
+      decadas: decadas,
+      terminaciones: terminaciones,
+      decadaMasFrecuente: decadaMasFrecuente,
+      terminacionMasFrecuente: terminacionMasFrecuente,
+      totalNumeros: datosIndividuales.numeros.length
+    };
+  });
+  
+  return resultados;
+}
+
+// Función para mostrar todos los análisis avanzados
+export function mostrarAnalisisAvanzados(datos) {
+  console.log('📊 Mostrando análisis avanzados...');
+  
+  const container = document.getElementById('analisis-avanzados');
+  if (!container) return;
+  
+  const sumAnalisis = analizarSumaNumeros(datos);
+  const paresImparesAnalisis = analizarParesImpares(datos);
+  const decadaTerminacionAnalisis = analizarDecadaTerminacion(datos);
+  
+  let htmlContent = '<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">';
+  
+  // Tarjeta 1: Análisis de Suma
+  htmlContent += `
+    <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
+      <h3 class="text-xl font-bold text-white mb-4 text-center">🔢 Análisis de Suma de Números</h3>
+      <div class="space-y-4">
+  `;
+  
+  Object.entries(sumAnalisis).forEach(([sorteo, datos]) => {
+    const colores = {
+      melate: 'bg-blue-500',
+      revancha: 'bg-purple-500',
+      revanchita: 'bg-green-500'
+    };
+    
+    htmlContent += `
+      <div class="${colores[sorteo]} bg-opacity-20 rounded-lg p-4">
+        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
+        <div class="text-sm text-gray-300">
+          <p><strong>Suma promedio:</strong> ${datos.sumaPromedio}</p>
+          <p><strong>Rango más frecuente:</strong> ${datos.rangoMasFrecuente[0]} (${datos.rangoMasFrecuente[1]} veces)</p>
+          <div class="mt-2 text-xs">
+            <div class="grid grid-cols-2 gap-1">
+              ${Object.entries(datos.rangos).map(([rango, freq]) => `
+                <span>${rango}: ${freq}</span>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  htmlContent += '</div></div>';
+  
+  // Tarjeta 2: Análisis de Pares e Impares
+  htmlContent += `
+    <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
+      <h3 class="text-xl font-bold text-white mb-4 text-center">⚖️ Análisis de Pares e Impares</h3>
+      <div class="space-y-4">
+  `;
+  
+  Object.entries(paresImparesAnalisis).forEach(([sorteo, datos]) => {
+    const colores = {
+      melate: 'bg-blue-500',
+      revancha: 'bg-purple-500',
+      revanchita: 'bg-green-500'
+    };
+    
+    htmlContent += `
+      <div class="${colores[sorteo]} bg-opacity-20 rounded-lg p-4">
+        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
+        <div class="text-sm text-gray-300">
+          <p><strong>Distribución más frecuente:</strong> ${datos.distribucionMasFrecuente[0]} (${datos.distribucionMasFrecuente[1]} veces)</p>
+          <div class="mt-2 text-xs">
+            <div class="grid grid-cols-2 gap-1">
+              ${Object.entries(datos.distribuciones).map(([dist, freq]) => `
+                <span>${dist}: ${freq}</span>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  htmlContent += '</div></div>';
+  
+  // Tarjeta 3: Análisis de Década y Terminación
+  htmlContent += `
+    <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
+      <h3 class="text-xl font-bold text-white mb-4 text-center">🎯 Análisis de Década y Terminación</h3>
+      <div class="space-y-4">
+  `;
+  
+  Object.entries(decadaTerminacionAnalisis).forEach(([sorteo, datos]) => {
+    const colores = {
+      melate: 'bg-blue-500',
+      revancha: 'bg-purple-500',
+      revanchita: 'bg-green-500'
+    };
+    
+    htmlContent += `
+      <div class="${colores[sorteo]} bg-opacity-20 rounded-lg p-4">
+        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
+        <div class="text-sm text-gray-300">
+          <p><strong>Década más frecuente:</strong> ${datos.decadaMasFrecuente[0]} (${datos.decadaMasFrecuente[1]} veces)</p>
+          <p><strong>Terminación más frecuente:</strong> ${datos.terminacionMasFrecuente[0]} (${datos.terminacionMasFrecuente[1]} veces)</p>
+          <div class="mt-2 text-xs">
+            <div class="mb-1"><strong>Por década:</strong></div>
+            <div class="grid grid-cols-3 gap-1 mb-2">
+              ${Object.entries(datos.decadas).map(([decada, freq]) => `
+                <span>${decada}: ${freq}</span>
+              `).join('')}
+            </div>
+            <div class="mb-1"><strong>Por terminación:</strong></div>
+            <div class="grid grid-cols-5 gap-1">
+              ${Object.entries(datos.terminaciones).map(([term, freq]) => `
+                <span>${term}: ${freq}</span>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  htmlContent += '</div></div>';
+  htmlContent += '</div>';
+  
+  container.innerHTML = htmlContent;
+}

@@ -48,6 +48,15 @@
       </div>
     </div>
 
+    <!-- Análisis avanzados -->
+    <div class="text-center mb-6">
+      <h2 class="text-2xl font-bold text-white mb-2">📊 Análisis Estadísticos Avanzados</h2>
+      <div class="text-gray-300 text-sm">
+        Patrones profundos en los últimos 30 meses de sorteos
+      </div>
+    </div>
+    <div id="analisis-avanzados" class="mb-12 animate__animated animate__fadeInUp"></div>
+
     <!-- Estadísticas adicionales -->
     <div id="estadisticas-extra" class="animate__animated animate__fadeInUp"></div>
     
@@ -65,7 +74,7 @@
   <script type="module">
     console.log('🚀 Iniciando análisis estadístico...');
     
-    import { cargarDatosHistoricos, graficarEstadisticas, mostrarEstadisticasComparativas } from './js/dataParser.js';
+    import { cargarDatosHistoricos, graficarEstadisticas, mostrarEstadisticasComparativas, mostrarAnalisisAvanzados } from './js/dataParser.js';
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
@@ -98,6 +107,7 @@
         }
         
         graficarEstadisticas(datos);
+        mostrarAnalisisAvanzados(datos);
         mostrarEstadisticasComparativas(datos);
 
         console.log('✅ Análisis completado exitosamente');
