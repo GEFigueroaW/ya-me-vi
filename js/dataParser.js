@@ -171,14 +171,27 @@ export function graficarEstadisticas(datos) {
   
   container.innerHTML = '';
   
-  // Crear contenedor principal para las 4 cajas alineadas horizontalmente
+  // Crear contenedor principal responsive
   const contenedorPrincipal = document.createElement('div');
-  contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6';
+  contenedorPrincipal.id = 'contenedor-principal';
+  contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
+  
+  // Crear contenedor de cajas
+  const contenedorCajas = document.createElement('div');
+  contenedorCajas.id = 'contenedor-cajas';
+  contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+  
+  // Crear contenedor de contenido expandido
+  const contenedorContenido = document.createElement('div');
+  contenedorContenido.id = 'contenedor-contenido';
+  contenedorContenido.className = 'hidden lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
   
   // Caja 1: Frecuencias
   const cajaFrecuencias = crearCajaFrecuencias(datos);
-  contenedorPrincipal.appendChild(cajaFrecuencias);
+  contenedorCajas.appendChild(cajaFrecuencias);
   
+  contenedorPrincipal.appendChild(contenedorCajas);
+  contenedorPrincipal.appendChild(contenedorContenido);
   container.appendChild(contenedorPrincipal);
   
   const loadingDiv = document.querySelector('.animate-spin');
@@ -190,10 +203,11 @@ export function graficarEstadisticas(datos) {
 function crearCajaFrecuencias(datos) {
   const tarjetaUnificada = document.createElement('div');
   tarjetaUnificada.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 h-full';
+  tarjetaUnificada.id = 'caja-frecuencias';
   
   const botonTitulo = document.createElement('button');
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
-  botonTitulo.onclick = () => toggleAnalisis('frecuencias-unificadas');
+  botonTitulo.onclick = () => expandirCaja('frecuencias', datos);
   botonTitulo.innerHTML = `
     <div class="flex items-center justify-between">
       <div class="text-2xl">📊</div>
@@ -203,29 +217,109 @@ function crearCajaFrecuencias(datos) {
     </div>
   `;
   
+  // Contenido expandible móvil
   const contenidoExpandible = document.createElement('div');
-  contenidoExpandible.id = 'frecuencias-unificadas-content';
-  contenidoExpandible.className = 'hidden px-6 pb-6';
+  contenidoExpandible.id = 'frecuencias-content-mobile';
+  contenidoExpandible.className = 'hidden lg:hidden px-6 pb-6';
   
-  // Generar contenido para cada sorteo
-  const sorteos = ['melate', 'revancha', 'revanchita'];
+  tarjetaUnificada.appendChild(botonTitulo);
+  tarjetaUnificada.appendChild(contenidoExpandible);
+  
+  return tarjetaUnificada;
+}
+
+// Hacer expandirCaja global para que esté disponible desde el HTML
+window.expandirCaja = expandirCaja;
+
+// Función para manejar el resize de la ventana
+function manejarResize() {
+  const contenedorPrincipal = document.getElementById('contenedor-principal');
+  const contenedorCajas = document.getElementById('contenedor-cajas');
+  const contenedorContenido = document.getElementById('contenedor-contenido');
+  
+  if (!contenedorPrincipal || !contenedorCajas || !contenedorContenido) return;
+  
+  if (window.innerWidth < 1024) {
+    // En móvil: resetear layout
+    contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
+    contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+    contenedorContenido.classList.add('hidden');
+  } else {
+    // En desktop: si hay contenido visible, mantener layout expandido
+    if (!contenedorContenido.classList.contains('hidden')) {
+      contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
+      contenedorCajas.className = 'lg:col-span-1 grid grid-cols-1 gap-6';
+      contenedorContenido.className = 'lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
+    }
+  }
+}
+
+// Agregar listener para resize
+window.addEventListener('resize', manejarResize);
+
+// Función para expandir una caja
+function expandirCaja(tipo, datos) {
+  const contenedorCajas = document.getElementById('contenedor-cajas');
+  const contenedorContenido = document.getElementById('contenedor-contenido');
+  const contenedorPrincipal = document.getElementById('contenedor-principal');
+  
+  // Cerrar todas las cajas móviles
+  const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
+  cajasMobile.forEach(caja => caja.classList.add('hidden'));
+  
+  // Generar contenido según el tipo
   let contenidoHTML = '';
   
-  // Contenedor principal responsive
-  contenidoHTML += `
-    <div class="grid grid-cols-1 xl:grid-cols-3 lg:grid-cols-2 gap-8 divide-y xl:divide-y-0 xl:divide-x divide-white divide-opacity-20">
-  `;
+  if (tipo === 'frecuencias') {
+    contenidoHTML = generarContenidoFrecuencias(datos);
+  } else if (tipo === 'suma') {
+    const sumAnalisis = analizarSumaNumeros(datos);
+    contenidoHTML = generarContenidoSuma(sumAnalisis);
+  } else if (tipo === 'pares') {
+    const paresImparesAnalisis = analizarParesImpares(datos);
+    contenidoHTML = generarContenidoPares(paresImparesAnalisis);
+  } else if (tipo === 'decada') {
+    const decadaTerminacionAnalisis = analizarDecadaTerminacion(datos);
+    contenidoHTML = generarContenidoDecada(decadaTerminacionAnalisis);
+  }
+  
+  // En desktop: reorganizar layout
+  if (window.innerWidth >= 1024) {
+    // Reorganizar grid para 1 columna de cajas + 3 columnas de contenido
+    contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
+    contenedorCajas.className = 'lg:col-span-1 grid grid-cols-1 gap-6';
+    contenedorContenido.className = 'lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
+    contenedorContenido.classList.remove('hidden');
+    contenedorContenido.innerHTML = contenidoHTML;
+  } else {
+    // En móvil: mostrar contenido debajo de la caja
+    const contenidoMobile = document.getElementById(`${tipo}-content-mobile`);
+    if (contenidoMobile) {
+      contenidoMobile.innerHTML = contenidoHTML;
+      contenidoMobile.classList.remove('hidden');
+    }
+  }
+}
+
+// Función para generar contenido de frecuencias con últimos 30 meses
+function generarContenidoFrecuencias(datos) {
+  const sorteos = ['melate', 'revancha', 'revanchita'];
+  let contenidoHTML = '<div class="space-y-8">';
   
   sorteos.forEach(sorteo => {
     const datosIndividuales = datos[sorteo];
-    if (!datosIndividuales || !datosIndividuales.numeros || datosIndividuales.numeros.length === 0) {
+    if (!datosIndividuales || !datosIndividuales.sorteos || datosIndividuales.sorteos.length === 0) {
       console.warn(`⚠️ No hay datos para ${sorteo}`);
       return;
     }
     
-    console.log(`📊 ${sorteo}: ${datosIndividuales.sorteos ? datosIndividuales.sorteos.length : 0} sorteos, ${datosIndividuales.numeros.length} números`);
+    // Usar todos los sorteos (ya filtrados por 30 meses en cargarSorteoIndividual)
+    const sorteosFiltrados = datosIndividuales.sorteos;
+    const numerosFiltrados = datosIndividuales.numeros;
     
-    const frecuencias = calcularFrecuencias(datosIndividuales.numeros);
+    console.log(`📊 ${sorteo}: ${sorteosFiltrados.length} sorteos (últimos 30 meses), ${numerosFiltrados.length} números`);
+    
+    const frecuencias = calcularFrecuencias(numerosFiltrados);
     const frecuenciasArray = Object.entries(frecuencias).map(([num, freq]) => ({
       numero: parseInt(num),
       frecuencia: freq
@@ -237,16 +331,17 @@ function crearCajaFrecuencias(datos) {
     const menosFrecuentes = frecuenciasArray.slice(-10).reverse();
     
     contenidoHTML += `
-      <div class="space-y-8 pt-8 xl:pt-0 xl:px-4 first:pt-0">
+      <div class="space-y-6">
         <!-- Título del sorteo -->
         <div class="text-center">
           <h4 class="text-2xl font-bold text-white mb-2">🎲 ${sorteo.toUpperCase()}</h4>
+          <p class="text-gray-300 text-sm">Análisis de los últimos 30 meses (${sorteosFiltrados.length} sorteos)</p>
         </div>
         
         <!-- Top 10 MÁS frecuentes -->
         <div>
           <h5 class="text-lg font-semibold text-orange-400 mb-4 text-center">🔥 Top 10 MÁS frecuentes</h5>
-          <div class="grid grid-cols-5 sm:grid-cols-5 gap-3">
+          <div class="grid grid-cols-5 gap-3">
             ${topFrecuentes.map((item, index) => `
               <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
                 <div class="text-red-600 text-2xl font-bold mb-1">${item.numero}</div>
@@ -259,7 +354,7 @@ function crearCajaFrecuencias(datos) {
         <!-- Top 10 MENOS frecuentes -->
         <div>
           <h5 class="text-lg font-semibold text-white mb-4 text-center">❄️ Top 10 MENOS frecuentes</h5>
-          <div class="grid grid-cols-5 sm:grid-cols-5 gap-3">
+          <div class="grid grid-cols-5 gap-3">
             ${menosFrecuentes.map((item, index) => `
               <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
                 <div class="text-blue-600 text-2xl font-bold mb-1">${item.numero}</div>
@@ -268,20 +363,14 @@ function crearCajaFrecuencias(datos) {
             `).join('')}
           </div>
         </div>
+        
+        ${sorteo !== 'revanchita' ? '<hr class="border-white border-opacity-20 my-8">' : ''}
       </div>
     `;
   });
   
-  contenidoHTML += `
-    </div>
-  `;
-  
-  contenidoExpandible.innerHTML = contenidoHTML;
-  
-  tarjetaUnificada.appendChild(botonTitulo);
-  tarjetaUnificada.appendChild(contenidoExpandible);
-  
-  return tarjetaUnificada;
+  contenidoHTML += '</div>';
+  return contenidoHTML;
 }
 
 function calcularFrecuencias(numeros) {
@@ -523,35 +612,28 @@ export function analizarDecadaTerminacion(datos) {
 export function mostrarAnalisisAvanzados(datos) {
   console.log('📊 Mostrando análisis avanzados...');
   
-  const container = document.getElementById('charts-container');
-  if (!container) return;
-  
-  // Buscar el contenedor principal que ya existe
-  const contenedorPrincipal = container.querySelector('.grid');
-  if (!contenedorPrincipal) return;
-  
-  const sumAnalisis = analizarSumaNumeros(datos);
-  const paresImparesAnalisis = analizarParesImpares(datos);
-  const decadaTerminacionAnalisis = analizarDecadaTerminacion(datos);
+  const contenedorCajas = document.getElementById('contenedor-cajas');
+  if (!contenedorCajas) return;
   
   // Crear las 3 cajas adicionales
-  const cajaSuma = crearCajaAnalisis('suma', '🔢', 'Suma de números', sumAnalisis);
-  const cajaPares = crearCajaAnalisis('pares', '⚖️', 'Pares e impares', paresImparesAnalisis);
-  const cajaDecada = crearCajaAnalisis('decada', '🎯', 'Década y terminación', decadaTerminacionAnalisis);
+  const cajaSuma = crearCajaAnalisis('suma', '🔢', 'Suma de números', datos);
+  const cajaPares = crearCajaAnalisis('pares', '⚖️', 'Pares e impares', datos);
+  const cajaDecada = crearCajaAnalisis('decada', '🎯', 'Década y terminación', datos);
   
-  // Agregar las cajas al contenedor principal
-  contenedorPrincipal.appendChild(cajaSuma);
-  contenedorPrincipal.appendChild(cajaPares);
-  contenedorPrincipal.appendChild(cajaDecada);
+  // Agregar las cajas al contenedor
+  contenedorCajas.appendChild(cajaSuma);
+  contenedorCajas.appendChild(cajaPares);
+  contenedorCajas.appendChild(cajaDecada);
 }
 
-function crearCajaAnalisis(tipo, emoji, titulo, analisis) {
+function crearCajaAnalisis(tipo, emoji, titulo, datos) {
   const caja = document.createElement('div');
   caja.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 h-full';
+  caja.id = `caja-${tipo}`;
   
   const botonTitulo = document.createElement('button');
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
-  botonTitulo.onclick = () => toggleAnalisis(tipo);
+  botonTitulo.onclick = () => expandirCaja(tipo, datos);
   botonTitulo.innerHTML = `
     <div class="flex items-center justify-between">
       <div class="text-2xl">${emoji}</div>
@@ -561,13 +643,22 @@ function crearCajaAnalisis(tipo, emoji, titulo, analisis) {
     </div>
   `;
   
+  // Contenido expandible móvil
   const contenidoExpandible = document.createElement('div');
-  contenidoExpandible.id = `${tipo}-content`;
-  contenidoExpandible.className = 'hidden px-6 pb-6';
+  contenidoExpandible.id = `${tipo}-content-mobile`;
+  contenidoExpandible.className = 'hidden lg:hidden px-6 pb-6';
   
+  caja.appendChild(botonTitulo);
+  caja.appendChild(contenidoExpandible);
+  
+  return caja;
+}
+
+// Función para generar contenido de suma
+function generarContenidoSuma(sumAnalisis) {
   let contenidoHTML = '<div class="space-y-4">';
   
-  Object.entries(analisis).forEach(([sorteo, datos]) => {
+  Object.entries(sumAnalisis).forEach(([sorteo, datos]) => {
     const colores = {
       melate: 'bg-blue-500',
       revancha: 'bg-purple-500',
@@ -578,10 +669,6 @@ function crearCajaAnalisis(tipo, emoji, titulo, analisis) {
       <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
         <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
         <div class="text-sm text-gray-300">
-    `;
-    
-    if (tipo === 'suma') {
-      contenidoHTML += `
           <p><strong>Suma promedio:</strong> ${datos.sumaPromedio}</p>
           <p><strong>Rango más frecuente:</strong> ${datos.rangoMasFrecuente[0]} (${datos.rangoMasFrecuente[1]} veces)</p>
           <div class="mt-2 text-xs">
@@ -591,9 +678,30 @@ function crearCajaAnalisis(tipo, emoji, titulo, analisis) {
               `).join('')}
             </div>
           </div>
-      `;
-    } else if (tipo === 'pares') {
-      contenidoHTML += `
+        </div>
+      </div>
+    `;
+  });
+  
+  contenidoHTML += '</div>';
+  return contenidoHTML;
+}
+
+// Función para generar contenido de pares
+function generarContenidoPares(paresImparesAnalisis) {
+  let contenidoHTML = '<div class="space-y-4">';
+  
+  Object.entries(paresImparesAnalisis).forEach(([sorteo, datos]) => {
+    const colores = {
+      melate: 'bg-blue-500',
+      revancha: 'bg-purple-500',
+      revanchita: 'bg-green-500'
+    };
+    
+    contenidoHTML += `
+      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
+        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
+        <div class="text-sm text-gray-300">
           <p><strong>Distribución más frecuente:</strong> ${datos.distribucionMasFrecuente[0]} (${datos.distribucionMasFrecuente[1]} veces)</p>
           <div class="mt-2 text-xs">
             <div class="grid grid-cols-2 gap-1">
@@ -602,9 +710,30 @@ function crearCajaAnalisis(tipo, emoji, titulo, analisis) {
               `).join('')}
             </div>
           </div>
-      `;
-    } else if (tipo === 'decada') {
-      contenidoHTML += `
+        </div>
+      </div>
+    `;
+  });
+  
+  contenidoHTML += '</div>';
+  return contenidoHTML;
+}
+
+// Función para generar contenido de década
+function generarContenidoDecada(decadaTerminacionAnalisis) {
+  let contenidoHTML = '<div class="space-y-4">';
+  
+  Object.entries(decadaTerminacionAnalisis).forEach(([sorteo, datos]) => {
+    const colores = {
+      melate: 'bg-blue-500',
+      revancha: 'bg-purple-500',
+      revanchita: 'bg-green-500'
+    };
+    
+    contenidoHTML += `
+      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
+        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
+        <div class="text-sm text-gray-300">
           <p><strong>Década más frecuente:</strong> ${datos.decadaMasFrecuente[0]} (${datos.decadaMasFrecuente[1]} veces)</p>
           <p><strong>Terminación más frecuente:</strong> ${datos.terminacionMasFrecuente[0]} (${datos.terminacionMasFrecuente[1]} veces)</p>
           <div class="mt-2 text-xs">
@@ -621,21 +750,11 @@ function crearCajaAnalisis(tipo, emoji, titulo, analisis) {
               `).join('')}
             </div>
           </div>
-      `;
-    }
-    
-    contenidoHTML += `
         </div>
       </div>
     `;
   });
   
   contenidoHTML += '</div>';
-  
-  contenidoExpandible.innerHTML = contenidoHTML;
-  
-  caja.appendChild(botonTitulo);
-  caja.appendChild(contenidoExpandible);
-  
-  return caja;
+  return contenidoHTML;
 }

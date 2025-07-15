@@ -89,6 +89,9 @@
         const datos = await cargarDatosHistoricos('todos');
         console.log('📊 Datos cargados, generando estadísticas...');
         
+        // Guardar datos globalmente para las funciones de expansión
+        window.datosAnalisis = datos;
+        
         // Mostrar último sorteo de Melate
         if (datos.melate && datos.melate.ultimoSorteo) {
           const ultimoSorteoTexto = document.getElementById('ultimo-sorteo-texto');
@@ -130,27 +133,10 @@
 
     // Función para toggle de análisis expandibles
     window.toggleAnalisis = function(tipo) {
-      const content = document.getElementById(tipo + '-content');
-      const allContents = [
-        'suma-content', 
-        'pares-content', 
-        'decada-content',
-        'frecuencias-unificadas-content'
-      ];
-      
-      // Cerrar todos los demás
-      allContents.forEach(id => {
-        if (id !== tipo + '-content') {
-          const element = document.getElementById(id);
-          if (element) {
-            element.classList.add('hidden');
-          }
-        }
-      });
-      
-      // Toggle el seleccionado
-      if (content) {
-        content.classList.toggle('hidden');
+      // Esta función ahora redirige a expandirCaja
+      const datosGlobales = window.datosAnalisis || {};
+      if (window.expandirCaja) {
+        window.expandirCaja(tipo, datosGlobales);
       }
     }
   </script>
