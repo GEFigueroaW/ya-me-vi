@@ -1,6 +1,9 @@
 // dataParser.js - Módulo principal para cargar y procesar datos de sorteos
 // Versión limpia y funcional - Julio 2025
 
+// Variables globales para rastrear el estado
+let cajaActualmenteAbierta = null;
+
 export async function cargarDatosHistoricos(modo = 'todos') {
   console.log('🚀 Cargando datos históricos, modo:', modo);
   
@@ -207,7 +210,7 @@ function crearCajaFrecuencias(datos) {
   
   const botonTitulo = document.createElement('button');
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
-  botonTitulo.onclick = () => expandirCaja('frecuencias', datos);
+  botonTitulo.onclick = () => manejarClicCaja('frecuencias', datos);
   botonTitulo.innerHTML = `
     <div class="flex items-center justify-between">
       <div class="text-2xl">📊</div>
@@ -228,8 +231,10 @@ function crearCajaFrecuencias(datos) {
   return tarjetaUnificada;
 }
 
-// Hacer expandirCaja global para que esté disponible desde el HTML
+// Hacer funciones globales para que estén disponibles desde el HTML
 window.expandirCaja = expandirCaja;
+window.manejarClicCaja = manejarClicCaja;
+window.cerrarTodasLasCajas = cerrarTodasLasCajas;
 
 // Función para manejar el resize de la ventana
 function manejarResize() {
@@ -239,17 +244,44 @@ function manejarResize() {
   
   if (!contenedorPrincipal || !contenedorCajas || !contenedorContenido) return;
   
+  // Verificar si hay alguna caja abierta
+  const cajaAbierta = document.querySelector('.caja-abierta');
+  const hayContenidoVisible = !contenedorContenido.classList.contains('hidden');
+  
   if (window.innerWidth < 1024) {
-    // En móvil: resetear layout
+    // En móvil: cerrar contenido de desktop y usar contenido móvil
+    if (hayContenidoVisible) {
+      contenedorContenido.classList.add('hidden');
+    }
+    
+    // Resetear layout a móvil
     contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
     contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
-    contenedorContenido.classList.add('hidden');
+    
+    // Si hay una caja abierta, mostrar su contenido móvil
+    if (cajaAbierta) {
+      const tipo = cajaAbierta.id.replace('caja-', '');
+      const contenidoMobile = document.getElementById(`${tipo}-content-mobile`);
+      if (contenidoMobile && contenidoMobile.innerHTML.trim()) {
+        contenidoMobile.classList.remove('hidden');
+      }
+    }
   } else {
-    // En desktop: si hay contenido visible, mantener layout expandido
-    if (!contenedorContenido.classList.contains('hidden')) {
+    // En desktop: si hay una caja abierta, mantener layout expandido
+    if (cajaAbierta) {
       contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
       contenedorCajas.className = 'lg:col-span-1 grid grid-cols-1 gap-6';
       contenedorContenido.className = 'lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
+      contenedorContenido.classList.remove('hidden');
+      
+      // Cerrar contenido móvil
+      const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
+      cajasMobile.forEach(caja => caja.classList.add('hidden'));
+    } else {
+      // No hay cajas abiertas, layout normal
+      contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
+      contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+      contenedorContenido.classList.add('hidden');
     }
   }
 }
@@ -263,9 +295,28 @@ function expandirCaja(tipo, datos) {
   const contenedorContenido = document.getElementById('contenedor-contenido');
   const contenedorPrincipal = document.getElementById('contenedor-principal');
   
+  // Verificar si la caja ya está abierta
+  const cajaActual = document.getElementById(`caja-${tipo}`);
+  const yaAbierta = cajaActual && cajaActual.classList.contains('caja-abierta');
+  
   // Cerrar todas las cajas móviles
   const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
   cajasMobile.forEach(caja => caja.classList.add('hidden'));
+  
+  // Remover clase 'caja-abierta' de todas las cajas
+  const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
+  todasLasCajas.forEach(caja => caja.classList.remove('caja-abierta'));
+  
+  // Si la caja ya estaba abierta, cerrarla y volver al layout original
+  if (yaAbierta) {
+    cerrarTodasLasCajas();
+    return;
+  }
+  
+  // Marcar la caja actual como abierta
+  if (cajaActual) {
+    cajaActual.classList.add('caja-abierta');
+  }
   
   // Generar contenido según el tipo
   let contenidoHTML = '';
@@ -291,6 +342,9 @@ function expandirCaja(tipo, datos) {
     contenedorContenido.className = 'lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
     contenedorContenido.classList.remove('hidden');
     contenedorContenido.innerHTML = contenidoHTML;
+    
+    // Mover la caja abierta al contenedor de contenido (visualmente)
+    moverCajaAbiertaAlContenido(tipo, datos);
   } else {
     // En móvil: mostrar contenido debajo de la caja
     const contenidoMobile = document.getElementById(`${tipo}-content-mobile`);
@@ -299,6 +353,82 @@ function expandirCaja(tipo, datos) {
       contenidoMobile.classList.remove('hidden');
     }
   }
+}
+
+// Función para cerrar todas las cajas y volver al layout original
+function cerrarTodasLasCajas() {
+  const contenedorCajas = document.getElementById('contenedor-cajas');
+  const contenedorContenido = document.getElementById('contenedor-contenido');
+  const contenedorPrincipal = document.getElementById('contenedor-principal');
+  
+  // Cerrar todas las cajas móviles
+  const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
+  cajasMobile.forEach(caja => caja.classList.add('hidden'));
+  
+  // Remover clase 'caja-abierta' de todas las cajas
+  const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
+  todasLasCajas.forEach(caja => caja.classList.remove('caja-abierta'));
+  
+  // Volver al layout original (4 cajas horizontales)
+  contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
+  contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+  contenedorContenido.classList.add('hidden');
+  contenedorContenido.innerHTML = '';
+  
+  // Limpiar cualquier caja duplicada en el contenido
+  const cajaEnContenido = contenedorContenido.querySelector('[id^="caja-"]');
+  if (cajaEnContenido) {
+    cajaEnContenido.remove();
+  }
+  
+  // Actualizar estado global
+  cajaActualmenteAbierta = null;
+}
+
+// Función para mostrar la caja abierta en el área de contenido
+function moverCajaAbiertaAlContenido(tipo, datos) {
+  const contenedorContenido = document.getElementById('contenedor-contenido');
+  const cajaOriginal = document.getElementById(`caja-${tipo}`);
+  
+  if (!contenedorContenido || !cajaOriginal) return;
+  
+  // Crear una copia visual de la caja abierta para el área de contenido
+  const cajaEnContenido = document.createElement('div');
+  cajaEnContenido.className = 'mb-6 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30';
+  cajaEnContenido.id = `caja-${tipo}-contenido`;
+  
+  // Obtener el emoji y título
+  const emojis = {
+    frecuencias: '📊',
+    suma: '🔢',
+    pares: '⚖️',
+    decada: '🎯'
+  };
+  
+  const titulos = {
+    frecuencias: 'Frecuencias',
+    suma: 'Suma de números',
+    pares: 'Pares e impares',
+    decada: 'Década y terminación'
+  };
+  
+  const botonTitulo = document.createElement('button');
+  botonTitulo.className = 'w-full p-4 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
+  botonTitulo.onclick = () => manejarClicCaja(tipo, datos); // Al hacer clic, se cierra
+  botonTitulo.innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="text-2xl">${emojis[tipo]}</div>
+      <div class="flex-1">
+        <h3 class="text-lg font-bold text-white text-center">${titulos[tipo]}</h3>
+      </div>
+      <div class="text-gray-300 text-sm">✕</div>
+    </div>
+  `;
+  
+  cajaEnContenido.appendChild(botonTitulo);
+  
+  // Insertar la caja al inicio del contenido
+  contenedorContenido.insertBefore(cajaEnContenido, contenedorContenido.firstChild);
 }
 
 // Función para generar contenido de frecuencias con últimos 30 meses
@@ -633,7 +763,7 @@ function crearCajaAnalisis(tipo, emoji, titulo, datos) {
   
   const botonTitulo = document.createElement('button');
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
-  botonTitulo.onclick = () => expandirCaja(tipo, datos);
+  botonTitulo.onclick = () => manejarClicCaja(tipo, datos);
   botonTitulo.innerHTML = `
     <div class="flex items-center justify-between">
       <div class="text-2xl">${emoji}</div>
@@ -757,4 +887,23 @@ function generarContenidoDecada(decadaTerminacionAnalisis) {
   
   contenidoHTML += '</div>';
   return contenidoHTML;
+}
+
+// Función principal para manejar clics en cajas
+function manejarClicCaja(tipo, datos) {
+  // Si se hace clic en la misma caja que está abierta, cerrarla
+  if (cajaActualmenteAbierta === tipo) {
+    cerrarTodasLasCajas();
+    cajaActualmenteAbierta = null;
+    return;
+  }
+  
+  // Si hay otra caja abierta, cerrarla primero
+  if (cajaActualmenteAbierta) {
+    cerrarTodasLasCajas();
+  }
+  
+  // Abrir la nueva caja
+  expandirCaja(tipo, datos);
+  cajaActualmenteAbierta = tipo;
 }
