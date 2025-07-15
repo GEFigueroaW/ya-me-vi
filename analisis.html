@@ -32,6 +32,9 @@
     <!-- Encabezado de sorteos -->
     <div class="text-center mb-6">
       <h2 class="text-xl font-semibold text-white mb-2">MELATE | REVANCHA | REVANCHITA</h2>
+      <div class="text-gray-300 text-sm mb-2">
+        Análisis de los últimos 30 meses de sorteos
+      </div>
       <div id="ultimo-sorteo" class="text-gray-300 text-sm">
         <span id="ultimo-sorteo-texto">Cargando último sorteo...</span>
       </div>
@@ -77,7 +80,7 @@
       if (loadingDiv) {
         loadingDiv.innerHTML = `
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p class="text-white">🔄 Cargando datos históricos...</p>
+          <p class="text-white">🔄 Cargando últimos 30 meses de sorteos...</p>
         `;
       }
       

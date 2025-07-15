@@ -61,6 +61,11 @@ async function cargarSorteoIndividual(sorteo) {
     const numeros = [];
     let ultimoSorteo = 'No disponible';
     
+    // Calcular fecha límite (30 meses atrás desde hoy)
+    const fechaActual = new Date();
+    const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 30, fechaActual.getDate());
+    console.log(`📅 Filtrando sorteos desde: ${fechaLimite.toLocaleDateString()}`);
+    
     // Procesar cada línea (saltar encabezado)
     for (let i = 1; i < lineas.length; i++) {
       const linea = lineas[i].trim();
@@ -71,10 +76,28 @@ async function cargarSorteoIndividual(sorteo) {
       // Detectar formato automáticamente
       let numerosLinea = [];
       let concurso = '';
+      let fechaSorteo = null;
       
       if (columnas.length >= 11 && sorteo === 'melate') {
         // Formato: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
         concurso = columnas[1];
+        
+        // Verificar fecha - últimos 30 meses
+        const fechaStr = columnas[10].trim();
+        if (fechaStr) {
+          const partesFecha = fechaStr.split('/');
+          if (partesFecha.length === 3) {
+            const dia = parseInt(partesFecha[0]);
+            const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+            const año = parseInt(partesFecha[2]);
+            fechaSorteo = new Date(año, mes, dia);
+            
+            if (fechaSorteo < fechaLimite) {
+              continue; // Saltar sorteos más antiguos de 30 meses
+            }
+          }
+        }
+        
         for (let j = 2; j <= 7; j++) {
           const num = parseInt(columnas[j]);
           if (!isNaN(num) && num >= 1 && num <= 56) {
@@ -84,6 +107,23 @@ async function cargarSorteoIndividual(sorteo) {
       } else if (columnas.length >= 10 && (sorteo === 'revancha' || sorteo === 'revanchita')) {
         // Formato: NPRODUCTO,CONCURSO,R1/F1,R2/F2,R3/F3,R4/F4,R5/F5,R6/F6,BOLSA,FECHA
         concurso = columnas[1];
+        
+        // Verificar fecha - últimos 30 meses
+        const fechaStr = columnas[9].trim();
+        if (fechaStr) {
+          const partesFecha = fechaStr.split('/');
+          if (partesFecha.length === 3) {
+            const dia = parseInt(partesFecha[0]);
+            const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+            const año = parseInt(partesFecha[2]);
+            fechaSorteo = new Date(año, mes, dia);
+            
+            if (fechaSorteo < fechaLimite) {
+              continue; // Saltar sorteos más antiguos de 30 meses
+            }
+          }
+        }
+        
         for (let j = 2; j <= 7; j++) {
           const num = parseInt(columnas[j]);
           if (!isNaN(num) && num >= 1 && num <= 56) {
@@ -106,7 +146,7 @@ async function cargarSorteoIndividual(sorteo) {
       }
     }
     
-    console.log(`✅ ${sorteo}: ${sorteos.length} sorteos cargados`);
+    console.log(`✅ ${sorteo}: ${sorteos.length} sorteos cargados (últimos 30 meses) - ${numeros.length} números`);
     
     return {
       sorteos: sorteos,
