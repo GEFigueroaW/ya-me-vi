@@ -171,9 +171,25 @@ export function graficarEstadisticas(datos) {
   
   container.innerHTML = '';
   
-  // Crear tarjeta unificada
+  // Crear contenedor principal para las 4 cajas alineadas horizontalmente
+  const contenedorPrincipal = document.createElement('div');
+  contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6';
+  
+  // Caja 1: Frecuencias
+  const cajaFrecuencias = crearCajaFrecuencias(datos);
+  contenedorPrincipal.appendChild(cajaFrecuencias);
+  
+  container.appendChild(contenedorPrincipal);
+  
+  const loadingDiv = document.querySelector('.animate-spin');
+  if (loadingDiv && loadingDiv.parentElement) {
+    loadingDiv.parentElement.style.display = 'none';
+  }
+}
+
+function crearCajaFrecuencias(datos) {
   const tarjetaUnificada = document.createElement('div');
-  tarjetaUnificada.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30';
+  tarjetaUnificada.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 h-full';
   
   const botonTitulo = document.createElement('button');
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
@@ -182,7 +198,7 @@ export function graficarEstadisticas(datos) {
     <div class="flex items-center justify-between">
       <div class="text-2xl">📊</div>
       <div class="flex-1">
-        <h3 class="text-2xl font-bold text-white text-center">FRECUENCIAS</h3>
+        <h3 class="text-xl font-bold text-white text-center">Frecuencias</h3>
       </div>
     </div>
   `;
@@ -265,12 +281,7 @@ export function graficarEstadisticas(datos) {
   tarjetaUnificada.appendChild(botonTitulo);
   tarjetaUnificada.appendChild(contenidoExpandible);
   
-  container.appendChild(tarjetaUnificada);
-  
-  const loadingDiv = document.querySelector('.animate-spin');
-  if (loadingDiv && loadingDiv.parentElement) {
-    loadingDiv.parentElement.style.display = 'none';
-  }
+  return tarjetaUnificada;
 }
 
 function calcularFrecuencias(numeros) {
@@ -512,41 +523,65 @@ export function analizarDecadaTerminacion(datos) {
 export function mostrarAnalisisAvanzados(datos) {
   console.log('📊 Mostrando análisis avanzados...');
   
-  const container = document.getElementById('analisis-avanzados');
+  const container = document.getElementById('charts-container');
   if (!container) return;
+  
+  // Buscar el contenedor principal que ya existe
+  const contenedorPrincipal = container.querySelector('.grid');
+  if (!contenedorPrincipal) return;
   
   const sumAnalisis = analizarSumaNumeros(datos);
   const paresImparesAnalisis = analizarParesImpares(datos);
   const decadaTerminacionAnalisis = analizarDecadaTerminacion(datos);
   
-  let htmlContent = '<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">';
+  // Crear las 3 cajas adicionales
+  const cajaSuma = crearCajaAnalisis('suma', '🔢', 'Suma de números', sumAnalisis);
+  const cajaPares = crearCajaAnalisis('pares', '⚖️', 'Pares e impares', paresImparesAnalisis);
+  const cajaDecada = crearCajaAnalisis('decada', '🎯', 'Década y terminación', decadaTerminacionAnalisis);
   
-  // Tarjeta 1: Análisis de Suma
-  htmlContent += `
-    <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
-      <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('suma')">
-        <div class="flex items-center justify-between">
-          <div class="text-2xl">🔢</div>
-          <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">Suma de Números</h3>
-          </div>
-        </div>
-      </button>
-      <div id="suma-content" class="hidden px-6 pb-6">
-        <div class="space-y-4">
+  // Agregar las cajas al contenedor principal
+  contenedorPrincipal.appendChild(cajaSuma);
+  contenedorPrincipal.appendChild(cajaPares);
+  contenedorPrincipal.appendChild(cajaDecada);
+}
+
+function crearCajaAnalisis(tipo, emoji, titulo, analisis) {
+  const caja = document.createElement('div');
+  caja.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 h-full';
+  
+  const botonTitulo = document.createElement('button');
+  botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
+  botonTitulo.onclick = () => toggleAnalisis(tipo);
+  botonTitulo.innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="text-2xl">${emoji}</div>
+      <div class="flex-1">
+        <h3 class="text-xl font-bold text-white text-center">${titulo}</h3>
+      </div>
+    </div>
   `;
   
-  Object.entries(sumAnalisis).forEach(([sorteo, datos]) => {
+  const contenidoExpandible = document.createElement('div');
+  contenidoExpandible.id = `${tipo}-content`;
+  contenidoExpandible.className = 'hidden px-6 pb-6';
+  
+  let contenidoHTML = '<div class="space-y-4">';
+  
+  Object.entries(analisis).forEach(([sorteo, datos]) => {
     const colores = {
       melate: 'bg-blue-500',
       revancha: 'bg-purple-500',
       revanchita: 'bg-green-500'
     };
     
-    htmlContent += `
+    contenidoHTML += `
       <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
         <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
         <div class="text-sm text-gray-300">
+    `;
+    
+    if (tipo === 'suma') {
+      contenidoHTML += `
           <p><strong>Suma promedio:</strong> ${datos.sumaPromedio}</p>
           <p><strong>Rango más frecuente:</strong> ${datos.rangoMasFrecuente[0]} (${datos.rangoMasFrecuente[1]} veces)</p>
           <div class="mt-2 text-xs">
@@ -556,39 +591,9 @@ export function mostrarAnalisisAvanzados(datos) {
               `).join('')}
             </div>
           </div>
-        </div>
-      </div>
-    `;
-  });
-  
-  htmlContent += '</div></div></div>';
-  
-  // Tarjeta 2: Análisis de Pares e Impares
-  htmlContent += `
-    <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
-      <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('pares')">
-        <div class="flex items-center justify-between">
-          <div class="text-2xl">⚖️</div>
-          <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">Pares e Impares</h3>
-          </div>
-        </div>
-      </button>
-      <div id="pares-content" class="hidden px-6 pb-6">
-        <div class="space-y-4">
-  `;
-  
-  Object.entries(paresImparesAnalisis).forEach(([sorteo, datos]) => {
-    const colores = {
-      melate: 'bg-blue-500',
-      revancha: 'bg-purple-500',
-      revanchita: 'bg-green-500'
-    };
-    
-    htmlContent += `
-      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
-        <div class="text-sm text-gray-300">
+      `;
+    } else if (tipo === 'pares') {
+      contenidoHTML += `
           <p><strong>Distribución más frecuente:</strong> ${datos.distribucionMasFrecuente[0]} (${datos.distribucionMasFrecuente[1]} veces)</p>
           <div class="mt-2 text-xs">
             <div class="grid grid-cols-2 gap-1">
@@ -597,39 +602,9 @@ export function mostrarAnalisisAvanzados(datos) {
               `).join('')}
             </div>
           </div>
-        </div>
-      </div>
-    `;
-  });
-  
-  htmlContent += '</div></div></div>';
-  
-  // Tarjeta 3: Análisis de Década y Terminación
-  htmlContent += `
-    <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
-      <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('decada')">
-        <div class="flex items-center justify-between">
-          <div class="text-2xl">🎯</div>
-          <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">Década y Terminación</h3>
-          </div>
-        </div>
-      </button>
-      <div id="decada-content" class="hidden px-6 pb-6">
-        <div class="space-y-4">
-  `;
-  
-  Object.entries(decadaTerminacionAnalisis).forEach(([sorteo, datos]) => {
-    const colores = {
-      melate: 'bg-blue-500',
-      revancha: 'bg-purple-500',
-      revanchita: 'bg-green-500'
-    };
-    
-    htmlContent += `
-      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
-        <div class="text-sm text-gray-300">
+      `;
+    } else if (tipo === 'decada') {
+      contenidoHTML += `
           <p><strong>Década más frecuente:</strong> ${datos.decadaMasFrecuente[0]} (${datos.decadaMasFrecuente[1]} veces)</p>
           <p><strong>Terminación más frecuente:</strong> ${datos.terminacionMasFrecuente[0]} (${datos.terminacionMasFrecuente[1]} veces)</p>
           <div class="mt-2 text-xs">
@@ -646,13 +621,21 @@ export function mostrarAnalisisAvanzados(datos) {
               `).join('')}
             </div>
           </div>
+      `;
+    }
+    
+    contenidoHTML += `
         </div>
       </div>
     `;
   });
   
-  htmlContent += '</div></div></div>';
-  htmlContent += '</div>';
+  contenidoHTML += '</div>';
   
-  container.innerHTML = htmlContent;
+  contenidoExpandible.innerHTML = contenidoHTML;
+  
+  caja.appendChild(botonTitulo);
+  caja.appendChild(contenidoExpandible);
+  
+  return caja;
 }
