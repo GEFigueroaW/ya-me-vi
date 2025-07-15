@@ -182,9 +182,8 @@ export function graficarEstadisticas(datos) {
     <div class="flex items-center justify-between">
       <div class="text-2xl">📊</div>
       <div class="flex-1">
-        <h3 class="text-2xl font-bold text-white text-center">ANÁLISIS DE FRECUENCIAS</h3>
+        <h3 class="text-2xl font-bold text-white text-center">FRECUENCIAS</h3>
       </div>
-      <div class="text-2xl">�</div>
     </div>
   `;
   
@@ -226,7 +225,6 @@ export function graficarEstadisticas(datos) {
         <!-- Título del sorteo -->
         <div class="text-center">
           <h4 class="text-2xl font-bold text-white mb-2">🎲 ${sorteo.toUpperCase()}</h4>
-          <p class="text-gray-300 text-sm">${datosIndividuales.sorteos ? datosIndividuales.sorteos.length : 0} sorteos analizados</p>
         </div>
         
         <!-- Top 10 MÁS frecuentes -->
@@ -236,7 +234,7 @@ export function graficarEstadisticas(datos) {
             ${topFrecuentes.map((item, index) => `
               <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
                 <div class="text-red-600 text-2xl font-bold mb-1">${item.numero}</div>
-                <div class="text-orange-600 text-sm font-semibold">${item.frecuencia}</div>
+                <div class="text-red-600 text-sm font-semibold">${item.frecuencia}</div>
               </div>
             `).join('')}
           </div>
@@ -530,9 +528,8 @@ export function mostrarAnalisisAvanzados(datos) {
         <div class="flex items-center justify-between">
           <div class="text-2xl">🔢</div>
           <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">Análisis de Suma de Números</h3>
+            <h3 class="text-xl font-bold text-white text-center">Suma de Números</h3>
           </div>
-          <div class="text-2xl">�</div>
         </div>
       </button>
       <div id="suma-content" class="hidden px-6 pb-6">
@@ -573,9 +570,8 @@ export function mostrarAnalisisAvanzados(datos) {
         <div class="flex items-center justify-between">
           <div class="text-2xl">⚖️</div>
           <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">Análisis de Pares e Impares</h3>
+            <h3 class="text-xl font-bold text-white text-center">Pares e Impares</h3>
           </div>
-          <div class="text-2xl">�</div>
         </div>
       </button>
       <div id="pares-content" class="hidden px-6 pb-6">
@@ -615,9 +611,8 @@ export function mostrarAnalisisAvanzados(datos) {
         <div class="flex items-center justify-between">
           <div class="text-2xl">🎯</div>
           <div class="flex-1">
-            <h3 class="text-xl font-bold text-white text-center">Análisis de Década y Terminación</h3>
+            <h3 class="text-xl font-bold text-white text-center">Década y Terminación</h3>
           </div>
-          <div class="text-2xl">�</div>
         </div>
       </button>
       <div id="decada-content" class="hidden px-6 pb-6">
