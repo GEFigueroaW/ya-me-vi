@@ -169,6 +169,16 @@
       min-height: 80px;
       max-height: 80px;
       margin-bottom: 0.25rem; /* Espaciado mucho más pequeño entre cajas */
+      position: relative; /* Posición estable */
+      flex-shrink: 0; /* Evita que se reduzcan */
+    }
+    
+    /* Contenedor de cajas con layout estable */
+    #contenedor-cajas {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem; /* Espaciado consistente */
+      min-height: calc(3 * 80px + 2 * 0.25rem); /* Altura mínima fija */
     }
     
     /* Cuando las cajas están en layout original, mantener altura flexible */
