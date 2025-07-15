@@ -179,9 +179,11 @@ export function graficarEstadisticas(datos) {
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
   botonTitulo.onclick = () => toggleAnalisis('frecuencias-unificadas');
   botonTitulo.innerHTML = `
-    <h3 class="text-2xl font-bold text-white text-center">📊 ANÁLISIS DE FRECUENCIAS</h3>
-    <div class="text-center mt-2">
-      <span class="text-gray-300 text-sm">👁️ Clic para ver</span>
+    <div class="flex items-center justify-between">
+      <div class="flex-1">
+        <h3 class="text-2xl font-bold text-white text-center">📊 ANÁLISIS DE FRECUENCIAS</h3>
+      </div>
+      <div class="text-2xl">👁️</div>
     </div>
   `;
   
@@ -195,7 +197,7 @@ export function graficarEstadisticas(datos) {
   
   // Contenedor principal responsive
   contenidoHTML += `
-    <div class="grid grid-cols-1 xl:grid-cols-3 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-3 lg:grid-cols-2 gap-8 divide-y xl:divide-y-0 xl:divide-x divide-white divide-opacity-20">
   `;
   
   sorteos.forEach(sorteo => {
@@ -219,7 +221,7 @@ export function graficarEstadisticas(datos) {
     const menosFrecuentes = frecuenciasArray.slice(-10).reverse();
     
     contenidoHTML += `
-      <div class="space-y-8">
+      <div class="space-y-8 pt-8 xl:pt-0 xl:px-4 first:pt-0">
         <!-- Título del sorteo -->
         <div class="text-center">
           <h4 class="text-2xl font-bold text-white mb-2">🎲 ${sorteo.toUpperCase()}</h4>
@@ -232,8 +234,8 @@ export function graficarEstadisticas(datos) {
           <div class="grid grid-cols-5 sm:grid-cols-5 gap-3">
             ${topFrecuentes.map((item, index) => `
               <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
-                <div class="text-white text-2xl font-bold mb-1">${item.numero}</div>
-                <div class="text-orange-400 text-sm font-semibold">${item.frecuencia}</div>
+                <div class="text-red-600 text-2xl font-bold mb-1">${item.numero}</div>
+                <div class="text-orange-600 text-sm font-semibold">${item.frecuencia}</div>
               </div>
             `).join('')}
           </div>
@@ -245,8 +247,8 @@ export function graficarEstadisticas(datos) {
           <div class="grid grid-cols-5 sm:grid-cols-5 gap-3">
             ${menosFrecuentes.map((item, index) => `
               <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
-                <div class="text-white text-2xl font-bold mb-1">${item.numero}</div>
-                <div class="text-blue-400 text-sm font-semibold">${item.frecuencia}</div>
+                <div class="text-blue-600 text-2xl font-bold mb-1">${item.numero}</div>
+                <div class="text-blue-600 text-sm font-semibold">${item.frecuencia}</div>
               </div>
             `).join('')}
           </div>
@@ -524,9 +526,11 @@ export function mostrarAnalisisAvanzados(datos) {
   htmlContent += `
     <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
       <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('suma')">
-        <h3 class="text-xl font-bold text-white text-center">🔢 Análisis de Suma de Números</h3>
-        <div class="text-center mt-2">
-          <span class="text-gray-300 text-sm">Clic para expandir</span>
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <h3 class="text-xl font-bold text-white text-center">🔢 Análisis de Suma de Números</h3>
+          </div>
+          <div class="text-2xl">👁️</div>
         </div>
       </button>
       <div id="suma-content" class="hidden px-6 pb-6">
@@ -564,9 +568,11 @@ export function mostrarAnalisisAvanzados(datos) {
   htmlContent += `
     <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
       <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('pares')">
-        <h3 class="text-xl font-bold text-white text-center">⚖️ Análisis de Pares e Impares</h3>
-        <div class="text-center mt-2">
-          <span class="text-gray-300 text-sm">Clic para expandir</span>
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <h3 class="text-xl font-bold text-white text-center">⚖️ Análisis de Pares e Impares</h3>
+          </div>
+          <div class="text-2xl">👁️</div>
         </div>
       </button>
       <div id="pares-content" class="hidden px-6 pb-6">
@@ -603,9 +609,11 @@ export function mostrarAnalisisAvanzados(datos) {
   htmlContent += `
     <div class="bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30">
       <button class="w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300" onclick="toggleAnalisis('decada')">
-        <h3 class="text-xl font-bold text-white text-center">🎯 Análisis de Década y Terminación</h3>
-        <div class="text-center mt-2">
-          <span class="text-gray-300 text-sm">Clic para expandir</span>
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <h3 class="text-xl font-bold text-white text-center">🎯 Análisis de Década y Terminación</h3>
+          </div>
+          <div class="text-2xl">👁️</div>
         </div>
       </button>
       <div id="decada-content" class="hidden px-6 pb-6">
