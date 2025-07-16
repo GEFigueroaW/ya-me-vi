@@ -342,9 +342,15 @@ class EvaluadorNumeros {
    * Generar tarjeta de sorteo individual
    */
   generarTarjetaSorteo(nombre, emoji, clasificacion, indice, frecuencia, color) {
+    const colorClasses = {
+      blue: 'bg-blue-500 bg-opacity-20 border-blue-400 text-blue-800',
+      purple: 'bg-purple-500 bg-opacity-20 border-purple-400 text-purple-800',
+      green: 'bg-green-500 bg-opacity-20 border-green-400 text-green-800'
+    };
+    
     return `
-      <div class="bg-${color}-500 bg-opacity-20 rounded-lg p-4 text-center border border-${color}-400">
-        <h4 class="font-bold text-${color}-800 mb-2">${emoji} ${nombre}</h4>
+      <div class="${colorClasses[color]} rounded-lg p-4 text-center border">
+        <h4 class="font-bold mb-2">${emoji} ${nombre}</h4>
         <div class="text-4xl font-bold ${clasificacion.color} mb-2">
           ${clasificacion.emoji}
         </div>
@@ -465,9 +471,17 @@ class EvaluadorNumeros {
    * Generar tarjeta de combinación
    */
   generarTarjetaCombinacion(nombre, emoji, clasificacion, promedio, potencial, color) {
+    const colorClasses = {
+      blue: 'bg-blue-500 bg-opacity-20 border-blue-400 text-blue-800 text-blue-600',
+      purple: 'bg-purple-500 bg-opacity-20 border-purple-400 text-purple-800 text-purple-600',
+      green: 'bg-green-500 bg-opacity-20 border-green-400 text-green-800 text-green-600'
+    };
+    
+    const [bgClass, borderClass, textClass, potentialClass] = colorClasses[color].split(' ');
+    
     return `
-      <div class="bg-${color}-500 bg-opacity-20 rounded-lg p-4 text-center border border-${color}-400">
-        <h4 class="font-bold text-${color}-800 mb-2">${emoji} ${nombre}</h4>
+      <div class="${bgClass} rounded-lg p-4 text-center border ${borderClass}">
+        <h4 class="font-bold ${textClass} mb-2">${emoji} ${nombre}</h4>
         <div class="text-3xl font-bold ${clasificacion.color} mb-2">
           ${clasificacion.emoji} 
           <span class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} text-sm">
@@ -480,7 +494,7 @@ class EvaluadorNumeros {
         <div class="text-xs text-gray-600 mb-2">
           Apariciones reales en sorteos históricos
         </div>
-        <div class="text-lg font-bold text-${color}-600">
+        <div class="text-lg font-bold ${potentialClass}">
           <span class="text-green-600">⭐ Potencial:</span> ${potencial.toFixed(1)}%
         </div>
         <div class="text-xs text-gray-600">

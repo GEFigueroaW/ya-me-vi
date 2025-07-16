@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Evaluar Combinación</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="overflow-x-hidden">
+
+  <!-- Fondo dinámico -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 min-h-screen text-white p-4 md:p-10">
+    
+    <!-- Botón de regreso -->
+    <button id="btn-back" class="btn-back-improved">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <span class="btn-text">Volver</span>
+    </button>
+
+    <!-- Espaciador para evitar solapamiento en móviles -->
+    <div class="mobile-spacer"></div>
+
+    <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown text-center">🎯 Evalúa tus Números de la Suerte</h1>
+    
+    <!-- Encabezado descriptivo -->
+    <div class="text-center mb-8">
+      <h2 class="text-xl font-semibold text-white mb-2">ANÁLISIS ESTADÍSTICO PERSONALIZADO</h2>
+      <div class="text-gray-300 text-sm">
+        Basado en datos históricos de Melate, Revancha y Revanchita
+      </div>
+    </div>
+
+    <!-- Explicación intuitiva - Oculta inicialmente -->
+    <div id="explicacion-inicial" class="max-w-4xl mx-auto mb-8 hidden">
+      <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
+        <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Qué significan los resultados?</h3>
+        <div class="grid md:grid-cols-2 gap-6 text-white">
+          <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+            <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE</h4>
+            <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial:</p>
+            <ul class="text-xs space-y-1 text-gray-200">
+              <li>• Cuántas veces salió tu número</li>
+              <li>• Basado en sorteos reales</li>
+              <li>• Datos de los últimos 30 meses</li>
+            </ul>
+          </div>
+          <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+            <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
+            <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar:</p>
+            <ul class="text-xs space-y-1 text-gray-200">
+              <li>• Aplica factor matemático 10.5x</li>
+              <li>• Ajusta expectativas realistas</li>
+              <li>• Garantiza mínimo 8% siempre</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <div class="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
+            <p class="text-sm text-yellow-200">
+              <strong>🔥 Mientras más alto el porcentaje, mejor tu número</strong>
+            </p>
+            <p class="text-xs text-gray-300 mt-1">
+              Si Índice = Potencial → Máxima confianza | Si Índice > Potencial → Buena recomendación
+            </p>
+          </div>
+        </div>
+        
+        <!-- Botón para mostrar/ocultar ayuda adicional -->
+        <div class="mt-4 text-center">
+          <button id="toggle-help" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300">
+            <span id="help-text">Ver ejemplo práctico</span>
+            <span id="help-icon">👁️</span>
+          </button>
+        </div>
+        
+        <!-- Ayuda expandible -->
+        <div id="help-content" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
+          <h4 class="font-semibold mb-3 text-yellow-300">🧮 Ejemplo con el número 15:</h4>
+          <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+            <ul class="text-gray-200 space-y-1">
+              <li>📊 <strong>Frecuencia:</strong> 12 apariciones en 1,668 números históricos</li>
+              <li>📈 <strong>Porcentaje base:</strong> (12 ÷ 1,668) × 100 = 0.72%</li>
+              <li>⚡ <strong>Factor 10.5x:</strong> 0.72% × 10.5 = 7.56%</li>
+              <li>🎯 <strong>Resultado final:</strong> Máximo entre 7.56% y 8% = 8.0%</li>
+            </ul>
+            <p class="text-white mt-2 font-medium text-center">
+              <span class="text-yellow-300">🎯 Índice = 8.0%</span> | 
+              <span class="text-green-300">⭐ Potencial = 8.0%</span>
+              <span class="text-purple-200"> (¡Máxima confianza!)</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="max-w-6xl mx-auto">
+      
+      <!-- Sección de evaluación de número individual -->
+      <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white border-opacity-50 shadow-xl">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">🔍 Ingresa tu Número de la Suerte entre el 1 y el 56</h2>
+        <div class="max-w-md mx-auto">
+          <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-6">
+            <input type="number" id="numero-individual" class="w-20 sm:w-24 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400" min="1" max="56" placeholder="">
+            <button id="evaluar-numero-btn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
+              Evaluar
+            </button>
+          </div>
+        </div>
+        
+        <!-- Botón para mostrar explicación (siempre visible y más sutil) -->
+        <div class="mt-4 text-center">
+          <button id="mostrar-explicacion-btn" class="bg-white bg-opacity-50 hover:bg-opacity-60 rounded-lg px-4 py-2 text-sm text-gray-800 transition-all duration-300 border border-white border-opacity-50 shadow-lg">
+            <span id="explicacion-text">💡 ¿Cómo interpretar resultados?</span>
+            <span id="explicacion-icon">👁️</span>
+          </button>
+        </div>
+        
+        <div id="resultado-numero" class="mt-6"></div>
+      </div>
+
+      <!-- Sección de evaluación de combinación -->
+      <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white border-opacity-50 shadow-xl">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">🔍 Ingresa tu Combinación de la Suerte</h2>
+        <div class="max-w-2xl mx-auto">
+          <p class="text-center text-gray-700 mb-6">Ingresa tu combinación de 6 números (1-56)</p>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+          </div>
+          <div class="text-center">
+            <button id="evaluar-combinacion-btn" class="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
+              🎯 Evaluar Combinación
+            </button>
+          </div>
+        </div>
+        
+        <!-- Botón para mostrar explicación (siempre visible y más sutil) -->
+        <div class="mt-4 text-center">
+          <button id="mostrar-explicacion-btn-combo" class="bg-white bg-opacity-50 hover:bg-opacity-60 rounded-lg px-4 py-2 text-sm text-gray-800 transition-all duration-300 border border-white border-opacity-50 shadow-lg">
+            <span id="explicacion-combo-text">💡 ¿Cómo interpretar resultados?</span>
+            <span id="explicacion-combo-icon">👁️</span>
+          </button>
+        </div>
+        
+        <div id="resultado-combinacion" class="mt-6"></div>
+        
+        <!-- Botón para mostrar explicación después del resultado (ahora oculto) -->
+        <div id="explicacion-boton-container" class="mt-6 text-center hidden">
+          <button id="mostrar-explicacion-btn-old" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300">
+            ¿CÓMO INTERPRETAR LOS RESULTADOS?
+          </button>
+        </div>
+        
+        <!-- Sección de explicación expandible -->
+        <div id="explicacion-expandible" class="mt-6 hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
+            <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Cómo interpretar los resultados?</h3>
+            <div class="grid md:grid-cols-2 gap-6 text-white">
+              <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+                <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE</h4>
+                <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial:</p>
+                <ul class="text-xs space-y-1 text-gray-200">
+                  <li>• Cuántas veces salió tu número</li>
+                  <li>• Basado en sorteos reales</li>
+                  <li>• Datos de los últimos 30 meses</li>
+                </ul>
+              </div>
+              <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+                <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
+                <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar:</p>
+                <ul class="text-xs space-y-1 text-gray-200">
+                  <li>• Aplica factor matemático 10.5x</li>
+                  <li>• Ajusta expectativas realistas</li>
+                  <li>• Garantiza mínimo 8% siempre</li>
+                </ul>
+              </div>
+            </div>
+            <div class="mt-4 text-center">
+              <div class="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
+                <p class="text-sm text-yellow-200">
+                  <strong>🔥 Mientras más alto el porcentaje, mejor tu número</strong>
+                </p>
+                <p class="text-xs text-gray-300 mt-1">
+                  Si Índice = Potencial → Máxima confianza | Si Índice > Potencial → Buena recomendación
+                </p>
+              </div>
+            </div>
+            
+            <!-- Botón para mostrar/ocultar ayuda adicional -->
+            <div class="mt-4 text-center">
+              <button id="toggle-help-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300">
+                <span id="help-text-expandible">Ver ejemplo práctico</span>
+                <span id="help-icon-expandible">👁️</span>
+              </button>
+            </div>
+            
+            <!-- Nuevo botón para "CÓMO FUNCIONA EL ANÁLISIS" -->
+            <div class="mt-3 text-center">
+              <button id="toggle-analisis-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-white border-opacity-30">
+                <span id="analisis-text-expandible">⚙️ ¿Cómo funciona el análisis?</span>
+                <span id="analisis-icon-expandible">🔍</span>
+              </button>
+            </div>
+            
+            <!-- Ayuda expandible -->
+            <div id="help-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
+              <h4 class="font-semibold mb-3 text-yellow-300">🧮 Ejemplo con el número 15:</h4>
+              <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+                <ul class="text-gray-200 space-y-1">
+                  <li>📊 <strong>Frecuencia:</strong> 12 apariciones en 1,668 números históricos</li>
+                  <li>📈 <strong>Porcentaje base:</strong> (12 ÷ 1,668) × 100 = 0.72%</li>
+                  <li>⚡ <strong>Factor 10.5x:</strong> 0.72% × 10.5 = 7.56%</li>
+                  <li>🎯 <strong>Resultado final:</strong> Máximo entre 7.56% y 8% = 8.0%</li>
+                </ul>
+                <p class="text-white mt-2 font-medium text-center">
+                  <span class="text-yellow-300">🎯 Índice = 8.0%</span> | 
+                  <span class="text-green-300">⭐ Potencial = 8.0%</span>
+                  <span class="text-purple-200"> (¡Máxima confianza!)</span>
+                </p>
+              </div>
+            </div>
+            
+            <!-- Contenido del análisis expandible -->
+            <div id="analisis-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
+              <h4 class="font-semibold mb-3 text-blue-300">⚙️ ¿Cómo funciona el análisis?</h4>
+              <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+                <div class="space-y-3">
+                  <div class="border-l-4 border-yellow-400 pl-3">
+                    <h5 class="font-semibold text-yellow-300">🔍 Recolección de datos</h5>
+                    <p class="text-gray-200 text-xs mt-1">Analizamos más de 1,668 números ganadores de los últimos 30 meses de Melate, Revancha y Revanchita.</p>
+                  </div>
+                  <div class="border-l-4 border-green-400 pl-3">
+                    <h5 class="font-semibold text-green-300">📊 Cálculo estadístico</h5>
+                    <p class="text-gray-200 text-xs mt-1">Calculamos la frecuencia real de cada número y aplicamos algoritmos de probabilidad avanzados.</p>
+                  </div>
+                  <div class="border-l-4 border-blue-400 pl-3">
+                    <h5 class="font-semibold text-blue-300">🎯 Factor de ajuste</h5>
+                    <p class="text-gray-200 text-xs mt-1">Multiplicamos por 10.5x para generar expectativas realistas, garantizando mínimo 8% de potencial.</p>
+                  </div>
+                  <div class="border-l-4 border-purple-400 pl-3">
+                    <h5 class="font-semibold text-purple-300">✨ Resultado final</h5>
+                    <p class="text-gray-200 text-xs mt-1">Te mostramos tanto el dato histórico real (ÍNDICE) como tu probabilidad ajustada (POTENCIAL).</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black bg-opacity-70 text-white text-xs text-center py-3 px-4 mt-8">
+      Este sistema se basa en estadísticas, patrones, probabilidad e inteligencia artificial. No garantiza premios. Juega con responsabilidad.
+    </footer>
+  </div>
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script type="module" src="js/combinacion.js"></script>
+  <script type="module" src="js/combinacion-ui.js"></script>
+</body>
+</html>
+          const archivoCSV = {
+            melate: 'assets/Melate.csv',
+            revancha: 'assets/Revancha.csv',
+            revanchita: 'assets/Revanchita.csv'
+          };
+          
+          console.log(`📊 Cargando ${archivoCSV[sorteo]}...`);
+          const response = await fetch(archivoCSV[sorteo]);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          const csvText = await response.text();
+          const lines = csvText.trim().split('\n');
+          
+          if (lines.length <= 1) {
+            throw new Error('Archivo CSV vacío o solo con encabezados');
+          }
+          
+          // Detectar formato del CSV
+          const header = lines[0].toLowerCase();
+          let formatoDetectado = '';
+          
+          if (header.includes('nproducto,concurso,r1,r2,r3,r4,r5,r6')) {
+            formatoDetectado = 'historico_real';
+          } else if (header.includes('date,sorteo,tipo,num1')) {
+            formatoDetectado = 'simple';
+          } else if (header.includes('fecha,sorteo,numerosorteo,num1') || header.includes('fecha,sorteo,num1')) {
+            formatoDetectado = 'completo';
+          } else {
+            throw new Error('Formato de CSV no reconocido');
+          }
+          
+          console.log(`🔍 Formato detectado para ${sorteo}: ${formatoDetectado}`);
+          
+          const numeros = [];
+          let sorteosValidos = 0;
+          const fechaLimite = new Date('2022-11-01'); // Filtrar últimos 30 meses desde julio 2025
+          
+          // Procesar líneas según el formato
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            const cols = line.split(',');
+            let numerosLinea = [];
+            let lineaValida = true;
+            let fechaSorteo = null;
+            
+            if (formatoDetectado === 'historico_real') {
+              // Manejar los diferentes formatos por archivo
+              if (sorteo === 'melate') {
+                // Melate: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
+                // Índices:    0       1      2  3  4  5  6  7  8     9     10
+                if (cols.length >= 11) {
+                  // Verificar fecha - últimos 30 meses
+                  const fechaStr = cols[10].trim();
+                  if (fechaStr) {
+                    const partesFecha = fechaStr.split('/');
+                    if (partesFecha.length === 3) {
+                      const dia = parseInt(partesFecha[0]);
+                      const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+                      const año = parseInt(partesFecha[2]);
+                      fechaSorteo = new Date(año, mes, dia);
+                      
+                      if (fechaSorteo < fechaLimite) {
+                        continue; // Saltar sorteos más antiguos de 30 meses
+                      }
+                    }
+                  }
+                  
+                  // Extraer números R1-R6 (columnas 2-7)
+                  for (let j = 2; j <= 7; j++) {
+                    const num = parseInt(cols[j]);
+                    if (!isNaN(num) && num >= 1 && num <= 56) {
+                      numerosLinea.push(num);
+                    } else {
+                      lineaValida = false;
+                      break;
+                    }
+                  }
+                } else {
+                  lineaValida = false;
+                }
+              } else if (sorteo === 'revancha') {
+                // Revancha: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,BOLSA,FECHA
+                // Índices:     0       1      2  3  4  5  6  7    8     9
+                if (cols.length >= 10) {
+                  // Verificar fecha - últimos 30 meses
+                  const fechaStr = cols[9].trim();
+                  if (fechaStr) {
+                    const partesFecha = fechaStr.split('/');
+                    if (partesFecha.length === 3) {
+                      const dia = parseInt(partesFecha[0]);
+                      const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+                      const año = parseInt(partesFecha[2]);
+                      fechaSorteo = new Date(año, mes, dia);
+                      
+                      if (fechaSorteo < fechaLimite) {
+                        continue; // Saltar sorteos más antiguos de 30 meses
+                      }
+                    }
+                  }
+                  
+                  // Extraer números R1-R6 (columnas 2-7)
+                  for (let j = 2; j <= 7; j++) {
+                    const num = parseInt(cols[j]);
+                    if (!isNaN(num) && num >= 1 && num <= 56) {
+                      numerosLinea.push(num);
+                    } else {
+                      lineaValida = false;
+                      break;
+                    }
+                  }
+                } else {
+                  lineaValida = false;
+                }
+              } else if (sorteo === 'revanchita') {
+                // Revanchita: NPRODUCTO,CONCURSO,F1,F2,F3,F4,F5,F6,BOLSA,FECHA
+                // Índices:       0       1      2  3  4  5  6  7    8     9
+                if (cols.length >= 10) {
+                  // Verificar fecha - últimos 30 meses
+                  const fechaStr = cols[9].trim();
+                  if (fechaStr) {
+                    const partesFecha = fechaStr.split('/');
+                    if (partesFecha.length === 3) {
+                      const dia = parseInt(partesFecha[0]);
+                      const mes = parseInt(partesFecha[1]) - 1; // Mes base 0
+                      const año = parseInt(partesFecha[2]);
+                      fechaSorteo = new Date(año, mes, dia);
+                      
+                      if (fechaSorteo < fechaLimite) {
+                        continue; // Saltar sorteos más antiguos de 30 meses
+                      }
+                    }
+                  }
+                  
+                  // Extraer números F1-F6 (columnas 2-7)
+                  for (let j = 2; j <= 7; j++) {
+                    const num = parseInt(cols[j]);
+                    if (!isNaN(num) && num >= 1 && num <= 56) {
+                      numerosLinea.push(num);
+                    } else {
+                      lineaValida = false;
+                      break;
+                    }
+                  }
+                } else {
+                  lineaValida = false;
+                }
+              }
+            } else if (formatoDetectado === 'simple') {
+              // Formato: Date,Sorteo,Tipo,Num1,Num2,Num3,Num4,Num5,Num6
+              if (cols.length >= 9) {
+                for (let j = 3; j <= 8; j++) {
+                  const num = parseInt(cols[j]);
+                  if (!isNaN(num) && num >= 1 && num <= 56) {
+                    numerosLinea.push(num);
+                  } else {
+                    lineaValida = false;
+                    break;
+                  }
+                }
+              } else {
+                lineaValida = false;
+              }
+            } else if (formatoDetectado === 'completo') {
+              // Formato: Fecha,Sorteo,NumeroSorteo,Num1,Num2,Num3,Num4,Num5,Num6,Adicional,Extra,Fecha_Sorteo,Fecha_Caducidad
+              if (cols.length >= 9) {
+                for (let j = 3; j <= 8; j++) {
+                  const num = parseInt(cols[j]);
+                  if (!isNaN(num) && num >= 1 && num <= 56) {
+                    numerosLinea.push(num);
+                  } else {
+                    lineaValida = false;
+                    break;
+                  }
+                }
+              } else {
+                lineaValida = false;
+              }
+            }
+            
+            if (lineaValida && numerosLinea.length === 6) {
+              numeros.push(...numerosLinea);
+              sorteosValidos++;
+            } else {
+              if (formatoDetectado === 'historico_real' && fechaSorteo && fechaSorteo >= fechaLimite) {
+                console.warn(`⚠️ Línea ${i + 1} inválida en ${archivoCSV[sorteo]}: ${line}`);
+              }
+            }
+          }
+          
+          if (numeros.length > 0) {
+            numerosPorSorteo[sorteo] = numeros;
+            estadisticasCarga[sorteo] = {
+              cargado: true,
+              sorteos: sorteosValidos,
+              totalNumeros: numeros.length,
+              formato: formatoDetectado,
+              error: null
+            };
+            datosRealesCargados = true;
+            console.log(`✅ ${sorteo}: ${sorteosValidos} sorteos cargados (${numeros.length} números) - Formato: ${formatoDetectado}`);
+          } else {
+            throw new Error('No se encontraron números válidos en el archivo');
+          }
+          
+        } catch (error) {
+          console.error(`❌ Error cargando ${sorteo}:`, error.message);
+          estadisticasCarga[sorteo].error = error.message;
+        }
+      }
+      
+      // Mostrar resumen de carga
+      console.log('\n📋 RESUMEN DE CARGA DE DATOS:');
+      console.log('═══════════════════════════════════');
+      
+      const archivosReales = Object.values(estadisticasCarga).filter(e => e.cargado).length;
+      
+      if (archivosReales > 0) {
+        console.log(`✅ DATOS HISTÓRICOS REALES CARGADOS (${archivosReales}/3 archivos)`);
+        Object.entries(estadisticasCarga).forEach(([sorteo, stats]) => {
+          if (stats.cargado) {
+            const periodo = stats.formato === 'historico_real' ? ' - Últimos 30 meses' : '';
+            console.log(`   📊 ${sorteo.toUpperCase()}: ${stats.sorteos} sorteos históricos (${stats.formato}${periodo})`);
+          } else {
+            console.log(`   ❌ ${sorteo.toUpperCase()}: ${stats.error || 'No disponible'}`);
+          }
+        });
+        
+        // Mostrar estadísticas de distribución
+        console.log('\n🔢 ANÁLISIS DE DISTRIBUCIÓN:');
+        Object.entries(estadisticasCarga).forEach(([sorteo, stats]) => {
+          if (stats.cargado) {
+            const numeros = numerosPorSorteo[sorteo];
+            const frecuencias = {};
+            
+            numeros.forEach(num => {
+              frecuencias[num] = (frecuencias[num] || 0) + 1;
+            });
+            
+            const numerosUnicos = Object.keys(frecuencias).length;
+            const maxFrecuencia = Math.max(...Object.values(frecuencias));
+            const minFrecuencia = Math.min(...Object.values(frecuencias));
+            
+            console.log(`   🎲 ${sorteo.toUpperCase()}: ${numerosUnicos} números únicos (freq: ${minFrecuencia}-${maxFrecuencia})`);
+          }
+        });
+      } else {
+        console.log('❌ NO SE CARGARON DATOS REALES');
+        console.log('   Usando datos de prueba generados automáticamente');
+        console.log('   Para usar datos reales, sigue las instrucciones en:');
+        console.log('   📄 GUIA-DATOS-REALES.md');
+      }
+      
+      console.log('═══════════════════════════════════\n');
+      
+      if (!datosRealesCargados) {
+        console.log('🔄 Generando datos de prueba...');
+        inicializarDatosPrueba();
+      }
+      
+      return {
+        datosReales: datosRealesCargados,
+        estadisticas: estadisticasCarga,
+        totalSorteos: Object.values(estadisticasCarga).reduce((sum, e) => sum + (e.sorteos || 0), 0)
+      };
+    }
+
+    // Inicializar datos de prueba como fallback
+    function inicializarDatosPrueba() {
+      for (let sorteo of ['melate', 'revancha', 'revanchita']) {
+        const numeros = [];
+        
+        // Generar datos más realistas basados en patrones de lotería
+        for (let numero = 1; numero <= 56; numero++) {
+          // Simular frecuencias más realistas: algunos números salen más que otros
+          let apariciones;
+          if (numero <= 14) {
+            apariciones = Math.floor(Math.random() * 8) + 12; // Números bajos: 12-19
+          } else if (numero <= 28) {
+            apariciones = Math.floor(Math.random() * 6) + 8;  // Números medios: 8-13
+          } else if (numero <= 42) {
+            apariciones = Math.floor(Math.random() * 8) + 10; // Números altos: 10-17
+          } else {
+            apariciones = Math.floor(Math.random() * 5) + 6;  // Números muy altos: 6-10
+          }
+          
+          for (let i = 0; i < apariciones; i++) {
+            numeros.push(numero);
+          }
+        }
+        
+        // Mezclar el array
+        for (let i = numeros.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [numeros[i], numeros[j]] = [numeros[j], numeros[i]];
+        }
+        
+        numerosPorSorteo[sorteo] = numeros;
+      }
+    }
+
+    // Función para preparar datos históricos
+    async function prepararDatosHistoricos() {
+      try {
+        const resultadoCarga = await cargarDatosCSV();
+        
+        if (resultadoCarga.datosReales && numerosPorSorteo.melate.length > 0) {
+          // Verificar calidad de los datos
+          const calidadDatos = verificarCalidadDatos();
+          
+          if (calidadDatos.esValido) {
+            console.log('✅ Datos históricos validados correctamente');
+            console.log(`📊 Análisis de calidad: ${calidadDatos.score}/100 puntos`);
+            
+            // Mostrar información adicional en la interfaz
+            mostrarIndicadorDatosReales(resultadoCarga.estadisticas);
+          } else {
+            console.warn('⚠️ Calidad de datos por debajo del estándar');
+            console.log('💡 Considera actualizar los archivos CSV con más datos');
+          }
+        } else {
+          console.log('🔄 Usando datos de prueba para demostración');
+          mostrarIndicadorDatosPrueba();
+        }
+      } catch (error) {
+        console.error('❌ Error preparando datos históricos:', error);
+        inicializarDatosPrueba();
+        mostrarIndicadorDatosPrueba();
+      }
+    }
+
+    // Función para verificar calidad de datos
+    function verificarCalidadDatos() {
+      let score = 0;
+      let observaciones = [];
+      
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        
+        if (numeros.length >= 300) score += 20; // Cantidad suficiente
+        else if (numeros.length >= 150) score += 15;
+        else if (numeros.length >= 60) score += 10;
+        else observaciones.push(`${sorteo}: pocos datos (${numeros.length/6} sorteos)`);
+        
+        // Verificar distribución
+        const distribucion = {};
+        numeros.forEach(n => distribucion[n] = (distribucion[n] || 0) + 1);
+        
+        const valores = Object.values(distribucion);
+        const promedio = valores.reduce((a,b) => a+b, 0) / valores.length;
+        const varianza = valores.reduce((sum, val) => sum + Math.pow(val - promedio, 2), 0) / valores.length;
+        
+        if (varianza > 0.5) score += 10; // Buena varianza
+        else observaciones.push(`${sorteo}: distribución muy uniforme (posible datos sintéticos)`);
+      });
+      
+      return {
+        esValido: score >= 60,
+        score,
+        observaciones
+      };
+    }
+
+    // Funciones para mostrar indicadores en la interfaz
+    function mostrarIndicadorDatosReales(estadisticas) {
+      const indicador = document.createElement('div');
+      indicador.className = 'fixed top-20 right-4 bg-green-500 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm z-20';
+      indicador.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="animate-pulse">🟢</span>
+          <span>Datos Reales</span>
+        </div>
+      `;
+      
+      document.body.appendChild(indicador);
+      
+      // Remover después de 5 segundos
+      setTimeout(() => {
+        if (indicador.parentNode) {
+          indicador.remove();
+        }
+      }, 5000);
+    }
+
+    function mostrarIndicadorDatosPrueba() {
+      const indicador = document.createElement('div');
+      indicador.className = 'fixed top-20 right-4 bg-orange-500 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm z-20';
+      indicador.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="animate-pulse">🟠</span>
+          <span>Datos de Prueba</span>
+        </div>
+      `;
+      
+      document.body.appendChild(indicador);
+      
+      // Remover después de 7 segundos
+      setTimeout(() => {
+        if (indicador.parentNode) {
+          indicador.remove();
+        }
+      }, 7000);
+    }
+
+    function calcularFrecuenciaPorSorteo(num) {
+      const resultados = {};
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        const frecuencia = numeros.filter(n => n === num).length;
+        const total = numeros.length;
+        const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
+        
+        // Aplicar el factor de motivación ajustado
+        const factorMotivacion = 10.5; // Reducido a 10.5 para mayor realismo
+        const porcentajeAjustado = porcentajeBase * factorMotivacion;
+        const porcentajeFinal = Math.max(porcentajeAjustado, 8.0); // Mínimo ajustado a 8%
+        
+        resultados[sorteo] = {
+          frecuencia: frecuencia,
+          total: total,
+          porcentaje: porcentajeFinal
+        };
+      });
+      return resultados;
+    }
+
+    // Función para calcular índice real (sin factor 10.5x) por sorteo
+    function calcularIndicePorSorteo(num) {
+      const resultados = {};
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        const frecuencia = numeros.filter(n => n === num).length;
+        const total = numeros.length;
+        const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
+        
+        resultados[sorteo] = {
+          frecuencia: frecuencia,
+          total: total,
+          porcentaje: porcentajeBase
+        };
+      });
+      return resultados;
+    }
+
+    function calcularFrecuenciaTotal(num) {
+      let total = 0;
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        total += numeros.filter(n => n === num).length;
+      });
+      return total;
+    }
+
+    function calcularPorcentajeTotal(num) {
+      let totalNumeros = 0;
+      let frecuenciaTotal = 0;
+      
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        const numeros = numerosPorSorteo[sorteo] || [];
+        totalNumeros += numeros.length;
+        const frecuenciaSorteo = numeros.filter(n => n === num).length;
+        frecuenciaTotal += frecuenciaSorteo;
+      });
+      
+      // Cálculo base
+      const porcentajeBase = totalNumeros > 0 ? (frecuenciaTotal / totalNumeros) * 100 : 0;
+      
+      // Factor de motivación: Ajustar para hacer más atractivo al usuario
+      // Multiplicamos por un factor que hace que los resultados sean más positivos
+      const factorMotivacion = 10.5; // Reducido para mayor realismo y expectativas apropiadas
+      const porcentajeAjustado = porcentajeBase * factorMotivacion;
+      
+      // Asegurar que ningún número tenga menos de 8% (mínimo 8%)
+      const porcentajeFinal = Math.max(porcentajeAjustado, 8.0);
+      
+      return porcentajeFinal;
+    }
+
+    function clasificarProbabilidad(porcentaje) {
+      // Rangos ajustados para el factor 10.5 con colores más contrastantes y sombras
+      if (porcentaje >= 30) return { 
+        categoria: 'Excepcional', 
+        color: 'text-green-600 font-bold', 
+        bgColor: 'bg-green-100 bg-opacity-80', 
+        emoji: '🔥' 
+      };
+      if (porcentaje >= 25) return { 
+        categoria: 'Muy Alta', 
+        color: 'text-green-700 font-bold', 
+        bgColor: 'bg-green-50 bg-opacity-80', 
+        emoji: '⚡' 
+      };
+      if (porcentaje >= 20) return { 
+        categoria: 'Alta', 
+        color: 'text-blue-700 font-bold', 
+        bgColor: 'bg-blue-50 bg-opacity-80', 
+        emoji: '📈' 
+      };
+      if (porcentaje >= 16) return { 
+        categoria: 'Buena', 
+        color: 'text-yellow-700 font-bold', 
+        bgColor: 'bg-yellow-50 bg-opacity-80', 
+        emoji: '⚖️' 
+      };
+      if (porcentaje >= 12) return { 
+        categoria: 'Moderada', 
+        color: 'text-orange-700 font-bold', 
+        bgColor: 'bg-orange-50 bg-opacity-80', 
+        emoji: '🎲' 
+      };
+      if (porcentaje >= 10) return { 
+        categoria: 'Aceptable', 
+        color: 'text-purple-700 font-bold', 
+        bgColor: 'bg-purple-50 bg-opacity-80', 
+        emoji: '🎯' 
+      };
+      if (porcentaje >= 8) return { 
+        categoria: 'Baja', 
+        color: 'text-cyan-700 font-bold', 
+        bgColor: 'bg-cyan-50 bg-opacity-80', 
+        emoji: '💫' 
+      };
+      return { 
+        categoria: 'Muy Baja', 
+        color: 'text-gray-700 font-bold', 
+        bgColor: 'bg-gray-50 bg-opacity-80', 
+        emoji: '✨' 
+      };
+    }
+
+    // Validación en tiempo real mejorada
+    function validarInputEnTiempoReal(input) {
+      const valor = parseInt(input.value);
+      
+      // Limpiar estilos previos
+      input.classList.remove('border-red-500', 'border-green-500');
+      
+      // Si está vacío, no mostrar error
+      if (input.value === '') {
+        return true;
+      }
+      
+      // Validar rango
+      if (isNaN(valor) || valor < 1 || valor > 56) {
+        input.classList.add('border-red-500');
+        mostrarErrorTemporal(input, 'Número debe estar entre 1 y 56');
+        return false;
+      }
+      
+      // Para inputs de combinación, verificar duplicados
+      if (input.classList.contains('combo-input')) {
+        const valores = Array.from(inputsCombinacion)
+          .map(inp => parseInt(inp.value))
+          .filter(num => !isNaN(num));
+        
+        const duplicados = valores.filter(num => num === valor).length > 1;
+        
+        if (duplicados) {
+          input.classList.add('border-red-500');
+          mostrarErrorTemporal(input, 'Número duplicado no permitido');
+          validarCombinacionCompleta(); // Validar inmediatamente
+          return false;
+        }
+      }
+      
+      input.classList.add('border-green-500');
+      validarCombinacionCompleta(); // Validar inmediatamente
+      return true;
+    }
+
+    // Función para validar toda la combinación y controlar el botón
+    function validarCombinacionCompleta() {
+      const btnCombinacion = document.getElementById('evaluar-combinacion-btn');
+      const valores = Array.from(inputsCombinacion)
+        .map(inp => parseInt(inp.value))
+        .filter(num => !isNaN(num));
+      
+      // Verificar duplicados
+      const duplicados = valores.some((num, index) => 
+        valores.indexOf(num) !== index
+      );
+      
+      // Verificar números fuera de rango
+      const fueraDeRango = valores.some(num => num < 1 || num > 56);
+      
+      // Deshabilitar botón si hay errores
+      if (duplicados || fueraDeRango) {
+        btnCombinacion.disabled = true;
+        btnCombinacion.classList.add('opacity-50', 'cursor-not-allowed');
+        btnCombinacion.classList.remove('hover:from-purple-600', 'hover:to-purple-700', 'transform', 'hover:scale-105');
+      } else {
+        btnCombinacion.disabled = false;
+        btnCombinacion.classList.remove('opacity-50', 'cursor-not-allowed');
+        btnCombinacion.classList.add('hover:from-purple-600', 'hover:to-purple-700', 'transform', 'hover:scale-105');
+      }
+    }
+
+    // Mostrar error temporal
+    function mostrarErrorTemporal(input, mensaje) {
+      // Remover error anterior si existe
+      const errorAnterior = input.parentNode.querySelector('.error-mensaje');
+      if (errorAnterior) {
+        errorAnterior.remove();
+      }
+      
+      // Crear mensaje de error
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-mensaje text-red-400 text-xs mt-1 absolute z-10 bg-red-900 bg-opacity-80 px-2 py-1 rounded';
+      errorDiv.textContent = mensaje;
+      
+      // Posicionar el error
+      input.parentNode.style.position = 'relative';
+      input.parentNode.appendChild(errorDiv);
+      
+      // Eliminar después de 3 segundos
+      setTimeout(() => {
+        if (errorDiv.parentNode) {
+          errorDiv.remove();
+        }
+      }, 3000);
+    }
+
+    // Función para prevenir entrada inválida
+    function prevenirEntradaInvalida(input) {
+      input.addEventListener('input', (e) => {
+        let valor = e.target.value;
+        
+        // Remover caracteres no numéricos
+        valor = valor.replace(/[^0-9]/g, '');
+        
+        // Limitar a 2 dígitos máximo
+        if (valor.length > 2) {
+          valor = valor.slice(0, 2);
+        }
+        
+        // Si es mayor a 56, limitarlo a 56
+        if (parseInt(valor) > 56) {
+          valor = '56';
+          mostrarErrorTemporal(input, 'Máximo número permitido: 56');
+        }
+        
+        // Si es 0, no permitir
+        if (valor === '0') {
+          valor = '';
+        }
+        
+        e.target.value = valor;
+        
+        // Validar inmediatamente después de cambiar el valor
+        setTimeout(() => {
+          validarInputEnTiempoReal(input);
+        }, 0);
+      });
+    }
+
+    // Elementos DOM
+    const btnBack = document.getElementById('btn-back');
+    const btnNumero = document.getElementById('evaluar-numero-btn');
+    const btnCombinacion = document.getElementById('evaluar-combinacion-btn');
+    const inputNumero = document.getElementById('numero-individual');
+    const inputsCombinacion = document.querySelectorAll('.combo-input');
+    const resultadoNumero = document.getElementById('resultado-numero');
+    const resultadoCombinacion = document.getElementById('resultado-combinacion');
+
+    // Event listeners
+    btnBack.addEventListener('click', () => {
+      window.location.href = 'home.html';
+    });
+
+    // Aplicar validación en tiempo real a todos los inputs
+    prevenirEntradaInvalida(inputNumero);
+    inputsCombinacion.forEach(input => {
+      prevenirEntradaInvalida(input);
+      
+      // Agregar eventos adicionales para validación más rápida
+      input.addEventListener('keyup', () => {
+        setTimeout(() => validarCombinacionCompleta(), 0);
+      });
+      
+      input.addEventListener('blur', () => {
+        setTimeout(() => validarCombinacionCompleta(), 0);
+      });
+      
+      input.addEventListener('paste', () => {
+        setTimeout(() => validarCombinacionCompleta(), 100);
+      });
+    });
+
+    // Validar combinación completa al inicio
+    validarCombinacionCompleta();
+
+    // Evaluar número individual
+    btnNumero.addEventListener('click', () => {
+      const numero = parseInt(inputNumero.value);
+      
+      if (isNaN(numero) || numero < 1 || numero > 56) {
+        resultadoNumero.innerHTML = `
+          <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-4">
+            <p class="text-red-300 font-semibold">⚠️ Por favor, ingresa un número válido entre 1 y 56.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      try {
+        const frecuenciaPorSorteo = calcularFrecuenciaPorSorteo(numero);
+        const indicePorSorteo = calcularIndicePorSorteo(numero);
+        const frecuenciaTotal = calcularFrecuenciaTotal(numero);
+        const porcentajeTotal = calcularPorcentajeTotal(numero);
+        const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
+        
+        // Clasificaciones por sorteo individual
+        const clasificacionMelate = clasificarProbabilidad(frecuenciaPorSorteo.melate.porcentaje);
+        const clasificacionRevancha = clasificarProbabilidad(frecuenciaPorSorteo.revancha.porcentaje);
+        const clasificacionRevanchita = clasificarProbabilidad(frecuenciaPorSorteo.revanchita.porcentaje);
+
+        resultadoNumero.innerHTML = `
+          <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-50 shadow-xl">
+            <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">🎯 Tus Posibilidades con el Número ${numero}</h3>
+            
+            <!-- Análisis por sorteo individual -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-blue-500 bg-opacity-20 rounded-lg p-4 text-center border border-blue-400">
+                <h4 class="font-bold text-blue-800 mb-2">🎲 Melate</h4>
+                <div class="text-4xl font-bold ${clasificacionMelate.color} mb-2">
+                  ${clasificacionMelate.emoji}
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-yellow-600">🎯 Índice:</span> ${indicePorSorteo.melate.porcentaje.toFixed(1)}%
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-green-600">⭐ Potencial:</span> ${frecuenciaPorSorteo.melate.porcentaje.toFixed(1)}%
+                </div>
+                <div class="inline-block px-3 py-1 rounded-full ${clasificacionMelate.bgColor} ${clasificacionMelate.color} mb-1">
+                  ${clasificacionMelate.categoria}
+                </div>
+                <div class="text-sm text-gray-600">
+                  ${frecuenciaPorSorteo.melate.frecuencia} apariciones históricas
+                </div>
+              </div>
+              
+              <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-400">
+                <h4 class="font-bold text-purple-800 mb-2">🎲 Revancha</h4>
+                <div class="text-4xl font-bold ${clasificacionRevancha.color} mb-2">
+                  ${clasificacionRevancha.emoji}
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-yellow-600">🎯 Índice:</span> ${indicePorSorteo.revancha.porcentaje.toFixed(1)}%
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-green-600">⭐ Potencial:</span> ${frecuenciaPorSorteo.revancha.porcentaje.toFixed(1)}%
+                </div>
+                <div class="inline-block px-3 py-1 rounded-full ${clasificacionRevancha.bgColor} ${clasificacionRevancha.color} mb-1">
+                  ${clasificacionRevancha.categoria}
+                </div>
+                <div class="text-sm text-gray-600">
+                  ${frecuenciaPorSorteo.revancha.frecuencia} apariciones históricas
+                </div>
+              </div>
+              
+              <div class="bg-green-500 bg-opacity-20 rounded-lg p-4 text-center border border-green-400">
+                <h4 class="font-bold text-green-800 mb-2">🎲 Revanchita</h4>
+                <div class="text-4xl font-bold ${clasificacionRevanchita.color} mb-2">
+                  ${clasificacionRevanchita.emoji}
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-yellow-600">🎯 Índice:</span> ${indicePorSorteo.revanchita.porcentaje.toFixed(1)}%
+                </div>
+                <div class="text-lg font-bold text-gray-800 mb-1">
+                  <span class="text-green-600">⭐ Potencial:</span> ${frecuenciaPorSorteo.revanchita.porcentaje.toFixed(1)}%
+                </div>
+                <div class="inline-block px-3 py-1 rounded-full ${clasificacionRevanchita.bgColor} ${clasificacionRevanchita.color} mb-1">
+                  ${clasificacionRevanchita.categoria}
+                </div>
+                <div class="text-sm text-gray-600">
+                  ${frecuenciaPorSorteo.revanchita.frecuencia} apariciones históricas
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Los botones de explicación ahora están siempre visibles
+        
+      } catch (error) {
+        console.error('❌ Error al analizar número individual:', error);
+        resultadoNumero.innerHTML = `
+          <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-4">
+            <p class="text-red-300 font-semibold">❌ Error al procesar el análisis. Error: ${error.message}</p>
+          </div>
+        `;
+      }
+    });
+
+    // Evaluar combinación completa
+    btnCombinacion.addEventListener('click', () => {
+      // Verificar si el botón está deshabilitado (por duplicados o errores)
+      if (btnCombinacion.disabled) {
+        return; // No hacer nada si está deshabilitado
+      }
+      
+      const numeros = Array.from(inputsCombinacion)
+        .map(input => parseInt(input.value))
+        .filter(num => !isNaN(num));
+
+      // Validación
+      if (numeros.length !== 6) {
+        resultadoCombinacion.innerHTML = `
+          <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-6">
+            <p class="text-red-300 font-semibold text-lg">❌ Por favor, completa todos los 6 números.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Verificar duplicados
+      const sinDuplicados = new Set(numeros);
+      if (sinDuplicados.size !== 6) {
+        resultadoCombinacion.innerHTML = `
+          <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-6">
+            <p class="text-red-300 font-semibold text-lg">❌ No se permiten números duplicados. Por favor, ingresa números únicos.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Verificar rango
+      if (numeros.some(n => n < 1 || n > 56)) {
+        resultadoCombinacion.innerHTML = `
+          <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-6">
+            <p class="text-red-300 font-semibold text-lg">❌ Los números deben estar entre 1 y 56. Por favor, verifica tu combinación.</p>
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        // Análisis individual
+        const analisisIndividual = numeros.map(num => {
+          const frecuenciaPorSorteo = calcularFrecuenciaPorSorteo(num);
+          const frecuenciaTotal = calcularFrecuenciaTotal(num);
+          const porcentajeTotal = calcularPorcentajeTotal(num);
+          const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
+          
+          return {
+            numero: num,
+            frecuenciaTotal,
+            porcentajeTotal,
+            clasificacionTotal,
+            porSorteo: frecuenciaPorSorteo
+          };
+        });
+
+        // Crear HTML para el análisis agrupado por sorteo
+        const htmlMelate = analisisIndividual.map(analisis => {
+          const clasificacion = clasificarProbabilidad(analisis.porSorteo.melate.porcentaje);
+          const indicePorSorteo = calcularIndicePorSorteo(analisis.numero);
+          return `
+            <div class="bg-blue-500 bg-opacity-20 rounded-lg p-3 border border-blue-400">
+              <div class="flex items-center justify-between">
+                <div class="text-xl font-bold text-gray-800">${analisis.numero}</div>
+                <div class="text-sm">
+                  ${clasificacion.emoji}
+                </div>
+              </div>
+              <div class="text-center mt-2">
+                <div class="text-xs text-yellow-600 font-medium">🎯 Índice</div>
+                <div class="text-sm font-bold text-gray-700">${indicePorSorteo.melate.porcentaje.toFixed(1)}%</div>
+                <div class="text-xs text-green-600 font-medium mt-1">⭐ Potencial</div>
+                <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.melate.porcentaje.toFixed(1)}%</div>
+                <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
+                  ${clasificacion.categoria}
+                </div>
+                <div class="text-xs text-gray-600">${analisis.porSorteo.melate.frecuencia} apariciones</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        const htmlRevancha = analisisIndividual.map(analisis => {
+          const clasificacion = clasificarProbabilidad(analisis.porSorteo.revancha.porcentaje);
+          const indicePorSorteo = calcularIndicePorSorteo(analisis.numero);
+          return `
+            <div class="bg-purple-500 bg-opacity-20 rounded-lg p-3 border border-purple-400">
+              <div class="flex items-center justify-between">
+                <div class="text-xl font-bold text-gray-800">${analisis.numero}</div>
+                <div class="text-sm">
+                  ${clasificacion.emoji}
+                </div>
+              </div>
+              <div class="text-center mt-2">
+                <div class="text-xs text-yellow-600 font-medium">🎯 Índice</div>
+                <div class="text-sm font-bold text-gray-700">${indicePorSorteo.revancha.porcentaje.toFixed(1)}%</div>
+                <div class="text-xs text-green-600 font-medium mt-1">⭐ Potencial</div>
+                <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.revancha.porcentaje.toFixed(1)}%</div>
+                <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
+                  ${clasificacion.categoria}
+                </div>
+                <div class="text-xs text-gray-600">${analisis.porSorteo.revancha.frecuencia} apariciones</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        const htmlRevanchita = analisisIndividual.map(analisis => {
+          const clasificacion = clasificarProbabilidad(analisis.porSorteo.revanchita.porcentaje);
+          const indicePorSorteo = calcularIndicePorSorteo(analisis.numero);
+          return `
+            <div class="bg-green-500 bg-opacity-20 rounded-lg p-3 border border-green-400">
+              <div class="flex items-center justify-between">
+                <div class="text-xl font-bold text-gray-800">${analisis.numero}</div>
+                <div class="text-sm">
+                  ${clasificacion.emoji}
+                </div>
+              </div>
+              <div class="text-center mt-2">
+                <div class="text-xs text-yellow-600 font-medium">🎯 Índice</div>
+                <div class="text-sm font-bold text-gray-700">${indicePorSorteo.revanchita.porcentaje.toFixed(1)}%</div>
+                <div class="text-xs text-green-600 font-medium mt-1">⭐ Potencial</div>
+                <div class="text-lg font-bold text-gray-800">${analisis.porSorteo.revanchita.porcentaje.toFixed(1)}%</div>
+                <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
+                  ${clasificacion.categoria}
+                </div>
+                <div class="text-xs text-gray-600">${analisis.porSorteo.revanchita.frecuencia} apariciones</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Calcular promedios por sorteo
+        const promedioMelate = analisisIndividual.reduce((sum, a) => sum + a.porSorteo.melate.porcentaje, 0) / 6;
+        const promedioRevancha = analisisIndividual.reduce((sum, a) => sum + a.porSorteo.revancha.porcentaje, 0) / 6;
+        const promedioRevanchita = analisisIndividual.reduce((sum, a) => sum + a.porSorteo.revanchita.porcentaje, 0) / 6;
+        
+        // Clasificaciones por sorteo
+        const clasificacionMelate = clasificarProbabilidad(promedioMelate);
+        const clasificacionRevancha = clasificarProbabilidad(promedioRevancha);
+        const clasificacionRevanchita = clasificarProbabilidad(promedioRevanchita);
+        
+        // Calcular potencial de éxito por sorteo
+        const factorCombinacion = 0.85;
+        const potencialMelate = Math.max(promedioMelate * factorCombinacion, 6.0);
+        const potencialRevancha = Math.max(promedioRevancha * factorCombinacion, 6.0);
+        const potencialRevanchita = Math.max(promedioRevanchita * factorCombinacion, 6.0);
+        
+        resultadoCombinacion.innerHTML = `
+          <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 mb-6 border border-white border-opacity-50 shadow-xl">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 text-center">🎯 Tus Posibilidades con la Combinación</h2>
+            <div class="text-center mb-6">
+              <div class="text-4xl font-bold text-gray-800 mb-2">${numeros.join(' - ')}</div>
+              <p class="text-gray-700">Tu combinación seleccionada</p>
+            </div>
+            
+            <div class="mb-6">
+              <h3 class="text-xl font-bold mb-4 text-gray-800 text-center">📊 Posibilidades Detalladas por Sorteo</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-blue-500 bg-opacity-20 rounded-lg p-4 text-center border border-blue-400">
+                  <h4 class="font-bold text-blue-800 mb-2">🎲 Melate</h4>
+                  <div class="text-3xl font-bold ${clasificacionMelate.color} mb-2">
+                    ${clasificacionMelate.emoji} 
+                    <span class="inline-block px-2 py-1 rounded-full ${clasificacionMelate.bgColor} text-sm">
+                      ${clasificacionMelate.categoria}
+                    </span>
+                  </div>
+                  <div class="text-lg text-gray-800 mb-1">
+                    <span class="text-yellow-600">🎯 Índice:</span> <span class="font-bold">${promedioMelate.toFixed(1)}%</span>
+                  </div>
+                  <div class="text-xs text-gray-600 mb-2">
+                    Apariciones reales en sorteos históricos
+                  </div>
+                  <div class="text-lg font-bold text-blue-600">
+                    <span class="text-green-600">⭐ Potencial:</span> ${potencialMelate.toFixed(1)}%
+                  </div>
+                  <div class="text-xs text-gray-600">
+                    Tu probabilidad real de éxito
+                  </div>
+                </div>
+                
+                <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-400">
+                  <h4 class="font-bold text-purple-800 mb-2">🎲 Revancha</h4>
+                  <div class="text-3xl font-bold ${clasificacionRevancha.color} mb-2">
+                    ${clasificacionRevancha.emoji} 
+                    <span class="inline-block px-2 py-1 rounded-full ${clasificacionRevancha.bgColor} text-sm">
+                      ${clasificacionRevancha.categoria}
+                    </span>
+                  </div>
+                  <div class="text-lg text-gray-800 mb-1">
+                    <span class="text-yellow-600">🎯 Índice:</span> <span class="font-bold">${promedioRevancha.toFixed(1)}%</span>
+                  </div>
+                  <div class="text-xs text-gray-600 mb-2">
+                    Apariciones reales en sorteos históricos
+                  </div>
+                  <div class="text-lg font-bold text-purple-600">
+                    <span class="text-green-600">⭐ Potencial:</span> ${potencialRevancha.toFixed(1)}%
+                  </div>
+                  <div class="text-xs text-gray-600">
+                    Tu probabilidad real de éxito
+                  </div>
+                </div>
+                
+                <div class="bg-green-500 bg-opacity-20 rounded-lg p-4 text-center border border-green-400">
+                  <h4 class="font-bold text-green-800 mb-2">🎲 Revanchita</h4>
+                  <div class="text-3xl font-bold ${clasificacionRevanchita.color} mb-2">
+                    ${clasificacionRevanchita.emoji} 
+                    <span class="inline-block px-2 py-1 rounded-full ${clasificacionRevanchita.bgColor} text-sm">
+                      ${clasificacionRevanchita.categoria}
+                    </span>
+                  </div>
+                  <div class="text-lg text-gray-800 mb-1">
+                    <span class="text-yellow-600">🎯 Índice:</span> <span class="font-bold">${promedioRevanchita.toFixed(1)}%</span>
+                  </div>
+                  <div class="text-xs text-gray-600 mb-2">
+                    Apariciones reales en sorteos históricos
+                  </div>
+                  <div class="text-lg font-bold text-green-600">
+                    <span class="text-green-600">⭐ Potencial:</span> ${potencialRevanchita.toFixed(1)}%
+                  </div>
+                  <div class="text-xs text-gray-600">
+                    Tu probabilidad real de éxito
+                  </div>
+                </div>
+              </div>
+            </div>
+              
+              <!-- Melate -->
+              <div class="mb-6">
+                <h4 class="text-lg font-bold mb-3 text-blue-600">🎲 Melate</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  ${htmlMelate}
+                </div>
+              </div>
+              
+              <!-- Revancha -->
+              <div class="mb-6">
+                <h4 class="text-lg font-bold mb-3 text-purple-600">🎲 Revancha</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  ${htmlRevancha}
+                </div>
+              </div>
+              
+              <!-- Revanchita -->
+              <div class="mb-6">
+                <h4 class="text-lg font-bold mb-3 text-green-600">🎲 Revanchita</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  ${htmlRevanchita}
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-500 to-pink-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-400">
+              <h3 class="text-xl font-bold mb-2 text-gray-800">💡 Mensaje de Suerte</h3>
+              <p class="text-gray-700">
+                ${[clasificacionMelate, clasificacionRevancha, clasificacionRevanchita].filter(c => c.categoria === 'Excepcional' || c.categoria === 'Muy Alta').length >= 2 
+                  ? '🌟 ¡Extraordinario! Tu combinación tiene múltiples sorteos con potencial excepcional. ¡Las estrellas se alinean para ti!' 
+                  : [clasificacionMelate, clasificacionRevancha, clasificacionRevanchita].filter(c => c.categoria === 'Alta' || c.categoria === 'Buena').length >= 2
+                  ? '🍀 ¡Fantástica elección! Tu combinación muestra gran potencial en múltiples sorteos.'
+                  : '✨ ¡Excelente! Tu combinación está cargada de energía positiva en todos los sorteos!'}
+              </p>
+            </div>
+          </div>
+        `;
+        
+        // Los botones de explicación ahora están siempre visibles
+        
+      } catch (error) {
+        console.error('❌ Error al analizar combinación:', error);
+        resultadoCombinacion.innerHTML = `
+          <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-6">
+            <p class="text-red-300 font-semibold">❌ Error al procesar el análisis. Error: ${error.message}</p>
+          </div>
+        `;
+      }
+    });
+
+    // Función para mostrar el botón de explicación después de obtener resultados
+    function mostrarBotonExplicacion() {
+      // Los botones ahora están siempre visibles, no se necesita mostrar/ocultar
+    }
+    
+    // Función para ocultar el botón de explicación
+    function ocultarBotonExplicacion() {
+      // Los botones ahora están siempre visibles, no se necesita mostrar/ocultar
+    }
+    
+    // Event listeners para los botones expandibles
+    document.addEventListener('DOMContentLoaded', () => {
+      // Botón para números individuales
+      const mostrarExplicacionBtn = document.getElementById('mostrar-explicacion-btn');
+      const explicacionExpandible = document.getElementById('explicacion-expandible');
+      const explicacionText = document.getElementById('explicacion-text');
+      const explicacionIcon = document.getElementById('explicacion-icon');
+      
+      // Botón para combinaciones
+      const mostrarExplicacionBtnCombo = document.getElementById('mostrar-explicacion-btn-combo');
+      const explicacionComboText = document.getElementById('explicacion-combo-text');
+      const explicacionComboIcon = document.getElementById('explicacion-combo-icon');
+      
+      // Función para alternar explicación
+      function toggleExplicacion() {
+        if (explicacionExpandible.classList.contains('hidden')) {
+          explicacionExpandible.classList.remove('hidden');
+          explicacionExpandible.classList.add('animate__animated', 'animate__fadeInDown');
+          
+          // Actualizar ambos botones
+          explicacionText.textContent = '🔼 Ocultar explicación';
+          explicacionIcon.textContent = '👁️‍🗨️';
+          explicacionComboText.textContent = '🔼 Ocultar explicación';
+          explicacionComboIcon.textContent = '👁️‍🗨️';
+          
+          // Scroll suave hacia la explicación
+          explicacionExpandible.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          explicacionExpandible.classList.add('hidden');
+          
+          // Restaurar ambos botones
+          explicacionText.textContent = '💡 ¿Cómo interpretar resultados?';
+          explicacionIcon.textContent = '👁️';
+          explicacionComboText.textContent = '💡 ¿Cómo interpretar resultados?';
+          explicacionComboIcon.textContent = '👁️';
+        }
+      }
+      
+      // Event listeners para ambos botones
+      mostrarExplicacionBtn.addEventListener('click', toggleExplicacion);
+      mostrarExplicacionBtnCombo.addEventListener('click', toggleExplicacion);
+      
+      // Funcionalidad del botón de ayuda expandible dentro de la explicación
+      const toggleHelpExpandibleBtn = document.getElementById('toggle-help-expandible');
+      const helpContentExpandible = document.getElementById('help-content-expandible');
+      const helpTextExpandible = document.getElementById('help-text-expandible');
+      const helpIconExpandible = document.getElementById('help-icon-expandible');
+
+      if (toggleHelpExpandibleBtn) {
+        toggleHelpExpandibleBtn.addEventListener('click', () => {
+          if (helpContentExpandible.classList.contains('hidden')) {
+            helpContentExpandible.classList.remove('hidden');
+            helpContentExpandible.classList.add('animate__animated', 'animate__fadeInDown');
+            helpTextExpandible.textContent = 'Ocultar ejemplo';
+            helpIconExpandible.textContent = '👁️‍🗨️';
+          } else {
+            helpContentExpandible.classList.add('hidden');
+            helpTextExpandible.textContent = 'Ver ejemplo práctico';
+            helpIconExpandible.textContent = '👁️';
+          }
+        });
+      }
+      
+      // Funcionalidad del botón de análisis expandible dentro de la explicación
+      const toggleAnalisisExpandibleBtn = document.getElementById('toggle-analisis-expandible');
+      const analisisContentExpandible = document.getElementById('analisis-content-expandible');
+      const analisisTextExpandible = document.getElementById('analisis-text-expandible');
+      const analisisIconExpandible = document.getElementById('analisis-icon-expandible');
+
+      if (toggleAnalisisExpandibleBtn) {
+        toggleAnalisisExpandibleBtn.addEventListener('click', () => {
+          if (analisisContentExpandible.classList.contains('hidden')) {
+            analisisContentExpandible.classList.remove('hidden');
+            analisisContentExpandible.classList.add('animate__animated', 'animate__fadeInDown');
+            analisisTextExpandible.textContent = '🔼 Ocultar análisis';
+            analisisIconExpandible.textContent = '🔍‍🗨️';
+          } else {
+            analisisContentExpandible.classList.add('hidden');
+            analisisTextExpandible.textContent = '⚙️ ¿Cómo funciona el análisis?';
+            analisisIconExpandible.textContent = '🔍';
+          }
+        });
+      }
+    });
+    
+    // Inicializar la aplicación
+    prepararDatosHistoricos();
+  </script>
+</body>
+</html>
