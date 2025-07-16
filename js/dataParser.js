@@ -269,6 +269,43 @@ function crearCajaFrecuencias(datos) {
   return tarjetaUnificada;
 }
 
+// Crear caja para análisis avanzados (suma, pares, decada)
+export function crearCajaAnalisis(tipo, datos) {
+  const config = {
+    suma: {
+      emoji: '🔢',
+      titulo: 'Suma de números',
+    },
+    pares: {
+      emoji: '⚖️',
+      titulo: 'Pares e impares',
+    },
+    decada: {
+      emoji: '🎯',
+      titulo: 'Década y terminación',
+    }
+  };
+  if (!config[tipo]) return null;
+  const tarjeta = document.createElement('div');
+  tarjeta.className = 'caja-interactiva';
+  tarjeta.id = `caja-${tipo}`;
+  const botonTitulo = document.createElement('button');
+  botonTitulo.onclick = () => manejarClicCaja(tipo, datos);
+  botonTitulo.innerHTML = `
+    <div class="caja-content">
+      <div class="caja-emoji">${config[tipo].emoji}</div>
+      <h3 class="caja-titulo">${config[tipo].titulo}</h3>
+    </div>
+  `;
+  // Contenido expandible móvil
+  const contenidoExpandible = document.createElement('div');
+  contenidoExpandible.id = `${tipo}-content-mobile`;
+  contenidoExpandible.className = 'hidden lg:hidden px-6 pb-6';
+  tarjeta.appendChild(botonTitulo);
+  tarjeta.appendChild(contenidoExpandible);
+  return tarjeta;
+}
+
 // Hacer funciones globales para que estén disponibles desde el HTML
 window.expandirCaja = expandirCaja;
 window.manejarClicCaja = manejarClicCaja;
