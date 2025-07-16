@@ -364,19 +364,27 @@ function abrirCaja(tipo, datos) {
   console.log(`🔓 Abriendo caja ${tipo}`);
   
 
-  // Ocultar las cajas del lado izquierdo
-  contenedorCajas.style.display = 'none';
+  // Mostrar todas las cajas a la izquierda, pero solo la seleccionada como abierta
+  const cajasInteractivas = contenedorCajas.querySelectorAll('.caja-interactiva');
+  cajasInteractivas.forEach(caja => {
+    if (caja.id === `caja-${tipo}`) {
+      caja.classList.add('caja-abierta');
+      caja.style.opacity = '0.5'; // Opcional: resalta la caja activa
+      caja.style.pointerEvents = 'none';
+    } else {
+      caja.classList.remove('caja-abierta');
+      caja.style.opacity = '1';
+      caja.style.pointerEvents = '';
+    }
+  });
 
-  // Activar el layout de dos columnas (por si se usa en desktop)
+  // Activar el layout de dos columnas
   contenedorPrincipal.classList.add('expanded');
 
   // Mostrar contenedor de contenido sin animación inicial
   contenedorContenido.classList.remove('hidden');
   contenedorContenido.style.opacity = '1';
   contenedorContenido.style.transform = 'translateX(0)';
-
-  // Marcar la caja como abierta
-  cajaActual.classList.add('caja-abierta');
   
   // Generar contenido según el tipo
   let contenidoHTML = '';
@@ -443,8 +451,13 @@ function cerrarTodasLasCajas() {
   console.log('🔒 Cerrando todas las cajas');
   
 
-  // Mostrar las cajas del lado izquierdo nuevamente
-  contenedorCajas.style.display = '';
+  // Restaurar todas las cajas a estado normal
+  const cajasInteractivas = contenedorCajas.querySelectorAll('.caja-interactiva');
+  cajasInteractivas.forEach(caja => {
+    caja.classList.remove('caja-abierta');
+    caja.style.opacity = '1';
+    caja.style.pointerEvents = '';
+  });
 
   // Remover clase de expansión para volver al layout original
   contenedorPrincipal.classList.remove('expanded');
