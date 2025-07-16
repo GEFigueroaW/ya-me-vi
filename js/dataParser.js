@@ -177,17 +177,17 @@ export function graficarEstadisticas(datos) {
   // Crear contenedor principal con sistema de columnas mejorado
   const contenedorPrincipal = document.createElement('div');
   contenedorPrincipal.id = 'contenedor-principal';
-  contenedorPrincipal.className = 'contenedor-principal-base';
+  contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6'; // Volver a clase estable
   
   // Crear contenedor de cajas con dimensionado dinámico
   const contenedorCajas = document.createElement('div');
   contenedorCajas.id = 'contenedor-cajas';
-  contenedorCajas.className = 'centrar-cajas-horizontal';
+  contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
   
   // Crear contenedor de contenido expandido
   const contenedorContenido = document.createElement('div');
   contenedorContenido.id = 'contenedor-contenido';
-  contenedorContenido.className = 'hidden';
+  contenedorContenido.className = 'hidden lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
   
   // Función para calcular el ancho dinámico basado en el título más largo
   function calcularAnchoDinamico() {
@@ -206,6 +206,7 @@ export function graficarEstadisticas(datos) {
   const cajaFrecuencias = crearCajaFrecuencias(datos);
   contenedorCajas.appendChild(cajaFrecuencias);
   
+  // Añadir contenedores al DOM
   contenedorPrincipal.appendChild(contenedorCajas);
   contenedorPrincipal.appendChild(contenedorContenido);
   container.appendChild(contenedorPrincipal);

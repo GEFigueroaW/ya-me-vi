@@ -166,7 +166,7 @@
       background-color: rgba(59, 130, 246, 0.2) !important;
     }
     
-    /* Sistema de cajas mejorado - Layout en dos columnas */
+    /* Sistema de cajas simplificado y funcional */
     #contenedor-principal {
       display: grid !important;
       grid-template-columns: 1fr !important;
@@ -182,9 +182,16 @@
         grid-template-columns: 1fr 1.5fr !important;
         gap: 3rem !important;
       }
+      
+      /* Layout normal de Tailwind cuando no está expandido */
+      #contenedor-principal.grid.lg\:grid-cols-4 {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 1.5rem !important;
+      }
     }
     
-    /* Contenedor de cajas - dimensionado dinámico */
+    /* Contenedor de cajas */
     #contenedor-cajas,
     .centrar-cajas-horizontal {
       display: flex !important;
@@ -195,20 +202,42 @@
       gap: 1.5rem !important;
     }
     
-    /* En desktop, layout vertical para cajas del lado izquierdo */
+    /* En desktop con layout expandido */
     @media (min-width: 1024px) {
-      #contenedor-cajas,
-      .centrar-cajas-horizontal {
+      #contenedor-cajas.lg\:col-span-4 {
+        flex-direction: row !important;
+        justify-content: center !important;
         align-items: stretch !important;
-        max-width: 100% !important;
+        gap: 1.5rem !important;
+      }
+      
+      #contenedor-cajas.lg\:col-span-1 {
+        flex-direction: column !important;
+        align-items: stretch !important;
       }
     }
     
-    /* Cajas individuales con dimensionado dinámico */
+    /* Cajas individuales - simplificadas */
     .caja-interactiva {
       position: relative !important;
       width: 100% !important;
-      min-width: max(280px, var(--ancho-caja-dinamico, 320px)) !important;
+      min-width: 280px !important;
+      max-width: 400px !important;
+      margin: 0 auto !important;
+      border-radius: 16px !important;
+      backdrop-filter: blur(12px) !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      overflow: hidden !important;
+    }
+    
+    /* Fallback para cajas normales si no existe .caja-interactiva */
+    #contenedor-cajas > div:not(.caja-interactiva) {
+      position: relative !important;
+      width: 100% !important;
+      min-width: 280px !important;
       max-width: 400px !important;
       margin: 0 auto !important;
       border-radius: 16px !important;
@@ -227,8 +256,9 @@
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
     }
     
-    /* Botones de las cajas con tipografía moderna */
-    .caja-interactiva button {
+    /* Botones de las cajas - simplificados */
+    .caja-interactiva button,
+    #contenedor-cajas button {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
       width: 100% !important;
       padding: 1.75rem 2rem !important;
@@ -240,16 +270,15 @@
       overflow: hidden !important;
     }
     
-    .caja-interactiva button:hover {
+    .caja-interactiva button:hover,
+    #contenedor-cajas button:hover {
       background: rgba(255, 255, 255, 0.08) !important;
+      transform: translateY(-2px) !important;
     }
     
-    .caja-interactiva button:active {
-      transform: scale(0.98) !important;
-    }
-    
-    /* Contenido interno de las cajas */
-    .caja-content {
+    /* Contenido interno - simplificado */
+    .caja-content,
+    #contenedor-cajas .flex.items-center.justify-center {
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -258,16 +287,18 @@
       text-align: center !important;
     }
     
-    /* Emojis modernos */
-    .caja-emoji {
+    /* Emojis */
+    .caja-emoji,
+    #contenedor-cajas .text-2xl {
       font-size: 2rem !important;
       line-height: 1 !important;
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
       flex-shrink: 0 !important;
     }
     
-    /* Títulos con tipografía moderna */
-    .caja-titulo {
+    /* Títulos modernos */
+    .caja-titulo,
+    #contenedor-cajas h3 {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
       font-size: 1.125rem !important;
       font-weight: 600 !important;
