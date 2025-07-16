@@ -964,10 +964,7 @@ function generarContenidoSuma(sumAnalisis) {
 
     contenidoHTML += `
       <div class="${cfg.color} bg-opacity-40 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: El Poder de los Números Sumados</h4>
-        <div class="text-base text-white mb-2 text-center">
-          <strong>Suma promedio histórica:</strong> <span class="text-yellow-300">${datos.sumaPromedio}</span>
-        </div>
+        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: Suma promedio histórica: <span class="text-yellow-300">${Math.round(Number(datos.sumaPromedio))}</span></h4>
         <div class="text-base text-white mb-2 text-center">
           <strong>¡El rango más frecuente es el de <span class="text-yellow-300">${datos.rangoMasFrecuente[0]}</span>!</strong> Ha aparecido <span class="text-yellow-300">${datos.rangoMasFrecuente[1]}</span> veces en los sorteos.
           ${sorteo === 'melate' ? '<br>Esto significa que casi la mitad de los sorteos ganadores caen en esta "zona dorada".' : ''}
