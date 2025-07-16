@@ -1016,7 +1016,22 @@ function generarContenidoSuma(sumAnalisis) {
 
 // Función para generar contenido de pares
 function generarContenidoPares(paresImparesAnalisis) {
-  let contenidoHTML = '<div class="space-y-4">';
+  let contenidoHTML = `<div class="space-y-8">
+    <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+      <button type="button" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.chevron').classList.toggle('rotate-180')">
+        <h3 class="text-2xl font-bold text-yellow-400 text-left">🌟 ¡Desvela el Patrón Oculto del Melate! 🌟</h3>
+        <span class="chevron transition-transform duration-300"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></span>
+      </button>
+      <div class="px-4 pb-4 hidden">
+        <p class="text-white text-base mb-2 text-center">¿Sabías que la suma de los números ganadores tiene un secreto?<br>
+        Analizamos los sorteos de los ultimos 30 meses para revelarte las sumas de números con la mayor probabilidad de aparecer.<br>
+        <span class="text-yellow-300 font-semibold">¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</span></p>
+        <div class="mt-2 text-sm text-gray-200">
+          <strong>¿Por qué la suma de tus números importa?</strong><br>
+          Imagina que cada sorteo es una huella digital. Al sumar los números ganadores, descubrimos que no todas las sumas son igual de comunes. ¡Hay rangos que se repiten una y otra vez! Esta es una herramienta poderosa para afinar tu selección.
+        </div>
+      </div>
+    </div>`;
   
   Object.entries(paresImparesAnalisis).forEach(([sorteo, datos]) => {
     const colores = {
@@ -1042,7 +1057,25 @@ function generarContenidoPares(paresImparesAnalisis) {
     `;
   });
   
-  contenidoHTML += '</div>';
+  contenidoHTML += `
+    <div class="mt-8 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+      <button type="button" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.chevron').classList.toggle('rotate-180')">
+        <h4 class="text-lg font-bold text-yellow-300 text-left">¿Listo para usar esta información?</h4>
+        <span class="chevron transition-transform duration-300"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></span>
+      </button>
+      <div class="px-4 pb-4 hidden">
+        <ul class="list-disc list-inside text-white text-base mb-2">
+          <li>Elige tus 6 números favoritos para el próximo sorteo de Melate, Revancha o Revanchita.</li>
+          <li>Súmalos: ¿Cuál es el total de tus números?</li>
+          <li>Compara tu suma: ¿Cae dentro del rango más frecuente (<span class="text-yellow-300">150-199</span>)?</li>
+          <li>Si sí, <span class="text-green-400 font-bold">¡excelente!</span> Estás jugando con las estadísticas históricas a tu favor.</li>
+          <li>Si no, puedes ajustar uno o dos números para acercar tu suma a la "zona dorada".</li>
+        </ul>
+        <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
+        <div class="text-yellow-300 font-bold text-center">¡Con estos datos, tus selecciones pueden ser más inteligentes y estratégicas!<br>¡Mucha suerte en el próximo sorteo!</div>
+      </div>
+    </div>
+  </div>`;
   return contenidoHTML;
 }
 
