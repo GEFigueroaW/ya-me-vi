@@ -1026,7 +1026,7 @@ function generarContenidoPares(paresImparesAnalisis) {
   let contenidoHTML = `<div class="space-y-8">
     <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
       <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
-        <h3 class="text-2xl font-bold text-yellow-400 text-left">� ¡El Equilibrio Ganador! Desvela el Patrón de Pares e Impares en Melate �</h3>
+        <h3 class="text-2xl font-bold text-yellow-400 text-left">⚖️ ¡El Equilibrio Ganador! Desvela el Patrón de Pares e Impares en Melate ⚖️</h3>
         <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
       </button>
       <div class="px-4 pb-4 hidden">
