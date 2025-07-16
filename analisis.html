@@ -163,34 +163,100 @@
       background-color: rgba(59, 130, 246, 0.2) !important;
     }
     
-    /* Contenedor de cajas con layout estable */
+    /* Centrado horizontal del contenedor de cajas */
     #contenedor-cajas {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem; /* Espaciado consistente */
-      min-height: calc(3 * 80px + 2 * 0.25rem); /* Altura mínima fija */
-      width: fit-content; /* Ancho ajustado al contenido */
-      max-width: 250px; /* Máximo basado en el texto más largo */
+      gap: 1rem;
+      align-items: center; /* Centra horizontalmente las cajas */
+      justify-content: center; /* Centra verticalmente si hay espacio */
+      margin: 0 auto; /* Centra el contenedor completo */
+      width: 100%;
+      max-width: 300px; /* Ancho máximo apropiado para las cajas */
     }
     
-    /* Altura más compacta para las cajas del lado izquierdo */
+    /* Asegurar que las cajas mantengan su ancho y contenido en una línea */
     #contenedor-cajas > div {
-      height: 80px; /* Altura más compacta como cuando están cerradas */
-      min-height: 80px;
-      max-height: 80px;
-      margin-bottom: 0.25rem; /* Espaciado mucho más pequeño entre cajas */
-      position: relative; /* Posición estable */
-      flex-shrink: 0; /* Evita que se reduzcan */
-      width: 100%; /* Ocupa todo el ancho del contenedor */
-      min-width: 200px; /* Mínimo para que quepa el texto */
+      width: 100%;
+      min-width: 280px; /* Ancho mínimo para contenido en una línea */
+      max-width: 300px; /* Ancho máximo consistente */
+      height: auto;
+      position: relative;
     }
     
-    /* Cuando las cajas están en layout original, mantener altura flexible */
-    .lg\:col-span-4 > div {
-      height: auto !important;
-      min-height: auto !important;
-      max-height: none !important;
-      margin-bottom: 1rem !important; /* Espaciado normal en layout horizontal */
+    /* Ajustes para el contenido de las cajas - una sola línea */
+    #contenedor-cajas button {
+      padding: 1rem 1.5rem; /* Reducir padding vertical para más espacio horizontal */
+      white-space: nowrap; /* Evitar saltos de línea */
+      overflow: hidden; /* Ocultar desbordamiento */
+      text-overflow: ellipsis; /* Mostrar puntos suspensivos si es necesario */
+    }
+    
+    /* Flexbox para el contenido interno de las cajas */
+    #contenedor-cajas .flex.items-center.justify-between {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem; /* Espacio entre emoji y texto */
+      width: 100%;
+    }
+    
+    /* Ajustes para el emoji */
+    #contenedor-cajas .text-2xl {
+      font-size: 1.5rem; /* Reducir ligeramente el tamaño del emoji */
+      flex-shrink: 0; /* No permitir que se reduzca */
+      min-width: 2rem; /* Ancho mínimo fijo */
+    }
+    
+    /* Ajustes para el texto */
+    #contenedor-cajas .flex-1 {
+      flex: 1;
+      min-width: 0; /* Permitir que se reduzca si es necesario */
+    }
+    
+    #contenedor-cajas h3 {
+      font-size: 1.125rem; /* Tamaño de fuente ligeramente más pequeño */
+      line-height: 1.2; /* Altura de línea más compacta */
+      margin: 0; /* Eliminar márgenes */
+      white-space: nowrap; /* Una sola línea */
+      overflow: hidden; /* Ocultar desbordamiento */
+      text-overflow: ellipsis; /* Puntos suspensivos si es necesario */
+    }
+    
+    /* Ajustes responsivos */
+    @media (min-width: 1024px) {
+      /* En desktop, cuando está en layout expandido */
+      .lg\:col-span-1 #contenedor-cajas {
+        max-width: 100%; /* Usar todo el ancho disponible */
+      }
+      
+      /* En desktop, cuando está en layout normal */
+      .lg\:col-span-4 #contenedor-cajas {
+        flex-direction: row; /* Horizontal en desktop */
+        justify-content: center; /* Centrar horizontalmente */
+        max-width: 100%; /* Usar todo el ancho disponible */
+        gap: 1.5rem; /* Espacio entre cajas */
+      }
+      
+      .lg\:col-span-4 #contenedor-cajas > div {
+        width: auto; /* Ancho automático en layout horizontal */
+        min-width: 200px; /* Mínimo para contenido */
+        max-width: 250px; /* Máximo para mantener proporciones */
+      }
+    }
+    
+    /* Asegurar que el contenido expandible móvil no interfiera */
+    .lg\:hidden {
+      margin-top: 0 !important;
+    }
+    
+    /* Mejoras para transiciones */
+    #contenedor-cajas > div {
+      transition: all 0.3s ease;
+    }
+    
+    #contenedor-cajas button:hover {
+      transform: translateY(-2px);
     }
   </style>
 </body>
