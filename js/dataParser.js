@@ -996,17 +996,18 @@ function generarContenidoDecada(decadaTerminacionAnalisis) {
 export function manejarClicCaja(tipo, datos) {
   console.log(`📦 [DEBUG] Clic en caja: ${tipo}, actual abierta: ${cajaActualmenteAbierta}`);
   
-  // Si se hace clic en la misma caja que está abierta, cerrarla
+
+  // Si la caja ya está abierta, NO la cierres al hacer clic en la caja original
   if (cajaActualmenteAbierta === tipo) {
-    console.log(`🔒 Cerrando caja ${tipo} que ya estaba abierta`);
-    cerrarTodasLasCajas();
+    // No hacer nada, la caja permanece abierta hasta que el usuario la cierre manualmente
+    console.log(`ℹ️ Caja ${tipo} ya está abierta, no se cierra con clic en la caja original.`);
     return;
   }
-  
-  // Siempre cerrar primero todas las cajas
+
+  // Si se hace clic en otra caja, cerrar la actual y abrir la nueva
   console.log(`🔄 Cerrando todas las cajas antes de abrir ${tipo}`);
   cerrarTodasLasCajas();
-  
+
   // Usar requestAnimationFrame para garantizar que el DOM se actualice
   requestAnimationFrame(() => {
     console.log(`🔓 [DEBUG] Abriendo caja con requestAnimationFrame: ${tipo}`);
