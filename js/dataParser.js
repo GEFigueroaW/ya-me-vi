@@ -912,9 +912,9 @@ function crearCajaAnalisis(tipo, emoji, titulo, datos) {
 function generarContenidoSuma(sumAnalisis) {
   let contenidoHTML = `<div class="space-y-8">
     <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
-      <button type="button" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.chevron').classList.toggle('rotate-180')">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
         <h3 class="text-2xl font-bold text-yellow-400 text-left">🌟 ¡Desvela el Patrón Oculto del Melate! 🌟</h3>
-        <span class="chevron transition-transform duration-300"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></span>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
       </button>
       <div class="px-4 pb-4 hidden">
         <p class="text-white text-base mb-2 text-center">¿Sabías que la suma de los números ganadores tiene un secreto?<br>
@@ -1001,9 +1001,9 @@ function generarContenidoSuma(sumAnalisis) {
 
   contenidoHTML += `
     <div class="mt-8 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
-      <button type="button" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.chevron').classList.toggle('rotate-180')">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
         <h4 class="text-lg font-bold text-yellow-300 text-left">¿Listo para usar esta información?</h4>
-        <span class="chevron transition-transform duration-300"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></span>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
       </button>
       <div class="px-4 pb-4 hidden">
         <ul class="list-disc list-inside text-white text-base mb-2">
