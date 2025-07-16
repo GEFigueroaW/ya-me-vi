@@ -1025,40 +1025,78 @@ function generarContenidoSuma(sumAnalisis) {
 function generarContenidoPares(paresImparesAnalisis) {
   let contenidoHTML = `<div class="space-y-8">
     <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
-      <button type="button" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.chevron').classList.toggle('rotate-180')">
-        <h3 class="text-2xl font-bold text-yellow-400 text-left">🌟 ¡Desvela el Patrón Oculto del Melate! 🌟</h3>
-        <span class="chevron transition-transform duration-300"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></span>
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
+        <h3 class="text-2xl font-bold text-yellow-400 text-left">� ¡El Equilibrio Ganador! Desvela el Patrón de Pares e Impares en Melate �</h3>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
       </button>
       <div class="px-4 pb-4 hidden">
-        <p class="text-white text-base mb-2 text-center">¿Sabías que la suma de los números ganadores tiene un secreto?<br>
-        Analizamos los sorteos de los ultimos 30 meses para revelarte las sumas de números con la mayor probabilidad de aparecer.<br>
+        <p class="text-white text-base mb-2 text-center">¿Sabías que la combinación de números pares e impares tiene un balance favorito?<br>
+        Analizamos los sorteos de los ultimos 30 meses para revelarte la composición de números pares e impares con la mayor probabilidad de aparecer.<br>
         <span class="text-yellow-300 font-semibold">¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</span></p>
         <div class="mt-2 text-sm text-gray-200">
-          <strong>¿Por qué la suma de tus números importa?</strong><br>
-          Imagina que cada sorteo es una huella digital. Al sumar los números ganadores, descubrimos que no todas las sumas son igual de comunes. ¡Hay rangos que se repiten una y otra vez! Esta es una herramienta poderosa para afinar tu selección.
+          <strong>¿Por qué el balance de pares e impares importa?</strong><br>
+          Más allá de los números individuales, la mezcla de pares e impares en una combinación ganadora no es aleatoria. Descubrimos que hay un equilibrio que se repite constantemente. ¡Conocer este patrón puede ser tu clave para una selección más inteligente!
         </div>
       </div>
     </div>`;
   
   Object.entries(paresImparesAnalisis).forEach(([sorteo, datos]) => {
-    const colores = {
-      melate: 'bg-blue-500',
-      revancha: 'bg-purple-500',
-      revanchita: 'bg-green-500'
+    const config = {
+      melate: {
+        color: 'bg-blue-500',
+        emoji: '🔢',
+        nombre: 'Melate',
+        consejo: '✨ ¡Equilibrio Perfecto! La combinación de 3 números pares y 3 números impares es, por mucho, la más común en Melate. ¡Busca este balance en tus selecciones para alinearte con la historia!'
+      },
+      revancha: {
+        color: 'bg-purple-500',
+        emoji: '🍀',
+        nombre: 'Revancha',
+        consejo: '💡 ¡Consistencia Clave! Al igual que en Melate, el patrón de 3 pares y 3 impares es el más frecuente en Revancha. ¡La historia nos muestra el camino!'
+      },
+      revanchita: {
+        color: 'bg-green-500',
+        emoji: '🌈',
+        nombre: 'Revanchita',
+        consejo: '🚀 ¡Observa el Patrón! La combinación 3 pares y 3 impares sigue siendo la más destacada en Revanchita. ¡Pero no subestimes las combinaciones de 2 y 4 pares, que también tienen una buena frecuencia!'
+      }
     };
-    
+    const cfg = config[sorteo];
+
+    // Calcular totales para porcentajes
+    const total = Object.values(datos.distribuciones).reduce((a, b) => a + b, 0) || 1;
+
+    // Ordenar claves para mostrar de 0p-6i a 6p-0i
+    const orden = ['0p-6i','1p-5i','2p-4i','3p-3i','4p-2i','5p-1i','6p-0i'];
+
     contenidoHTML += `
-      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
-        <div class="text-sm text-gray-300">
-          <p><strong>Distribución más frecuente:</strong> ${datos.distribucionMasFrecuente[0]} (${datos.distribucionMasFrecuente[1]} veces)</p>
-          <div class="mt-2 text-xs">
-            <div class="grid grid-cols-2 gap-1">
-              ${Object.entries(datos.distribuciones).map(([dist, freq]) => `
-                <span>${dist}: ${freq}</span>
-              `).join('')}
-            </div>
-          </div>
+      <div class="${cfg.color} bg-opacity-40 rounded-lg p-4">
+        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: Pares e Impares</h4>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
+            <thead>
+              <tr class="bg-white bg-opacity-10">
+                <th class="px-2 py-1">Combinación (Pares/Impares)</th>
+                <th class="px-2 py-1">Frecuencia (Veces)</th>
+                <th class="px-2 py-1">Porcentaje (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orden.map(clave => {
+                const [p,i] = clave.split('-');
+                const freq = datos.distribuciones[clave] || 0;
+                const pct = ((freq/total)*100).toFixed(1);
+                return `<tr>
+                  <td class="px-2 py-1 text-center">${p.replace('p',' Pares')} / ${i.replace('i',' Impares')}</td>
+                  <td class="px-2 py-1 text-center">${freq}</td>
+                  <td class="px-2 py-1 text-center">${pct}%</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="text-yellow-300 font-semibold text-center mb-2">
+          ${cfg.consejo}
         </div>
       </div>
     `;
@@ -1066,17 +1104,17 @@ function generarContenidoPares(paresImparesAnalisis) {
   
   contenidoHTML += `
     <div class="mt-8 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
-      <button type="button" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.chevron').classList.toggle('rotate-180')">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
         <h4 class="text-lg font-bold text-yellow-300 text-left">¿Listo para usar esta información?</h4>
-        <span class="chevron transition-transform duration-300"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></span>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
       </button>
       <div class="px-4 pb-4 hidden">
         <ul class="list-disc list-inside text-white text-base mb-2">
           <li>Elige tus 6 números favoritos para el próximo sorteo de Melate, Revancha o Revanchita.</li>
-          <li>Súmalos: ¿Cuál es el total de tus números?</li>
-          <li>Compara tu suma: ¿Cae dentro del rango más frecuente (<span class="text-yellow-300">150-199</span>)?</li>
+          <li>Cuenta cuántos son pares y cuántos son impares.</li>
+          <li>Compara tu balance: ¿Se acerca a la combinación más frecuente (generalmente 3 Pares / 3 Impares)?</li>
           <li>Si sí, <span class="text-green-400 font-bold">¡excelente!</span> Estás jugando con las estadísticas históricas a tu favor.</li>
-          <li>Si no, puedes ajustar uno o dos números para acercar tu suma a la "zona dorada".</li>
+          <li>Si no, puedes ajustar uno o dos números para acercar tu combinación al balance ganador.</li>
         </ul>
         <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
         <div class="text-yellow-300 font-bold text-center">¡Con estos datos, tus selecciones pueden ser más inteligentes y estratégicas!<br>¡Mucha suerte en el próximo sorteo!</div>
