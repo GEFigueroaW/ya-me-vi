@@ -140,6 +140,9 @@
   </script>
 
   <style>
+    /* Importar fuente moderna */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
     #charts-container canvas {
       background-color: rgba(255, 255, 255, 0.1);
       border-radius: 1rem;
@@ -155,7 +158,7 @@
     .caja-abierta {
       border: 2px solid rgba(59, 130, 246, 0.6) !important;
       background-color: rgba(59, 130, 246, 0.1) !important;
-      transform: scale(0.95);
+      transform: scale(0.98);
       transition: all 0.3s ease;
     }
     
@@ -163,126 +166,214 @@
       background-color: rgba(59, 130, 246, 0.2) !important;
     }
     
-    /* Centrar el contenedor de cajas */
+    /* Sistema de cajas mejorado - Layout en dos columnas */
+    #contenedor-principal {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 2rem !important;
+      width: 100% !important;
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+    }
+    
+    /* En desktop: layout de 2 columnas cuando hay expansión */
+    @media (min-width: 1024px) {
+      #contenedor-principal.expanded {
+        grid-template-columns: 1fr 1.5fr !important;
+        gap: 3rem !important;
+      }
+    }
+    
+    /* Contenedor de cajas - dimensionado dinámico */
     #contenedor-cajas,
     .centrar-cajas-horizontal {
       display: flex !important;
       flex-direction: column !important;
-      justify-content: center !important;
+      justify-content: flex-start !important;
       align-items: center !important;
+      width: 100% !important;
+      gap: 1.5rem !important;
+    }
+    
+    /* En desktop, layout vertical para cajas del lado izquierdo */
+    @media (min-width: 1024px) {
+      #contenedor-cajas,
+      .centrar-cajas-horizontal {
+        align-items: stretch !important;
+        max-width: 100% !important;
+      }
+    }
+    
+    /* Cajas individuales con dimensionado dinámico */
+    .caja-interactiva {
+      position: relative !important;
+      width: 100% !important;
+      min-width: max(280px, var(--ancho-caja-dinamico, 320px)) !important;
+      max-width: 400px !important;
       margin: 0 auto !important;
+      border-radius: 16px !important;
+      backdrop-filter: blur(12px) !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      overflow: hidden !important;
+    }
+    
+    .caja-interactiva:hover {
+      transform: translateY(-4px) !important;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
+    }
+    
+    /* Botones de las cajas con tipografía moderna */
+    .caja-interactiva button {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
       width: 100% !important;
-      max-width: 350px !important;
-      gap: 1rem !important;
+      padding: 1.75rem 2rem !important;
+      background: transparent !important;
+      border: none !important;
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+      position: relative !important;
+      overflow: hidden !important;
     }
     
-    /* En desktop, layout horizontal centrado */
-    @media (min-width: 1024px) {
-      #contenedor-cajas.lg\:col-span-4,
-      .centrar-cajas-horizontal.lg\:col-span-4 {
-        flex-direction: row !important;
-        justify-content: center !important;
-        max-width: 100% !important;
-        gap: 1.5rem !important;
-      }
-      
-      /* Cuando está en layout expandido */
-      #contenedor-cajas.lg\:col-span-1,
-      .centrar-cajas-horizontal.lg\:col-span-1 {
-        flex-direction: column !important;
-        max-width: 100% !important;
-      }
+    .caja-interactiva button:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
     }
     
-    /* Estilos para las cajas individuales */
-    #contenedor-cajas > div {
-      width: 100% !important;
-      min-width: 280px !important;
-      max-width: 320px !important;
-      height: auto !important;
-      margin: 0 !important;
-      flex-shrink: 0 !important;
+    .caja-interactiva button:active {
+      transform: scale(0.98) !important;
     }
     
-    /* En desktop con layout horizontal */
-    @media (min-width: 1024px) {
-      #contenedor-cajas.lg\:col-span-4 > div,
-      .centrar-cajas-horizontal.lg\:col-span-4 > div {
-        width: auto !important;
-        min-width: 200px !important;
-        max-width: 250px !important;
-        flex: 1 !important;
-      }
-    }
-    
-    /* Centrar el contenido interno de las cajas */
-    #contenedor-cajas button {
-      padding: 1rem 1.5rem !important;
+    /* Contenido interno de las cajas */
+    .caja-content {
       display: flex !important;
-      justify-content: center !important;
       align-items: center !important;
+      justify-content: center !important;
+      gap: 1rem !important;
       width: 100% !important;
       text-align: center !important;
     }
     
-    /* Flexbox para el contenido interno - centrado */
-    #contenedor-cajas .flex.items-center.justify-center {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 0.75rem !important;
-      width: 100% !important;
-    }
-    
-    /* Ajustes para el emoji */
-    #contenedor-cajas .text-2xl {
-      font-size: 1.5rem !important;
-      flex-shrink: 0 !important;
+    /* Emojis modernos */
+    .caja-emoji {
+      font-size: 2rem !important;
       line-height: 1 !important;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
+      flex-shrink: 0 !important;
     }
     
-    /* Ajustes para el texto - una sola línea */
-    #contenedor-cajas h3 {
+    /* Títulos con tipografía moderna */
+    .caja-titulo {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
       font-size: 1.125rem !important;
-      line-height: 1.2 !important;
+      font-weight: 600 !important;
+      line-height: 1.3 !important;
+      color: rgba(255, 255, 255, 0.95) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+      letter-spacing: -0.02em !important;
       margin: 0 !important;
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
     }
     
-    /* Mejoras para transiciones */
-    #contenedor-cajas > div {
-      transition: all 0.3s ease !important;
+    /* Contenedor de contenido expandido */
+    #contenedor-contenido {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 20px !important;
+      padding: 2rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      min-height: 400px !important;
+      overflow-y: auto !important;
     }
     
-    #contenedor-cajas button:hover {
-      transform: translateY(-2px) !important;
+    /* Caja expandida en el contenido */
+    .caja-expandida {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 16px !important;
+      padding: 1.5rem !important;
+      margin-bottom: 1.5rem !important;
+      backdrop-filter: blur(8px) !important;
     }
     
-    /* Centrar el contenedor principal */
-    #contenedor-principal {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      width: 100% !important;
+    .caja-expandida h3 {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      font-size: 1.25rem !important;
+      font-weight: 600 !important;
+      color: rgba(255, 255, 255, 0.95) !important;
+      margin-bottom: 1rem !important;
+      text-align: center !important;
+      letter-spacing: -0.02em !important;
     }
     
-    /* En desktop, layout de grid cuando esté expandido */
-    @media (min-width: 1024px) {
-      #contenedor-principal.grid.lg\:grid-cols-4 {
-        display: grid !important;
-        grid-template-columns: 1fr 3fr !important;
-        align-items: start !important;
+    /* Responsive para móviles */
+    @media (max-width: 1023px) {
+      #contenedor-principal {
+        grid-template-columns: 1fr !important;
         gap: 1.5rem !important;
       }
       
-      /* Cuando no está expandido, centrar todo */
-      #contenedor-principal:not(.grid.lg\:grid-cols-4) {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
+      .caja-interactiva {
+        max-width: 350px !important;
       }
+      
+      .caja-titulo {
+        font-size: 1rem !important;
+      }
+      
+      .caja-emoji {
+        font-size: 1.75rem !important;
+      }
+    }
+    
+    /* Animaciones suaves */
+    .caja-interactiva * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    /* Efecto de ripple en hover */
+    .caja-interactiva button::before {
+      content: '' !important;
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      width: 0 !important;
+      height: 0 !important;
+      border-radius: 50% !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      transform: translate(-50%, -50%) !important;
+      transition: width 0.6s, height 0.6s !important;
+    }
+    
+    .caja-interactiva button:hover::before {
+      width: 300px !important;
+      height: 300px !important;
+    }
+    
+    /* Ocultar scrollbar pero mantener funcionalidad */
+    #contenedor-contenido::-webkit-scrollbar {
+      width: 4px !important;
+    }
+    
+    #contenedor-contenido::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 2px !important;
+    }
+    
+    #contenedor-contenido::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3) !important;
+      border-radius: 2px !important;
+    }
+    
+    #contenedor-contenido::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5) !important;
     }
   </style>
 </body>

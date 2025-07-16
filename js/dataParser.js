@@ -174,20 +174,33 @@ export function graficarEstadisticas(datos) {
   
   container.innerHTML = '';
   
-  // Crear contenedor principal responsive
+  // Crear contenedor principal con sistema de columnas mejorado
   const contenedorPrincipal = document.createElement('div');
   contenedorPrincipal.id = 'contenedor-principal';
-  contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
+  contenedorPrincipal.className = 'contenedor-principal-base';
   
-  // Crear contenedor de cajas
+  // Crear contenedor de cajas con dimensionado dinámico
   const contenedorCajas = document.createElement('div');
   contenedorCajas.id = 'contenedor-cajas';
-  contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
+  contenedorCajas.className = 'centrar-cajas-horizontal';
   
   // Crear contenedor de contenido expandido
   const contenedorContenido = document.createElement('div');
   contenedorContenido.id = 'contenedor-contenido';
-  contenedorContenido.className = 'hidden lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
+  contenedorContenido.className = 'hidden';
+  
+  // Función para calcular el ancho dinámico basado en el título más largo
+  function calcularAnchoDinamico() {
+    const titulos = ['Frecuencias', 'Suma de números', 'Pares e impares', 'Década y terminación'];
+    const maxLength = Math.max(...titulos.map(t => t.length));
+    const baseWidth = 280;
+    const extraWidth = maxLength * 8; // 8px por carácter adicional
+    return Math.min(baseWidth + extraWidth, 400); // Máximo 400px
+  }
+  
+  // Aplicar ancho dinámico
+  const anchoOptimo = calcularAnchoDinamico();
+  contenedorCajas.style.setProperty('--ancho-caja-dinamico', `${anchoOptimo}px`);
   
   // Caja 1: Frecuencias
   const cajaFrecuencias = crearCajaFrecuencias(datos);
@@ -205,16 +218,15 @@ export function graficarEstadisticas(datos) {
 
 function crearCajaFrecuencias(datos) {
   const tarjetaUnificada = document.createElement('div');
-  tarjetaUnificada.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 h-full';
+  tarjetaUnificada.className = 'caja-interactiva';
   tarjetaUnificada.id = 'caja-frecuencias';
   
   const botonTitulo = document.createElement('button');
-  botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
   botonTitulo.onclick = () => manejarClicCaja('frecuencias', datos);
   botonTitulo.innerHTML = `
-    <div class="flex items-center justify-center gap-3">
-      <div class="text-2xl">📊</div>
-      <h3 class="text-xl font-bold text-white whitespace-nowrap">Frecuencias</h3>
+    <div class="caja-content">
+      <div class="caja-emoji">📊</div>
+      <h3 class="caja-titulo">Frecuencias</h3>
     </div>
   `;
   
@@ -247,50 +259,34 @@ function manejarResize() {
   const hayContenidoVisible = !contenedorContenido.classList.contains('hidden');
   
   if (window.innerWidth < 1024) {
-    // En móvil: cerrar contenido de desktop y usar contenido móvil
-    if (hayContenidoVisible) {
-      contenedorContenido.classList.add('hidden');
-    }
+    // En móvil: desactivar el layout expandido
+    contenedorPrincipal.classList.remove('expanded');
     
-    // Resetear layout a móvil y mostrar todas las cajas
-    contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
-    contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
-    
-    // Mostrar todas las cajas en móvil
-    const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
-    todasLasCajas.forEach(caja => caja.style.display = '');
-    
-    // Si hay una caja abierta, mostrar su contenido móvil
-    if (cajaAbierta) {
+    // Si hay contenido visible, ocultarlo en desktop y mostrarlo en móvil
+    if (hayContenidoVisible && cajaAbierta) {
       const tipo = cajaAbierta.id.replace('caja-', '');
       const contenidoMobile = document.getElementById(`${tipo}-content-mobile`);
-      if (contenidoMobile && contenidoMobile.innerHTML.trim()) {
+      if (contenidoMobile) {
+        contenidoMobile.innerHTML = contenedorContenido.innerHTML;
         contenidoMobile.classList.remove('hidden');
       }
+      contenedorContenido.classList.add('hidden');
     }
   } else {
-    // En desktop: si hay una caja abierta, mantener layout expandido
+    // En desktop: si hay una caja abierta, activar layout expandido
     if (cajaAbierta) {
-      contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
-      contenedorCajas.className = 'lg:col-span-1 grid grid-cols-1 gap-6';
-      contenedorContenido.className = 'lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
+      contenedorPrincipal.classList.add('expanded');
       contenedorContenido.classList.remove('hidden');
       
-      // Ocultar la caja abierta del lado izquierdo
-      cajaAbierta.style.display = 'none';
-      
-      // Cerrar contenido móvil
-      const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
-      cajasMobile.forEach(caja => caja.classList.add('hidden'));
-    } else {
-      // No hay cajas abiertas, layout normal y mostrar todas las cajas
-      contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
-      contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
-      contenedorContenido.classList.add('hidden');
-      
-      // Mostrar todas las cajas
-      const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
-      todasLasCajas.forEach(caja => caja.style.display = '');
+      // Ocultar contenido móvil si existe
+      const tipo = cajaAbierta.id.replace('caja-', '');
+      const contenidoMobile = document.getElementById(`${tipo}-content-mobile`);
+      if (contenidoMobile) {
+        if (contenidoMobile.innerHTML.trim() && contenedorContenido.innerHTML.trim() === '') {
+          contenedorContenido.innerHTML = contenidoMobile.innerHTML;
+        }
+        contenidoMobile.classList.add('hidden');
+      }
     }
   }
 }
@@ -298,7 +294,7 @@ function manejarResize() {
 // Agregar listener para resize
 window.addEventListener('resize', manejarResize);
 
-// Función para expandir una caja
+// Función para expandir una caja con el nuevo sistema de dos columnas
 export function expandirCaja(tipo, datos) {
   const contenedorCajas = document.getElementById('contenedor-cajas');
   const contenedorContenido = document.getElementById('contenedor-contenido');
@@ -306,6 +302,68 @@ export function expandirCaja(tipo, datos) {
   
   // Verificar si la caja ya está abierta
   const cajaActual = document.getElementById(`caja-${tipo}`);
+  
+  if (!contenedorCajas || !contenedorContenido || !contenedorPrincipal) {
+    console.error('❌ Contenedores no encontrados');
+    return;
+  }
+  
+  // Si la caja ya está abierta, cerrarla
+  if (cajaActual && cajaActual.classList.contains('caja-abierta')) {
+    cerrarTodasLasCajas();
+    return;
+  }
+  
+  // Cerrar cualquier caja abierta anteriormente
+  cerrarTodasLasCajas();
+  
+  // Activar el layout de dos columnas
+  contenedorPrincipal.classList.add('expanded');
+  
+  // Mostrar contenedor de contenido
+  contenedorContenido.classList.remove('hidden');
+  
+  // Marcar la caja como abierta
+  if (cajaActual) {
+    cajaActual.classList.add('caja-abierta');
+  }
+  
+  // Generar contenido según el tipo
+  let contenidoHTML = '';
+  
+  switch (tipo) {
+    case 'frecuencias':
+      contenidoHTML = generarContenidoFrecuencias(datos);
+      break;
+    case 'suma':
+      contenidoHTML = generarContenidoSuma(datos.melate?.sumAnalisis || {});
+      break;
+    case 'pares':
+      contenidoHTML = generarContenidoPares(datos.melate?.paresAnalisis || {});
+      break;
+    case 'decada':
+      contenidoHTML = generarContenidoDecada(datos.melate?.decadaAnalisis || {});
+      break;
+    default:
+      contenidoHTML = '<p class="text-white">Contenido no disponible</p>';
+  }
+  
+  // Insertar contenido con animación
+  contenedorContenido.innerHTML = `
+    <div class="caja-expandida">
+      ${contenidoHTML}
+    </div>
+  `;
+  
+  // Actualizar variable global
+  cajaActualmenteAbierta = tipo;
+  
+  // Animar la entrada del contenido
+  setTimeout(() => {
+    contenedorContenido.style.opacity = '1';
+    contenedorContenido.style.transform = 'translateY(0)';
+  }, 100);
+}
   const yaAbierta = cajaActual && cajaActual.classList.contains('caja-abierta');
   
   // Cerrar todas las cajas móviles
@@ -374,6 +432,40 @@ function cerrarTodasLasCajas() {
   const contenedorCajas = document.getElementById('contenedor-cajas');
   const contenedorContenido = document.getElementById('contenedor-contenido');
   const contenedorPrincipal = document.getElementById('contenedor-principal');
+  
+  if (!contenedorCajas || !contenedorContenido || !contenedorPrincipal) return;
+  
+  // Remover clase de expansión
+  contenedorPrincipal.classList.remove('expanded');
+  
+  // Ocultar contenedor de contenido con animación
+  contenedorContenido.style.opacity = '0';
+  contenedorContenido.style.transform = 'translateY(20px)';
+  
+  setTimeout(() => {
+    contenedorContenido.classList.add('hidden');
+    contenedorContenido.innerHTML = '';
+    contenedorContenido.style.opacity = '';
+    contenedorContenido.style.transform = '';
+  }, 300);
+  
+  // Remover clase de caja abierta de todas las cajas
+  const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
+  todasLasCajas.forEach(caja => {
+    caja.classList.remove('caja-abierta');
+    caja.style.display = '';
+  });
+  
+  // Limpiar contenido móvil
+  const contenidosMoviles = document.querySelectorAll('[id$="-content-mobile"]');
+  contenidosMoviles.forEach(contenido => {
+    contenido.classList.add('hidden');
+    contenido.innerHTML = '';
+  });
+  
+  // Resetear variable global
+  cajaActualmenteAbierta = null;
+}
   
   // Cerrar todas las cajas móviles
   const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
@@ -771,16 +863,15 @@ export function mostrarAnalisisAvanzados(datos) {
 
 function crearCajaAnalisis(tipo, emoji, titulo, datos) {
   const caja = document.createElement('div');
-  caja.className = 'bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 h-full';
+  caja.className = 'caja-interactiva';
   caja.id = `caja-${tipo}`;
   
   const botonTitulo = document.createElement('button');
-  botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
   botonTitulo.onclick = () => manejarClicCaja(tipo, datos);
   botonTitulo.innerHTML = `
-    <div class="flex items-center justify-center gap-3">
-      <div class="text-2xl">${emoji}</div>
-      <h3 class="text-xl font-bold text-white whitespace-nowrap">${titulo}</h3>
+    <div class="caja-content">
+      <div class="caja-emoji">${emoji}</div>
+      <h3 class="caja-titulo">${titulo}</h3>
     </div>
   `;
   

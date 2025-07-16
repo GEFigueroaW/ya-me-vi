@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Cajas Interactivas Mejoradas</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    /* Importar fuente moderna */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    /* Sistema de cajas mejorado - Layout en dos columnas */
+    #contenedor-principal {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 2rem !important;
+      width: 100% !important;
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+    }
+    
+    /* En desktop: layout de 2 columnas cuando hay expansión */
+    @media (min-width: 1024px) {
+      #contenedor-principal.expanded {
+        grid-template-columns: 1fr 1.5fr !important;
+        gap: 3rem !important;
+      }
+    }
+    
+    /* Contenedor de cajas */
+    #contenedor-cajas {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-start !important;
+      align-items: center !important;
+      width: 100% !important;
+      gap: 1.5rem !important;
+    }
+    
+    /* En desktop */
+    @media (min-width: 1024px) {
+      #contenedor-cajas {
+        align-items: stretch !important;
+        max-width: 100% !important;
+      }
+    }
+    
+    /* Cajas individuales con dimensionado dinámico */
+    .caja-interactiva {
+      position: relative !important;
+      width: 100% !important;
+      min-width: max(280px, var(--ancho-caja-dinamico, 320px)) !important;
+      max-width: 400px !important;
+      margin: 0 auto !important;
+      border-radius: 16px !important;
+      backdrop-filter: blur(12px) !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      overflow: hidden !important;
+    }
+    
+    .caja-interactiva:hover {
+      transform: translateY(-4px) !important;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
+    }
+    
+    /* Botones de las cajas */
+    .caja-interactiva button {
+      width: 100% !important;
+      padding: 1.75rem 2rem !important;
+      background: transparent !important;
+      border: none !important;
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+      position: relative !important;
+      overflow: hidden !important;
+    }
+    
+    .caja-interactiva button:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    /* Contenido interno */
+    .caja-content {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 1rem !important;
+      width: 100% !important;
+      text-align: center !important;
+    }
+    
+    /* Emojis */
+    .caja-emoji {
+      font-size: 2rem !important;
+      line-height: 1 !important;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
+      flex-shrink: 0 !important;
+    }
+    
+    /* Títulos modernos */
+    .caja-titulo {
+      font-size: 1.125rem !important;
+      font-weight: 600 !important;
+      line-height: 1.3 !important;
+      color: rgba(255, 255, 255, 0.95) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+      letter-spacing: -0.02em !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    
+    /* Contenedor de contenido expandido */
+    #contenedor-contenido {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 20px !important;
+      padding: 2rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      min-height: 400px !important;
+      overflow-y: auto !important;
+    }
+    
+    .caja-abierta {
+      border: 2px solid rgba(59, 130, 246, 0.6) !important;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+      transform: scale(0.98) !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1023px) {
+      #contenedor-principal {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+      }
+      
+      .caja-interactiva {
+        max-width: 350px !important;
+      }
+      
+      .caja-titulo {
+        font-size: 1rem !important;
+      }
+      
+      .caja-emoji {
+        font-size: 1.75rem !important;
+      }
+    }
+    
+    /* Efecto ripple */
+    .caja-interactiva button::before {
+      content: '' !important;
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      width: 0 !important;
+      height: 0 !important;
+      border-radius: 50% !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      transform: translate(-50%, -50%) !important;
+      transition: width 0.6s, height 0.6s !important;
+    }
+    
+    .caja-interactiva button:hover::before {
+      width: 300px !important;
+      height: 300px !important;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="text-white p-8">
+  <h1 class="text-3xl font-bold mb-8 text-center">Test - Cajas Interactivas Mejoradas</h1>
+  
+  <div id="contenedor-principal">
+    <!-- Contenedor de cajas -->
+    <div id="contenedor-cajas" style="--ancho-caja-dinamico: 340px;">
+      <div class="caja-interactiva" id="caja-frecuencias">
+        <button onclick="toggleCaja('frecuencias')">
+          <div class="caja-content">
+            <div class="caja-emoji">📊</div>
+            <h3 class="caja-titulo">Frecuencias</h3>
+          </div>
+        </button>
+      </div>
+      
+      <div class="caja-interactiva" id="caja-suma">
+        <button onclick="toggleCaja('suma')">
+          <div class="caja-content">
+            <div class="caja-emoji">🔢</div>
+            <h3 class="caja-titulo">Suma de números</h3>
+          </div>
+        </button>
+      </div>
+      
+      <div class="caja-interactiva" id="caja-pares">
+        <button onclick="toggleCaja('pares')">
+          <div class="caja-content">
+            <div class="caja-emoji">⚖️</div>
+            <h3 class="caja-titulo">Pares e impares</h3>
+          </div>
+        </button>
+      </div>
+      
+      <div class="caja-interactiva" id="caja-decada">
+        <button onclick="toggleCaja('decada')">
+          <div class="caja-content">
+            <div class="caja-emoji">🎯</div>
+            <h3 class="caja-titulo">Década y terminación</h3>
+          </div>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Contenedor de contenido expandido -->
+    <div id="contenedor-contenido" class="hidden">
+      <h2 class="text-2xl font-bold mb-4 text-center">Contenido Expandido</h2>
+      <p class="text-center text-gray-300">El contenido detallado aparecerá aquí cuando selecciones una caja.</p>
+    </div>
+  </div>
+  
+  <script>
+    let cajaAbierta = null;
+    
+    function toggleCaja(tipo) {
+      const contenedorPrincipal = document.getElementById('contenedor-principal');
+      const contenedorContenido = document.getElementById('contenedor-contenido');
+      const cajaActual = document.getElementById(`caja-${tipo}`);
+      
+      // Si la caja ya está abierta, cerrarla
+      if (cajaAbierta === tipo) {
+        cerrarCaja();
+        return;
+      }
+      
+      // Cerrar caja anterior si existe
+      if (cajaAbierta) {
+        cerrarCaja();
+      }
+      
+      // Abrir nueva caja
+      cajaAbierta = tipo;
+      
+      // Activar layout expandido
+      contenedorPrincipal.classList.add('expanded');
+      contenedorContenido.classList.remove('hidden');
+      
+      // Marcar caja como abierta
+      cajaActual.classList.add('caja-abierta');
+      
+      // Simular contenido
+      const contenidos = {
+        frecuencias: '<h3>Análisis de Frecuencias</h3><p>Aquí aparecerían las estadísticas de frecuencia de los números...</p>',
+        suma: '<h3>Suma de Números</h3><p>Aquí aparecería el análisis de las sumas de las combinaciones...</p>',
+        pares: '<h3>Pares e Impares</h3><p>Aquí aparecería el análisis de números pares e impares...</p>',
+        decada: '<h3>Década y Terminación</h3><p>Aquí aparecería el análisis por décadas y terminaciones...</p>'
+      };
+      
+      contenedorContenido.innerHTML = `
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;">
+          ${contenidos[tipo]}
+        </div>
+      `;
+    }
+    
+    function cerrarCaja() {
+      if (!cajaAbierta) return;
+      
+      const contenedorPrincipal = document.getElementById('contenedor-principal');
+      const contenedorContenido = document.getElementById('contenedor-contenido');
+      const cajaActual = document.getElementById(`caja-${cajaAbierta}`);
+      
+      // Desactivar layout expandido
+      contenedorPrincipal.classList.remove('expanded');
+      contenedorContenido.classList.add('hidden');
+      
+      // Quitar marca de caja abierta
+      cajaActual.classList.remove('caja-abierta');
+      
+      cajaAbierta = null;
+    }
+    
+    // Calcular ancho dinámico basado en el título más largo
+    function calcularAnchoDinamico() {
+      const titulos = ['Frecuencias', 'Suma de números', 'Pares e impares', 'Década y terminación'];
+      const maxLength = Math.max(...titulos.map(t => t.length));
+      const baseWidth = 280;
+      const extraWidth = maxLength * 8;
+      return Math.min(baseWidth + extraWidth, 400);
+    }
+    
+    // Aplicar ancho dinámico
+    document.addEventListener('DOMContentLoaded', () => {
+      const anchoOptimo = calcularAnchoDinamico();
+      document.getElementById('contenedor-cajas').style.setProperty('--ancho-caja-dinamico', `${anchoOptimo}px`);
+    });
+  </script>
+</body>
+</html>
