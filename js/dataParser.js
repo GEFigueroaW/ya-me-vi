@@ -910,34 +910,107 @@ function crearCajaAnalisis(tipo, emoji, titulo, datos) {
 
 // Función para generar contenido de suma
 function generarContenidoSuma(sumAnalisis) {
-  let contenidoHTML = '<div class="space-y-4">';
-  
+  let contenidoHTML = `<div class="space-y-8">
+    <div class="mb-6 p-4 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20">
+      <h3 class="text-2xl font-bold text-yellow-400 mb-2 text-center">🌟 ¡Desvela el Patrón Oculto del Melate! 🌟</h3>
+      <p class="text-white text-base mb-2 text-center">¿Sabías que la suma de los números ganadores tiene un secreto?<br>
+      Analizamos miles de sorteos históricos para revelarte las sumas de números con la mayor probabilidad de aparecer.<br>
+      <span class="text-yellow-300 font-semibold">¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</span></p>
+      <div class="mt-2 text-sm text-gray-200">
+        <strong>¿Por qué la suma de tus números importa?</strong><br>
+        Imagina que cada sorteo es una huella digital. Al sumar los números ganadores, descubrimos que no todas las sumas son igual de comunes. ¡Hay rangos que se repiten una y otra vez! Esta es una herramienta poderosa para afinar tu selección.
+      </div>
+    </div>`;
+
   Object.entries(sumAnalisis).forEach(([sorteo, datos]) => {
-    const colores = {
-      melate: 'bg-blue-500',
-      revancha: 'bg-purple-500',
-      revanchita: 'bg-green-500'
+    // Configuración por sorteo
+    const config = {
+      melate: {
+        color: 'bg-blue-500',
+        emoji: '📊',
+        nombre: 'Melate',
+        consejo: '¡TU ZONA DE MAYOR OPORTUNIDAD!',
+        datoEstrella: '✨ ¡Dato Estrella! Si tus números suman entre 150 y 199, ¡estás alineado con la tendencia histórica del Melate!'
+      },
+      revancha: {
+        color: 'bg-purple-500',
+        emoji: '🍀',
+        nombre: 'Revancha',
+        consejo: '💡 ¡Consejo de Oro! La consistencia es clave. Revancha refuerza la importancia del rango 150-199 como la zona más probable para la suma de tus números.'
+      },
+      revanchita: {
+        color: 'bg-green-500',
+        emoji: '🌈',
+        nombre: 'Revanchita',
+        consejo: '🚀 ¡Estrategia Avanzada! Si bien el 150-199 es dominante, el rango 200-249 tiene una presencia notable en Revanchita. ¡Considera ambas opciones!'
+      }
     };
-    
+    const cfg = config[sorteo];
+
+    // Impacto en el juego por rango
+    const impacto = {
+      '50-99': 'Menos común, riesgo alto.',
+      '100-149': 'Frecuencia moderada, ¡cerca de la zona caliente!',
+      '150-199': cfg.consejo || '¡Zona dorada!',
+      '200-249': 'Menos frecuente, pero aún posible.',
+      '250-299': 'Muy raro, alta improbabilidad.',
+      '300+': '¡Nunca ha ocurrido! Evita sumas tan altas.'
+    };
+
     contenidoHTML += `
-      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
-        <div class="text-sm text-gray-300">
-          <p><strong>Suma promedio:</strong> ${datos.sumaPromedio}</p>
-          <p><strong>Rango más frecuente:</strong> ${datos.rangoMasFrecuente[0]} (${datos.rangoMasFrecuente[1]} veces)</p>
-          <div class="mt-2 text-xs">
-            <div class="grid grid-cols-2 gap-1">
+      <div class="${cfg.color} bg-opacity-40 rounded-lg p-4">
+        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: El Poder de los Números Sumados</h4>
+        <div class="text-base text-white mb-2 text-center">
+          <strong>Suma promedio histórica:</strong> <span class="text-yellow-300">${datos.sumaPromedio}</span>
+        </div>
+        <div class="text-base text-white mb-2 text-center">
+          <strong>¡El rango más frecuente es el de <span class="text-yellow-300">${datos.rangoMasFrecuente[0]}</span>!</strong> Ha aparecido <span class="text-yellow-300">${datos.rangoMasFrecuente[1]}</span> veces en los sorteos.
+          ${sorteo === 'melate' ? '<br>Esto significa que casi la mitad de los sorteos ganadores caen en esta "zona dorada".' : ''}
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
+            <thead>
+              <tr class="bg-white bg-opacity-10">
+                <th class="px-2 py-1">Rango de Suma</th>
+                <th class="px-2 py-1">Frecuencia (Veces)</th>
+                <th class="px-2 py-1">Impacto en tu Juego</th>
+              </tr>
+            </thead>
+            <tbody>
               ${Object.entries(datos.rangos).map(([rango, freq]) => `
-                <span>${rango}: ${freq}</span>
+                <tr>
+                  <td class="px-2 py-1 text-center">${rango}</td>
+                  <td class="px-2 py-1 text-center">${freq}</td>
+                  <td class="px-2 py-1 text-center">${impacto[rango] || ''}</td>
+                </tr>
               `).join('')}
-            </div>
-          </div>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-yellow-300 font-semibold text-center mb-2">
+          ${cfg.datoEstrella ? cfg.datoEstrella : ''}
+        </div>
+        <div class="text-white text-sm text-center mb-2">
+          ${cfg.consejo}
         </div>
       </div>
     `;
   });
-  
-  contenidoHTML += '</div>';
+
+  contenidoHTML += `
+    <div class="mt-8 p-4 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20">
+      <h4 class="text-lg font-bold text-yellow-300 mb-2 text-center">¿Listo para usar esta información?</h4>
+      <ul class="list-disc list-inside text-white text-base mb-2">
+        <li>Elige tus 6 números favoritos para el próximo sorteo de Melate, Revancha o Revanchita.</li>
+        <li>Súmalos: ¿Cuál es el total de tus números?</li>
+        <li>Compara tu suma: ¿Cae dentro del rango más frecuente (<span class="text-yellow-300">150-199</span>)?</li>
+        <li>Si sí, <span class="text-green-400 font-bold">¡excelente!</span> Estás jugando con las estadísticas históricas a tu favor.</li>
+        <li>Si no, puedes ajustar uno o dos números para acercar tu suma a la "zona dorada".</li>
+      </ul>
+      <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
+      <div class="text-yellow-300 font-bold text-center">¡Con estos datos, tus selecciones pueden ser más inteligentes y estratégicas!<br>¡Mucha suerte en el próximo sorteo!</div>
+    </div>
+  </div>`;
   return contenidoHTML;
 }
 
