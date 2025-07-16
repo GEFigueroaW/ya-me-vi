@@ -365,9 +365,16 @@
       min-height: 400px !important;
       max-height: 80vh !important;
       overflow-y: auto !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      transition: opacity 0.3s ease, transform 0.3s ease !important;
       position: relative !important;
       width: 100% !important;
+      opacity: 1 !important;
+      transform: translateX(0) !important;
+    }
+    
+    /* Estado oculto del contenedor de contenido */
+    #contenedor-contenido.hidden {
+      display: none !important;
     }
     
     /* Desktop: cuando está expandido, el contenido ocupa el resto del espacio */

@@ -188,8 +188,7 @@ export function graficarEstadisticas(datos) {
   const contenedorContenido = document.createElement('div');
   contenedorContenido.id = 'contenedor-contenido';
   contenedorContenido.className = 'hidden'; // Oculto inicialmente
-  contenedorContenido.style.opacity = '0';
-  contenedorContenido.style.transform = 'translateX(20px)';
+  // NO establecer opacity y transform aquí - se hace en CSS
   
   // Función para calcular el ancho dinámico basado en el título más largo
   function calcularAnchoDinamico() {
@@ -339,21 +338,31 @@ export function expandirCaja(tipo, datos) {
   
   // Si la caja ya está abierta, cerrarla
   if (cajaActual && cajaActual.classList.contains('caja-abierta')) {
-    console.log(`🔒 Cerrando caja ${tipo}`);
+    console.log(`🔒 Cerrando caja ${tipo} que ya estaba abierta`);
     cerrarTodasLasCajas();
     return;
   }
   
   // Cerrar cualquier caja abierta anteriormente
-  cerrarTodasLasCajas();
+  if (cajaActualmenteAbierta && cajaActualmenteAbierta !== tipo) {
+    console.log(`🔄 Cerrando caja anterior: ${cajaActualmenteAbierta}`);
+    cerrarTodasLasCajas();
+    // Pequeña pausa para que termine la animación de cierre
+    setTimeout(() => {
+      expandirCaja(tipo, datos);
+    }, 100);
+    return;
+  }
   
   console.log(`🔓 Expandiendo caja ${tipo}`);
   
   // **CLAVE**: Activar el layout de dos columnas
   contenedorPrincipal.classList.add('expanded');
   
-  // Mostrar contenedor de contenido
+  // Mostrar contenedor de contenido sin animación inicial
   contenedorContenido.classList.remove('hidden');
+  contenedorContenido.style.opacity = '1';
+  contenedorContenido.style.transform = 'translateX(0)';
   
   // Marcar la caja como abierta
   if (cajaActual) {
@@ -391,7 +400,7 @@ export function expandirCaja(tipo, datos) {
             tipo === 'decada' ? '🎯 Década y terminación' : 'Análisis'}
         </h3>
         <button 
-          onclick="cerrarTodasLasCajas()" 
+          onclick="window.cerrarTodasLasCajas()" 
           class="text-white hover:text-red-300 transition-colors duration-200 text-2xl"
           title="Cerrar"
         >
@@ -405,11 +414,8 @@ export function expandirCaja(tipo, datos) {
   // Actualizar variable global
   cajaActualmenteAbierta = tipo;
   
-  // Animar la entrada del contenido
-  setTimeout(() => {
-    contenedorContenido.style.opacity = '1';
-    contenedorContenido.style.transform = 'translateX(0)';
-  }, 100);
+  // El contenido ya está visible, no necesitamos setTimeout
+  console.log(`✅ Caja ${tipo} expandida correctamente`);
   
   // Scroll suave al contenido en móvil
   if (window.innerWidth < 1024) {
@@ -435,15 +441,17 @@ function cerrarTodasLasCajas() {
   // **CLAVE**: Remover clase de expansión para volver al layout original
   contenedorPrincipal.classList.remove('expanded');
   
-  // Ocultar contenedor de contenido con animación
+  // Animación de salida para el contenido
   contenedorContenido.style.opacity = '0';
   contenedorContenido.style.transform = 'translateX(20px)';
   
+  // Esperar a que termine la animación antes de ocultar
   setTimeout(() => {
     contenedorContenido.classList.add('hidden');
     contenedorContenido.innerHTML = '';
-    contenedorContenido.style.opacity = '0';
-    contenedorContenido.style.transform = 'translateX(20px)';
+    // Resetear estilos para próxima apertura
+    contenedorContenido.style.opacity = '1';
+    contenedorContenido.style.transform = 'translateX(0)';
   }, 300);
   
   // Remover clase de caja abierta de todas las cajas
