@@ -324,6 +324,8 @@ window.addEventListener('resize', manejarResize);
 
 // Función para expandir una caja con el nuevo sistema de dos columnas
 export function expandirCaja(tipo, datos) {
+  console.log(`📦 [DEBUG] expandirCaja llamada para: ${tipo}`);
+  
   const contenedorCajas = document.getElementById('contenedor-cajas');
   const contenedorContenido = document.getElementById('contenedor-contenido');
   const contenedorPrincipal = document.getElementById('contenedor-principal');
@@ -336,31 +338,14 @@ export function expandirCaja(tipo, datos) {
     return;
   }
   
-  // Si la caja ya está abierta, cerrarla
-  if (cajaActual && cajaActual.classList.contains('caja-abierta')) {
-    console.log(`🔒 Cerrando caja ${tipo} que ya estaba abierta`);
-    cerrarTodasLasCajas();
-    return;
-  }
-  
-  // Si hay otra caja abierta, cerrarla primero
-  if (cajaActualmenteAbierta && cajaActualmenteAbierta !== tipo) {
-    console.log(`🔄 Cambiando de caja ${cajaActualmenteAbierta} a ${tipo}`);
-    cerrarTodasLasCajas();
-    
-    // Esperar un poco para que termine la animación de cierre
-    setTimeout(() => {
-      abrirCaja(tipo, datos);
-    }, 150);
-    return;
-  }
-  
-  // Si no hay ninguna caja abierta, abrir directamente
-  abrirCaja(tipo, datos);
+  // Usar manejarClicCaja para manejar toda la lógica
+  manejarClicCaja(tipo, datos);
 }
 
 // Función separada para abrir una caja (sin lógica de cierre)
 function abrirCaja(tipo, datos) {
+  console.log(`🔓 [DEBUG] Iniciando abrirCaja para tipo: ${tipo}`);
+  
   const contenedorCajas = document.getElementById('contenedor-cajas');
   const contenedorContenido = document.getElementById('contenedor-contenido');
   const contenedorPrincipal = document.getElementById('contenedor-principal');
@@ -368,6 +353,11 @@ function abrirCaja(tipo, datos) {
   
   if (!contenedorCajas || !contenedorContenido || !contenedorPrincipal) {
     console.error('❌ Contenedores no encontrados');
+    return;
+  }
+  
+  if (!cajaActual) {
+    console.error(`❌ Caja ${tipo} no encontrada`);
     return;
   }
   
@@ -382,9 +372,7 @@ function abrirCaja(tipo, datos) {
   contenedorContenido.style.transform = 'translateX(0)';
   
   // Marcar la caja como abierta
-  if (cajaActual) {
-    cajaActual.classList.add('caja-abierta');
-  }
+  cajaActual.classList.add('caja-abierta');
   
   // Generar contenido según el tipo
   let contenidoHTML = '';
@@ -1006,19 +994,22 @@ function generarContenidoDecada(decadaTerminacionAnalisis) {
 
 // Función principal para manejar clics en cajas
 export function manejarClicCaja(tipo, datos) {
+  console.log(`📦 [DEBUG] Clic en caja: ${tipo}, actual abierta: ${cajaActualmenteAbierta}`);
+  
   // Si se hace clic en la misma caja que está abierta, cerrarla
   if (cajaActualmenteAbierta === tipo) {
+    console.log(`🔒 Cerrando caja ${tipo} que ya estaba abierta`);
     cerrarTodasLasCajas();
-    cajaActualmenteAbierta = null;
     return;
   }
   
-  // Si hay otra caja abierta, cerrarla primero
-  if (cajaActualmenteAbierta) {
-    cerrarTodasLasCajas();
-  }
+  // Siempre cerrar primero todas las cajas
+  console.log(`🔄 Cerrando todas las cajas antes de abrir ${tipo}`);
+  cerrarTodasLasCajas();
   
-  // Abrir la nueva caja
-  expandirCaja(tipo, datos);
-  cajaActualmenteAbierta = tipo;
+  // Usar requestAnimationFrame para garantizar que el DOM se actualice
+  requestAnimationFrame(() => {
+    console.log(`🔓 [DEBUG] Abriendo caja con requestAnimationFrame: ${tipo}`);
+    abrirCaja(tipo, datos);
+  });
 }

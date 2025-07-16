@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DEBUG - Transición entre cajas</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    body { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .debug-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 1000;
+      min-width: 250px;
+    }
+    
+    .debug-panel div {
+      margin: 4px 0;
+    }
+    
+    .debug-panel .status {
+      font-weight: bold;
+      color: #4ade80;
+    }
+    
+    .debug-panel .error {
+      color: #ef4444;
+    }
+    
+    /* Copiar estilos básicos del CSS principal */
+    #contenedor-principal {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 2rem !important;
+      width: 100% !important;
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    @media (min-width: 1024px) {
+      #contenedor-principal.expanded {
+        grid-template-columns: auto 1fr !important;
+        gap: 3rem !important;
+        align-items: flex-start !important;
+      }
+      
+      #contenedor-principal:not(.expanded) {
+        justify-items: center !important;
+      }
+    }
+    
+    #contenedor-cajas {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 1.5rem !important;
+      width: 100% !important;
+      --ancho-caja-dinamico: 320px;
+    }
+    
+    @media (min-width: 1024px) {
+      #contenedor-principal:not(.expanded) #contenedor-cajas {
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        flex-wrap: nowrap !important;
+      }
+      
+      #contenedor-principal.expanded #contenedor-cajas {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        width: auto !important;
+        flex-shrink: 0 !important;
+      }
+    }
+    
+    .caja-interactiva {
+      width: var(--ancho-caja-dinamico) !important;
+      min-width: 300px !important;
+      max-width: 450px !important;
+      position: relative !important;
+      border-radius: 16px !important;
+      backdrop-filter: blur(12px) !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      overflow: hidden !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .caja-interactiva button {
+      font-family: 'Inter', sans-serif !important;
+      width: 100% !important;
+      padding: 1.75rem 2rem !important;
+      background: transparent !important;
+      border: none !important;
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    .caja-content {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 1rem !important;
+    }
+    
+    .caja-emoji {
+      font-size: 2rem !important;
+      line-height: 1 !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .caja-titulo {
+      font-size: 1.125rem !important;
+      font-weight: 600 !important;
+      line-height: 1.3 !important;
+      color: rgba(255, 255, 255, 0.95) !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+    
+    .caja-abierta {
+      border: 2px solid rgba(59, 130, 246, 0.8) !important;
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      box-shadow: 0 12px 48px rgba(59, 130, 246, 0.2) !important;
+    }
+    
+    #contenedor-contenido {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      border-radius: 20px !important;
+      padding: 2rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+      min-height: 400px !important;
+      transition: opacity 0.3s ease, transform 0.3s ease !important;
+      width: 100% !important;
+      opacity: 1 !important;
+      transform: translateX(0) !important;
+    }
+    
+    #contenedor-contenido.hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="text-white p-8">
+  
+  <div class="debug-panel">
+    <div class="text-lg font-bold mb-2">🐛 DEBUG Panel</div>
+    <div>Estado: <span id="debug-estado" class="status">Inicial</span></div>
+    <div>Caja abierta: <span id="debug-caja-abierta" class="status">Ninguna</span></div>
+    <div>Último clic: <span id="debug-ultimo-clic" class="status">-</span></div>
+    <div>Función: <span id="debug-funcion" class="status">-</span></div>
+    <div>Layout: <span id="debug-layout" class="status">Normal</span></div>
+    <div>Contenido: <span id="debug-contenido" class="status">Oculto</span></div>
+    <div>Error: <span id="debug-error" class="error">-</span></div>
+    <div style="margin-top: 10px;">
+      <button onclick="forzarAbrir('frecuencias')" class="bg-blue-500 px-2 py-1 rounded text-xs">Abrir Frecuencias</button>
+      <button onclick="forzarAbrir('suma')" class="bg-green-500 px-2 py-1 rounded text-xs">Abrir Suma</button>
+      <button onclick="forzarAbrir('pares')" class="bg-yellow-500 px-2 py-1 rounded text-xs">Abrir Pares</button>
+      <button onclick="forzarAbrir('decada')" class="bg-purple-500 px-2 py-1 rounded text-xs">Abrir Década</button>
+    </div>
+  </div>
+  
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-center">🔧 DEBUG - Transición entre cajas</h1>
+    
+    <div id="charts-container" class="mb-8"></div>
+    
+    <div class="text-center mt-8">
+      <button onclick="resetearEstado()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded">
+        🔄 Resetear Estado
+      </button>
+    </div>
+  </div>
+
+  <script src="js/shared.js"></script>
+  <script src="js/dataParser.js" type="module"></script>
+  <script type="module">
+    import { cargarDatosHistoricos, graficarEstadisticas, mostrarAnalisisAvanzados } from './js/dataParser.js';
+    
+    // Variables de debug
+    let debugInfo = {
+      estado: 'Inicial',
+      cajaAbierta: 'Ninguna',
+      ultimoClic: '-',
+      funcion: '-',
+      layout: 'Normal',
+      contenido: 'Oculto',
+      error: '-'
+    };
+    
+    // Función para actualizar el panel de debug
+    function actualizarDebug() {
+      document.getElementById('debug-estado').textContent = debugInfo.estado;
+      document.getElementById('debug-caja-abierta').textContent = debugInfo.cajaAbierta;
+      document.getElementById('debug-ultimo-clic').textContent = debugInfo.ultimoClic;
+      document.getElementById('debug-funcion').textContent = debugInfo.funcion;
+      document.getElementById('debug-layout').textContent = debugInfo.layout;
+      document.getElementById('debug-contenido').textContent = debugInfo.contenido;
+      document.getElementById('debug-error').textContent = debugInfo.error;
+      
+      // Verificar el estado real del DOM
+      const contenedorPrincipal = document.getElementById('contenedor-principal');
+      const contenedorContenido = document.getElementById('contenedor-contenido');
+      
+      if (contenedorPrincipal) {
+        debugInfo.layout = contenedorPrincipal.classList.contains('expanded') ? 'Expandido' : 'Normal';
+      }
+      
+      if (contenedorContenido) {
+        debugInfo.contenido = contenedorContenido.classList.contains('hidden') ? 'Oculto' : 'Visible';
+      }
+    }
+    
+    // Función para forzar abrir una caja (debug)
+    window.forzarAbrir = function(tipo) {
+      if (window.manejarClicCaja) {
+        console.log(`🔧 [DEBUG] Forzando abrir caja: ${tipo}`);
+        // Crear datos de prueba
+        const datosDemo = {
+          melate: { numeros: [1,2,3,4,5] },
+          revancha: { numeros: [6,7,8,9,10] },
+          revanchita: { numeros: [11,12,13,14,15] }
+        };
+        window.manejarClicCaja(tipo, datosDemo);
+      }
+    };
+    
+    // Interceptar console.log para capturar debug info
+    const originalLog = console.log;
+    console.log = function(...args) {
+      const message = args.join(' ');
+      
+      if (message.includes('[DEBUG]')) {
+        debugInfo.funcion = message;
+        actualizarDebug();
+      } else if (message.includes('🔓 Abriendo caja')) {
+        debugInfo.estado = 'Abriendo';
+        debugInfo.cajaAbierta = message.split(' ')[3];
+        actualizarDebug();
+      } else if (message.includes('🔒 Cerrando')) {
+        debugInfo.estado = 'Cerrando';
+        debugInfo.cajaAbierta = 'Cerrando...';
+        actualizarDebug();
+      } else if (message.includes('✅ Caja') && message.includes('abierta correctamente')) {
+        debugInfo.estado = 'Abierta';
+        actualizarDebug();
+      } else if (message.includes('✅ Todas las cajas cerradas')) {
+        debugInfo.estado = 'Cerradas';
+        debugInfo.cajaAbierta = 'Ninguna';
+        actualizarDebug();
+      }
+      
+      originalLog.apply(console, args);
+    };
+    
+    // Interceptar console.error para capturar errores
+    const originalError = console.error;
+    console.error = function(...args) {
+      debugInfo.error = args.join(' ');
+      actualizarDebug();
+      originalError.apply(console, args);
+    };
+    
+    // Función para resetear el estado
+    window.resetearEstado = function() {
+      debugInfo = {
+        estado: 'Reseteado',
+        cajaAbierta: 'Ninguna',
+        ultimoClic: '-',
+        funcion: '-',
+        layout: 'Normal',
+        contenido: 'Oculto',
+        error: '-'
+      };
+      
+      if (window.cerrarTodasLasCajas) {
+        window.cerrarTodasLasCajas();
+      }
+      
+      actualizarDebug();
+    };
+    
+    // Interceptar clics en las cajas
+    document.addEventListener('click', function(e) {
+      const caja = e.target.closest('.caja-interactiva');
+      if (caja) {
+        const cajaId = caja.id;
+        debugInfo.ultimoClic = cajaId;
+        actualizarDebug();
+      }
+    });
+    
+    // Actualizar debug cada segundo
+    setInterval(actualizarDebug, 1000);
+    
+    // Cargar datos de prueba
+    async function inicializarDebug() {
+      try {
+        debugInfo.estado = 'Cargando datos...';
+        actualizarDebug();
+        
+        const datos = await cargarDatosHistoricos('todos');
+        
+        debugInfo.estado = 'Generando cajas...';
+        actualizarDebug();
+        
+        graficarEstadisticas(datos);
+        mostrarAnalisisAvanzados(datos);
+        
+        debugInfo.estado = 'Listo';
+        actualizarDebug();
+        
+      } catch (error) {
+        debugInfo.error = error.message;
+        debugInfo.estado = 'Error';
+        actualizarDebug();
+        
+        // Datos de fallback
+        const datosFallback = {
+          melate: { numeros: [1,2,3,4,5,6,7,8,9,10], sorteos: [] },
+          revancha: { numeros: [1,2,3,4,5,6,7,8,9,10], sorteos: [] },
+          revanchita: { numeros: [1,2,3,4,5,6,7,8,9,10], sorteos: [] }
+        };
+        
+        graficarEstadisticas(datosFallback);
+        mostrarAnalisisAvanzados(datosFallback);
+        
+        debugInfo.estado = 'Fallback listo';
+        actualizarDebug();
+      }
+    }
+    
+    inicializarDebug();
+  </script>
+</body>
+</html>
