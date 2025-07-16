@@ -7,19 +7,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
-  <style>
-    /* Ocultar los botones de incremento/decremento en inputs de tipo number */
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    
-    input[type="number"] {
-      -moz-appearance: textfield;
-      appearance: textfield;
-    }
-  </style>
 </head>
 <body class="overflow-x-hidden">
 
@@ -281,17 +268,10 @@
   </div>
   <!-- Scripts -->
   <script src="js/shared.js"></script>
-  <script type="module">
-    // Variables globales
-    let datosHistoricos = {};
-    let numerosPorSorteo = {
-      melate: [],
-      revancha: [],
-      revanchita: []
-    };
-
-    // Función para cargar datos CSV directamente
-    async function cargarDatosCSV() {
+  <script type="module" src="js/combinacion.js"></script>
+  <script type="module" src="js/combinacion-ui.js"></script>
+</body>
+</html>
       const sorteos = ['melate', 'revancha', 'revanchita'];
       let datosRealesCargados = false;
       let estadisticasCarga = {
