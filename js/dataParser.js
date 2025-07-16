@@ -174,20 +174,22 @@ export function graficarEstadisticas(datos) {
   
   container.innerHTML = '';
   
-  // Crear contenedor principal con sistema de columnas mejorado
+  // Crear contenedor principal con ID específico
   const contenedorPrincipal = document.createElement('div');
   contenedorPrincipal.id = 'contenedor-principal';
-  contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6'; // Volver a clase estable
+  contenedorPrincipal.className = 'contenedor-principal-inicial'; // Clase inicial
   
-  // Crear contenedor de cajas con dimensionado dinámico
+  // Crear contenedor de cajas con ID específico
   const contenedorCajas = document.createElement('div');
   contenedorCajas.id = 'contenedor-cajas';
-  contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
+  contenedorCajas.className = 'contenedor-cajas-inicial'; // Clase inicial
   
   // Crear contenedor de contenido expandido
   const contenedorContenido = document.createElement('div');
   contenedorContenido.id = 'contenedor-contenido';
-  contenedorContenido.className = 'hidden lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
+  contenedorContenido.className = 'hidden'; // Oculto inicialmente
+  contenedorContenido.style.opacity = '0';
+  contenedorContenido.style.transform = 'translateX(20px)';
   
   // Función para calcular el ancho dinámico basado en el título más largo
   function calcularAnchoDinamico() {
@@ -219,10 +221,10 @@ export function graficarEstadisticas(datos) {
     const margenSeguridad = 20; // Margen de seguridad
     
     const anchoOptimo = maxWidth + paddingEmoji + paddingInterno + margenSeguridad;
-    return Math.max(anchoOptimo, 300); // Mínimo 300px
+    return Math.max(anchoOptimo, 320); // Mínimo 320px
   }
   
-  // Aplicar ancho dinámico
+  // Aplicar ancho dinámico inmediatamente
   const anchoOptimo = calcularAnchoDinamico();
   contenedorCajas.style.setProperty('--ancho-caja-dinamico', `${anchoOptimo}px`);
   
@@ -347,13 +349,11 @@ export function expandirCaja(tipo, datos) {
   
   console.log(`🔓 Expandiendo caja ${tipo}`);
   
-  // Activar el layout de dos columnas con animación suave
+  // **CLAVE**: Activar el layout de dos columnas
   contenedorPrincipal.classList.add('expanded');
   
-  // Mostrar contenedor de contenido con animación
+  // Mostrar contenedor de contenido
   contenedorContenido.classList.remove('hidden');
-  contenedorContenido.style.opacity = '0';
-  contenedorContenido.style.transform = 'translateX(20px)';
   
   // Marcar la caja como abierta
   if (cajaActual) {
@@ -380,7 +380,7 @@ export function expandirCaja(tipo, datos) {
       contenidoHTML = '<p class="text-white">Contenido no disponible</p>';
   }
   
-  // Insertar contenido
+  // Insertar contenido con botón de cerrar
   contenedorContenido.innerHTML = `
     <div class="caja-expandida">
       <div class="flex items-center justify-between mb-4">
@@ -409,7 +409,7 @@ export function expandirCaja(tipo, datos) {
   setTimeout(() => {
     contenedorContenido.style.opacity = '1';
     contenedorContenido.style.transform = 'translateX(0)';
-  }, 150);
+  }, 100);
   
   // Scroll suave al contenido en móvil
   if (window.innerWidth < 1024) {
@@ -432,25 +432,24 @@ function cerrarTodasLasCajas() {
   
   console.log('🔒 Cerrando todas las cajas');
   
-  // Remover clase de expansión
+  // **CLAVE**: Remover clase de expansión para volver al layout original
   contenedorPrincipal.classList.remove('expanded');
   
-  // Ocultar contenedor de contenido con animación mejorada
+  // Ocultar contenedor de contenido con animación
   contenedorContenido.style.opacity = '0';
   contenedorContenido.style.transform = 'translateX(20px)';
   
   setTimeout(() => {
     contenedorContenido.classList.add('hidden');
     contenedorContenido.innerHTML = '';
-    contenedorContenido.style.opacity = '';
-    contenedorContenido.style.transform = '';
+    contenedorContenido.style.opacity = '0';
+    contenedorContenido.style.transform = 'translateX(20px)';
   }, 300);
   
   // Remover clase de caja abierta de todas las cajas
   const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
   todasLasCajas.forEach(caja => {
     caja.classList.remove('caja-abierta');
-    caja.style.display = '';
   });
   
   // Limpiar contenido móvil
@@ -463,7 +462,7 @@ function cerrarTodasLasCajas() {
   // Limpiar variable global
   cajaActualmenteAbierta = null;
   
-  console.log('✅ Todas las cajas cerradas');
+  console.log('✅ Todas las cajas cerradas, layout restaurado');
 }
 
 // Función para mostrar la caja abierta en el área de contenido

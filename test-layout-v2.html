@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEST - Layout de Cajas v2</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+  
+  <!-- Fondo de prueba -->
+  <div class="fixed inset-0 bg-gradient-to-br from-purple-900 to-blue-900"></div>
+  
+  <!-- Contenido principal -->
+  <div class="relative z-10 min-h-screen p-8">
+    <h1 class="text-3xl font-bold mb-8 text-center">TEST - Layout de Cajas Interactivas v2</h1>
+    
+    <!-- Contenedor de prueba -->
+    <div id="charts-container" class="mb-8"></div>
+    
+    <!-- Información de debug -->
+    <div class="fixed bottom-4 left-4 bg-black bg-opacity-50 p-4 rounded text-xs">
+      <div>Estado: <span id="debug-estado">Inicial</span></div>
+      <div>Caja abierta: <span id="debug-caja">Ninguna</span></div>
+      <div>Ancho calculado: <span id="debug-ancho">Calculando...</span></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script src="js/dataParser.js" type="module"></script>
+  <script type="module">
+    import { cargarDatosHistoricos, graficarEstadisticas, mostrarAnalisisAvanzados } from './js/dataParser.js';
+    
+    // Función de debug
+    function actualizarDebug() {
+      const contenedorPrincipal = document.getElementById('contenedor-principal');
+      const estadoSpan = document.getElementById('debug-estado');
+      const cajaSpan = document.getElementById('debug-caja');
+      const anchoSpan = document.getElementById('debug-ancho');
+      
+      if (contenedorPrincipal) {
+        estadoSpan.textContent = contenedorPrincipal.classList.contains('expanded') ? 'Expandido' : 'Normal';
+        
+        const cajaAbierta = document.querySelector('.caja-abierta');
+        cajaSpan.textContent = cajaAbierta ? cajaAbierta.id : 'Ninguna';
+        
+        const contenedorCajas = document.getElementById('contenedor-cajas');
+        if (contenedorCajas) {
+          const ancho = getComputedStyle(contenedorCajas).getPropertyValue('--ancho-caja-dinamico');
+          anchoSpan.textContent = ancho || 'No definido';
+        }
+      }
+    }
+    
+    // Actualizar debug cada segundo
+    setInterval(actualizarDebug, 1000);
+    
+    // Cargar datos de prueba
+    async function inicializarTest() {
+      console.log('🧪 Iniciando test de layout...');
+      
+      try {
+        const datos = await cargarDatosHistoricos('todos');
+        console.log('📊 Datos cargados para test:', datos);
+        
+        graficarEstadisticas(datos);
+        mostrarAnalisisAvanzados(datos);
+        
+        console.log('✅ Test inicializado correctamente');
+      } catch (error) {
+        console.error('❌ Error en test:', error);
+        
+        // Datos de fallback para test
+        const datosFallback = {
+          melate: { numeros: [1,2,3,4,5,6,7,8,9,10], sorteos: [] },
+          revancha: { numeros: [1,2,3,4,5,6,7,8,9,10], sorteos: [] },
+          revanchita: { numeros: [1,2,3,4,5,6,7,8,9,10], sorteos: [] }
+        };
+        
+        graficarEstadisticas(datosFallback);
+        mostrarAnalisisAvanzados(datosFallback);
+      }
+    }
+    
+    inicializarTest();
+  </script>
+  
+  <style>
+    /* Importar estilos del archivo principal */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* === SISTEMA DE LAYOUT MEJORADO === */
+    
+    /* Contenedor principal - siempre grid */
+    #contenedor-principal {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 2rem !important;
+      width: 100% !important;
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    /* Desktop: cuando hay expansión, dos columnas */
+    @media (min-width: 1024px) {
+      #contenedor-principal.expanded {
+        grid-template-columns: auto 1fr !important;
+        gap: 3rem !important;
+        align-items: flex-start !important;
+      }
+      
+      /* Desktop: cuando NO hay expansión, centrado */
+      #contenedor-principal:not(.expanded) {
+        justify-items: center !important;
+      }
+    }
+    
+    /* === CONTENEDOR DE CAJAS === */
+    
+    /* Contenedor de cajas - base */
+    #contenedor-cajas {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 1.5rem !important;
+      width: 100% !important;
+      --ancho-caja-dinamico: 320px; /* Valor por defecto */
+    }
+    
+    /* Desktop: cuando NO está expandido - horizontal */
+    @media (min-width: 1024px) {
+      #contenedor-principal:not(.expanded) #contenedor-cajas {
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        flex-wrap: wrap !important;
+      }
+      
+      /* Desktop: cuando SÍ está expandido - vertical a la izquierda */
+      #contenedor-principal.expanded #contenedor-cajas {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        width: auto !important;
+        flex-shrink: 0 !important;
+      }
+    }
+    
+    /* === CAJAS INDIVIDUALES === */
+    
+    .caja-interactiva {
+      width: var(--ancho-caja-dinamico) !important;
+      min-width: 300px !important;
+      max-width: 450px !important;
+      position: relative !important;
+      border-radius: 16px !important;
+      backdrop-filter: blur(12px) !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      overflow: hidden !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .caja-interactiva:hover {
+      transform: translateY(-4px) !important;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .caja-abierta {
+      border: 2px solid rgba(59, 130, 246, 0.8) !important;
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      box-shadow: 0 12px 48px rgba(59, 130, 246, 0.2) !important;
+    }
+    
+    /* Botones de las cajas */
+    .caja-interactiva button {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      width: 100% !important;
+      padding: 1.75rem 2rem !important;
+      background: transparent !important;
+      border: none !important;
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    .caja-content {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 1rem !important;
+    }
+    
+    .caja-emoji {
+      font-size: 2rem !important;
+      line-height: 1 !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .caja-titulo {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      font-size: 1.125rem !important;
+      font-weight: 600 !important;
+      line-height: 1.3 !important;
+      color: rgba(255, 255, 255, 0.95) !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+    
+    /* === CONTENEDOR DE CONTENIDO EXPANDIDO === */
+    
+    #contenedor-contenido {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      border-radius: 20px !important;
+      padding: 2rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+      min-height: 400px !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      width: 100% !important;
+    }
+    
+    .caja-expandida {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 16px !important;
+      padding: 2rem !important;
+      backdrop-filter: blur(10px) !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1023px) {
+      #contenedor-principal {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+      }
+      
+      .caja-interactiva {
+        max-width: 90vw !important;
+      }
+    }
+  </style>
+  
+</body>
+</html>
