@@ -450,12 +450,13 @@ function cerrarTodasLasCajas() {
   console.log('🔒 Cerrando todas las cajas');
   
 
-  // Restaurar todas las cajas a estado normal
+  // Restaurar todas las cajas a estado normal y visibles
   const cajasInteractivas = contenedorCajas.querySelectorAll('.caja-interactiva');
   cajasInteractivas.forEach(caja => {
     caja.classList.remove('caja-abierta');
     caja.style.opacity = '1';
     caja.style.pointerEvents = '';
+    caja.style.display = '';
   });
 
   // Remover clase de expansión para volver al layout original
