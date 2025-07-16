@@ -1014,3 +1014,32 @@ export function manejarClicCaja(tipo, datos) {
     abrirCaja(tipo, datos);
   }
 }
+
+export function mostrarAnalisisAvanzados(datos) {
+  console.log('📊 Mostrando análisis avanzados...');
+  const contenedorCajas = document.getElementById('contenedor-cajas');
+  if (!contenedorCajas) return;
+
+  // Generar análisis avanzados con datos reales
+  const sumAnalisis = analizarSumaNumeros(datos);
+  const paresAnalisis = analizarParesImpares(datos);
+  // Usar el nuevo análisis de década por posición
+  const decadaAnalisis = analizarDecadaPorPosicion(datos);
+
+  // Agregar análisis a los datos para que estén disponibles en las cajas
+  datos.sumAnalisis = sumAnalisis;
+  datos.paresAnalisis = paresAnalisis;
+  datos.decadaAnalisis = decadaAnalisis;
+
+  // Crear las 3 cajas adicionales
+  const cajaSuma = crearCajaAnalisis('suma', '🔢', 'Suma de números', datos);
+  const cajaPares = crearCajaAnalisis('pares', '⚖️', 'Pares e impares', datos);
+  const cajaDecada = crearCajaAnalisis('decada', '🎯', 'Década y terminación', datos);
+
+  // Agregar las cajas al contenedor
+  contenedorCajas.appendChild(cajaSuma);
+  contenedorCajas.appendChild(cajaPares);
+  contenedorCajas.appendChild(cajaDecada);
+
+  console.log('✅ Análisis avanzados completados (incluye década por posición)');
+}
