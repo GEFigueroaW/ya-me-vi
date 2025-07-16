@@ -364,18 +364,17 @@ function abrirCaja(tipo, datos) {
   console.log(`🔓 Abriendo caja ${tipo}`);
   
 
-  // Mostrar todas las cajas a la izquierda, pero solo la seleccionada como abierta
+  // Mostrar solo las 3 cajas cerradas a la izquierda, ocultar la caja expandida
   const cajasInteractivas = contenedorCajas.querySelectorAll('.caja-interactiva');
   cajasInteractivas.forEach(caja => {
     if (caja.id === `caja-${tipo}`) {
-      caja.classList.add('caja-abierta');
-      caja.style.opacity = '0.5'; // Opcional: resalta la caja activa
-      caja.style.pointerEvents = 'none';
+      caja.style.display = 'none';
     } else {
-      caja.classList.remove('caja-abierta');
-      caja.style.opacity = '1';
-      caja.style.pointerEvents = '';
+      caja.style.display = '';
     }
+    caja.classList.remove('caja-abierta');
+    caja.style.opacity = '1';
+    caja.style.pointerEvents = '';
   });
 
   // Activar el layout de dos columnas
