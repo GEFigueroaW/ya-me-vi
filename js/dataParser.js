@@ -192,15 +192,41 @@ export function graficarEstadisticas(datos) {
   // Función para calcular el ancho dinámico basado en el título más largo
   function calcularAnchoDinamico() {
     const titulos = ['Frecuencias', 'Suma de números', 'Pares e impares', 'Década y terminación'];
-    const maxLength = Math.max(...titulos.map(t => t.length));
-    const baseWidth = 280;
-    const extraWidth = maxLength * 8; // 8px por carácter adicional
-    return Math.min(baseWidth + extraWidth, 400); // Máximo 400px
+    
+    // Crear elemento temporal para medir el ancho real del texto
+    const elementoTemporal = document.createElement('div');
+    elementoTemporal.style.position = 'absolute';
+    elementoTemporal.style.visibility = 'hidden';
+    elementoTemporal.style.whiteSpace = 'nowrap';
+    elementoTemporal.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    elementoTemporal.style.fontSize = '1.125rem';
+    elementoTemporal.style.fontWeight = '600';
+    elementoTemporal.style.letterSpacing = '-0.02em';
+    document.body.appendChild(elementoTemporal);
+    
+    let maxWidth = 0;
+    titulos.forEach(titulo => {
+      elementoTemporal.textContent = titulo;
+      const anchoTexto = elementoTemporal.offsetWidth;
+      maxWidth = Math.max(maxWidth, anchoTexto);
+    });
+    
+    document.body.removeChild(elementoTemporal);
+    
+    // Agregar padding para emoji y espaciado interno
+    const paddingEmoji = 50; // Espacio para emoji (2rem)
+    const paddingInterno = 64; // Padding interno (2rem en cada lado)
+    const margenSeguridad = 20; // Margen de seguridad
+    
+    const anchoOptimo = maxWidth + paddingEmoji + paddingInterno + margenSeguridad;
+    return Math.max(anchoOptimo, 300); // Mínimo 300px
   }
   
   // Aplicar ancho dinámico
   const anchoOptimo = calcularAnchoDinamico();
   contenedorCajas.style.setProperty('--ancho-caja-dinamico', `${anchoOptimo}px`);
+  
+  console.log(`📐 Ancho dinámico calculado: ${anchoOptimo}px`);
   
   // Caja 1: Frecuencias
   const cajaFrecuencias = crearCajaFrecuencias(datos);
@@ -311,6 +337,7 @@ export function expandirCaja(tipo, datos) {
   
   // Si la caja ya está abierta, cerrarla
   if (cajaActual && cajaActual.classList.contains('caja-abierta')) {
+    console.log(`🔒 Cerrando caja ${tipo}`);
     cerrarTodasLasCajas();
     return;
   }
@@ -318,11 +345,15 @@ export function expandirCaja(tipo, datos) {
   // Cerrar cualquier caja abierta anteriormente
   cerrarTodasLasCajas();
   
-  // Activar el layout de dos columnas
+  console.log(`🔓 Expandiendo caja ${tipo}`);
+  
+  // Activar el layout de dos columnas con animación suave
   contenedorPrincipal.classList.add('expanded');
   
-  // Mostrar contenedor de contenido
+  // Mostrar contenedor de contenido con animación
   contenedorContenido.classList.remove('hidden');
+  contenedorContenido.style.opacity = '0';
+  contenedorContenido.style.transform = 'translateX(20px)';
   
   // Marcar la caja como abierta
   if (cajaActual) {
@@ -337,21 +368,36 @@ export function expandirCaja(tipo, datos) {
       contenidoHTML = generarContenidoFrecuencias(datos);
       break;
     case 'suma':
-      contenidoHTML = generarContenidoSuma(datos.melate?.sumAnalisis || {});
+      contenidoHTML = generarContenidoSuma(datos.sumAnalisis || {});
       break;
     case 'pares':
-      contenidoHTML = generarContenidoPares(datos.melate?.paresAnalisis || {});
+      contenidoHTML = generarContenidoPares(datos.paresAnalisis || {});
       break;
     case 'decada':
-      contenidoHTML = generarContenidoDecada(datos.melate?.decadaAnalisis || {});
+      contenidoHTML = generarContenidoDecada(datos.decadaAnalisis || {});
       break;
     default:
       contenidoHTML = '<p class="text-white">Contenido no disponible</p>';
   }
   
-  // Insertar contenido con animación
+  // Insertar contenido
   contenedorContenido.innerHTML = `
     <div class="caja-expandida">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold text-white">
+          ${tipo === 'frecuencias' ? '📊 Frecuencias' : 
+            tipo === 'suma' ? '🔢 Suma de números' : 
+            tipo === 'pares' ? '⚖️ Pares e impares' : 
+            tipo === 'decada' ? '🎯 Década y terminación' : 'Análisis'}
+        </h3>
+        <button 
+          onclick="cerrarTodasLasCajas()" 
+          class="text-white hover:text-red-300 transition-colors duration-200 text-2xl"
+          title="Cerrar"
+        >
+          ✕
+        </button>
+      </div>
       ${contenidoHTML}
     </div>
   `;
@@ -362,8 +408,18 @@ export function expandirCaja(tipo, datos) {
   // Animar la entrada del contenido
   setTimeout(() => {
     contenedorContenido.style.opacity = '1';
-    contenedorContenido.style.transform = 'translateY(0)';
-  }, 100);
+    contenedorContenido.style.transform = 'translateX(0)';
+  }, 150);
+  
+  // Scroll suave al contenido en móvil
+  if (window.innerWidth < 1024) {
+    setTimeout(() => {
+      contenedorContenido.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 300);
+  }
 }
 
 // Función para cerrar todas las cajas y volver al layout original
@@ -374,12 +430,14 @@ function cerrarTodasLasCajas() {
   
   if (!contenedorCajas || !contenedorContenido || !contenedorPrincipal) return;
   
+  console.log('🔒 Cerrando todas las cajas');
+  
   // Remover clase de expansión
   contenedorPrincipal.classList.remove('expanded');
   
-  // Ocultar contenedor de contenido con animación
+  // Ocultar contenedor de contenido con animación mejorada
   contenedorContenido.style.opacity = '0';
-  contenedorContenido.style.transform = 'translateY(20px)';
+  contenedorContenido.style.transform = 'translateX(20px)';
   
   setTimeout(() => {
     contenedorContenido.classList.add('hidden');
@@ -402,8 +460,10 @@ function cerrarTodasLasCajas() {
     contenido.innerHTML = '';
   });
   
-  // Resetear variable global
+  // Limpiar variable global
   cajaActualmenteAbierta = null;
+  
+  console.log('✅ Todas las cajas cerradas');
 }
 
 // Función para mostrar la caja abierta en el área de contenido
@@ -762,6 +822,16 @@ export function mostrarAnalisisAvanzados(datos) {
   const contenedorCajas = document.getElementById('contenedor-cajas');
   if (!contenedorCajas) return;
   
+  // Generar análisis avanzados con datos reales
+  const sumAnalisis = analizarSumaNumeros(datos);
+  const paresAnalisis = analizarParesImpares(datos);
+  const decadaAnalisis = analizarDecadaTerminacion(datos);
+  
+  // Agregar análisis a los datos para que estén disponibles en las cajas
+  datos.sumAnalisis = sumAnalisis;
+  datos.paresAnalisis = paresAnalisis;
+  datos.decadaAnalisis = decadaAnalisis;
+  
   // Crear las 3 cajas adicionales
   const cajaSuma = crearCajaAnalisis('suma', '🔢', 'Suma de números', datos);
   const cajaPares = crearCajaAnalisis('pares', '⚖️', 'Pares e impares', datos);
@@ -771,6 +841,8 @@ export function mostrarAnalisisAvanzados(datos) {
   contenedorCajas.appendChild(cajaSuma);
   contenedorCajas.appendChild(cajaPares);
   contenedorCajas.appendChild(cajaDecada);
+  
+  console.log('✅ Análisis avanzados completados');
 }
 
 function crearCajaAnalisis(tipo, emoji, titulo, datos) {
