@@ -365,68 +365,6 @@ export function expandirCaja(tipo, datos) {
     contenedorContenido.style.transform = 'translateY(0)';
   }, 100);
 }
-  const yaAbierta = cajaActual && cajaActual.classList.contains('caja-abierta');
-  
-  // Cerrar todas las cajas móviles
-  const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
-  cajasMobile.forEach(caja => caja.classList.add('hidden'));
-  
-  // Remover clase 'caja-abierta' de todas las cajas
-  const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
-  todasLasCajas.forEach(caja => caja.classList.remove('caja-abierta'));
-  
-  // Si la caja ya estaba abierta, cerrarla y volver al layout original
-  if (yaAbierta) {
-    cerrarTodasLasCajas();
-    return;
-  }
-  
-  // Marcar la caja actual como abierta y ocultarla del lado izquierdo
-  if (cajaActual) {
-    cajaActual.classList.add('caja-abierta');
-    
-    // En desktop, ocultar la caja abierta del lado izquierdo
-    if (window.innerWidth >= 1024) {
-      cajaActual.style.display = 'none';
-    }
-  }
-  
-  // Generar contenido según el tipo
-  let contenidoHTML = '';
-  
-  if (tipo === 'frecuencias') {
-    contenidoHTML = generarContenidoFrecuencias(datos);
-  } else if (tipo === 'suma') {
-    const sumAnalisis = analizarSumaNumeros(datos);
-    contenidoHTML = generarContenidoSuma(sumAnalisis);
-  } else if (tipo === 'pares') {
-    const paresImparesAnalisis = analizarParesImpares(datos);
-    contenidoHTML = generarContenidoPares(paresImparesAnalisis);
-  } else if (tipo === 'decada') {
-    const decadaTerminacionAnalisis = analizarDecadaTerminacion(datos);
-    contenidoHTML = generarContenidoDecada(decadaTerminacionAnalisis);
-  }
-  
-  // En desktop: reorganizar layout
-  if (window.innerWidth >= 1024) {
-    // Reorganizar grid para 1 columna de cajas + 3 columnas de contenido
-    contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
-    contenedorCajas.className = 'lg:col-span-1 grid grid-cols-1 gap-6';
-    contenedorContenido.className = 'lg:col-span-3 bg-white bg-opacity-50 rounded-xl backdrop-blur-sm border border-white border-opacity-30 p-6';
-    contenedorContenido.classList.remove('hidden');
-    contenedorContenido.innerHTML = contenidoHTML;
-    
-    // Mover la caja abierta al contenedor de contenido (visualmente)
-    moverCajaAbiertaAlContenido(tipo, datos);
-  } else {
-    // En móvil: mostrar contenido debajo de la caja
-    const contenidoMobile = document.getElementById(`${tipo}-content-mobile`);
-    if (contenidoMobile) {
-      contenidoMobile.innerHTML = contenidoHTML;
-      contenidoMobile.classList.remove('hidden');
-    }
-  }
-}
 
 // Función para cerrar todas las cajas y volver al layout original
 function cerrarTodasLasCajas() {
@@ -465,33 +403,6 @@ function cerrarTodasLasCajas() {
   });
   
   // Resetear variable global
-  cajaActualmenteAbierta = null;
-}
-  
-  // Cerrar todas las cajas móviles
-  const cajasMobile = document.querySelectorAll('[id$="-content-mobile"]');
-  cajasMobile.forEach(caja => caja.classList.add('hidden'));
-  
-  // Remover clase 'caja-abierta' de todas las cajas y restaurar visibilidad
-  const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
-  todasLasCajas.forEach(caja => {
-    caja.classList.remove('caja-abierta');
-    caja.style.display = ''; // Restaurar visibilidad
-  });
-  
-  // Volver al layout original (4 cajas horizontales)
-  contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
-  contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
-  contenedorContenido.classList.add('hidden');
-  contenedorContenido.innerHTML = '';
-  
-  // Limpiar cualquier caja duplicada en el contenido
-  const cajaEnContenido = contenedorContenido.querySelector('[id^="caja-"]');
-  if (cajaEnContenido) {
-    cajaEnContenido.remove();
-  }
-  
-  // Actualizar estado global
   cajaActualmenteAbierta = null;
 }
 
