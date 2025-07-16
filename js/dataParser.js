@@ -363,14 +363,18 @@ function abrirCaja(tipo, datos) {
   
   console.log(`🔓 Abriendo caja ${tipo}`);
   
-  // **CLAVE**: Activar el layout de dos columnas
+
+  // Ocultar las cajas del lado izquierdo
+  contenedorCajas.style.display = 'none';
+
+  // Activar el layout de dos columnas (por si se usa en desktop)
   contenedorPrincipal.classList.add('expanded');
-  
+
   // Mostrar contenedor de contenido sin animación inicial
   contenedorContenido.classList.remove('hidden');
   contenedorContenido.style.opacity = '1';
   contenedorContenido.style.transform = 'translateX(0)';
-  
+
   // Marcar la caja como abierta
   cajaActual.classList.add('caja-abierta');
   
@@ -438,13 +442,17 @@ function cerrarTodasLasCajas() {
   
   console.log('🔒 Cerrando todas las cajas');
   
-  // **CLAVE**: Remover clase de expansión para volver al layout original
+
+  // Mostrar las cajas del lado izquierdo nuevamente
+  contenedorCajas.style.display = '';
+
+  // Remover clase de expansión para volver al layout original
   contenedorPrincipal.classList.remove('expanded');
-  
+
   // Animación de salida para el contenido
   contenedorContenido.style.opacity = '0';
   contenedorContenido.style.transform = 'translateX(20px)';
-  
+
   // Esperar a que termine la animación antes de ocultar
   setTimeout(() => {
     contenedorContenido.classList.add('hidden');
