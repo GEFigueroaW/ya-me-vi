@@ -182,7 +182,7 @@ export function graficarEstadisticas(datos) {
   // Crear contenedor de cajas
   const contenedorCajas = document.createElement('div');
   contenedorCajas.id = 'contenedor-cajas';
-  contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+  contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
   
   // Crear contenedor de contenido expandido
   const contenedorContenido = document.createElement('div');
@@ -212,11 +212,9 @@ function crearCajaFrecuencias(datos) {
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
   botonTitulo.onclick = () => manejarClicCaja('frecuencias', datos);
   botonTitulo.innerHTML = `
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-center gap-3">
       <div class="text-2xl">📊</div>
-      <div class="flex-1">
-        <h3 class="text-xl font-bold text-white text-center">Frecuencias</h3>
-      </div>
+      <h3 class="text-xl font-bold text-white whitespace-nowrap">Frecuencias</h3>
     </div>
   `;
   
@@ -256,7 +254,7 @@ function manejarResize() {
     
     // Resetear layout a móvil y mostrar todas las cajas
     contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
-    contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+    contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
     
     // Mostrar todas las cajas en móvil
     const todasLasCajas = document.querySelectorAll('[id^="caja-"]');
@@ -287,7 +285,7 @@ function manejarResize() {
     } else {
       // No hay cajas abiertas, layout normal y mostrar todas las cajas
       contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
-      contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+      contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
       contenedorContenido.classList.add('hidden');
       
       // Mostrar todas las cajas
@@ -390,7 +388,7 @@ function cerrarTodasLasCajas() {
   
   // Volver al layout original (4 cajas horizontales)
   contenedorPrincipal.className = 'grid grid-cols-1 lg:grid-cols-4 gap-6';
-  contenedorCajas.className = 'lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6';
+  contenedorCajas.className = 'lg:col-span-4 centrar-cajas-horizontal';
   contenedorContenido.classList.add('hidden');
   contenedorContenido.innerHTML = '';
   
@@ -435,12 +433,9 @@ function moverCajaAbiertaAlContenido(tipo, datos) {
   botonTitulo.className = 'w-full p-4 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
   botonTitulo.onclick = () => manejarClicCaja(tipo, datos); // Al hacer clic, se cierra
   botonTitulo.innerHTML = `
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-center gap-3">
       <div class="text-2xl">${emojis[tipo]}</div>
-      <div class="flex-1">
-        <h3 class="text-lg font-bold text-white text-center">${titulos[tipo]}</h3>
-      </div>
-      <div class="text-gray-300 text-sm">✕</div>
+      <h3 class="text-lg font-bold text-white whitespace-nowrap">${titulos[tipo]}</h3>
     </div>
   `;
   
@@ -783,11 +778,9 @@ function crearCajaAnalisis(tipo, emoji, titulo, datos) {
   botonTitulo.className = 'w-full p-6 text-left hover:bg-white hover:bg-opacity-10 transition-all duration-300';
   botonTitulo.onclick = () => manejarClicCaja(tipo, datos);
   botonTitulo.innerHTML = `
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-center gap-3">
       <div class="text-2xl">${emoji}</div>
-      <div class="flex-1">
-        <h3 class="text-xl font-bold text-white text-center">${titulo}</h3>
-      </div>
+      <h3 class="text-xl font-bold text-white whitespace-nowrap">${titulo}</h3>
     </div>
   `;
   

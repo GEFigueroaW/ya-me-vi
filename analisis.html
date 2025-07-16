@@ -163,100 +163,126 @@
       background-color: rgba(59, 130, 246, 0.2) !important;
     }
     
-    /* Centrado horizontal del contenedor de cajas */
-    #contenedor-cajas {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      align-items: center; /* Centra horizontalmente las cajas */
-      justify-content: center; /* Centra verticalmente si hay espacio */
-      margin: 0 auto; /* Centra el contenedor completo */
-      width: 100%;
-      max-width: 300px; /* Ancho máximo apropiado para las cajas */
+    /* Centrar el contenedor de cajas */
+    #contenedor-cajas,
+    .centrar-cajas-horizontal {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      margin: 0 auto !important;
+      width: 100% !important;
+      max-width: 350px !important;
+      gap: 1rem !important;
     }
     
-    /* Asegurar que las cajas mantengan su ancho y contenido en una línea */
+    /* En desktop, layout horizontal centrado */
+    @media (min-width: 1024px) {
+      #contenedor-cajas.lg\:col-span-4,
+      .centrar-cajas-horizontal.lg\:col-span-4 {
+        flex-direction: row !important;
+        justify-content: center !important;
+        max-width: 100% !important;
+        gap: 1.5rem !important;
+      }
+      
+      /* Cuando está en layout expandido */
+      #contenedor-cajas.lg\:col-span-1,
+      .centrar-cajas-horizontal.lg\:col-span-1 {
+        flex-direction: column !important;
+        max-width: 100% !important;
+      }
+    }
+    
+    /* Estilos para las cajas individuales */
     #contenedor-cajas > div {
-      width: 100%;
-      min-width: 280px; /* Ancho mínimo para contenido en una línea */
-      max-width: 300px; /* Ancho máximo consistente */
-      height: auto;
-      position: relative;
+      width: 100% !important;
+      min-width: 280px !important;
+      max-width: 320px !important;
+      height: auto !important;
+      margin: 0 !important;
+      flex-shrink: 0 !important;
     }
     
-    /* Ajustes para el contenido de las cajas - una sola línea */
+    /* En desktop con layout horizontal */
+    @media (min-width: 1024px) {
+      #contenedor-cajas.lg\:col-span-4 > div,
+      .centrar-cajas-horizontal.lg\:col-span-4 > div {
+        width: auto !important;
+        min-width: 200px !important;
+        max-width: 250px !important;
+        flex: 1 !important;
+      }
+    }
+    
+    /* Centrar el contenido interno de las cajas */
     #contenedor-cajas button {
-      padding: 1rem 1.5rem; /* Reducir padding vertical para más espacio horizontal */
-      white-space: nowrap; /* Evitar saltos de línea */
-      overflow: hidden; /* Ocultar desbordamiento */
-      text-overflow: ellipsis; /* Mostrar puntos suspensivos si es necesario */
+      padding: 1rem 1.5rem !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      width: 100% !important;
+      text-align: center !important;
     }
     
-    /* Flexbox para el contenido interno de las cajas */
-    #contenedor-cajas .flex.items-center.justify-between {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem; /* Espacio entre emoji y texto */
-      width: 100%;
+    /* Flexbox para el contenido interno - centrado */
+    #contenedor-cajas .flex.items-center.justify-center {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 0.75rem !important;
+      width: 100% !important;
     }
     
     /* Ajustes para el emoji */
     #contenedor-cajas .text-2xl {
-      font-size: 1.5rem; /* Reducir ligeramente el tamaño del emoji */
-      flex-shrink: 0; /* No permitir que se reduzca */
-      min-width: 2rem; /* Ancho mínimo fijo */
+      font-size: 1.5rem !important;
+      flex-shrink: 0 !important;
+      line-height: 1 !important;
     }
     
-    /* Ajustes para el texto */
-    #contenedor-cajas .flex-1 {
-      flex: 1;
-      min-width: 0; /* Permitir que se reduzca si es necesario */
-    }
-    
+    /* Ajustes para el texto - una sola línea */
     #contenedor-cajas h3 {
-      font-size: 1.125rem; /* Tamaño de fuente ligeramente más pequeño */
-      line-height: 1.2; /* Altura de línea más compacta */
-      margin: 0; /* Eliminar márgenes */
-      white-space: nowrap; /* Una sola línea */
-      overflow: hidden; /* Ocultar desbordamiento */
-      text-overflow: ellipsis; /* Puntos suspensivos si es necesario */
-    }
-    
-    /* Ajustes responsivos */
-    @media (min-width: 1024px) {
-      /* En desktop, cuando está en layout expandido */
-      .lg\:col-span-1 #contenedor-cajas {
-        max-width: 100%; /* Usar todo el ancho disponible */
-      }
-      
-      /* En desktop, cuando está en layout normal */
-      .lg\:col-span-4 #contenedor-cajas {
-        flex-direction: row; /* Horizontal en desktop */
-        justify-content: center; /* Centrar horizontalmente */
-        max-width: 100%; /* Usar todo el ancho disponible */
-        gap: 1.5rem; /* Espacio entre cajas */
-      }
-      
-      .lg\:col-span-4 #contenedor-cajas > div {
-        width: auto; /* Ancho automático en layout horizontal */
-        min-width: 200px; /* Mínimo para contenido */
-        max-width: 250px; /* Máximo para mantener proporciones */
-      }
-    }
-    
-    /* Asegurar que el contenido expandible móvil no interfiera */
-    .lg\:hidden {
-      margin-top: 0 !important;
+      font-size: 1.125rem !important;
+      line-height: 1.2 !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
     }
     
     /* Mejoras para transiciones */
     #contenedor-cajas > div {
-      transition: all 0.3s ease;
+      transition: all 0.3s ease !important;
     }
     
     #contenedor-cajas button:hover {
-      transform: translateY(-2px);
+      transform: translateY(-2px) !important;
+    }
+    
+    /* Centrar el contenedor principal */
+    #contenedor-principal {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
+    
+    /* En desktop, layout de grid cuando esté expandido */
+    @media (min-width: 1024px) {
+      #contenedor-principal.grid.lg\:grid-cols-4 {
+        display: grid !important;
+        grid-template-columns: 1fr 3fr !important;
+        align-items: start !important;
+        gap: 1.5rem !important;
+      }
+      
+      /* Cuando no está expandido, centrar todo */
+      #contenedor-principal:not(.grid.lg\:grid-cols-4) {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+      }
     }
   </style>
 </body>
