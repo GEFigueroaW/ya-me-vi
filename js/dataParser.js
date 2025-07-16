@@ -387,7 +387,6 @@ function abrirCaja(tipo, datos) {
   
   // Generar contenido según el tipo
   let contenidoHTML = '';
-  
   switch (tipo) {
     case 'frecuencias':
       contenidoHTML = generarContenidoFrecuencias(datos);
@@ -399,6 +398,7 @@ function abrirCaja(tipo, datos) {
       contenidoHTML = generarContenidoPares(datos.paresAnalisis || {});
       break;
     case 'decada':
+      // Usar el análisis de década por posición
       contenidoHTML = generarContenidoDecada(datos.decadaAnalisis || {});
       break;
     default:
@@ -853,147 +853,118 @@ export function analizarDecadaTerminacion(datos) {
   return resultados;
 }
 
-// Función para mostrar todos los análisis avanzados
-export function mostrarAnalisisAvanzados(datos) {
-  console.log('📊 Mostrando análisis avanzados...');
-  
-  const contenedorCajas = document.getElementById('contenedor-cajas');
-  if (!contenedorCajas) return;
-  
-  // Generar análisis avanzados con datos reales
-  const sumAnalisis = analizarSumaNumeros(datos);
-  const paresAnalisis = analizarParesImpares(datos);
-  const decadaAnalisis = analizarDecadaTerminacion(datos);
-  
-  // Agregar análisis a los datos para que estén disponibles en las cajas
-  datos.sumAnalisis = sumAnalisis;
-  datos.paresAnalisis = paresAnalisis;
-  datos.decadaAnalisis = decadaAnalisis;
-  
-  // Crear las 3 cajas adicionales
-  const cajaSuma = crearCajaAnalisis('suma', '🔢', 'Suma de números', datos);
-  const cajaPares = crearCajaAnalisis('pares', '⚖️', 'Pares e impares', datos);
-  const cajaDecada = crearCajaAnalisis('decada', '🎯', 'Década y terminación', datos);
-  
-  // Agregar las cajas al contenedor
-  contenedorCajas.appendChild(cajaSuma);
-  contenedorCajas.appendChild(cajaPares);
-  contenedorCajas.appendChild(cajaDecada);
-  
-  console.log('✅ Análisis avanzados completados');
+// === NUEVO ANÁLISIS DE DÉCADA POR POSICIÓN ===
+function analizarDecadaPorPosicion(datos) {
+  // Devuelve un objeto con decadasPorPosicion para cada sorteo
+  const decadas = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-56'];
+  const posiciones = [0,1,2,3,4,5];
+  const nombresPos = ['1er Número','2do Número','3er Número','4to Número','5to Número','6to Número'];
+  const resultado = {};
+  Object.entries(datos).forEach(([sorteo, datosIndividuales]) => {
+    if (!datosIndividuales || !datosIndividuales.sorteos) return;
+    const decadasPorPosicion = posiciones.map(pos => {
+      // Contar frecuencias de década para esta posición
+      const cuenta = { '1-10':0, '11-20':0, '21-30':0, '31-40':0, '41-50':0, '51-56':0 };
+      datosIndividuales.sorteos.forEach(sorteoData => {
+        const num = sorteoData.numeros[pos];
+        if (num <= 10) cuenta['1-10']++;
+        else if (num <= 20) cuenta['11-20']++;
+        else if (num <= 30) cuenta['21-30']++;
+        else if (num <= 40) cuenta['31-40']++;
+        else if (num <= 50) cuenta['41-50']++;
+        else cuenta['51-56']++;
+      });
+      // Buscar la década más frecuente
+      let decadaMasFrecuente = '1-10', max = 0;
+      for (const d of decadas) {
+        if (cuenta[d] > max) { decadaMasFrecuente = d; max = cuenta[d]; }
+      }
+      return {
+        posicion: nombresPos[pos],
+        decadaMasFrecuente,
+        frecuencia: max
+      };
+    });
+    // Mensaje clave dinámico
+    let datoClave = '';
+    if (sorteo === 'melate') {
+      datoClave = 'Los datos muestran una clara progresión: la década 1-10 es la más frecuente para el 1er número, la 11-20 para el 2do, y así sucesivamente. ¡Los números más bajos tienden a ocupar las primeras posiciones, mientras que los más altos se reservan para las últimas!';
+    } else if (sorteo === 'revancha') {
+      datoClave = 'La tendencia es muy similar a Melate. Las décadas listadas son las más frecuentes para cada posición. Prioriza números de décadas bajas para las primeras posiciones y de décadas altas para las finales.';
+    } else if (sorteo === 'revanchita') {
+      datoClave = 'Revanchita confirma la inclinación de las décadas por posición. Las décadas mostradas son las que más han salido en cada lugar. Considera este orden al armar tu combinación para maximizar tu alineación con los patrones históricos.';
+    }
+    resultado[sorteo] = { decadasPorPosicion, datoClave };
+  });
+  return resultado;
 }
 
-function crearCajaAnalisis(tipo, emoji, titulo, datos) {
-  const caja = document.createElement('div');
-  caja.className = 'caja-interactiva';
-  caja.id = `caja-${tipo}`;
-  
-  const botonTitulo = document.createElement('button');
-  botonTitulo.onclick = () => manejarClicCaja(tipo, datos);
-  botonTitulo.innerHTML = `
-    <div class="caja-content">
-      <div class="caja-emoji">${emoji}</div>
-      <h3 class="caja-titulo">${titulo}</h3>
-    </div>
-  `;
-  
-  // Contenido expandible móvil
-  const contenidoExpandible = document.createElement('div');
-  contenidoExpandible.id = `${tipo}-content-mobile`;
-  contenidoExpandible.className = 'hidden lg:hidden px-6 pb-6';
-  
-  caja.appendChild(botonTitulo);
-  caja.appendChild(contenidoExpandible);
-  
-  return caja;
-}
-
-// Función para generar contenido de suma
-function generarContenidoSuma(sumAnalisis) {
+// Genera el contenido visual de la sección Década y Terminación por posición
+function generarContenidoDecada(decadaPorPosicionAnalisis) {
   let contenidoHTML = `<div class="space-y-8">
     <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
       <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
-        <h3 class="text-2xl font-bold text-yellow-400 text-left">🌟 ¡Desvela el Patrón Oculto del Melate! 🌟</h3>
+        <h3 class="text-2xl font-bold text-yellow-400 text-left">🎯 ¡Desbloquea el Secreto Posicional del Melate! 🎯</h3>
         <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
       </button>
       <div class="px-4 pb-4 hidden">
-        <p class="text-white text-base mb-2 text-center">¿Sabías que la suma de los números ganadores tiene un secreto?<br>
-        Analizamos los sorteos de los ultimos 30 meses para revelarte las sumas de números con la mayor probabilidad de aparecer.<br>
-        <span class="text-yellow-300 font-semibold">¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</span></p>
+        <p class="text-white text-base mb-2 text-center">Descubre la década más frecuente para cada número en la combinación ganadora.<br>
+        Hemos analizado miles de sorteos históricos para identificar cuál década de números tiende a aparecer más en cada posición específica (1er número, 2do número, etc.) de las combinaciones ganadoras. ¡Esta información es tu guía definitiva para construir tu boleto ganador con una estrategia basada en datos!</p>
         <div class="mt-2 text-sm text-gray-200">
-          <strong>¿Por qué la suma de tus números importa?</strong><br>
-          Imagina que cada sorteo es una huella digital. Al sumar los números ganadores, descubrimos que no todas las sumas son igual de comunes. ¡Hay rangos que se repiten una y otra vez! Esta es una herramienta poderosa para afinar tu selección.
+          <strong>¿Por qué la posición de tus números importa?</strong><br>
+          Tradicionalmente, elegimos 6 números sin pensar en su orden. Pero, ¿y si la historia nos dice que algunos números prefieren ciertas "ubicaciones" dentro de la combinación ganadora? Al entender esta tendencia, puedes afinar tu selección número por número, aumentando tus probabilidades de alinearte con los patrones más frecuentes.
         </div>
       </div>
     </div>`;
 
-  Object.entries(sumAnalisis).forEach(([sorteo, datos]) => {
-    // Configuración por sorteo
-    const config = {
-      melate: {
-        color: 'bg-blue-500',
-        emoji: '📊',
-        nombre: 'Melate',
-        consejo: '¡TU ZONA DE MAYOR OPORTUNIDAD!',
-        datoEstrella: '✨ ¡Dato Estrella! Si tus números suman entre 150 y 199, ¡estás alineado con la tendencia histórica del Melate!'
-      },
-      revancha: {
-        color: 'bg-purple-500',
-        emoji: '🍀',
-        nombre: 'Revancha',
-        consejo: '💡 ¡Consejo de Oro! La consistencia es clave. Revancha refuerza la importancia del rango 150-199 como la zona más probable para la suma de tus números.'
-      },
-      revanchita: {
-        color: 'bg-green-500',
-        emoji: '🌈',
-        nombre: 'Revanchita',
-        consejo: '🚀 ¡Estrategia Avanzada! Si bien el 150-199 es dominante, el rango 200-249 tiene una presencia notable en Revanchita. ¡Considera ambas opciones!'
-      }
-    };
+  const config = {
+    melate: {
+      color: 'bg-blue-500',
+      emoji: '🔢',
+      nombre: 'Melate',
+      consejo: '✨ ¡Dato Clave de Melate!'
+    },
+    revancha: {
+      color: 'bg-purple-500',
+      emoji: '🍀',
+      nombre: 'Revancha',
+      consejo: '💡 ¡Consejo de Revancha!'
+    },
+    revanchita: {
+      color: 'bg-green-500',
+      emoji: '🌈',
+      nombre: 'Revanchita',
+      consejo: '🚀 ¡Estrategia Avanzada!'
+    }
+  };
+
+  Object.entries(decadaPorPosicionAnalisis).forEach(([sorteo, datos]) => {
     const cfg = config[sorteo];
-
-    // Impacto en el juego por rango
-    const impacto = {
-      '50-99': 'Menos común, riesgo alto.',
-      '100-149': 'Frecuencia moderada, ¡cerca de la zona caliente!',
-      '150-199': cfg.consejo || '¡Zona dorada!',
-      '200-249': 'Menos frecuente, pero aún posible.',
-      '250-299': 'Muy raro, alta improbabilidad.',
-      '300+': '¡Nunca ha ocurrido! Evita sumas tan altas.'
-    };
-
     contenidoHTML += `
       <div class="${cfg.color} bg-opacity-40 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: Suma promedio histórica: <span class="text-yellow-300">${Math.round(Number(datos.sumaPromedio))}</span></h4>
-        <div class="text-base text-white mb-2 text-center">
-          <strong>¡El rango más frecuente es el de <span class="text-yellow-300">${datos.rangoMasFrecuente[0]}</span>!</strong> Ha aparecido <span class="text-yellow-300">${datos.rangoMasFrecuente[1]}</span> veces en los sorteos.
-          ${sorteo === 'melate' ? '<br>Esto significa que casi la mitad de los sorteos ganadores caen en esta "zona dorada".' : ''}
-        </div>
+        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: Las Décadas Más Frecuentes por Posición</h4>
         <div class="overflow-x-auto">
           <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
             <thead>
               <tr class="bg-white bg-opacity-10">
-                <th class="px-2 py-1">Rango de Suma</th>
+                <th class="px-2 py-1">Posición del Número</th>
+                <th class="px-2 py-1">Década Más Frecuente</th>
                 <th class="px-2 py-1">Frecuencia (Veces)</th>
-                <th class="px-2 py-1">Impacto en tu Juego</th>
               </tr>
             </thead>
             <tbody>
-              ${Object.entries(datos.rangos).map(([rango, freq]) => `
+              ${datos.decadasPorPosicion.map(posData => `
                 <tr>
-                  <td class="px-2 py-1 text-center">${rango}</td>
-                  <td class="px-2 py-1 text-center">${freq}</td>
-                  <td class="px-2 py-1 text-center">${impacto[rango] || ''}</td>
+                  <td class="px-2 py-1 text-center">${posData.posicion}</td>
+                  <td class="px-2 py-1 text-center">${posData.decadaMasFrecuente}</td>
+                  <td class="px-2 py-1 text-center">${posData.frecuencia}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
         </div>
         <div class="text-yellow-300 font-semibold text-center mb-2">
-          ${cfg.datoEstrella ? cfg.datoEstrella : ''}
-        </div>
-        <div class="text-white text-sm text-center mb-2">
-          ${cfg.consejo}
+          ${cfg.consejo} ${datos.datoClave}
         </div>
       </div>
     `;
@@ -1007,160 +978,17 @@ function generarContenidoSuma(sumAnalisis) {
       </button>
       <div class="px-4 pb-4 hidden">
         <ul class="list-disc list-inside text-white text-base mb-2">
-          <li>Elige tus 6 números favoritos para el próximo sorteo de Melate, Revancha o Revanchita.</li>
-          <li>Súmalos: ¿Cuál es el total de tus números?</li>
-          <li>Compara tu suma: ¿Cae dentro del rango más frecuente (<span class="text-yellow-300">150-199</span>)?</li>
-          <li>Si sí, <span class="text-green-400 font-bold">¡excelente!</span> Estás jugando con las estadísticas históricas a tu favor.</li>
-          <li>Si no, puedes ajustar uno o dos números para acercar tu suma a la "zona dorada".</li>
+          <li>Elige tus 6 números favoritos, pero esta vez, piensa en la posición que cada uno podría ocupar.</li>
+          <li>Para el 1er número, busca uno en la década 1-10 (que es la más frecuente para esa posición).</li>
+          <li>Para el 2do número, elige uno en la década 11-20 (la más frecuente para la segunda posición).</li>
+          <li>Y así sucesivamente, siguiendo la década más frecuente para cada posición.</li>
+          <li>Combina esta estrategia con el análisis de pares/impares para una selección aún más robusta.</li>
         </ul>
         <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
         <div class="text-yellow-300 font-bold text-center">¡Con estos datos, tus selecciones pueden ser más inteligentes y estratégicas!<br>¡Mucha suerte en el próximo sorteo!</div>
       </div>
     </div>
   </div>`;
-  return contenidoHTML;
-}
-
-// Función para generar contenido de pares
-function generarContenidoPares(paresImparesAnalisis) {
-  let contenidoHTML = `<div class="space-y-8">
-    <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
-      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
-        <h3 class="text-2xl font-bold text-yellow-400 text-left">⚖️ ¡El Equilibrio Ganador! Desvela el Patrón de Pares e Impares en Melate ⚖️</h3>
-        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
-      </button>
-      <div class="px-4 pb-4 hidden">
-        <p class="text-white text-base mb-2 text-center">¿Sabías que la combinación de números pares e impares tiene un balance favorito?<br>
-        Analizamos los sorteos de los ultimos 30 meses para revelarte la composición de números pares e impares con la mayor probabilidad de aparecer.<br>
-        <span class="text-yellow-300 font-semibold">¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</span></p>
-        <div class="mt-2 text-sm text-gray-200">
-          <strong>¿Por qué el balance de pares e impares importa?</strong><br>
-          Más allá de los números individuales, la mezcla de pares e impares en una combinación ganadora no es aleatoria. Descubrimos que hay un equilibrio que se repite constantemente. ¡Conocer este patrón puede ser tu clave para una selección más inteligente!
-        </div>
-      </div>
-    </div>`;
-  
-  Object.entries(paresImparesAnalisis).forEach(([sorteo, datos]) => {
-    const config = {
-      melate: {
-        color: 'bg-blue-500',
-        emoji: '🔢',
-        nombre: 'Melate',
-        consejo: '✨ ¡Equilibrio Perfecto! La combinación de 3 números pares y 3 números impares es, por mucho, la más común en Melate. ¡Busca este balance en tus selecciones para alinearte con la historia!'
-      },
-      revancha: {
-        color: 'bg-purple-500',
-        emoji: '🍀',
-        nombre: 'Revancha',
-        consejo: '💡 ¡Consistencia Clave! Al igual que en Melate, el patrón de 3 pares y 3 impares es el más frecuente en Revancha. ¡La historia nos muestra el camino!'
-      },
-      revanchita: {
-        color: 'bg-green-500',
-        emoji: '🌈',
-        nombre: 'Revanchita',
-        consejo: '🚀 ¡Observa el Patrón! La combinación 3 pares y 3 impares sigue siendo la más destacada en Revanchita. ¡Pero no subestimes las combinaciones de 2 y 4 pares, que también tienen una buena frecuencia!'
-      }
-    };
-    const cfg = config[sorteo];
-
-    // Calcular totales para porcentajes
-    const total = Object.values(datos.distribuciones).reduce((a, b) => a + b, 0) || 1;
-
-    // Ordenar claves para mostrar de 0p-6i a 6p-0i
-    const orden = ['0p-6i','1p-5i','2p-4i','3p-3i','4p-2i','5p-1i','6p-0i'];
-
-    contenidoHTML += `
-      <div class="${cfg.color} bg-opacity-40 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: Pares e Impares</h4>
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
-            <thead>
-              <tr class="bg-white bg-opacity-10">
-                <th class="px-2 py-1">Combinación (Pares/Impares)</th>
-                <th class="px-2 py-1">Frecuencia (Veces)</th>
-                <th class="px-2 py-1">Porcentaje (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${orden.map(clave => {
-                const [p,i] = clave.split('-');
-                const freq = datos.distribuciones[clave] || 0;
-                const pct = ((freq/total)*100).toFixed(1);
-                return `<tr>
-                  <td class="px-2 py-1 text-center">${p.replace('p',' Pares')} / ${i.replace('i',' Impares')}</td>
-                  <td class="px-2 py-1 text-center">${freq}</td>
-                  <td class="px-2 py-1 text-center">${pct}%</td>
-                </tr>`;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-        <div class="text-yellow-300 font-semibold text-center mb-2">
-          ${cfg.consejo}
-        </div>
-      </div>
-    `;
-  });
-  
-  contenidoHTML += `
-    <div class="mt-8 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
-      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
-        <h4 class="text-lg font-bold text-yellow-300 text-left">¿Listo para usar esta información?</h4>
-        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
-      </button>
-      <div class="px-4 pb-4 hidden">
-        <ul class="list-disc list-inside text-white text-base mb-2">
-          <li>Elige tus 6 números favoritos para el próximo sorteo de Melate, Revancha o Revanchita.</li>
-          <li>Cuenta cuántos son pares y cuántos son impares.</li>
-          <li>Compara tu balance: ¿Se acerca a la combinación más frecuente (generalmente 3 Pares / 3 Impares)?</li>
-          <li>Si sí, <span class="text-green-400 font-bold">¡excelente!</span> Estás jugando con las estadísticas históricas a tu favor.</li>
-          <li>Si no, puedes ajustar uno o dos números para acercar tu combinación al balance ganador.</li>
-        </ul>
-        <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
-        <div class="text-yellow-300 font-bold text-center">¡Con estos datos, tus selecciones pueden ser más inteligentes y estratégicas!<br>¡Mucha suerte en el próximo sorteo!</div>
-      </div>
-    </div>
-  </div>`;
-  return contenidoHTML;
-}
-
-// Función para generar contenido de década
-function generarContenidoDecada(decadaTerminacionAnalisis) {
-  let contenidoHTML = '<div class="space-y-4">';
-  
-  Object.entries(decadaTerminacionAnalisis).forEach(([sorteo, datos]) => {
-    const colores = {
-      melate: 'bg-blue-500',
-      revancha: 'bg-purple-500',
-      revanchita: 'bg-green-500'
-    };
-    
-    contenidoHTML += `
-      <div class="${colores[sorteo]} bg-opacity-50 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2">${sorteo.toUpperCase()}</h4>
-        <div class="text-sm text-gray-300">
-          <p><strong>Década más frecuente:</strong> ${datos.decadaMasFrecuente[0]} (${datos.decadaMasFrecuente[1]} veces)</p>
-          <p><strong>Terminación más frecuente:</strong> ${datos.terminacionMasFrecuente[0]} (${datos.terminacionMasFrecuente[1]} veces)</p>
-          <div class="mt-2 text-xs">
-            <div class="mb-1"><strong>Por década:</strong></div>
-            <div class="grid grid-cols-3 gap-1 mb-2">
-              ${Object.entries(datos.decadas).map(([decada, freq]) => `
-                <span>${decada}: ${freq}</span>
-              `).join('')}
-            </div>
-            <div class="mb-1"><strong>Por terminación:</strong></div>
-            <div class="grid grid-cols-5 gap-1">
-              ${Object.entries(datos.terminaciones).map(([term, freq]) => `
-                <span>${term}: ${freq}</span>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-  
-  contenidoHTML += '</div>';
   return contenidoHTML;
 }
 
