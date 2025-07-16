@@ -230,7 +230,10 @@
         flex-direction: row !important;
         justify-content: center !important;
         align-items: stretch !important;
-        flex-wrap: wrap !important;
+        flex-wrap: nowrap !important;
+        gap: 1.5rem !important;
+        width: 100% !important;
+        max-width: none !important;
       }
       
       /* Desktop: cuando SÍ está expandido - vertical a la izquierda */
@@ -239,6 +242,12 @@
         align-items: flex-start !important;
         width: auto !important;
         flex-shrink: 0 !important;
+      }
+      
+      /* Asegurar que las cajas tengan el mismo ancho en modo horizontal */
+      #contenedor-principal:not(.expanded) .caja-interactiva {
+        flex: 0 0 auto !important;
+        width: var(--ancho-caja-dinamico) !important;
       }
     }
     
@@ -269,17 +278,6 @@
       min-width: 300px !important;
       max-width: 450px !important;
       position: relative !important;
-      border-radius: 16px !important;
-      backdrop-filter: blur(12px) !important;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      overflow: hidden !important;
-      flex-shrink: 0 !important;
-    }
-      max-width: 450px !important;
-      margin: 0 auto !important;
       border-radius: 16px !important;
       backdrop-filter: blur(12px) !important;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
@@ -414,6 +412,25 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
       overflow: hidden !important;
       position: relative !important;
+    }
+    
+    /* Título clickeable en la caja expandida */
+    .caja-expandida .cursor-pointer {
+      border-radius: 12px !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      transition: all 0.3s ease !important;
+      margin: -0.5rem -0.5rem 1rem -0.5rem !important;
+      padding: 1rem !important;
+    }
+    
+    .caja-expandida .cursor-pointer:hover {
+      background: rgba(255, 255, 255, 0.15) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+      transform: translateY(-2px) !important;
+    }
+    
+    .caja-expandida .cursor-pointer:active {
+      transform: translateY(0) !important;
     }
     
     .caja-expandida::before {

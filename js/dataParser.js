@@ -343,18 +343,35 @@ export function expandirCaja(tipo, datos) {
     return;
   }
   
-  // Cerrar cualquier caja abierta anteriormente
+  // Si hay otra caja abierta, cerrarla primero
   if (cajaActualmenteAbierta && cajaActualmenteAbierta !== tipo) {
-    console.log(`🔄 Cerrando caja anterior: ${cajaActualmenteAbierta}`);
+    console.log(`🔄 Cambiando de caja ${cajaActualmenteAbierta} a ${tipo}`);
     cerrarTodasLasCajas();
-    // Pequeña pausa para que termine la animación de cierre
+    
+    // Esperar un poco para que termine la animación de cierre
     setTimeout(() => {
-      expandirCaja(tipo, datos);
-    }, 100);
+      abrirCaja(tipo, datos);
+    }, 150);
     return;
   }
   
-  console.log(`🔓 Expandiendo caja ${tipo}`);
+  // Si no hay ninguna caja abierta, abrir directamente
+  abrirCaja(tipo, datos);
+}
+
+// Función separada para abrir una caja (sin lógica de cierre)
+function abrirCaja(tipo, datos) {
+  const contenedorCajas = document.getElementById('contenedor-cajas');
+  const contenedorContenido = document.getElementById('contenedor-contenido');
+  const contenedorPrincipal = document.getElementById('contenedor-principal');
+  const cajaActual = document.getElementById(`caja-${tipo}`);
+  
+  if (!contenedorCajas || !contenedorContenido || !contenedorPrincipal) {
+    console.error('❌ Contenedores no encontrados');
+    return;
+  }
+  
+  console.log(`🔓 Abriendo caja ${tipo}`);
   
   // **CLAVE**: Activar el layout de dos columnas
   contenedorPrincipal.classList.add('expanded');
@@ -389,23 +406,18 @@ export function expandirCaja(tipo, datos) {
       contenidoHTML = '<p class="text-white">Contenido no disponible</p>';
   }
   
-  // Insertar contenido con botón de cerrar
+  // Insertar contenido SIN botón de cerrar - todo el título es clickeable
   contenedorContenido.innerHTML = `
     <div class="caja-expandida">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-xl font-bold text-white">
+      <div class="cursor-pointer hover:bg-white hover:bg-opacity-10 p-2 rounded-lg transition-all duration-200 mb-4" 
+           onclick="window.cerrarTodasLasCajas()" 
+           title="Hacer clic para cerrar">
+        <h3 class="text-xl font-bold text-white text-center">
           ${tipo === 'frecuencias' ? '📊 Frecuencias' : 
             tipo === 'suma' ? '🔢 Suma de números' : 
             tipo === 'pares' ? '⚖️ Pares e impares' : 
             tipo === 'decada' ? '🎯 Década y terminación' : 'Análisis'}
         </h3>
-        <button 
-          onclick="window.cerrarTodasLasCajas()" 
-          class="text-white hover:text-red-300 transition-colors duration-200 text-2xl"
-          title="Cerrar"
-        >
-          ✕
-        </button>
       </div>
       ${contenidoHTML}
     </div>
@@ -415,7 +427,7 @@ export function expandirCaja(tipo, datos) {
   cajaActualmenteAbierta = tipo;
   
   // El contenido ya está visible, no necesitamos setTimeout
-  console.log(`✅ Caja ${tipo} expandida correctamente`);
+  console.log(`✅ Caja ${tipo} abierta correctamente`);
   
   // Scroll suave al contenido en móvil
   if (window.innerWidth < 1024) {
@@ -470,7 +482,17 @@ function cerrarTodasLasCajas() {
   // Limpiar variable global
   cajaActualmenteAbierta = null;
   
-  console.log('✅ Todas las cajas cerradas, layout restaurado');
+  console.log('✅ Todas las cajas cerradas, volviendo a layout horizontal');
+  
+  // Forzar recalcular el layout para asegurar que las cajas queden horizontales
+  setTimeout(() => {
+    const contenedorCajas = document.getElementById('contenedor-cajas');
+    if (contenedorCajas) {
+      // Trigger reflow para asegurar que el CSS se aplique correctamente
+      contenedorCajas.style.display = 'flex';
+      contenedorCajas.offsetHeight; // Forzar reflow
+    }
+  }, 350);
 }
 
 // Función para mostrar la caja abierta en el área de contenido
