@@ -997,20 +997,20 @@ export function manejarClicCaja(tipo, datos) {
   console.log(`📦 [DEBUG] Clic en caja: ${tipo}, actual abierta: ${cajaActualmenteAbierta}`);
   
 
-  // Si la caja ya está abierta, NO la cierres al hacer clic en la caja original
+  // Si la caja ya está abierta, no hacer nada (solo se cierra con el área expandida)
   if (cajaActualmenteAbierta === tipo) {
-    // No hacer nada, la caja permanece abierta hasta que el usuario la cierre manualmente
     console.log(`ℹ️ Caja ${tipo} ya está abierta, no se cierra con clic en la caja original.`);
     return;
   }
 
-  // Si se hace clic en otra caja, cerrar la actual y abrir la nueva
-  console.log(`🔄 Cerrando todas las cajas antes de abrir ${tipo}`);
-  cerrarTodasLasCajas();
-
-  // Usar requestAnimationFrame para garantizar que el DOM se actualice
-  requestAnimationFrame(() => {
-    console.log(`🔓 [DEBUG] Abriendo caja con requestAnimationFrame: ${tipo}`);
+  // Si hay otra caja abierta, ciérrala antes de abrir la nueva
+  if (cajaActualmenteAbierta !== null) {
+    cerrarTodasLasCajas();
+    // Esperar a que termine la animación de cierre antes de abrir la nueva
+    setTimeout(() => {
+      abrirCaja(tipo, datos);
+    }, 320);
+  } else {
     abrirCaja(tipo, datos);
-  });
+  }
 }
