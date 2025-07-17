@@ -71,7 +71,7 @@ function generarContenidoSuma(sumAnalisis) {
         <div class="text-yellow-200 font-semibold text-center mb-2">
           Rango más frecuente: <span class="text-yellow-300">${datos.rangoMasFrecuente[0]}</span> (${datos.rangoMasFrecuente[1]} veces)
         </div>
-        <div class="text-white text-xs text-center">Total de sorteos analizados: ${datos.totalSorteos}</div>
+        <!-- Eliminado: Total de sorteos analizados -->
         <div class="text-yellow-300 font-bold text-center mt-2">
           ${sorteo === 'melate' ? '✨ ¡Dato Estrella! Si tus números suman entre 150 y 199, ¡estás alineado con la tendencia histórica del Melate!' : ''}
           ${sorteo === 'revancha' ? '💡 ¡Consejo de Oro! La consistencia es clave. Revancha refuerza la importancia del rango 150-199 como la zona más probable para la suma de tus números.' : ''}
@@ -173,7 +173,7 @@ function generarContenidoPares(paresAnalisis) {
         <div class="text-yellow-200 font-semibold text-center mb-2">
           Distribución más frecuente: <span class="text-yellow-300">${datos.distribucionMasFrecuente[0].replace('p',' pares / ').replace('i',' impares')}</span>
         </div>
-        <div class="text-white text-xs text-center">Total de sorteos analizados: ${datos.totalSorteos}</div>
+        <!-- Eliminado: Total de sorteos analizados -->
         <div class="text-yellow-300 font-bold text-center mt-2">${cfg.motivacion}</div>
       </div>
     `;
