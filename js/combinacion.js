@@ -484,7 +484,7 @@ function calcularFrecuenciaPorSorteo(num) {
     const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
     
     // Aplicar el factor de motivación ajustado
-    const factorMotivacion = 12.5; // Factor matemático según especificaciones
+    const factorMotivacion = 10; // Factor matemático según especificaciones
     const porcentajeAjustado = porcentajeBase * factorMotivacion;
     const porcentajeFinal = Math.max(porcentajeAjustado, 8.0); // Mínimo 8%
     
@@ -498,7 +498,7 @@ function calcularFrecuenciaPorSorteo(num) {
 }
 
 /**
- * Calcular índice real (sin factor 12.5x) por sorteo
+ * Calcular índice real (sin factor 10x) por sorteo
  */
 function calcularIndicePorSorteo(num) {
   const resultados = {};
@@ -546,8 +546,8 @@ function calcularPorcentajeTotal(num) {
   // Cálculo base
   const porcentajeBase = totalNumeros > 0 ? (frecuenciaTotal / totalNumeros) * 100 : 0;
   
-  // Factor de motivación: 12.5x según especificaciones
-  const factorMotivacion = 12.5;
+  // Factor de motivación: 10x según especificaciones
+  const factorMotivacion = 10;
   const porcentajeAjustado = porcentajeBase * factorMotivacion;
   
   // Asegurar que ningún número tenga menos de 8% (mínimo 8%)
@@ -560,7 +560,7 @@ function calcularPorcentajeTotal(num) {
  * Clasificar probabilidad según rangos definidos
  */
 function clasificarProbabilidad(porcentaje) {
-  // Rangos ajustados para el factor 12.5x con colores más contrastantes y sombras
+  // Rangos ajustados para el factor 10x con colores más contrastantes y sombras
   if (porcentaje >= 30) return { 
     categoria: 'Excepcional', 
     color: 'text-green-600 font-bold', 
