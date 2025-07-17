@@ -1,3 +1,84 @@
+// === GENERADORES DE CONTENIDO PARA ANÁLISIS AVANZADOS ===
+// Suma de Números
+function generarContenidoSuma(sumAnalisis) {
+  const sorteos = ['melate', 'revancha', 'revanchita'];
+  let contenidoHTML = '<div class="space-y-8">';
+  sorteos.forEach(sorteo => {
+    const datos = sumAnalisis[sorteo];
+    if (!datos) return;
+    contenidoHTML += `
+      <div class="bg-blue-500 bg-opacity-30 rounded-lg p-4 mb-4">
+        <h4 class="font-bold text-white mb-2 text-xl text-center">🔢 ${sorteo.toUpperCase()} - Suma de Números</h4>
+        <div class="text-white text-center mb-2">
+          <span class="font-semibold">Suma promedio:</span> <span class="text-yellow-300 text-lg font-bold">${datos.sumaPromedio}</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
+            <thead>
+              <tr class="bg-white bg-opacity-10">
+                <th class="px-2 py-1">Rango de Suma</th>
+                <th class="px-2 py-1">Frecuencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${Object.entries(datos.rangos).map(([rango, freq]) => `
+                <tr>
+                  <td class="px-2 py-1 text-center">${rango}</td>
+                  <td class="px-2 py-1 text-center">${freq}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="text-yellow-200 font-semibold text-center mb-2">
+          Rango más frecuente: <span class="text-yellow-300">${datos.rangoMasFrecuente[0]}</span>
+        </div>
+        <div class="text-white text-xs text-center">Total de sorteos analizados: ${datos.totalSorteos}</div>
+      </div>
+    `;
+  });
+  contenidoHTML += '</div>';
+  return contenidoHTML;
+}
+
+// Pares e Impares
+function generarContenidoPares(paresAnalisis) {
+  const sorteos = ['melate', 'revancha', 'revanchita'];
+  let contenidoHTML = '<div class="space-y-8">';
+  sorteos.forEach(sorteo => {
+    const datos = paresAnalisis[sorteo];
+    if (!datos) return;
+    contenidoHTML += `
+      <div class="bg-purple-500 bg-opacity-30 rounded-lg p-4 mb-4">
+        <h4 class="font-bold text-white mb-2 text-xl text-center">⚖️ ${sorteo.toUpperCase()} - Pares e Impares</h4>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
+            <thead>
+              <tr class="bg-white bg-opacity-10">
+                <th class="px-2 py-1">Distribución</th>
+                <th class="px-2 py-1">Frecuencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${Object.entries(datos.distribuciones).map(([dist, freq]) => `
+                <tr>
+                  <td class="px-2 py-1 text-center">${dist.replace('p',' pares / ').replace('i',' impares')}</td>
+                  <td class="px-2 py-1 text-center">${freq}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="text-yellow-200 font-semibold text-center mb-2">
+          Distribución más frecuente: <span class="text-yellow-300">${datos.distribucionMasFrecuente[0]}</span>
+        </div>
+        <div class="text-white text-xs text-center">Total de sorteos analizados: ${datos.totalSorteos}</div>
+      </div>
+    `;
+  });
+  contenidoHTML += '</div>';
+  return contenidoHTML;
+}
 // dataParser.js - Módulo principal para cargar y procesar datos de sorteos
 // Versión limpia y funcional - Julio 2025
 
@@ -1068,15 +1149,16 @@ export function mostrarAnalisisAvanzados(datos) {
   datos.paresAnalisis = paresAnalisis;
   datos.decadaAnalisis = decadaAnalisis;
 
-  // Crear las 3 cajas adicionales
-  const cajaSuma = crearCajaAnalisis('suma', '🔢', 'Suma de números', datos);
-  const cajaPares = crearCajaAnalisis('pares', '⚖️', 'Pares e impares', datos);
-  const cajaDecada = crearCajaAnalisis('decada', '🎯', 'Década y terminación', datos);
+
+  // Crear las 3 cajas adicionales usando la firma correcta
+  const cajaSuma = crearCajaAnalisis('suma', datos);
+  const cajaPares = crearCajaAnalisis('pares', datos);
+  const cajaDecada = crearCajaAnalisis('decada', datos);
 
   // Agregar las cajas al contenedor
-  contenedorCajas.appendChild(cajaSuma);
-  contenedorCajas.appendChild(cajaPares);
-  contenedorCajas.appendChild(cajaDecada);
+  if (cajaSuma) contenedorCajas.appendChild(cajaSuma);
+  if (cajaPares) contenedorCajas.appendChild(cajaPares);
+  if (cajaDecada) contenedorCajas.appendChild(cajaDecada);
 
   console.log('✅ Análisis avanzados completados (incluye década por posición)');
 }
