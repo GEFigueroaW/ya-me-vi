@@ -35,9 +35,6 @@ export class ValidadorInputs {
  */
 export class UIManager {
   constructor() {
-    // Elementos del Acordeón
-    this.triggers = document.querySelectorAll('[id^="trigger-"]');
-    
     // Elementos de la UI
     this.validador = new ValidadorInputs();
     
@@ -75,6 +72,7 @@ export class UIManager {
     document.querySelectorAll('button:not([id^="trigger-"]), input').forEach(element => {
       element.addEventListener('click', (e) => e.stopPropagation());
     });
+    
     // Inicializar el acordeón SOLO en los triggers
     this.triggers.forEach(trigger => {
       trigger.addEventListener('click', (e) => {
@@ -83,17 +81,11 @@ export class UIManager {
         this.toggleAcordeon(trigger);
       });
     });
+    
     // Botón de volver
     this.btnVolver.addEventListener('click', (e) => {
       e.stopPropagation();
       window.history.back();
-    });
-    
-    // Event listener para el acordeón de número individual
-    this.btnEvaluarNumero.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const trigger = document.getElementById('trigger-numero-individual');
-      this.toggleAcordeon(trigger);
     });
 
     // Evaluación del número individual
@@ -107,13 +99,6 @@ export class UIManager {
         e.stopPropagation();
         this.evaluarNumeroIndividual();
       }
-    });
-
-    // Event listener para el acordeón de combinación
-    this.btnEvaluarCombinacion.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const trigger = document.getElementById('trigger-combinacion');
-      this.toggleAcordeon(trigger);
     });
 
     // Evaluación de la combinación
@@ -143,46 +128,43 @@ export class UIManager {
    * Manejar la lógica del acordeón
    */
   toggleAcordeon(clickedTrigger) {
+    console.log('🔄 Accordion clicked:', clickedTrigger.id);
+    
     const contentId = clickedTrigger.id.replace('trigger-', 'content-');
     const contentToShow = document.getElementById(contentId);
     const icon = clickedTrigger.querySelector('svg');
-
-    // Estado actual: ¿hay alguna caja abierta?
-    let anyOpen = false;
-    this.triggers.forEach(trigger => {
-      const otherContentId = trigger.id.replace('trigger-', 'content-');
-      const otherContent = document.getElementById(otherContentId);
-      const otherIcon = trigger.querySelector('svg');
-      if (!otherContent.classList.contains('hidden')) {
-        anyOpen = true;
-      }
-    });
-
-    // Si el trigger clickeado está abierto, ciérralo
-    if (!contentToShow.classList.contains('hidden')) {
-      contentToShow.classList.add('hidden');
-      if (icon) icon.classList.remove('rotate-180');
+    
+    if (!contentToShow) {
+      console.error('❌ No se encontró el contenido para:', contentId);
       return;
     }
 
-    // Si el trigger clickeado está cerrado, cierra cualquier otro y ábrelo
+    // Verificar si el contenido clickeado está actualmente visible
+    const isCurrentlyOpen = !contentToShow.classList.contains('hidden');
+    
+    // Cerrar todas las secciones
     this.triggers.forEach(trigger => {
       const otherContentId = trigger.id.replace('trigger-', 'content-');
       const otherContent = document.getElementById(otherContentId);
       const otherIcon = trigger.querySelector('svg');
-      if (trigger !== clickedTrigger) {
+      
+      if (otherContent) {
         otherContent.classList.add('hidden');
-        if (otherIcon) otherIcon.classList.remove('rotate-180');
+        if (otherIcon) {
+          otherIcon.classList.remove('rotate-180');
+        }
       }
     });
-    contentToShow.classList.remove('hidden');
-    if (icon) icon.classList.add('rotate-180');
 
-    // Manejar los contenedores específicos si es necesario
-    if (contentId === 'content-numero-individual') {
-      this.contenedorCombinacion.style.display = 'none';
-    } else if (contentId === 'content-combinacion') {
-      this.contenedorNumero.style.display = 'none';
+    // Si NO estaba abierto, abrirlo
+    if (!isCurrentlyOpen) {
+      contentToShow.classList.remove('hidden');
+      if (icon) {
+        icon.classList.add('rotate-180');
+      }
+      console.log('✅ Sección abierta:', contentId);
+    } else {
+      console.log('✅ Sección cerrada:', contentId);
     }
   }
 
