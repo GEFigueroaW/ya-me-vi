@@ -15,6 +15,52 @@ import {
 } from './combinacion.js';
 
 /**
+ * Clase para manejar el comportamiento de acordeón en la página
+ */
+class Acordeon {
+  constructor() {
+    this.triggers = document.querySelectorAll('[id^="trigger-"]');
+    this.init();
+  }
+
+  init() {
+    this.triggers.forEach(trigger => {
+      trigger.addEventListener('click', () => this.toggle(trigger));
+    });
+  }
+
+  toggle(clickedTrigger) {
+    const contentId = clickedTrigger.id.replace('trigger-', 'content-');
+    const contentToShow = document.getElementById(contentId);
+    const icon = clickedTrigger.querySelector('svg');
+
+    const isOpening = contentToShow.classList.contains('hidden');
+
+    // Cerrar todos los demás acordeones antes de abrir el nuevo
+    this.triggers.forEach(trigger => {
+      if (trigger !== clickedTrigger) {
+        const otherContentId = trigger.id.replace('trigger-', 'content-');
+        const otherContent = document.getElementById(otherContentId);
+        if (!otherContent.classList.contains('hidden')) {
+          otherContent.classList.add('hidden');
+          trigger.querySelector('svg').classList.remove('rotate-180');
+        }
+      }
+    });
+
+    // Alternar el estado del acordeón clickeado
+    if (isOpening) {
+      contentToShow.classList.remove('hidden');
+      icon.classList.add('rotate-180');
+    } else {
+      contentToShow.classList.add('hidden');
+      icon.classList.remove('rotate-180');
+    }
+  }
+}
+
+
+/**
  * Clase para manejar la validación de inputs
  */
 class ValidadorInputs {
@@ -640,10 +686,9 @@ class InterfazExpandible {
  * Inicializar la aplicación cuando el DOM esté listo
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // Inicializar módulos
-  new ValidadorInputs();
-  new EvaluadorNumeros();
-  new InterfazExpandible();
+  new Acordeon();
+  const uiManager = new UIManager();
+  uiManager.inicializar();
 
   // Botón de regreso
   const btnBack = document.getElementById('btn-back');
