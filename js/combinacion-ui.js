@@ -71,20 +71,18 @@ export class UIManager {
    * Inicializar todos los event listeners
    */
   inicializar() {
-    // Prevenir la propagación del evento click en todos los botones y controles interactivos
+    // Prevenir la propagación del evento click en los botones internos (no en los triggers)
     document.querySelectorAll('button:not([id^="trigger-"]), input').forEach(element => {
       element.addEventListener('click', (e) => e.stopPropagation());
     });
-    
-    // Inicializar el acordeón
+    // Inicializar el acordeón SOLO en los triggers
     this.triggers.forEach(trigger => {
       trigger.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
-        // Solo el trigger debe expandir/collapse su sección
         this.toggleAcordeon(trigger);
       });
     });
-
     // Botón de volver
     this.btnVolver.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -149,42 +147,29 @@ export class UIManager {
     const contentToShow = document.getElementById(contentId);
     const icon = clickedTrigger.querySelector('svg');
 
-    // Cerrar todos los demás acordeones primero
+    // Cerrar todos los demás acordeones
     this.triggers.forEach(trigger => {
+      const otherContentId = trigger.id.replace('trigger-', 'content-');
+      const otherContent = document.getElementById(otherContentId);
+      const otherIcon = trigger.querySelector('svg');
       if (trigger !== clickedTrigger) {
-        const otherContentId = trigger.id.replace('trigger-', 'content-');
-        const otherContent = document.getElementById(otherContentId);
-        if (!otherContent.classList.contains('hidden')) {
-          otherContent.classList.add('hidden');
-          const otherIcon = trigger.querySelector('svg');
-          if (otherIcon) {
-            otherIcon.classList.remove('rotate-180');
-          }
-        }
+        otherContent.classList.add('hidden');
+        if (otherIcon) otherIcon.classList.remove('rotate-180');
       }
     });
 
-    // Alternar el acordeón clickeado
-    const isOpening = contentToShow.classList.contains('hidden');
-    if (isOpening) {
+    // Alternar el acordeón clickeado con animación
+    if (contentToShow.classList.contains('hidden')) {
       contentToShow.classList.remove('hidden');
-      if (icon) {
-        icon.classList.add('rotate-180');
-      }
-      // Calcular la altura máxima para contenido uniforme
-      const maxHeight = Array.from(document.querySelectorAll('.section-content')).reduce((max, content) => {
-        if (!content.classList.contains('hidden')) {
-          return Math.max(max, content.scrollHeight);
-        }
-        return max;
-      }, 0);
-      contentToShow.style.maxHeight = maxHeight > 0 ? `${maxHeight}px` : 'auto';
+      contentToShow.classList.add('animate__animated', 'animate__fadeIn');
+      if (icon) icon.classList.add('rotate-180');
     } else {
-      contentToShow.classList.add('hidden');
-      if (icon) {
-        icon.classList.remove('rotate-180');
-      }
-      contentToShow.style.maxHeight = null;
+      contentToShow.classList.add('animate__animated', 'animate__fadeOut');
+      setTimeout(() => {
+        contentToShow.classList.add('hidden');
+        contentToShow.classList.remove('animate__fadeOut', 'animate__fadeIn', 'animate__animated');
+      }, 300);
+      if (icon) icon.classList.remove('rotate-180');
     }
 
     // Manejar los contenedores específicos si es necesario
