@@ -263,8 +263,8 @@ async function cargarSorteoIndividual(sorteo) {
     
     // Calcular fecha límite (30 meses atrás desde hoy)
     const fechaActual = new Date();
-    const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 30, fechaActual.getDate());
-    console.log(`📅 Filtrando sorteos desde: ${fechaLimite.toLocaleDateString()}`);
+    const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 36, fechaActual.getDate());
+    console.log(`📅 Filtrando sorteos desde: ${fechaLimite.toLocaleDateString()} para ${sorteo}`);
     
     // Procesar cada línea (saltar encabezado)
     for (let i = 1; i < lineas.length; i++) {
