@@ -1,24 +1,3 @@
-/**
- * YA ME VI - Combinación UI Module
- * Módulo para manejar la interfaz de usuario y validaciones
- */
-
-/**
- * Clase para validar inputs
- */
-class ValidadorInputs {
-  validarNumero(numero) {
-    return !isNaN(numero) && numero >= 1 && numero <= 56;
-  }
-  
-  validarCombinacion(numeros) {
-    if (numeros.length !== 6) return false;
-    const sinDuplicados = new Set(numeros);
-    if (sinDuplicados.size !== 6) return false;
-    return numeros.every(n => this.validarNumero(n));
-  }
-}
-
 import { 
   prepararDatosHistoricos,
   calcularFrecuenciaPorSorteo,
@@ -31,9 +10,30 @@ import {
 } from './combinacion.js';
 
 /**
+ * YA ME VI - Combinación UI Module
+ * Módulo para manejar la interfaz de usuario y validaciones
+ */
+
+/**
+ * Clase para validar inputs
+ */
+export class ValidadorInputs {
+  validarNumero(numero) {
+    return !isNaN(numero) && numero >= 1 && numero <= 56;
+  }
+  
+  validarCombinacion(numeros) {
+    if (numeros.length !== 6) return false;
+    const sinDuplicados = new Set(numeros);
+    if (sinDuplicados.size !== 6) return false;
+    return numeros.every(n => this.validarNumero(n));
+  }
+}
+
+/**
  * Clase para manejar la interfaz de usuario y validaciones
  */
-class UIManager {
+export class UIManager {
   constructor() {
     // Elementos del Acordeón
     this.triggers = document.querySelectorAll('[id^="trigger-"]');
@@ -501,7 +501,14 @@ class UIManager {
 /**
  * Inicializar la aplicación
  */
-document.addEventListener('DOMContentLoaded', () => {
+const init = () => {
   const uiManager = new UIManager();
   uiManager.inicializar();
-});
+};
+
+// Asegurarnos de que el DOM esté cargado antes de inicializar
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
