@@ -627,7 +627,7 @@ function generarHtmlAnalisisSorteo(analisisIndividual, sorteo, colorClass, borde
           </div>
         </div>
         <div class="text-center mt-2">
-          <div class="text-xs text-yellow-600 font-medium">🎯 Índice</div>
+          <div class="text-xs text-yellow-600 font-medium">🎯 Índice de éxito</div>
           <div class="text-sm font-bold text-gray-700">${indicePorSorteo[sorteo].porcentaje.toFixed(1)}%</div>
           <div class="text-xs text-green-600 font-medium mt-1">⭐ Potencial</div>
           <div class="text-lg font-bold text-gray-800">${analisis.porSorteo[sorteo].porcentaje.toFixed(1)}%</div>

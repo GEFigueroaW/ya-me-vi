@@ -355,7 +355,7 @@ class EvaluadorNumeros {
           ${clasificacion.emoji}
         </div>
         <div class="text-lg font-bold text-gray-800 mb-1">
-          <span class="text-yellow-600">🎯 Índice:</span> ${indice.porcentaje.toFixed(1)}%
+          <span class="text-yellow-600">🎯 Índice de éxito:</span> ${indice.porcentaje.toFixed(1)}%
         </div>
         <div class="text-lg font-bold text-gray-800 mb-1">
           <span class="text-green-600">⭐ Potencial:</span> ${frecuencia.porcentaje.toFixed(1)}%
@@ -489,7 +489,7 @@ class EvaluadorNumeros {
           </span>
         </div>
         <div class="text-lg text-gray-800 mb-1">
-          <span class="text-yellow-600">🎯 Índice:</span> <span class="font-bold">${promedio.toFixed(1)}%</span>
+          <span class="text-yellow-600">🎯 Índice de éxito:</span> <span class="font-bold">${promedio.toFixed(1)}%</span>
         </div>
         <div class="text-xs text-gray-600 mb-2">
           Apariciones reales en sorteos históricos
