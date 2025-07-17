@@ -147,9 +147,25 @@ export class UIManager {
     const contentToShow = document.getElementById(contentId);
     const icon = clickedTrigger.querySelector('svg');
 
-    // Alternar acordeón: si está abierto, ciérralo; si está cerrado, abre y cierra el otro
-    const isOpen = !contentToShow.classList.contains('hidden');
-    // Cerrar todos los demás acordeones excepto el actual
+    // Estado actual: ¿hay alguna caja abierta?
+    let anyOpen = false;
+    this.triggers.forEach(trigger => {
+      const otherContentId = trigger.id.replace('trigger-', 'content-');
+      const otherContent = document.getElementById(otherContentId);
+      const otherIcon = trigger.querySelector('svg');
+      if (!otherContent.classList.contains('hidden')) {
+        anyOpen = true;
+      }
+    });
+
+    // Si el trigger clickeado está abierto, ciérralo
+    if (!contentToShow.classList.contains('hidden')) {
+      contentToShow.classList.add('hidden');
+      if (icon) icon.classList.remove('rotate-180');
+      return;
+    }
+
+    // Si el trigger clickeado está cerrado, cierra cualquier otro y ábrelo
     this.triggers.forEach(trigger => {
       const otherContentId = trigger.id.replace('trigger-', 'content-');
       const otherContent = document.getElementById(otherContentId);
@@ -159,15 +175,8 @@ export class UIManager {
         if (otherIcon) otherIcon.classList.remove('rotate-180');
       }
     });
-    if (isOpen) {
-      // Si está abierto, ciérralo
-      contentToShow.classList.add('hidden');
-      if (icon) icon.classList.remove('rotate-180');
-    } else {
-      // Si está cerrado, ábrelo
-      contentToShow.classList.remove('hidden');
-      if (icon) icon.classList.add('rotate-180');
-    }
+    contentToShow.classList.remove('hidden');
+    if (icon) icon.classList.add('rotate-180');
 
     // Manejar los contenedores específicos si es necesario
     if (contentId === 'content-numero-individual') {
