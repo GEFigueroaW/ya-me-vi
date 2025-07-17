@@ -3,6 +3,22 @@
  * Módulo para manejar la interfaz de usuario y validaciones
  */
 
+/**
+ * Clase para validar inputs
+ */
+class ValidadorInputs {
+  validarNumero(numero) {
+    return !isNaN(numero) && numero >= 1 && numero <= 56;
+  }
+  
+  validarCombinacion(numeros) {
+    if (numeros.length !== 6) return false;
+    const sinDuplicados = new Set(numeros);
+    if (sinDuplicados.size !== 6) return false;
+    return numeros.every(n => this.validarNumero(n));
+  }
+}
+
 import { 
   prepararDatosHistoricos,
   calcularFrecuenciaPorSorteo,
@@ -24,34 +40,65 @@ class UIManager {
     
     // Elementos de la UI
     this.validador = new ValidadorInputs();
+    
+    // Botones principales
     this.btnVolver = document.getElementById('btn-back');
-    this.btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
+    this.btnEvaluarNumero = document.getElementById('trigger-numero-individual');
+    this.btnEvaluarCombinacion = document.getElementById('trigger-combinacion');
+    
+    // Inputs y resultados
     this.inputNumero = document.getElementById('numero-individual');
     this.resultadoNumero = document.getElementById('resultado-numero');
-    this.btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
     this.resultadoCombinacion = document.getElementById('resultado-combinacion');
+    
+    // Botones de explicación
     this.btnMostrarExplicacion = document.getElementById('mostrar-explicacion-btn');
     this.btnMostrarExplicacionCombo = document.getElementById('mostrar-explicacion-btn-combo');
+    
+    // Secciones de explicación
     this.explicacionNumero = document.getElementById('explicacion-numero');
     this.explicacionCombinacion = document.getElementById('explicacion-combinacion');
+    
+    // Contenedores principales
+    this.contenedorNumero = document.getElementById('content-numero-individual');
+    this.contenedorCombinacion = document.getElementById('content-combinacion');
+    
+    // Todos los disparadores del acordeón
+    this.triggers = document.querySelectorAll('[id^="trigger-"]');
   }
 
   /**
    * Inicializar todos los event listeners
    */
   inicializar() {
+    // Prevenir la propagación del evento click en todos los botones y controles interactivos
+    document.querySelectorAll('button, input').forEach(element => {
+      element.addEventListener('click', (e) => e.stopPropagation());
+    });
+    
     // Inicializar el acordeón
     this.triggers.forEach(trigger => {
-      trigger.addEventListener('click', () => this.toggleAcordeon(trigger));
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleAcordeon(trigger);
+      });
     });
 
-    // Inicializar botones y otros elementos, deteniendo la propagación del evento
+    // Botón de volver
     this.btnVolver.addEventListener('click', (e) => {
       e.stopPropagation();
       window.history.back();
     });
     
+    // Event listener para el acordeón de número individual
     this.btnEvaluarNumero.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const trigger = document.getElementById('trigger-numero-individual');
+      this.toggleAcordeon(trigger);
+    });
+
+    // Evaluación del número individual
+    document.getElementById('evaluar-numero-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       this.evaluarNumeroIndividual();
     });
@@ -63,7 +110,15 @@ class UIManager {
       }
     });
 
+    // Event listener para el acordeón de combinación
     this.btnEvaluarCombinacion.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const trigger = document.getElementById('trigger-combinacion');
+      this.toggleAcordeon(trigger);
+    });
+
+    // Evaluación de la combinación
+    document.getElementById('evaluar-combinacion-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       this.evaluarCombinacion();
     });
@@ -93,27 +148,49 @@ class UIManager {
     const contentToShow = document.getElementById(contentId);
     const icon = clickedTrigger.querySelector('svg');
 
-    const isOpening = contentToShow.classList.contains('hidden');
-
-    // Cerrar todos los demás acordeones
+    // Cerrar todos los demás acordeones primero
     this.triggers.forEach(trigger => {
       if (trigger !== clickedTrigger) {
         const otherContentId = trigger.id.replace('trigger-', 'content-');
         const otherContent = document.getElementById(otherContentId);
         if (!otherContent.classList.contains('hidden')) {
           otherContent.classList.add('hidden');
-          trigger.querySelector('svg').classList.remove('rotate-180');
+          const otherIcon = trigger.querySelector('svg');
+          if (otherIcon) {
+            otherIcon.classList.remove('rotate-180');
+          }
         }
       }
     });
 
     // Alternar el acordeón clickeado
+    const isOpening = contentToShow.classList.contains('hidden');
     if (isOpening) {
       contentToShow.classList.remove('hidden');
-      icon.classList.add('rotate-180');
+      if (icon) {
+        icon.classList.add('rotate-180');
+      }
+      // Calcular la altura máxima para contenido uniforme
+      const maxHeight = Array.from(document.querySelectorAll('.section-content')).reduce((max, content) => {
+        if (!content.classList.contains('hidden')) {
+          return Math.max(max, content.scrollHeight);
+        }
+        return max;
+      }, 0);
+      contentToShow.style.maxHeight = maxHeight > 0 ? `${maxHeight}px` : 'auto';
     } else {
       contentToShow.classList.add('hidden');
-      icon.classList.remove('rotate-180');
+      if (icon) {
+        icon.classList.remove('rotate-180');
+      }
+      contentToShow.style.maxHeight = null;
+    }
+
+    // Manejar los contenedores específicos si es necesario
+    if (contentId === 'content-numero-individual') {
+      this.contenedorCombinacion.style.display = 'none';
+    } else if (contentId === 'content-combinacion') {
+      this.contenedorNumero.style.display = 'none';
     }
   }
 
@@ -235,9 +312,9 @@ class UIManager {
         
         <!-- Análisis por sorteo individual -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          ${this.generarTarjetaSorteo('Melate', '🎲', clasificaciones.melate, indicePorSorteo.melate, frecuenciaPorSorteo.melate, 'blue')}
-          ${this.generarTarjetaSorteo('Revancha', '🎲', clasificaciones.revancha, indicePorSorteo.revancha, frecuenciaPorSorteo.revancha, 'purple')}
-          ${this.generarTarjetaSorteo('Revanchita', '🎲', clasificaciones.revanchita, indicePorSorteo.revanchita, frecuenciaPorSorteo.revanchita, 'green')}
+          ${this.generarTarjetaSorteo('Melate', '🔍', clasificaciones.melate, indicePorSorteo.melate, frecuenciaPorSorteo.melate, 'blue')}
+          ${this.generarTarjetaSorteo('Revancha', '🔍', clasificaciones.revancha, indicePorSorteo.revancha, frecuenciaPorSorteo.revancha, 'purple')}
+          ${this.generarTarjetaSorteo('Revanchita', '🔍', clasificaciones.revanchita, indicePorSorteo.revanchita, frecuenciaPorSorteo.revanchita, 'green')}
         </div>
       </div>
     `;
@@ -310,9 +387,9 @@ class UIManager {
         <div class="mb-6">
           <h3 class="text-xl font-bold mb-4 text-gray-800 text-center">📊 Posibilidades Detalladas por Sorteo</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            ${this.generarTarjetaCombinacion('Melate', '🎲', clasificaciones.melate, promedios.melate, potenciales.melate, 'blue')}
-            ${this.generarTarjetaCombinacion('Revancha', '🎲', clasificaciones.revancha, promedios.revancha, potenciales.revancha, 'purple')}
-            ${this.generarTarjetaCombinacion('Revanchita', '🎲', clasificaciones.revanchita, promedios.revanchita, potenciales.revanchita, 'green')}
+            ${this.generarTarjetaCombinacion('Melate', '🔍', clasificaciones.melate, promedios.melate, potenciales.melate, 'blue')}
+            ${this.generarTarjetaCombinacion('Revancha', '🔍', clasificaciones.revancha, promedios.revancha, potenciales.revancha, 'purple')}
+            ${this.generarTarjetaCombinacion('Revanchita', '🔍', clasificaciones.revanchita, promedios.revanchita, potenciales.revanchita, 'green')}
           </div>
         </div>
           
