@@ -26,12 +26,10 @@ function generarContenidoSuma(sumAnalisis) {
         <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
       </button>
       <div class="px-4 pb-4 hidden">
-        <p class="text-white text-base mb-2 text-center">¿Sabías que la suma de los números ganadores tiene un secreto?<br>
-        Analizamos los sorteos de los ultimos 30 meses para revelarte las sumas de números con la mayor probabilidad de aparecer. ¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</p>
-        <div class="mt-2 text-sm text-gray-200">
-          <strong>¿Por qué la suma de tus números importa?</strong><br>
-          Imagina que cada sorteo es una huella digital. Al sumar los números ganadores, descubrimos que no todas las sumas son igual de comunes. ¡Hay rangos que se repiten una y otra vez! Esta es una herramienta poderosa para afinar tu selección.
-        </div>
+        <p class="text-white text-base mb-4 text-center font-semibold">¿Sabías que la suma de los números ganadores tiene un patrón favorito?</p>
+        <p class="text-white text-base mb-2 text-center">En los últimos 30 meses, la mayoría de los sorteos premiados caen en un rango de suma muy especial.<br><span class="text-yellow-300 font-bold">¡Descubre la zona dorada y elige tus números con ventaja!</span></p>
+        <div class="mt-2 text-sm text-yellow-200 text-center font-semibold">¿Por qué importa la suma?</div>
+        <p class="text-gray-200 text-sm text-center">No todas las sumas son igual de comunes. Los sorteos premiados suelen agruparse en ciertos rangos. Si tu combinación suma dentro de ese rango, ¡estás jugando con la estadística a tu favor!</p>
       </div>
     </div>`;
   sorteos.forEach(sorteo => {
@@ -128,16 +126,14 @@ function generarContenidoPares(paresAnalisis) {
   let contenidoHTML = `<div class="space-y-8">
     <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
       <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
-        <h3 class="text-2xl font-bold text-yellow-400 text-left">🎲 ¡El Equilibrio Ganador! Desvela el Patrón de Pares e Impares en Melate 🎲</h3>
+        <h3 class="text-2xl font-bold text-yellow-400 text-left">🎲 ¡El Equilibrio Ganador! Desvela el Patrón de Pares e Impares 🎲</h3>
         <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
       </button>
       <div class="px-4 pb-4 hidden">
-        <p class="text-white text-base mb-2 text-center">¿Sabías que la combinación de números pares e impares tiene un balance favorito?<br>
-        Analizamos los sorteos de los últimos 30 meses para revelarte la composición de números pares e impares con la mayor probabilidad de aparecer. ¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</p>
-        <div class="mt-2 text-sm text-gray-200">
-          <strong>¿Por qué el balance de pares e impares importa?</strong><br>
-          Más allá de los números individuales, la mezcla de pares e impares en una combinación ganadora no es aleatoria. Descubrimos que hay un equilibrio que se repite constantemente. ¡Conocer este patrón puede ser tu clave para una selección más inteligente!
-        </div>
+        <p class="text-white text-base mb-4 text-center font-semibold">¿Sabías que el balance entre pares e impares es la clave de muchas combinaciones ganadoras?</p>
+        <p class="text-white text-base mb-2 text-center">En los últimos 30 meses, la mayoría de los premios han salido con una mezcla muy especial.<br><span class="text-yellow-300 font-bold">¡Descubre el balance ideal y juega con ventaja!</span></p>
+        <div class="mt-2 text-sm text-yellow-200 text-center font-semibold">¿Por qué importa el balance?</div>
+        <p class="text-gray-200 text-sm text-center">No es casualidad: la combinación 3 pares y 3 impares es la más frecuente. Si tu selección se acerca a este equilibrio, ¡tienes más posibilidades de ganar!</p>
       </div>
     </div>`;
   sorteos.forEach(sorteo => {
