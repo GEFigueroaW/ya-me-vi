@@ -147,6 +147,8 @@ export class UIManager {
     const contentToShow = document.getElementById(contentId);
     const icon = clickedTrigger.querySelector('svg');
 
+    // Alternar acordeón: si está abierto, ciérralo; si está cerrado, abre y cierra el otro
+    const isOpen = !contentToShow.classList.contains('hidden');
     // Cerrar todos los demás acordeones
     this.triggers.forEach(trigger => {
       const otherContentId = trigger.id.replace('trigger-', 'content-');
@@ -157,19 +159,19 @@ export class UIManager {
         if (otherIcon) otherIcon.classList.remove('rotate-180');
       }
     });
-
-    // Alternar el acordeón clickeado con animación
-    if (contentToShow.classList.contains('hidden')) {
-      contentToShow.classList.remove('hidden');
-      contentToShow.classList.add('animate__animated', 'animate__fadeIn');
-      if (icon) icon.classList.add('rotate-180');
-    } else {
+    if (isOpen) {
+      // Si está abierto, ciérralo
       contentToShow.classList.add('animate__animated', 'animate__fadeOut');
       setTimeout(() => {
         contentToShow.classList.add('hidden');
         contentToShow.classList.remove('animate__fadeOut', 'animate__fadeIn', 'animate__animated');
       }, 300);
       if (icon) icon.classList.remove('rotate-180');
+    } else {
+      // Si está cerrado, ábrelo
+      contentToShow.classList.remove('hidden');
+      contentToShow.classList.add('animate__animated', 'animate__fadeIn');
+      if (icon) icon.classList.add('rotate-180');
     }
 
     // Manejar los contenedores específicos si es necesario
