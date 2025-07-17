@@ -19,6 +19,14 @@ let numerosPorSorteo = {
 async function cargarDatosCSV() {
   const sorteos = ['melate', 'revancha', 'revanchita'];
   let datosRealesCargados = false;
+  
+  // Reinitialize arrays to ensure clean state
+  numerosPorSorteo = {
+    melate: [],
+    revancha: [],
+    revanchita: []
+  };
+  
   let estadisticasCarga = {
     melate: { cargado: false, sorteos: 0, error: null },
     revancha: { cargado: false, sorteos: 0, error: null },
@@ -67,7 +75,7 @@ async function cargarDatosCSV() {
       
       const numeros = [];
       let sorteosValidos = 0;
-      const fechaLimite = new Date('2022-11-01'); // Filtrar últimos 30 meses desde julio 2025
+      const fechaLimite = new Date('2022-01-01'); // Filtrar últimos 36 meses para incluir más datos de Revanchita
       
       // Procesar líneas según el formato
       for (let i = 1; i < lines.length; i++) {
@@ -131,7 +139,8 @@ async function cargarDatosCSV() {
       }
       
       if (numeros.length > 0) {
-        numerosPorSorteo[sorteo] = numeros;
+        // Ensure we create a new array for each sorteo to avoid reference issues
+        numerosPorSorteo[sorteo] = [...numeros];
         estadisticasCarga[sorteo] = {
           cargado: true,
           sorteos: sorteosValidos,
@@ -481,6 +490,13 @@ function calcularFrecuenciaPorSorteo(num) {
     const numeros = numerosPorSorteo[sorteo] || [];
     const frecuencia = numeros.filter(n => n === num).length;
     const total = numeros.length;
+    
+    // Temporary logging for debugging
+    if (num === 10) {
+      console.log(`🔍 Número 10 en ${sorteo}: frecuencia=${frecuencia}, total=${total}, data=[${numeros.slice(0, 20).join(',')}]`);
+    }
+    
+    // Calcular porcentaje base
     const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
     
     // Aplicar el factor de motivación ajustado
