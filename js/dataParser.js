@@ -1135,21 +1135,19 @@ function analizarDecadaPorPosicion(datos) {
 
 // Genera el contenido visual de la sección Década y Terminación por posición
 function generarContenidoDecada(decadaPorPosicionAnalisis) {
-  let contenidoHTML = `<div class="space-y-8">
-    <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
-      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
-        <h3 class="text-2xl font-bold text-yellow-400 text-left">🎯 ¡Desbloquea el Secreto Posicional del Melate! 🎯</h3>
-        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
-      </button>
-      <div class="px-4 pb-4 hidden">
-        <p class="text-white text-base mb-2 text-center">Descubre la década más frecuente para cada número en la combinación ganadora.<br>
-        Hemos analizado miles de sorteos históricos para identificar cuál década de números tiende a aparecer más en cada posición específica (1er número, 2do número, etc.) de las combinaciones ganadoras. ¡Esta información es tu guía definitiva para construir tu boleto ganador con una estrategia basada en datos!</p>
-        <div class="mt-2 text-sm text-gray-200">
-          <strong>¿Por qué la posición de tus números importa?</strong><br>
-          Tradicionalmente, elegimos 6 números sin pensar en su orden. Pero, ¿y si la historia nos dice que algunos números prefieren ciertas "ubicaciones" dentro de la combinación ganadora? Al entender esta tendencia, puedes afinar tu selección número por número, aumentando tus probabilidades de alinearte con los patrones más frecuentes.
-        </div>
-      </div>
-    </div>`;
+let contenidoHTML = `<div class="space-y-8">
+  <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+    <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
+      <h3 class="text-2xl font-bold text-yellow-400 text-left">🎯 ¡Descubre el Patrón Posicional de las Décadas! 🎯</h3>
+      <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
+    </button>
+    <div class="px-4 pb-4 hidden">
+      <p class="text-white text-base mb-4 text-center font-semibold">¿Sabías que cada posición en la combinación ganadora tiene una década favorita?</p>
+      <p class="text-white text-base mb-2 text-center">En los últimos 30 meses, los números ganadores muestran una tendencia clara: cada lugar de la combinación prefiere una década específica.<br><span class="text-yellow-300 font-bold">¡Aprovecha este patrón y elige tus números con estrategia!</span></p>
+      <div class="mt-2 text-sm text-yellow-200 text-center font-semibold">¿Por qué importa la década y la posición?</div>
+      <p class="text-gray-200 text-sm text-center">No todos los números tienen la misma probabilidad de aparecer en cada posición. Si eliges tus números siguiendo la década más frecuente para cada lugar, ¡estás jugando con la estadística a tu favor!</p>
+    </div>
+  </div>`;
 
   const config = {
     melate: {
@@ -1175,15 +1173,15 @@ function generarContenidoDecada(decadaPorPosicionAnalisis) {
   Object.entries(decadaPorPosicionAnalisis).forEach(([sorteo, datos]) => {
     const cfg = config[sorteo];
     contenidoHTML += `
-      <div class="${cfg.color} bg-opacity-40 rounded-lg p-4">
-        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: Las Décadas Más Frecuentes por Posición</h4>
+      <div class="${cfg.color} bg-opacity-40 rounded-lg p-4 mb-4">
+        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.emoji} ${cfg.nombre}: Décadas por Posición</h4>
         <div class="overflow-x-auto">
           <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
             <thead>
               <tr class="bg-white bg-opacity-10">
                 <th class="px-2 py-1">Posición del Número</th>
                 <th class="px-2 py-1">Década Más Frecuente</th>
-                <th class="px-2 py-1">Frecuencia (Veces)</th>
+                <th class="px-2 py-1">Frecuencia</th>
               </tr>
             </thead>
             <tbody>
@@ -1197,7 +1195,10 @@ function generarContenidoDecada(decadaPorPosicionAnalisis) {
             </tbody>
           </table>
         </div>
-        <div class="text-yellow-300 font-semibold text-center mb-2">
+        <div class="text-yellow-200 font-semibold text-center mb-2">
+          Década más frecuente por posición: <span class="text-yellow-300">${datos.decadasPorPosicion.map(posData => posData.decadaMasFrecuente).join(', ')}</span>
+        </div>
+        <div class="text-yellow-300 font-bold text-center mt-2">
           ${cfg.consejo} ${datos.datoClave}
         </div>
       </div>
@@ -1212,11 +1213,11 @@ function generarContenidoDecada(decadaPorPosicionAnalisis) {
       </button>
       <div class="px-4 pb-4 hidden">
         <ul class="list-disc list-inside text-white text-base mb-2">
-          <li>Elige tus 6 números favoritos, pero esta vez, piensa en la posición que cada uno podría ocupar.</li>
-          <li>Para el 1er número, busca uno en la década 1-10 (que es la más frecuente para esa posición).</li>
-          <li>Para el 2do número, elige uno en la década 11-20 (la más frecuente para la segunda posición).</li>
-          <li>Y así sucesivamente, siguiendo la década más frecuente para cada posición.</li>
-          <li>Combina esta estrategia con el análisis de pares/impares para una selección aún más robusta.</li>
+          <li>Elige tus 6 números favoritos para el próximo sorteo, pensando en la posición que cada uno ocupará.</li>
+          <li>Para el 1er número, selecciona uno en la década más frecuente para esa posición (por ejemplo, 1-10).</li>
+          <li>Para el 2do número, elige uno en la década más frecuente para la segunda posición, y así sucesivamente.</li>
+          <li>Si tu selección sigue este patrón, ¡excelente! Estás jugando con las estadísticas históricas a tu favor.</li>
+          <li>Si no, ¡no te preocupes! Puedes ajustar uno o dos números para acercar tu combinación al patrón ganador.</li>
         </ul>
         <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
         <div class="text-yellow-300 font-bold text-center">¡Con estos datos, tus selecciones pueden ser más inteligentes y estratégicas!<br>¡Mucha suerte en el próximo sorteo!</div>
