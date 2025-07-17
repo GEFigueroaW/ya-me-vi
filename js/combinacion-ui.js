@@ -15,28 +15,70 @@ import {
 } from './combinacion.js';
 
 /**
- * Clase para manejar el comportamiento de acordeón en la página
+ * Clase para manejar la interfaz de usuario y validaciones
  */
-class Acordeon {
+class UIManager {
   constructor() {
+    // Elementos del Acordeón
     this.triggers = document.querySelectorAll('[id^="trigger-"]');
-    this.init();
+    
+    // Elementos de la UI
+    this.validador = new ValidadorInputs();
+    this.btnVolver = document.getElementById('btn-back');
+    this.btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
+    this.inputNumero = document.getElementById('numero-individual');
+    this.resultadoNumero = document.getElementById('resultado-numero');
+    this.btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
+    this.resultadoCombinacion = document.getElementById('resultado-combinacion');
+    this.btnMostrarExplicacion = document.getElementById('mostrar-explicacion-btn');
+    this.btnMostrarExplicacionCombo = document.getElementById('mostrar-explicacion-btn-combo');
+    this.explicacionExpandible = document.getElementById('explicacion-expandible');
+    this.toggleHelpBtn = document.getElementById('toggle-help-expandible');
+    this.helpContent = document.getElementById('help-content-expandible');
   }
 
-  init() {
+  /**
+   * Inicializar todos los event listeners
+   */
+  inicializar() {
+    // Inicializar el acordeón
     this.triggers.forEach(trigger => {
-      trigger.addEventListener('click', () => this.toggle(trigger));
+      trigger.addEventListener('click', () => this.toggleAcordeon(trigger));
+    });
+
+    // Inicializar botones y otros elementos
+    this.btnVolver.addEventListener('click', () => window.history.back());
+    
+    this.btnEvaluarNumero.addEventListener('click', () => this.evaluarNumeroIndividual());
+    this.inputNumero.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this.evaluarNumeroIndividual();
+    });
+
+    this.btnEvaluarCombinacion.addEventListener('click', () => this.evaluarCombinacion());
+    
+    this.btnMostrarExplicacion.addEventListener('click', () => this.toggleExplicacion());
+    this.btnMostrarExplicacionCombo.addEventListener('click', () => this.toggleExplicacion());
+
+    this.toggleHelpBtn.addEventListener('click', () => this.toggleAyudaDetallada());
+
+    prepararDatosHistoricos().then(() => {
+      console.log('✅ Datos históricos listos para usar en la UI.');
+    }).catch(error => {
+      console.error('❌ Error al preparar datos para la UI:', error);
     });
   }
 
-  toggle(clickedTrigger) {
+  /**
+   * Manejar la lógica del acordeón
+   */
+  toggleAcordeon(clickedTrigger) {
     const contentId = clickedTrigger.id.replace('trigger-', 'content-');
     const contentToShow = document.getElementById(contentId);
     const icon = clickedTrigger.querySelector('svg');
 
     const isOpening = contentToShow.classList.contains('hidden');
 
-    // Cerrar todos los demás acordeones antes de abrir el nuevo
+    // Cerrar todos los demás acordeones
     this.triggers.forEach(trigger => {
       if (trigger !== clickedTrigger) {
         const otherContentId = trigger.id.replace('trigger-', 'content-');
@@ -48,7 +90,7 @@ class Acordeon {
       }
     });
 
-    // Alternar el estado del acordeón clickeado
+    // Alternar el acordeón clickeado
     if (isOpening) {
       contentToShow.classList.remove('hidden');
       icon.classList.add('rotate-180');
@@ -57,8 +99,69 @@ class Acordeon {
       icon.classList.remove('rotate-180');
     }
   }
-}
 
+  /**
+   * Alternar visibilidad de la sección de explicación
+   */
+  toggleExplicacion() {
+    const explicacion = document.getElementById('explicacion-expandible');
+    const textElements = [
+      document.getElementById('explicacion-text'),
+      document.getElementById('explicacion-combo-text')
+    ];
+    const iconElements = [
+      document.getElementById('explicacion-icon'),
+      document.getElementById('explicacion-combo-icon')
+    ];
+
+    if (explicacion.classList.contains('hidden')) {
+      explicacion.classList.remove('hidden');
+      explicacion.classList.add('animate__animated', 'animate__fadeInDown');
+      
+      // Actualizar todos los botones
+      textElements.forEach(el => {
+        if (el) el.textContent = '🔼 Ocultar explicación';
+      });
+      iconElements.forEach(el => {
+        if (el) el.textContent = '👁️‍🗨️';
+      });
+      
+      // Scroll suave hacia la explicación
+      explicacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      explicacion.classList.add('hidden');
+      
+      // Restaurar todos los botones
+      textElements.forEach(el => {
+        if (el) el.textContent = '💡 ¿Cómo interpretar resultados?';
+      });
+      iconElements.forEach(el => {
+        if (el) el.textContent = '👁️';
+      });
+    }
+  }
+
+  /**
+   * Alternar ayuda detallada
+   */
+  toggleAyudaDetallada() {
+    const ayudaContent = document.getElementById('help-content-expandible');
+    const ayudaText = document.getElementById('help-text-expandible');
+    const ayudaIcon = document.getElementById('help-icon-expandible');
+
+    if (ayudaContent.classList.contains('hidden')) {
+      ayudaContent.classList.remove('hidden');
+      ayudaContent.classList.add('animate__animated', 'animate__fadeInDown');
+      ayudaText.textContent = 'Ocultar ejemplo';
+      ayudaIcon.textContent = '👁️‍🗨️';
+    } else {
+      ayudaContent.classList.add('hidden');
+      ayudaText.textContent = 'Ver ejemplo práctico';
+      ayudaIcon.textContent = '👁️';
+    }
+  }
+
+}
 
 /**
  * Clase para manejar la validación de inputs
@@ -563,141 +666,9 @@ class EvaluadorNumeros {
 }
 
 /**
- * Clase para manejar la interfaz expandible
- */
-class InterfazExpandible {
-  constructor() {
-    this.inicializarEventListeners();
-  }
-
-  /**
-   * Inicializar event listeners
-   */
-  inicializarEventListeners() {
-    // Botones para números individuales y combinaciones
-    const botones = [
-      'mostrar-explicacion-btn',
-      'mostrar-explicacion-btn-combo'
-    ];
-
-    botones.forEach(id => {
-      const boton = document.getElementById(id);
-      if (boton) {
-        boton.addEventListener('click', () => this.toggleExplicacion());
-      }
-    });
-
-    // Botón de ayuda expandible
-    const toggleHelpBtn = document.getElementById('toggle-help-expandible');
-    if (toggleHelpBtn) {
-      toggleHelpBtn.addEventListener('click', () => this.toggleHelp());
-    }
-
-    // Botón de análisis expandible
-    const toggleAnalisisBtn = document.getElementById('toggle-analisis-expandible');
-    if (toggleAnalisisBtn) {
-      toggleAnalisisBtn.addEventListener('click', () => this.toggleAnalisis());
-    }
-  }
-
-  /**
-   * Alternar explicación
-   */
-  toggleExplicacion() {
-    const explicacion = document.getElementById('explicacion-expandible');
-    const textElements = [
-      document.getElementById('explicacion-text'),
-      document.getElementById('explicacion-combo-text')
-    ];
-    const iconElements = [
-      document.getElementById('explicacion-icon'),
-      document.getElementById('explicacion-combo-icon')
-    ];
-
-    if (explicacion.classList.contains('hidden')) {
-      explicacion.classList.remove('hidden');
-      explicacion.classList.add('animate__animated', 'animate__fadeInDown');
-      
-      // Actualizar todos los botones
-      textElements.forEach(el => {
-        if (el) el.textContent = '🔼 Ocultar explicación';
-      });
-      iconElements.forEach(el => {
-        if (el) el.textContent = '👁️‍🗨️';
-      });
-      
-      // Scroll suave hacia la explicación
-      explicacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-      explicacion.classList.add('hidden');
-      
-      // Restaurar todos los botones
-      textElements.forEach(el => {
-        if (el) el.textContent = '💡 ¿Cómo interpretar resultados?';
-      });
-      iconElements.forEach(el => {
-        if (el) el.textContent = '👁️';
-      });
-    }
-  }
-
-  /**
-   * Alternar ayuda
-   */
-  toggleHelp() {
-    const helpContent = document.getElementById('help-content-expandible');
-    const helpText = document.getElementById('help-text-expandible');
-    const helpIcon = document.getElementById('help-icon-expandible');
-
-    if (helpContent.classList.contains('hidden')) {
-      helpContent.classList.remove('hidden');
-      helpContent.classList.add('animate__animated', 'animate__fadeInDown');
-      helpText.textContent = 'Ocultar ejemplo';
-      helpIcon.textContent = '👁️‍🗨️';
-    } else {
-      helpContent.classList.add('hidden');
-      helpText.textContent = 'Ver ejemplo práctico';
-      helpIcon.textContent = '👁️';
-    }
-  }
-
-  /**
-   * Alternar análisis
-   */
-  toggleAnalisis() {
-    const analisisContent = document.getElementById('analisis-content-expandible');
-    const analisisText = document.getElementById('analisis-text-expandible');
-    const analisisIcon = document.getElementById('analisis-icon-expandible');
-
-    if (analisisContent.classList.contains('hidden')) {
-      analisisContent.classList.remove('hidden');
-      analisisContent.classList.add('animate__animated', 'animate__fadeInDown');
-      analisisText.textContent = '🔼 Ocultar análisis';
-      analisisIcon.textContent = '🔍‍🗨️';
-    } else {
-      analisisContent.classList.add('hidden');
-      analisisText.textContent = '⚙️ ¿Cómo funciona el análisis?';
-      analisisIcon.textContent = '🔍';
-    }
-  }
-}
-
-/**
- * Inicializar la aplicación cuando el DOM esté listo
+ * Inicializar la aplicación
  */
 document.addEventListener('DOMContentLoaded', () => {
-  new Acordeon();
   const uiManager = new UIManager();
   uiManager.inicializar();
-
-  // Botón de regreso
-  const btnBack = document.getElementById('btn-back');
-  if (btnBack) {
-    btnBack.addEventListener('click', () => {
-      window.location.href = 'home.html';
-    });
-  }
-
-  // Inicializar datos históricos
-  prepararDatosHistoricos();
 });
