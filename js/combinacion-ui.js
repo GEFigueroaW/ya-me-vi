@@ -60,6 +60,16 @@ export class UIManager {
     this.contenedorNumero = document.getElementById('content-numero-individual');
     this.contenedorCombinacion = document.getElementById('content-combinacion');
     
+    // Botones de ejemplo práctico
+    this.btnToggleHelp = document.getElementById('toggle-help');
+    this.btnToggleHelpExpandible = document.getElementById('toggle-help-expandible');
+    this.helpContent = document.getElementById('help-content');
+    this.helpContentExpandible = document.getElementById('help-content-expandible');
+    this.helpText = document.getElementById('help-text');
+    this.helpTextExpandible = document.getElementById('help-text-expandible');
+    this.helpIcon = document.getElementById('help-icon');
+    this.helpIconExpandible = document.getElementById('help-icon-expandible');
+    
     // Todos los disparadores del acordeón
     this.triggers = document.querySelectorAll('[id^="trigger-"]');
   }
@@ -116,6 +126,21 @@ export class UIManager {
       e.stopPropagation();
       this.toggleExplicacion(this.explicacionCombinacion);
     });
+
+    // Botones de ejemplo práctico
+    if (this.btnToggleHelp) {
+      this.btnToggleHelp.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleHelpContent(this.helpContent, this.helpText, this.helpIcon);
+      });
+    }
+
+    if (this.btnToggleHelpExpandible) {
+      this.btnToggleHelpExpandible.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleHelpContent(this.helpContentExpandible, this.helpTextExpandible, this.helpIconExpandible);
+      });
+    }
 
     prepararDatosHistoricos().then(() => {
       console.log('✅ Datos históricos listos para usar en la UI.');
@@ -180,6 +205,57 @@ export class UIManager {
       elementoExplicacion.classList.remove('hidden');
       elementoExplicacion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
+  }
+
+  /**
+   * Alternar visibilidad del contenido de ayuda expandible
+   */
+  toggleHelpContent(helpContent, helpText, helpIcon) {
+    if (!helpContent || !helpText || !helpIcon) return;
+    
+    const esVisible = !helpContent.classList.contains('hidden');
+    
+    if (esVisible) {
+      // Ocultar contenido
+      helpContent.classList.add('hidden');
+      helpText.textContent = 'Ver ejemplo práctico';
+      helpIcon.textContent = '👁️';
+    } else {
+      // Mostrar contenido
+      helpContent.classList.remove('hidden');
+      helpText.textContent = 'Ocultar ejemplo';
+      helpIcon.textContent = '🙈';
+      
+      // Solo llenar el contenido si está vacío (para contenido expandible vacío)
+      if (helpContent.innerHTML.trim() === '') {
+        helpContent.innerHTML = this.generarEjemploPractico();
+      }
+      
+      // Scroll suave hacia el contenido
+      helpContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  /**
+   * Generar el HTML del ejemplo práctico
+   */
+  generarEjemploPractico() {
+    return `
+      <h4 class="font-semibold mb-3 text-yellow-300">🧮 Ejemplo con el número 15:</h4>
+      <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+        <ul class="text-gray-200 space-y-1">
+          <li>📊 <strong>Frecuencia:</strong> 12 apariciones en 1,668 números históricos</li>
+          <li>📈 <strong>Porcentaje base:</strong> (12 ÷ 1,668) × 100 = 0.72%</li>
+          <li>⚡ <strong>Factor 12.5x:</strong> 0.72% × 12.5 = 9.0%</li>
+          <li>🎯 <strong>Resultado final:</strong> Máximo entre 9.0% y 8% = 9.0%</li>
+        </ul>
+        <p class="text-white mt-2 font-medium text-center">
+          <span class="text-yellow-300">🎯 Índice de éxito = 9.0%</span> | 
+          <span class="text-green-300">⭐ Potencial = 9.0%</span>
+          <span class="text-purple-200"> (¡Máxima confianza!)</span>
+        </p>
+      </div>
+    `;
   }
 
   /**
