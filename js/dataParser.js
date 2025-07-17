@@ -1195,9 +1195,7 @@ let contenidoHTML = `<div class="space-y-8">
             </tbody>
           </table>
         </div>
-        <div class="text-yellow-200 font-semibold text-center mb-2">
-          Década más frecuente por posición: <span class="text-yellow-300">${datos.decadasPorPosicion.map(posData => posData.decadaMasFrecuente).join(', ')}</span>
-        </div>
+        <!-- Línea eliminada: Década más frecuente por posición -->
         <div class="text-yellow-300 font-bold text-center mt-2">
           ${cfg.consejo} ${datos.datoClave}
         </div>
