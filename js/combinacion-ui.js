@@ -63,12 +63,23 @@ export class UIManager {
     // Botones de ejemplo práctico
     this.btnToggleHelp = document.getElementById('toggle-help');
     this.btnToggleHelpExpandible = document.getElementById('toggle-help-expandible');
+    this.btnToggleHelpNumero = document.getElementById('toggle-help-numero');
+    this.btnToggleHelpCombinacion = document.getElementById('toggle-help-combinacion');
+    
     this.helpContent = document.getElementById('help-content');
     this.helpContentExpandible = document.getElementById('help-content-expandible');
+    this.helpContentNumero = document.getElementById('help-content-numero');
+    this.helpContentCombinacion = document.getElementById('help-content-combinacion');
+    
     this.helpText = document.getElementById('help-text');
     this.helpTextExpandible = document.getElementById('help-text-expandible');
+    this.helpTextNumero = document.getElementById('help-text-numero');
+    this.helpTextCombinacion = document.getElementById('help-text-combinacion');
+    
     this.helpIcon = document.getElementById('help-icon');
     this.helpIconExpandible = document.getElementById('help-icon-expandible');
+    this.helpIconNumero = document.getElementById('help-icon-numero');
+    this.helpIconCombinacion = document.getElementById('help-icon-combinacion');
     
     // Todos los disparadores del acordeón
     this.triggers = document.querySelectorAll('[id^="trigger-"]');
@@ -139,6 +150,20 @@ export class UIManager {
       this.btnToggleHelpExpandible.addEventListener('click', (e) => {
         e.stopPropagation();
         this.toggleHelpContent(this.helpContentExpandible, this.helpTextExpandible, this.helpIconExpandible);
+      });
+    }
+
+    if (this.btnToggleHelpNumero) {
+      this.btnToggleHelpNumero.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleHelpContent(this.helpContentNumero, this.helpTextNumero, this.helpIconNumero);
+      });
+    }
+
+    if (this.btnToggleHelpCombinacion) {
+      this.btnToggleHelpCombinacion.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleHelpContent(this.helpContentCombinacion, this.helpTextCombinacion, this.helpIconCombinacion);
       });
     }
 
