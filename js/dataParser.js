@@ -2,81 +2,201 @@
 // Suma de Números
 function generarContenidoSuma(sumAnalisis) {
   const sorteos = ['melate', 'revancha', 'revanchita'];
-  let contenidoHTML = '<div class="space-y-8">';
+  const sorteoConfig = {
+    melate: {
+      icon: '📊',
+      color: 'bg-blue-500',
+      nombre: 'Melate'
+    },
+    revancha: {
+      icon: '🍀',
+      color: 'bg-purple-500',
+      nombre: 'Revancha'
+    },
+    revanchita: {
+      icon: '🌈',
+      color: 'bg-green-500',
+      nombre: 'Revanchita'
+    }
+  };
+  let contenidoHTML = `<div class="space-y-8">
+    <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
+        <h3 class="text-2xl font-bold text-yellow-400 text-left">🌟 ¡Desvela el Patrón Oculto del Melate! 🌟</h3>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
+      </button>
+      <div class="px-4 pb-4 hidden">
+        <p class="text-white text-base mb-2 text-center">¿Sabías que la suma de los números ganadores tiene un secreto?<br>
+        Analizamos los sorteos de los ultimos 30 meses para revelarte las sumas de números con la mayor probabilidad de aparecer. ¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</p>
+        <div class="mt-2 text-sm text-gray-200">
+          <strong>¿Por qué la suma de tus números importa?</strong><br>
+          Imagina que cada sorteo es una huella digital. Al sumar los números ganadores, descubrimos que no todas las sumas son igual de comunes. ¡Hay rangos que se repiten una y otra vez! Esta es una herramienta poderosa para afinar tu selección.
+        </div>
+      </div>
+    </div>`;
   sorteos.forEach(sorteo => {
     const datos = sumAnalisis[sorteo];
     if (!datos) return;
+    const cfg = sorteoConfig[sorteo];
     contenidoHTML += `
-      <div class="bg-blue-500 bg-opacity-30 rounded-lg p-4 mb-4">
-        <h4 class="font-bold text-white mb-2 text-xl text-center">🔢 ${sorteo.toUpperCase()} - Suma de Números</h4>
-        <div class="text-white text-center mb-2">
-          <span class="font-semibold">Suma promedio:</span> <span class="text-yellow-300 text-lg font-bold">${datos.sumaPromedio}</span>
-        </div>
+      <div class="${cfg.color} bg-opacity-30 rounded-lg p-4 mb-4">
+        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.icon} ${cfg.nombre}: Suma promedio histórica: <span class='text-yellow-300'>${Math.round(Number(datos.sumaPromedio))}</span></h4>
         <div class="overflow-x-auto">
           <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
             <thead>
               <tr class="bg-white bg-opacity-10">
                 <th class="px-2 py-1">Rango de Suma</th>
                 <th class="px-2 py-1">Frecuencia</th>
+                <th class="px-2 py-1">Impacto en tu Juego</th>
               </tr>
             </thead>
             <tbody>
-              ${Object.entries(datos.rangos).map(([rango, freq]) => `
-                <tr>
+              ${Object.entries(datos.rangos).map(([rango, freq]) => {
+                let impacto = '';
+                if (rango === '150-199') impacto = '¡TU ZONA DE MAYOR OPORTUNIDAD!';
+                else if (rango === '100-149') impacto = 'Frecuencia moderada, ¡cerca de la zona caliente!';
+                else if (rango === '50-99') impacto = 'Menos común, riesgo alto.';
+                else if (rango === '200-249') impacto = 'Menos frecuente, pero aún posible.';
+                else if (rango === '250-299') impacto = 'Muy raro, alta improbabilidad.';
+                else if (rango === '300+') impacto = '¡Nunca ha ocurrido! Evita sumas tan altas.';
+                return `<tr>
                   <td class="px-2 py-1 text-center">${rango}</td>
                   <td class="px-2 py-1 text-center">${freq}</td>
-                </tr>
-              `).join('')}
+                  <td class="px-2 py-1 text-center">${impacto}</td>
+                </tr>`;
+              }).join('')}
             </tbody>
           </table>
         </div>
         <div class="text-yellow-200 font-semibold text-center mb-2">
-          Rango más frecuente: <span class="text-yellow-300">${datos.rangoMasFrecuente[0]}</span>
+          Rango más frecuente: <span class="text-yellow-300">${datos.rangoMasFrecuente[0]}</span> (${datos.rangoMasFrecuente[1]} veces)
         </div>
         <div class="text-white text-xs text-center">Total de sorteos analizados: ${datos.totalSorteos}</div>
+        <div class="text-yellow-300 font-bold text-center mt-2">
+          ${sorteo === 'melate' ? '✨ ¡Dato Estrella! Si tus números suman entre 150 y 199, ¡estás alineado con la tendencia histórica del Melate!' : ''}
+          ${sorteo === 'revancha' ? '💡 ¡Consejo de Oro! La consistencia es clave. Revancha refuerza la importancia del rango 150-199 como la zona más probable para la suma de tus números.' : ''}
+          ${sorteo === 'revanchita' ? '🚀 ¡Estrategia Avanzada! Si bien el 150-199 es dominante, el rango 200-249 tiene una presencia notable en Revanchita. ¡Considera ambas opciones!' : ''}
+        </div>
       </div>
     `;
   });
-  contenidoHTML += '</div>';
+  contenidoHTML += `
+    <div class="mt-8 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
+        <h4 class="text-lg font-bold text-yellow-300 text-left">¿Listo para usar esta información?</h4>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
+      </button>
+      <div class="px-4 pb-4 hidden">
+        <ul class="list-disc list-inside text-white text-base mb-2">
+          <li>Elige tus 6 números favoritos para el próximo sorteo de Melate, Revancha o Revanchita.</li>
+          <li>Súmalos: ¿Cuál es el total de tus números?</li>
+          <li>Compara tu suma: ¿Cae dentro del rango más frecuente (150-199)?</li>
+          <li>Si sí, ¡excelente! Estás jugando con las estadísticas históricas a tu favor.</li>
+          <li>Si no, ¡no te preocupes! Puedes ajustar uno o dos números para acercar tu suma a la "zona dorada".</li>
+        </ul>
+        <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
+        <div class="text-yellow-300 font-bold text-center">¡Con estos datos, tus selecciones pueden ser más inteligentes y estratégicas!<br>¡Mucha suerte en el próximo sorteo!</div>
+      </div>
+    </div>
+  </div>`;
   return contenidoHTML;
 }
 
 // Pares e Impares
 function generarContenidoPares(paresAnalisis) {
   const sorteos = ['melate', 'revancha', 'revanchita'];
-  let contenidoHTML = '<div class="space-y-8">';
+  const sorteoConfig = {
+    melate: {
+      icon: '📊',
+      color: 'bg-blue-500',
+      nombre: 'Melate',
+      motivacion: '✨ ¡Equilibrio Perfecto! La combinación de 3 números pares y 3 números impares es, por mucho, la más común en Melate. ¡Busca este balance en tus selecciones para alinearte con la historia!'
+    },
+    revancha: {
+      icon: '🍀',
+      color: 'bg-purple-500',
+      nombre: 'Revancha',
+      motivacion: '💡 ¡Consistencia Clave! Al igual que en Melate, el patrón de 3 pares y 3 impares es el más frecuente en Revancha. ¡La historia nos muestra el camino!'
+    },
+    revanchita: {
+      icon: '🌈',
+      color: 'bg-green-500',
+      nombre: 'Revanchita',
+      motivacion: '🚀 ¡Observa el Patrón! La combinación 3 pares y 3 impares sigue siendo la más destacada en Revanchita. ¡Pero no subestimes las combinaciones de 2 y 4 pares, que también tienen una buena frecuencia!'
+    }
+  };
+  let contenidoHTML = `<div class="space-y-8">
+    <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
+        <h3 class="text-2xl font-bold text-yellow-400 text-left">🎲 ¡El Equilibrio Ganador! Desvela el Patrón de Pares e Impares en Melate 🎲</h3>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
+      </button>
+      <div class="px-4 pb-4 hidden">
+        <p class="text-white text-base mb-2 text-center">¿Sabías que la combinación de números pares e impares tiene un balance favorito?<br>
+        Analizamos los sorteos de los últimos 30 meses para revelarte la composición de números pares e impares con la mayor probabilidad de aparecer. ¡Usa esta información para elegir tus números con una ventaja estratégica en el próximo sorteo!</p>
+        <div class="mt-2 text-sm text-gray-200">
+          <strong>¿Por qué el balance de pares e impares importa?</strong><br>
+          Más allá de los números individuales, la mezcla de pares e impares en una combinación ganadora no es aleatoria. Descubrimos que hay un equilibrio que se repite constantemente. ¡Conocer este patrón puede ser tu clave para una selección más inteligente!
+        </div>
+      </div>
+    </div>`;
   sorteos.forEach(sorteo => {
     const datos = paresAnalisis[sorteo];
     if (!datos) return;
+    const cfg = sorteoConfig[sorteo];
     contenidoHTML += `
-      <div class="bg-purple-500 bg-opacity-30 rounded-lg p-4 mb-4">
-        <h4 class="font-bold text-white mb-2 text-xl text-center">⚖️ ${sorteo.toUpperCase()} - Pares e Impares</h4>
+      <div class="${cfg.color} bg-opacity-30 rounded-lg p-4 mb-4">
+        <h4 class="font-bold text-white mb-2 text-xl text-center">${cfg.icon} ${cfg.nombre}: Balance de Pares e Impares</h4>
         <div class="overflow-x-auto">
           <table class="min-w-full text-xs text-white border border-white border-opacity-20 rounded-lg mb-2">
             <thead>
               <tr class="bg-white bg-opacity-10">
-                <th class="px-2 py-1">Distribución</th>
-                <th class="px-2 py-1">Frecuencia</th>
+                <th class="px-2 py-1">Combinación (Pares/Impares)</th>
+                <th class="px-2 py-1">Frecuencia (Veces)</th>
+                <th class="px-2 py-1">Porcentaje (%)</th>
               </tr>
             </thead>
             <tbody>
-              ${Object.entries(datos.distribuciones).map(([dist, freq]) => `
-                <tr>
-                  <td class="px-2 py-1 text-center">${dist.replace('p',' pares / ').replace('i',' impares')}</td>
+              ${Object.entries(datos.distribuciones).map(([dist, freq]) => {
+                const total = datos.totalSorteos || 1;
+                const porcentaje = Math.round((freq / total) * 1000) / 10; // 1 decimal
+                const distLabel = dist.replace('p',' pares / ').replace('i',' impares');
+                return `<tr>
+                  <td class="px-2 py-1 text-center">${distLabel}</td>
                   <td class="px-2 py-1 text-center">${freq}</td>
-                </tr>
-              `).join('')}
+                  <td class="px-2 py-1 text-center">${porcentaje}%</td>
+                </tr>`;
+              }).join('')}
             </tbody>
           </table>
         </div>
         <div class="text-yellow-200 font-semibold text-center mb-2">
-          Distribución más frecuente: <span class="text-yellow-300">${datos.distribucionMasFrecuente[0]}</span>
+          Distribución más frecuente: <span class="text-yellow-300">${datos.distribucionMasFrecuente[0].replace('p',' pares / ').replace('i',' impares')}</span>
         </div>
         <div class="text-white text-xs text-center">Total de sorteos analizados: ${datos.totalSorteos}</div>
+        <div class="text-yellow-300 font-bold text-center mt-2">${cfg.motivacion}</div>
       </div>
     `;
   });
-  contenidoHTML += '</div>';
+  contenidoHTML += `
+    <div class="mt-8 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
+        <h4 class="text-lg font-bold text-yellow-300 text-left">¿Listo para usar esta información?</h4>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
+      </button>
+      <div class="px-4 pb-4 hidden">
+        <ul class="list-disc list-inside text-white text-base mb-2">
+          <li>Elige tus 6 números favoritos para el próximo sorteo de Melate, Revancha o Revanchita.</li>
+          <li>Cuenta cuántos son pares y cuántos son impares.</li>
+          <li>Compara tu balance: ¿Se acerca a la combinación más frecuente (generalmente 3 Pares / 3 Impares)?</li>
+          <li>Si sí, ¡excelente! Estás jugando con las estadísticas históricas a tu favor.</li>
+          <li>Si no, ¡no te preocupes! Puedes ajustar uno o dos números para acercar tu combinación al balance ganador.</li>
+        </ul>
+        <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
+        <div class="text-yellow-300 font-bold text-center">¡Con estos datos, tus selecciones pueden ser más inteligentes y estratégicas!<br>¡Mucha suerte en el próximo sorteo!</div>
+      </div>
+    </div>
+  </div>`;
   return contenidoHTML;
 }
 // dataParser.js - Módulo principal para cargar y procesar datos de sorteos
