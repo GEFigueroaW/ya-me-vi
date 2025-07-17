@@ -46,20 +46,42 @@ class UIManager {
       trigger.addEventListener('click', () => this.toggleAcordeon(trigger));
     });
 
-    // Inicializar botones y otros elementos
-    this.btnVolver.addEventListener('click', () => window.history.back());
+    // Inicializar botones y otros elementos, deteniendo la propagación del evento
+    this.btnVolver.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.history.back();
+    });
     
-    this.btnEvaluarNumero.addEventListener('click', () => this.evaluarNumeroIndividual());
-    this.inputNumero.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') this.evaluarNumeroIndividual();
+    this.btnEvaluarNumero.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.evaluarNumeroIndividual();
     });
 
-    this.btnEvaluarCombinacion.addEventListener('click', () => this.evaluarCombinacion());
-    
-    this.btnMostrarExplicacion.addEventListener('click', () => this.toggleExplicacion());
-    this.btnMostrarExplicacionCombo.addEventListener('click', () => this.toggleExplicacion());
+    this.inputNumero.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.stopPropagation();
+        this.evaluarNumeroIndividual();
+      }
+    });
 
-    this.toggleHelpBtn.addEventListener('click', () => this.toggleAyudaDetallada());
+    this.btnEvaluarCombinacion.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.evaluarCombinacion();
+    });
+    
+    this.btnMostrarExplicacion.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleExplicacion();
+    });
+    this.btnMostrarExplicacionCombo.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleExplicacion();
+    });
+
+    this.toggleHelpBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleAyudaDetallada();
+    });
 
     prepararDatosHistoricos().then(() => {
       console.log('✅ Datos históricos listos para usar en la UI.');
