@@ -479,7 +479,7 @@ export function crearCajaAnalisis(tipo, datos) {
     },
     decada: {
       emoji: '🎯',
-      titulo: 'Década y terminación',
+      titulo: 'Décadas por posición',
     }
   };
   if (!config[tipo]) return null;
@@ -649,7 +649,7 @@ function abrirCaja(tipo, datos) {
           ${tipo === 'frecuencias' ? '📊 Frecuencias' : 
             tipo === 'suma' ? '🔢 Suma de números' : 
             tipo === 'pares' ? '⚖️ Pares e impares' : 
-            tipo === 'decada' ? '🎯 Década y terminación' : 'Análisis'}
+            tipo === 'decada' ? '🎯 Décadas por posición' : 'Análisis'}
         </h3>
       </div>
       ${contenidoHTML}
@@ -762,7 +762,7 @@ function moverCajaAbiertaAlContenido(tipo, datos) {
     frecuencias: 'Frecuencias',
     suma: 'Suma de números',
     pares: 'Pares e impares',
-    decada: 'Década y terminación'
+    decada: 'Décadas por posición'
   };
   
   const botonTitulo = document.createElement('button');
@@ -1138,7 +1138,7 @@ function generarContenidoDecada(decadaPorPosicionAnalisis) {
 let contenidoHTML = `<div class="space-y-8">
   <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
     <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
-      <h3 class="text-2xl font-bold text-yellow-400 text-left">🎯 ¡Descubre el Patrón Posicional de las Décadas! 🎯</h3>
+      <h3 class="text-2xl font-bold text-yellow-400 text-left">🎯 ¡Descubre el Patrón de las Décadas por Posición! 🎯</h3>
       <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
     </button>
     <div class="px-4 pb-4 hidden">
@@ -1216,7 +1216,7 @@ let contenidoHTML = `<div class="space-y-8">
           <li>Elige tus 6 números favoritos para el próximo sorteo, pensando en la posición que cada uno ocupará.</li>
           <li>Para el 1er número, selecciona uno en la década más frecuente para esa posición (por ejemplo, 1-10).</li>
           <li>Para el 2do número, elige uno en la década más frecuente para la segunda posición, y así sucesivamente.</li>
-          <li>Si tu selección sigue este patrón, ¡excelente! Estás jugando con las estadísticas históricas a tu favor.</li>
+          <li>Si tu selección sigue este patrón de décadas por posición, ¡excelente! Estás jugando con las estadísticas históricas a tu favor.</li>
           <li>Si no, ¡no te preocupes! Puedes ajustar uno o dos números para acercar tu combinación al patrón ganador.</li>
         </ul>
         <div class="text-white text-sm text-center mb-2">Recuerda: Esta es una herramienta estadística para mejorar tus probabilidades, ¡pero la suerte siempre es un factor emocionante!</div>
