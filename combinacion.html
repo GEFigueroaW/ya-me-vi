@@ -129,6 +129,33 @@
           </div>
           
           <div id="resultado-numero" class="mt-6"></div>
+
+          <!-- Sección de explicación para Número Individual -->
+          <div id="explicacion-numero" class="mt-6 hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
+              <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Cómo interpretar los resultados?</h3>
+              <div class="grid md:grid-cols-2 gap-6 text-white">
+                <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+                  <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE DE ÉXITO</h4>
+                  <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial.</p>
+                  <ul class="text-xs space-y-1 text-gray-200">
+                    <li>• Cuántas veces salió tu número</li>
+                    <li>• Basado en sorteos reales</li>
+                    <li>• Datos de los últimos 30 meses</li>
+                  </ul>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+                  <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
+                  <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar.</p>
+                  <ul class="text-xs space-y-1 text-gray-200">
+                    <li>• Aplica factor matemático 10x</li>
+                    <li>• Ajusta expectativas realistas</li>
+                    <li>• Garantiza mínimo 8% siempre</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -165,15 +192,15 @@
           </div>
           
           <div id="resultado-combinacion" class="mt-6"></div>
-          
-          <!-- Sección de explicación expandible -->
-          <div id="explicacion-expandible" class="mt-6 hidden">
+
+          <!-- Sección de explicación para Combinación -->
+          <div id="explicacion-combinacion" class="mt-6 hidden">
             <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
               <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Cómo interpretar los resultados?</h3>
               <div class="grid md:grid-cols-2 gap-6 text-white">
                 <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
                   <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE DE ÉXITO</h4>
-                  <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial:</p>
+                  <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial.</p>
                   <ul class="text-xs space-y-1 text-gray-200">
                     <li>• Cuántas veces salió tu número</li>
                     <li>• Basado en sorteos reales</li>
@@ -182,7 +209,7 @@
                 </div>
                 <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
                   <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
-                  <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar:</p>
+                  <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar.</p>
                   <ul class="text-xs space-y-1 text-gray-200">
                     <li>• Aplica factor matemático 10x</li>
                     <li>• Ajusta expectativas realistas</li>
@@ -190,28 +217,55 @@
                   </ul>
                 </div>
               </div>
-              <div class="mt-4 text-center">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
-                  <p class="text-sm text-yellow-200">
-                    <strong>🔥 Mientras más alto el porcentaje, mejor tu número</strong>
-                  </p>
-                  <p class="text-xs text-gray-300 mt-1">
-                    Si Índice de éxito = Potencial → Máxima confianza | Si Índice de éxito > Potencial → Buena recomendación
-                  </p>
-                </div>
-              </div>
-              
-              <!-- Botón para mostrar/ocultar ayuda adicional -->
-              <div class="mt-4 text-center">
-                <button id="toggle-help-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300">
-                  <span id="help-text-expandible">Ver ejemplo práctico</span>
-                  <span id="help-icon-expandible">👁️</span>
-                </button>
-              </div>
-              
-              <div id="help-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden"></div>
             </div>
           </div>
+        </div>
+      </div>
+      
+      <!-- Sección de explicación expandible (movida fuera de las secciones de acordeón) -->
+      <div id="explicacion-expandible" class="mt-6 hidden">
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
+          <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Cómo interpretar los resultados?</h3>
+          <div class="grid md:grid-cols-2 gap-6 text-white">
+            <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+              <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE DE ÉXITO</h4>
+              <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial:</p>
+              <ul class="text-xs space-y-1 text-gray-200">
+                <li>• Cuántas veces salió tu número</li>
+                <li>• Basado en sorteos reales</li>
+                <li>• Datos de los últimos 30 meses</li>
+              </ul>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+              <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
+              <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar:</p>
+              <ul class="text-xs space-y-1 text-gray-200">
+                <li>• Aplica factor matemático 10x</li>
+                <li>• Ajusta expectativas realistas</li>
+                <li>• Garantiza mínimo 8% siempre</li>
+              </ul>
+            </div>
+          </div>
+          <div class="mt-4 text-center">
+            <div class="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
+              <p class="text-sm text-yellow-200">
+                <strong>🔥 Mientras más alto el porcentaje, mejor tu número</strong>
+              </p>
+              <p class="text-xs text-gray-300 mt-1">
+                Si Índice de éxito = Potencial → Máxima confianza | Si Índice de éxito > Potencial → Buena recomendación
+              </p>
+            </div>
+          </div>
+          
+          <!-- Botón para mostrar/ocultar ayuda adicional -->
+          <div class="mt-4 text-center">
+            <button id="toggle-help-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300">
+              <span id="help-text-expandible">Ver ejemplo práctico</span>
+              <span id="help-icon-expandible">👁️</span>
+            </button>
+          </div>
+          
+          <div id="help-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden"></div>
         </div>
       </div>
     </div>

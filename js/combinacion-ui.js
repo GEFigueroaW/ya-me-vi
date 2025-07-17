@@ -32,9 +32,8 @@ class UIManager {
     this.resultadoCombinacion = document.getElementById('resultado-combinacion');
     this.btnMostrarExplicacion = document.getElementById('mostrar-explicacion-btn');
     this.btnMostrarExplicacionCombo = document.getElementById('mostrar-explicacion-btn-combo');
-    this.explicacionExpandible = document.getElementById('explicacion-expandible');
-    this.toggleHelpBtn = document.getElementById('toggle-help-expandible');
-    this.helpContent = document.getElementById('help-content-expandible');
+    this.explicacionNumero = document.getElementById('explicacion-numero');
+    this.explicacionCombinacion = document.getElementById('explicacion-combinacion');
   }
 
   /**
@@ -71,16 +70,12 @@ class UIManager {
     
     this.btnMostrarExplicacion.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.toggleExplicacion();
-    });
-    this.btnMostrarExplicacionCombo.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.toggleExplicacion();
+      this.toggleExplicacion(this.explicacionNumero);
     });
 
-    this.toggleHelpBtn.addEventListener('click', (e) => {
+    this.btnMostrarExplicacionCombo.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.toggleAyudaDetallada();
+      this.toggleExplicacion(this.explicacionCombinacion);
     });
 
     prepararDatosHistoricos().then(() => {
@@ -125,280 +120,19 @@ class UIManager {
   /**
    * Alternar visibilidad de la sección de explicación
    */
-  toggleExplicacion() {
-    const explicacion = document.getElementById('explicacion-expandible');
-    const textElements = [
-      document.getElementById('explicacion-text'),
-      document.getElementById('explicacion-combo-text')
-    ];
-    const iconElements = [
-      document.getElementById('explicacion-icon'),
-      document.getElementById('explicacion-combo-icon')
-    ];
-
-    if (explicacion.classList.contains('hidden')) {
-      explicacion.classList.remove('hidden');
-      explicacion.classList.add('animate__animated', 'animate__fadeInDown');
-      
-      // Actualizar todos los botones
-      textElements.forEach(el => {
-        if (el) el.textContent = '🔼 Ocultar explicación';
-      });
-      iconElements.forEach(el => {
-        if (el) el.textContent = '👁️‍🗨️';
-      });
-      
-      // Scroll suave hacia la explicación
-      explicacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  toggleExplicacion(elementoExplicacion) {
+    if (!elementoExplicacion) return;
+    const esVisible = !elementoExplicacion.classList.contains('hidden');
+    if (esVisible) {
+      elementoExplicacion.classList.add('hidden');
     } else {
-      explicacion.classList.add('hidden');
-      
-      // Restaurar todos los botones
-      textElements.forEach(el => {
-        if (el) el.textContent = '💡 ¿Cómo interpretar resultados?';
-      });
-      iconElements.forEach(el => {
-        if (el) el.textContent = '👁️';
-      });
+      elementoExplicacion.classList.remove('hidden');
+      elementoExplicacion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
 
   /**
-   * Alternar ayuda detallada
-   */
-  toggleAyudaDetallada() {
-    const ayudaContent = document.getElementById('help-content-expandible');
-    const ayudaText = document.getElementById('help-text-expandible');
-    const ayudaIcon = document.getElementById('help-icon-expandible');
-
-    if (ayudaContent.classList.contains('hidden')) {
-      ayudaContent.classList.remove('hidden');
-      ayudaContent.classList.add('animate__animated', 'animate__fadeInDown');
-      ayudaText.textContent = 'Ocultar ejemplo';
-      ayudaIcon.textContent = '👁️‍🗨️';
-    } else {
-      ayudaContent.classList.add('hidden');
-      ayudaText.textContent = 'Ver ejemplo práctico';
-      ayudaIcon.textContent = '👁️';
-    }
-  }
-
-}
-
-/**
- * Clase para manejar la validación de inputs
- */
-class ValidadorInputs {
-  constructor() {
-    this.inputsCombinacion = document.querySelectorAll('.combo-input');
-    this.btnCombinacion = document.getElementById('evaluar-combinacion-btn');
-    this.inicializarEventListeners();
-  }
-
-  /**
-   * Inicializar event listeners para validación
-   */
-  inicializarEventListeners() {
-    // Validación para input individual
-    const inputNumero = document.getElementById('numero-individual');
-    if (inputNumero) {
-      this.aplicarValidacionTiempoReal(inputNumero);
-    }
-
-    // Validación para inputs de combinación
-    this.inputsCombinacion.forEach(input => {
-      this.aplicarValidacionTiempoReal(input);
-      
-      // Eventos adicionales para validación más rápida
-      input.addEventListener('keyup', () => {
-        setTimeout(() => this.validarCombinacionCompleta(), 0);
-      });
-      
-      input.addEventListener('blur', () => {
-        setTimeout(() => this.validarCombinacionCompleta(), 0);
-      });
-      
-      input.addEventListener('paste', () => {
-        setTimeout(() => this.validarCombinacionCompleta(), 100);
-      });
-    });
-
-    // Validar combinación al inicio
-    this.validarCombinacionCompleta();
-  }
-
-  /**
-   * Aplicar validación en tiempo real a un input
-   */
-  aplicarValidacionTiempoReal(input) {
-    this.prevenirEntradaInvalida(input);
-    
-    input.addEventListener('input', () => {
-      this.validarInputEnTiempoReal(input);
-    });
-  }
-
-  /**
-   * Prevenir entrada inválida
-   */
-  prevenirEntradaInvalida(input) {
-    input.addEventListener('input', (e) => {
-      let valor = e.target.value;
-      
-      // Remover caracteres no numéricos
-      valor = valor.replace(/[^0-9]/g, '');
-      
-      // Limitar a 2 dígitos máximo
-      if (valor.length > 2) {
-        valor = valor.slice(0, 2);
-      }
-      
-      // Si es mayor a 56, limitarlo a 56
-      if (parseInt(valor) > 56) {
-        valor = '56';
-        this.mostrarErrorTemporal(input, 'Máximo número permitido: 56');
-      }
-      
-      // Si es 0, no permitir
-      if (valor === '0') {
-        valor = '';
-      }
-      
-      e.target.value = valor;
-      
-      // Validar inmediatamente después de cambiar el valor
-      setTimeout(() => {
-        this.validarInputEnTiempoReal(input);
-      }, 0);
-    });
-  }
-
-  /**
-   * Validar input en tiempo real
-   */
-  validarInputEnTiempoReal(input) {
-    const valor = parseInt(input.value);
-    
-    // Limpiar estilos previos
-    input.classList.remove('border-red-500', 'border-green-500');
-    
-    // Si está vacío, no mostrar error
-    if (input.value === '') {
-      return true;
-    }
-    
-    // Validar rango
-    if (isNaN(valor) || valor < 1 || valor > 56) {
-      input.classList.add('border-red-500');
-      this.mostrarErrorTemporal(input, 'Número debe estar entre 1 y 56');
-      return false;
-    }
-    
-    // Para inputs de combinación, verificar duplicados
-    if (input.classList.contains('combo-input')) {
-      const valores = Array.from(this.inputsCombinacion)
-        .map(inp => parseInt(inp.value))
-        .filter(num => !isNaN(num));
-      
-      const duplicados = valores.filter(num => num === valor).length > 1;
-      
-      if (duplicados) {
-        input.classList.add('border-red-500');
-        this.mostrarErrorTemporal(input, 'Número duplicado no permitido');
-        this.validarCombinacionCompleta();
-        return false;
-      }
-    }
-    
-    input.classList.add('border-green-500');
-    this.validarCombinacionCompleta();
-    return true;
-  }
-
-  /**
-   * Validar combinación completa y controlar el botón
-   */
-  validarCombinacionCompleta() {
-    const valores = Array.from(this.inputsCombinacion)
-      .map(inp => parseInt(inp.value))
-      .filter(num => !isNaN(num));
-    
-    // Verificar duplicados
-    const duplicados = valores.some((num, index) => 
-      valores.indexOf(num) !== index
-    );
-    
-    // Verificar números fuera de rango
-    const fueraDeRango = valores.some(num => num < 1 || num > 56);
-    
-    // Deshabilitar botón si hay errores
-    if (duplicados || fueraDeRango) {
-      this.btnCombinacion.disabled = true;
-      this.btnCombinacion.classList.add('opacity-50', 'cursor-not-allowed');
-      this.btnCombinacion.classList.remove('hover:from-purple-600', 'hover:to-purple-700', 'transform', 'hover:scale-105');
-    } else {
-      this.btnCombinacion.disabled = false;
-      this.btnCombinacion.classList.remove('opacity-50', 'cursor-not-allowed');
-      this.btnCombinacion.classList.add('hover:from-purple-600', 'hover:to-purple-700', 'transform', 'hover:scale-105');
-    }
-  }
-
-  /**
-   * Mostrar error temporal
-   */
-  mostrarErrorTemporal(input, mensaje) {
-    // Remover error anterior si existe
-    const errorAnterior = input.parentNode.querySelector('.error-mensaje');
-    if (errorAnterior) {
-      errorAnterior.remove();
-    }
-    
-    // Crear mensaje de error
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-mensaje text-red-400 text-xs mt-1 absolute z-10 bg-red-900 bg-opacity-80 px-2 py-1 rounded';
-    errorDiv.textContent = mensaje;
-    
-    // Posicionar el error
-    input.parentNode.style.position = 'relative';
-    input.parentNode.appendChild(errorDiv);
-    
-    // Eliminar después de 3 segundos
-    setTimeout(() => {
-      if (errorDiv.parentNode) {
-        errorDiv.remove();
-      }
-    }, 3000);
-  }
-}
-
-/**
- * Clase para manejar la evaluación de números y combinaciones
- */
-class EvaluadorNumeros {
-  constructor() {
-    this.resultadoNumero = document.getElementById('resultado-numero');
-    this.resultadoCombinacion = document.getElementById('resultado-combinacion');
-    this.inicializarEventListeners();
-  }
-
-  /**
-   * Inicializar event listeners
-   */
-  inicializarEventListeners() {
-    const btnNumero = document.getElementById('evaluar-numero-btn');
-    const btnCombinacion = document.getElementById('evaluar-combinacion-btn');
-
-    if (btnNumero) {
-      btnNumero.addEventListener('click', () => this.evaluarNumeroIndividual());
-    }
-
-    if (btnCombinacion) {
-      btnCombinacion.addEventListener('click', () => this.evaluarCombinacion());
-    }
-  }
-
-  /**
-   * Evaluar número individual
+   * Evaluar un número individual
    */
   evaluarNumeroIndividual() {
     const inputNumero = document.getElementById('numero-individual');
