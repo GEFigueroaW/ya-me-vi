@@ -67,14 +67,8 @@ async function cargarDatosCSV() {
       
       if (header.includes(',r1,r2,r3,r4,r5,r6') || header.includes(',f1,f2,f3,f4,f5,f6')) {
         formatoDetectado = 'historico_real';
-      } else if (header.includes('date,sorteo,tipo,num1')) {
-        formatoDetectado = 'simple';
-      } else if (header.includes('fecha,sorteo,numerosorteo,num1') || header.includes('fecha,sorteo,num1')) {
-        formatoDetectado = 'completo';
       } else {
-        // Si no detecta el formato, intentar con formato histórico_real por defecto
-        formatoDetectado = 'historico_real';
-        console.log(`⚠️ Formato no reconocido para ${sorteo}, intentando con histórico_real por defecto`);
+        throw new Error(`Formato de CSV no reconocido para ${sorteo}`);
       }
       
       console.log(`🔍 Formato detectado para ${sorteo}: ${formatoDetectado}`);
@@ -83,7 +77,7 @@ async function cargarDatosCSV() {
       let sorteosValidos = 0;
       // Ampliar fecha límite a 42 meses para incluir más datos históricos
       const fechaActual = new Date();
-      const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 42, fechaActual.getDate());
+      const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 36, fechaActual.getDate());
       console.log(`📅 Filtrando sorteos desde: ${fechaLimite.toLocaleDateString()} para ${sorteo}`);
       
       // Procesar líneas según el formato
@@ -97,50 +91,11 @@ async function cargarDatosCSV() {
         let fechaSorteo = null;
         
         if (formatoDetectado === 'historico_real') {
-          // Procesar según el tipo de sorteo con verificaciones adicionales
-          if (sorteo === 'revanchita' && i === 1) {
-            console.log(`🔍 Analizando línea 1 de ${sorteo}: ${line}`);
-            console.log(`🔢 Columnas: ${cols.length}, Valores: ${cols.join('|')}`);
-          }
-          
+          // Procesar según el tipo de sorteo
           const resultado = procesarLineaHistorica(sorteo, cols, fechaLimite);
           if (resultado.valida) {
             numerosLinea = resultado.numeros;
             fechaSorteo = resultado.fecha;
-          } else {
-            lineaValida = false;
-            
-            if (sorteo === 'revanchita' && i < 5) {
-              console.log(`⚠️ Línea ${i} de ${sorteo} inválida: ${JSON.stringify(resultado.motivo || 'Desconocido')}`);
-            }
-          }
-        } else if (formatoDetectado === 'simple') {
-          // Formato: Date,Sorteo,Tipo,Num1,Num2,Num3,Num4,Num5,Num6
-          if (cols.length >= 9) {
-            for (let j = 3; j <= 8; j++) {
-              const num = parseInt(cols[j]);
-              if (!isNaN(num) && num >= 1 && num <= 56) {
-                numerosLinea.push(num);
-              } else {
-                lineaValida = false;
-                break;
-              }
-            }
-          } else {
-            lineaValida = false;
-          }
-        } else if (formatoDetectado === 'completo') {
-          // Formato: Fecha,Sorteo,NumeroSorteo,Num1,Num2,Num3,Num4,Num5,Num6,Adicional,Extra,Fecha_Sorteo,Fecha_Caducidad
-          if (cols.length >= 9) {
-            for (let j = 3; j <= 8; j++) {
-              const num = parseInt(cols[j]);
-              if (!isNaN(num) && num >= 1 && num <= 56) {
-                numerosLinea.push(num);
-              } else {
-                lineaValida = false;
-                break;
-              }
-            }
           } else {
             lineaValida = false;
           }
@@ -199,74 +154,40 @@ async function cargarDatosCSV() {
 function procesarLineaHistorica(sorteo, cols, fechaLimite) {
   let numerosLinea = [];
   let fechaSorteo = null;
-  let lineaValida = true;
-  let motivoInvalido = null;
   
-  // Verificación de longitud mínima de columnas
-  if (cols.length < 8) {
-    return { valida: false, motivo: `Insuficientes columnas: ${cols.length}` };
+  // El formato es el mismo para Melate, Revancha y Revanchita
+  // Melate: 11 columnas, Revancha/Revanchita: 10 columnas
+  const esMelate = sorteo === 'melate' && cols.length >= 11;
+  const esRevancha = (sorteo === 'revancha' || sorteo === 'revanchita') && cols.length >= 10;
+
+  if (!esMelate && !esRevancha) {
+    return { valida: false };
   }
-  
-  try {
-    // Extraer columna de fecha común para todos los sorteos
-    let fechaCol = -1;
-    let fechaStr = '';
-    
-    if (sorteo === 'melate' && cols.length >= 11) {
-      fechaCol = 10;
-    } else if ((sorteo === 'revancha' || sorteo === 'revanchita') && cols.length >= 10) {
-      fechaCol = 9;
-    }
-    
-    if (fechaCol >= 0 && fechaCol < cols.length) {
-      fechaStr = cols[fechaCol].trim();
-      fechaSorteo = parsearFecha(fechaStr);
-      
-      // Si la fecha es menor que el límite, saltamos esta línea
-      if (fechaSorteo && fechaSorteo < fechaLimite) {
-        return { valida: false, motivo: 'Fecha anterior al límite' };
-      }
-    } else {
-      if (sorteo === 'revanchita') {
-        console.log(`⚠️ Columna de fecha inválida en ${sorteo}, índice: ${fechaCol}, longitud: ${cols.length}`);
-      }
-    }
-    
-    // Leer números según el tipo de sorteo (todos usan columnas 2-7 para los números)
-    for (let j = 2; j <= 7; j++) {
-      if (j >= cols.length) {
-        lineaValida = false;
-        motivoInvalido = `Columna ${j} no existe`;
-        break;
-      }
-      
-      const num = parseInt(cols[j]);
-      if (!isNaN(num) && num >= 1 && num <= 56) {
-        numerosLinea.push(num);
-      } else {
-        lineaValida = false;
-        motivoInvalido = `Número inválido en columna ${j}: ${cols[j]}`;
-        break;
-      }
-    }
-    
-    // Verificar que tenemos exactamente 6 números
-    if (numerosLinea.length !== 6) {
-      lineaValida = false;
-      motivoInvalido = `Cantidad de números incorrecta: ${numerosLinea.length}`;
-    }
-    
-  } catch (error) {
-    lineaValida = false;
-    motivoInvalido = `Error en procesamiento: ${error.message}`;
-    console.error(`❌ Error procesando línea de ${sorteo}:`, error);
+
+  const fechaStr = esMelate ? cols[10].trim() : cols[9].trim();
+  fechaSorteo = parsearFecha(fechaStr);
+
+  if (fechaSorteo && fechaSorteo < fechaLimite) {
+    return { valida: false };
   }
-  
+
+  // Los números siempre están en las columnas 2 a 7
+  for (let j = 2; j <= 7; j++) {
+    const num = parseInt(cols[j]);
+    if (isNaN(num) || num < 1 || num > 56) {
+      return { valida: false };
+    }
+    numerosLinea.push(num);
+  }
+
+  if (numerosLinea.length !== 6) {
+    return { valida: false };
+  }
+
   return {
-    valida: lineaValida,
+    valida: true,
     numeros: numerosLinea,
-    fecha: fechaSorteo,
-    motivo: motivoInvalido
+    fecha: fechaSorteo
   };
 }
 
@@ -413,31 +334,6 @@ async function prepararDatosHistoricos() {
   try {
     const resultadoCarga = await cargarDatosCSV();
     
-    // Verificar si hay datos para Revanchita, si no, intentar cargar desde archivo alternativo
-    if ((!numerosPorSorteo.revanchita || numerosPorSorteo.revanchita.length === 0) && 
-        resultadoCarga.estadisticas.revanchita && resultadoCarga.estadisticas.revanchita.error) {
-      console.log('🔄 Datos de Revanchita no disponibles, intentando con archivo alternativo...');
-      await intentarCargarRevanchitaAlternativa();
-    }
-    
-    // Si aún no hay datos para Revanchita y hay datos para Revancha, usar esos como referencia
-    if ((!numerosPorSorteo.revanchita || numerosPorSorteo.revanchita.length === 0) && 
-        numerosPorSorteo.revancha && numerosPorSorteo.revancha.length > 0) {
-      console.log('🔄 Usando datos de Revancha como referencia para Revanchita...');
-      // Crear una copia de los datos de Revanja para Revanchita
-      numerosPorSorteo.revanchita = [...numerosPorSorteo.revancha];
-      
-      // Actualizar estadísticas
-      if (resultadoCarga.estadisticas.revanchita) {
-        resultadoCarga.estadisticas.revanchita = {
-          ...resultadoCarga.estadisticas.revancha,
-          cargado: true,
-          esFallback: true,
-          mensaje: 'Usando datos de Revancha como referencia'
-        };
-      }
-    }
-    
     if (resultadoCarga.datosReales && (numerosPorSorteo.melate.length > 0 || numerosPorSorteo.revancha.length > 0)) {
       // Verificar calidad de los datos
       const calidadDatos = verificarCalidadDatos();
@@ -544,36 +440,15 @@ function mostrarIndicadorDatosPrueba() {
 }
 
 /**
- * Calcular frecuencia por sorteo con factor de motivación
+ * Calcular frecuencia por sorteo with motivation factor
  */
 function calcularFrecuenciaPorSorteo(num) {
   const resultados = {};
   
-  // Comprobar que hay datos para todos los sorteos
   ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-    if (!numerosPorSorteo[sorteo] || numerosPorSorteo[sorteo].length === 0) {
-      console.warn(`⚠️ No hay datos para ${sorteo}. Array vacío o no inicializado.`);
-      // Si no hay datos, crear un array vacío para evitar errores
-      numerosPorSorteo[sorteo] = numerosPorSorteo[sorteo] || [];
-    }
-  });
-  
-  // Log para depuración
-  console.log(`📊 Datos disponibles: Melate=${numerosPorSorteo.melate.length}, Revancha=${numerosPorSorteo.revancha.length}, Revanchita=${numerosPorSorteo.revanchita.length}`);
-  
-  ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-    // Crear una copia local del array para evitar problemas de referencia
-    const numeros = [...(numerosPorSorteo[sorteo] || [])];
+    const numeros = numerosPorSorteo[sorteo] || [];
     const frecuencia = numeros.filter(n => n === num).length;
     const total = numeros.length;
-    
-    // Logging específico para Revanchita
-    if (sorteo === 'revanchita') {
-      console.log(`🔍 ${sorteo.toUpperCase()}: Analizando número ${num}, frecuencia=${frecuencia}, total=${total}`);
-      if (total < 30) {
-        console.warn(`⚠️ Pocos datos para ${sorteo}: solo ${total} números (${Math.floor(total/6)} sorteos)`);
-      }
-    }
     
     // Calcular porcentaje base
     const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
@@ -590,17 +465,6 @@ function calcularFrecuenciaPorSorteo(num) {
     };
   });
   
-  // Si los datos de Revanchita son muy pocos, usar datos de Revancha como fallback
-  if (numerosPorSorteo.revanchita.length < 30 && numerosPorSorteo.revancha.length > 100) {
-    console.log(`🔄 Usando datos de Revancha como fallback para Revanchita debido a datos insuficientes`);
-    resultados.revanchita = {
-      ...resultados.revanchita,
-      frecuencia: resultados.revanja.frecuencia,
-      porcentaje: resultados.revanja.porcentaje,
-      esFallback: true
-    };
-  }
-  
   return resultados;
 }
 
@@ -609,18 +473,11 @@ function calcularFrecuenciaPorSorteo(num) {
  */
 function calcularIndicePorSorteo(num) {
   const resultados = {};
-  
   ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-    // Crear una copia local del array para evitar problemas de referencia
-    const numeros = [...(numerosPorSorteo[sorteo] || [])];
+    const numeros = numerosPorSorteo[sorteo] || [];
     const frecuencia = numeros.filter(n => n === num).length;
     const total = numeros.length;
     const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
-    
-    // Logging específico para Revanchita con valores reales
-    if (sorteo === 'revanchita') {
-      console.log(`📏 Índice real ${sorteo}: número=${num}, frecuencia=${frecuencia}, total=${total}, porcentaje=${porcentajeBase.toFixed(2)}%`);
-    }
     
     resultados[sorteo] = {
       frecuencia: frecuencia,
@@ -628,18 +485,6 @@ function calcularIndicePorSorteo(num) {
       porcentaje: porcentajeBase
     };
   });
-  
-  // Si los datos de Revanchita son muy pocos, usar datos de Revancha como fallback para índice también
-  if (numerosPorSorteo.revanchita.length < 30 && numerosPorSorteo.revancha.length > 100) {
-    console.log(`🔄 Usando índice de Revancha como fallback para índice de Revanchita`);
-    resultados.revanchita = {
-      ...resultados.revanchita,
-      frecuencia: resultados.revanja.frecuencia,
-      porcentaje: resultados.revanja.porcentaje,
-      esFallback: true
-    };
-  }
-  
   return resultados;
 }
 
@@ -780,88 +625,6 @@ function generarMensajeSuerte(clasificaciones) {
     return '🍀 ¡Fantástica elección! Tu combinación muestra gran potencial en múltiples sorteos.';
   } else {
     return '✨ ¡Excelente! Tu combinación está cargada de energía positiva en todos los sorteos!';
-  }
-}
-
-/**
- * Función para intentar cargar datos de Revanchita desde un archivo alternativo
- * Esta es una solución de contingencia si el archivo principal falla
- */
-async function intentarCargarRevanchitaAlternativa() {
-  console.log('🔄 Intentando cargar datos de Revanchita desde archivo alternativo...');
-  
-  try {
-    // Intentar primero con formato simple
-    const response = await fetch('assets/Revanchita-simple.csv');
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    
-    const csvText = await response.text();
-    const lines = csvText.trim().split('\n');
-    
-    if (lines.length <= 1) {
-      throw new Error('Archivo alternativo CSV vacío o solo con encabezados');
-    }
-    
-    console.log(`📄 Formato alternativo encontrado. Líneas: ${lines.length}`);
-    
-    // Detectar formato
-    const header = lines[0].toLowerCase();
-    let formatoDetectado = '';
-    
-    if (header.includes('date,sorteo,tipo,num')) {
-      formatoDetectado = 'simple';
-    } else {
-      throw new Error('Formato de CSV alternativo no reconocido');
-    }
-    
-    const numeros = [];
-    let sorteosValidos = 0;
-    
-    // Procesar líneas según formato simple
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-      
-      const cols = line.split(',');
-      let numerosLinea = [];
-      let lineaValida = true;
-      
-      if (formatoDetectado === 'simple' && cols.length >= 9) {
-        // Formato: Date,Sorteo,Tipo,Num1,Num2,Num3,Num4,Num5,Num6
-        for (let j = 3; j <= 8; j++) {
-          const num = parseInt(cols[j]);
-          if (!isNaN(num) && num >= 1 && num <= 56) {
-            numerosLinea.push(num);
-          } else {
-            lineaValida = false;
-            break;
-          }
-        }
-      } else {
-        lineaValida = false;
-      }
-      
-      if (lineaValida && numerosLinea.length === 6) {
-        numeros.push(...numerosLinea);
-        sorteosValidos++;
-      }
-    }
-    
-    if (numeros.length > 0) {
-      // Actualizar array global con los datos alternativo
-      numerosPorSorteo.revanchita = [...numeros];
-      console.log(`✅ Revanchita (alternativo): ${sorteosValidos} sorteos cargados (${numeros.length} números)`);
-      return true;
-    } else {
-      throw new Error('No se encontraron números válidos en el archivo alternativo');
-    }
-    
-  } catch (error) {
-    console.error(`❌ Error cargando Revanchita alternativo:`, error.message);
-    return false;
   }
 }
 
