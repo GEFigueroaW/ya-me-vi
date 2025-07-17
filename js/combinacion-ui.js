@@ -72,7 +72,7 @@ export class UIManager {
    */
   inicializar() {
     // Prevenir la propagación del evento click en todos los botones y controles interactivos
-    document.querySelectorAll('button, input').forEach(element => {
+    document.querySelectorAll('button:not([id^="trigger-"]), input').forEach(element => {
       element.addEventListener('click', (e) => e.stopPropagation());
     });
     
@@ -80,6 +80,7 @@ export class UIManager {
     this.triggers.forEach(trigger => {
       trigger.addEventListener('click', (e) => {
         e.stopPropagation();
+        // Solo el trigger debe expandir/collapse su sección
         this.toggleAcordeon(trigger);
       });
     });
