@@ -816,33 +816,30 @@ function generarContenidoFrecuencias(datos) {
         <div class="text-center">
           <h4 class="text-2xl font-bold text-white mb-4">🎲 ${sorteo.toUpperCase()}</h4>
         </div>
-        
         <!-- Top 10 MÁS frecuentes -->
         <div>
           <h5 class="text-lg font-semibold text-orange-400 mb-4 text-center">🔥 Top 10 MÁS frecuentes</h5>
           <div class="grid grid-cols-5 gap-3">
             ${topFrecuentes.map((item, index) => `
-              <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
-                <div class="text-red-600 text-2xl font-bold mb-1">${item.numero}</div>
-                <div class="text-red-600 text-sm font-semibold">${item.frecuencia}</div>
+              <div class="bg-white bg-opacity-75 rounded-xl p-4 flex flex-col items-center justify-center text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
+                <div class="text-red-600 text-2xl font-bold mb-1 flex items-center justify-center w-full">${item.numero}</div>
+                <div class="text-red-600 text-sm font-semibold flex items-center justify-center w-full">${item.frecuencia}</div>
               </div>
             `).join('')}
           </div>
         </div>
-        
         <!-- Top 10 MENOS frecuentes -->
         <div>
           <h5 class="text-lg font-semibold text-white mb-4 text-center">❄️ Top 10 MENOS frecuentes</h5>
           <div class="grid grid-cols-5 gap-3">
             ${menosFrecuentes.map((item, index) => `
-              <div class="bg-white bg-opacity-75 rounded-xl p-4 text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
-                <div class="text-blue-600 text-2xl font-bold mb-1">${item.numero}</div>
-                <div class="text-blue-600 text-sm font-semibold">${item.frecuencia}</div>
+              <div class="bg-white bg-opacity-75 rounded-xl p-4 flex flex-col items-center justify-center text-center backdrop-blur-sm hover:bg-opacity-80 transition-all">
+                <div class="text-blue-600 text-2xl font-bold mb-1 flex items-center justify-center w-full">${item.numero}</div>
+                <div class="text-blue-600 text-sm font-semibold flex items-center justify-center w-full">${item.frecuencia}</div>
               </div>
             `).join('')}
           </div>
         </div>
-        
         ${sorteo !== 'revanchita' ? '<hr class="border-white border-opacity-20 my-8">' : ''}
       </div>
     `;
