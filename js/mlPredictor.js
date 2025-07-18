@@ -160,33 +160,57 @@ function generarPoolCombinaciones(datos) {
 
 // NUEVO MÉTODO: Análisis de tendencias temporales recientes
 function analizarTendenciasRecientes(datosSorteos) {
-  // Obtener solo los sorteos del último trimestre (aprox. 12 sorteos)
-  const sorteosTrimestre = datosSorteos.slice(0, 12);
-  
-  // Inicializar mapa de tendencias
-  const tendencias = Array(56).fill(0);
-  
-  // Analizar tendencias recientes con mayor peso en los sorteos más recientes
-  sorteosTrimestre.forEach((sorteo, idx) => {
-    // Peso decreciente: los sorteos más recientes tienen más influencia
-    const peso = 1 - (idx / sorteosTrimestre.length);
-    
-    sorteo.numeros?.forEach(numero => {
-      if (numero >= 1 && numero <= 56) {
-        tendencias[numero - 1] += peso;
-      }
-    });
-  });
-  
-  // Normalizar tendencias a valores entre 0 y 1
-  const maxTendencia = Math.max(...tendencias);
-  if (maxTendencia > 0) {
-    for (let i = 0; i < tendencias.length; i++) {
-      tendencias[i] = tendencias[i] / maxTendencia;
-    }
+  // Verificar si tenemos datos válidos
+  if (!Array.isArray(datosSorteos) || datosSorteos.length === 0) {
+    console.warn("Datos de sorteos vacíos o inválidos para análisis de tendencias recientes");
+    // Devolver un array con valores uniformes si no hay datos
+    return Array(56).fill(1/56);
   }
   
-  return tendencias;
+  try {
+    // Obtener solo los sorteos del último trimestre (aprox. 12 sorteos o todos si hay menos)
+    const cantidadSorteos = Math.min(12, datosSorteos.length);
+    const sorteosTrimestre = datosSorteos.slice(0, cantidadSorteos);
+    
+    // Inicializar mapa de tendencias
+    const tendencias = Array(56).fill(0);
+    
+    // Analizar tendencias recientes con mayor peso en los sorteos más recientes
+    sorteosTrimestre.forEach((sorteo, idx) => {
+      // Verificar si el objeto sorteo tiene la propiedad 'numeros'
+      const numeros = sorteo.numeros || [];
+      
+      // Peso decreciente: los sorteos más recientes tienen más influencia
+      const peso = sorteosTrimestre.length > 0 ? 1 - (idx / sorteosTrimestre.length) : 1;
+      
+      // Procesar cada número del sorteo
+      numeros.forEach(numero => {
+        if (typeof numero === 'number' && numero >= 1 && numero <= 56) {
+          tendencias[numero - 1] += peso;
+        }
+      });
+    });
+    
+    // Normalizar tendencias a valores entre 0 y 1
+    const maxTendencia = Math.max(...tendencias);
+    if (maxTendencia > 0) {
+      for (let i = 0; i < tendencias.length; i++) {
+        tendencias[i] = tendencias[i] / maxTendencia;
+      }
+    } else {
+      // Si todos son cero, dar un valor base pequeño a todos
+      for (let i = 0; i < tendencias.length; i++) {
+        tendencias[i] = 1/56;
+      }
+    }
+    
+    console.log("Análisis de tendencias recientes completado");
+    return tendencias;
+  } catch (error) {
+    console.error("Error en análisis de tendencias recientes:", error);
+    // En caso de error, devolver valores uniformes
+    return Array(56).fill(1/56);
+  }
 }
 
 // Generar combinación avanzada con análisis multimétodo
@@ -270,28 +294,57 @@ function seleccionarPorDesviacion(desviacionAnalisis, rng) {
 
 // Generador de números aleatorios con semilla (LCG)
 function crearGeneradorAleatorio(semilla) {
-  let seed = semilla;
+  let seed = semilla || Date.now(); // Usar fecha actual si no hay semilla
   return function() {
     seed = (seed * 1664525 + 1013904223) % (2**32);
-    return seed;
+    // Devolver un valor entre 0 y 1, similar a Math.random()
+    const normalized = seed / (2**32);
+    return normalized;
   };
 }
 
 // Selección por frecuencia
 function seleccionarPorFrecuencia(frecuencia, rng, factorFrecuencia = 0.6) {
-  const numerosConPeso = frecuencia.map((item, index) => ({
-    numero: index + 1,
-    peso: item.score * factorFrecuencia + (rng() / (2**32)) * (1 - factorFrecuencia)
-  }));
-  
-  numerosConPeso.sort((a, b) => b.peso - a.peso);
-  
-  const seleccionados = [];
-  for (let i = 0; i < Math.min(6, numerosConPeso.length); i++) {
-    seleccionados.push(numerosConPeso[i].numero);
+  // Verificar que los datos de frecuencia están en formato correcto
+  if (!frecuencia || !Array.isArray(frecuencia) || frecuencia.length === 0) {
+    console.error("Datos de frecuencia inválidos:", frecuencia);
+    // Fallback: generar 6 números aleatorios
+    const numeros = new Set();
+    while (numeros.size < 6) {
+      numeros.add(Math.floor(Math.random() * 56) + 1);
+    }
+    return Array.from(numeros).sort((a, b) => a - b);
   }
   
-  return seleccionados.sort((a, b) => a - b);
+  try {
+    // Verificar si es array de objetos con score o array simple
+    const tieneScore = typeof frecuencia[0] === 'object' && frecuencia[0].hasOwnProperty('score');
+    
+    const numerosConPeso = frecuencia.map((item, index) => {
+      const score = tieneScore ? (item.score || 0) : (typeof item === 'number' ? item : 0);
+      return {
+        numero: index + 1,
+        peso: score * factorFrecuencia + rng() * (1 - factorFrecuencia)
+      };
+    });
+    
+    numerosConPeso.sort((a, b) => b.peso - a.peso);
+    
+    const seleccionados = [];
+    for (let i = 0; i < Math.min(6, numerosConPeso.length); i++) {
+      seleccionados.push(numerosConPeso[i].numero);
+    }
+    
+    return seleccionados.sort((a, b) => a - b);
+  } catch (error) {
+    console.error("Error en seleccionarPorFrecuencia:", error);
+    // Fallback con números aleatorios
+    const numeros = new Set();
+    while (numeros.size < 6) {
+      numeros.add(Math.floor(Math.random() * 56) + 1);
+    }
+    return Array.from(numeros).sort((a, b) => a - b);
+  }
 }
 
 // Selección por patrones
@@ -365,20 +418,39 @@ function seleccionarPorTendencias(tendencias, rng) {
     score: valor
   }));
   
-  while (numeros.length < 6 && tendenciasFormateadas.length > 0) {
+  // Para cada número necesario
+  let intentos = 0;
+  while (numeros.length < 6 && intentos < 100) {
+    intentos++;
     // Selección ponderada basada en las tendencias
     const suma = tendenciasFormateadas.reduce((total, item) => total + item.score, 0);
-    let seleccion = rng() * suma;
     
+    // Si no hay suma válida (todos ceros), usamos selección aleatoria
+    if (suma <= 0) {
+      const randomIndex = Math.floor(Math.random() * 56);
+      const numero = randomIndex + 1;
+      if (!usado.has(numero)) {
+        numeros.push(numero);
+        usado.add(numero);
+      }
+      continue;
+    }
+    
+    // Generar un valor aleatorio entre 0 y suma total
+    const rawRandom = rng();
+    const scaledRandom = rawRandom / (2**32) * suma;
+    
+    // Selección ponderada
+    let acumulado = 0;
     for (let i = 0; i < tendenciasFormateadas.length; i++) {
-      seleccion -= tendenciasFormateadas[i].score;
-      if (seleccion <= 0) {
+      acumulado += tendenciasFormateadas[i].score;
+      if (scaledRandom <= acumulado) {
         const numero = tendenciasFormateadas[i].numero;
         if (!usado.has(numero)) {
           numeros.push(numero);
           usado.add(numero);
+          break;
         }
-        break;
       }
     }
   }

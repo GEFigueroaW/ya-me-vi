@@ -166,16 +166,38 @@
       const arrow = document.getElementById('arrow-icon');
       const container = document.getElementById('prediccion-container');
       
+      if (!contenido || !arrow || !container) {
+        console.error('❌ Elementos de UI no encontrados');
+        return;
+      }
+      
       if (contenido.classList.contains('hidden')) {
+        // Expandir
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
         container.style.opacity = '1';
         
-        if (!prediccionesGeneradas) {
-          generarPrediccionesPorSorteo();
-          prediccionesGeneradas = true;
+        try {
+          if (!prediccionesGeneradas) {
+            console.log('🔄 Iniciando generación de predicciones...');
+            generarPrediccionesPorSorteo()
+              .then(() => {
+                prediccionesGeneradas = true;
+                console.log('✅ Predicciones generadas exitosamente');
+              })
+              .catch(error => {
+                console.error('❌ Error generando predicciones:', error);
+                const mensajeEstado = document.getElementById('mensaje-estado');
+                if (mensajeEstado) {
+                  mensajeEstado.textContent = 'Error al generar predicciones. Intente nuevamente.';
+                }
+              });
+          }
+        } catch (error) {
+          console.error('❌ Error en togglePrediccionIA:', error);
         }
       } else {
+        // Colapsar
         contenido.classList.add('hidden');
         arrow.style.transform = 'rotate(0deg)';
         container.style.opacity = '0.5';
@@ -253,24 +275,43 @@
       container.innerHTML = html;
     }
 
+    // Función para generar un conjunto de números aleatorios como fallback
+    function generarCombinacionFallback() {
+      const numeros = new Set();
+      while (numeros.size < 6) {
+        numeros.add(Math.floor(Math.random() * 56) + 1);
+      }
+      return Array.from(numeros).sort((a, b) => a - b);
+    }
+    
     // Función para generar predicciones por sorteo con análisis avanzado de IA
     async function generarPrediccionesPorSorteo() {
       console.log('🤖 Generando predicciones avanzadas con IA...');
       
       const mensajeEstado = document.getElementById('mensaje-estado');
       if (mensajeEstado) {
-        mensajeEstado.textContent = 'Generando predicciones con 5 métodos de análisis...';
+        mensajeEstado.textContent = 'Generando predicciones con métodos avanzados de análisis...';
       }
+      
+      // Establecer un timeout para garantizar que siempre tengamos una respuesta
+      const timeoutPromise = new Promise(resolve => {
+        setTimeout(() => {
+          resolve('timeout');
+        }, 10000); // 10 segundos de timeout
+      });
       
       try {
         // Cargar datos históricos si no están cargados
         if (!datosHistoricos) {
-          datosHistoricos = await cargarDatosHistoricos('todos');
+          datosHistoricos = await Promise.race([cargarDatosHistoricos('todos'), timeoutPromise]);
+          if (datosHistoricos === 'timeout') {
+            throw new Error('Tiempo de espera agotado al cargar datos históricos');
+          }
         }
         
         // Generar predicciones para cada sorteo usando un ID único por usuario
         const sorteos = ['melate', 'revancha', 'revanchita'];
-        const userId = firebase.auth().currentUser?.uid || 'usuario123';
+        const userId = 'usuario123'; // ID fijo para garantizar resultados consistentes
         
         for (const sorteo of sorteos) {
           try {
