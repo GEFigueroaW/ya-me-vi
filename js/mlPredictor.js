@@ -309,9 +309,10 @@ function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAna
   const semillaModificada = semilla + hashTipoSorteo;
   
   // Crear generador aleatorio con semilla específica para este tipo de sorteo
+  // Importante: Usamos la semilla sin modificar para tener resultados consistentes
   const rng = crearGeneradorAleatorio(semillaModificada);
   
-  // Determinar estrategia basada en el tipo de sorteo
+  // Determinar estrategia basada en el tipo de sorteo de forma determinista
   // Se usa un hash más elaborado para asegurar buena distribución
   const estrategia = Math.abs((semillaModificada + hashTipoSorteo * 13) % 6);
   
@@ -422,10 +423,10 @@ function crearGeneradorAleatorio(semilla) {
   // Asegurar que la semilla es un número
   let seed = typeof semilla === 'number' ? semilla : (Date.now() % 2**32); 
   
-  // Añadir un valor aleatorio para evitar semillas idénticas en ejecuciones rápidas
-  seed = (seed + Math.floor(Math.random() * 10000)) % (2**32);
+  // Importante: NO añadir valores aleatorios a la semilla para mantener consistencia
+  // seed = (seed + Math.floor(Math.random() * 10000)) % (2**32); - ELIMINADO
   
-  // Valor inicial para evitar patrones iniciales
+  // Valor inicial para evitar patrones iniciales - Esto mantiene la consistencia
   seed = (seed * 747796405 + 2891336453) % (2**32);
   
   console.log(`🎲 Inicializando generador aleatorio con semilla: ${seed}`);
