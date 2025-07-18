@@ -488,10 +488,12 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
             });
         }
         
-        // Actualizar mensaje en la UI para mostrar que es análisis completo
+        // Actualizar mensaje en la UI para mostrar el progreso del análisis
         const elementoDetalle = document.getElementById(`detalle-${nombreSorteo.toLowerCase()}`);
         if (elementoDetalle) {
-            elementoDetalle.textContent = 'Realizando análisis completo...';
+            const fecha = new Date().toLocaleTimeString();
+            elementoDetalle.innerHTML = `Análisis completo (${fecha})<br>
+                <small>Frecuencias: 22% | Suma: 22% | Paridad: 22% | Décadas: 22% | Aleatorio: 12%</small>`;
         }
 
         // 1. Análisis de frecuencias (22%)
