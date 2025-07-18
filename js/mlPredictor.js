@@ -20,7 +20,10 @@ export async function generarPrediccionPersonalizada(userId, datos) {
   console.log(`📊 Datos para ${tipoSorteo}: ${numeros.length} números, ${(datos.datos || []).length} sorteos`);
 
   // Generar combinación personalizada
-  const combinacion = generarCombinacionPersonalizada(userId, datos);
+  const combinacionBase = generarCombinacionPersonalizada(userId, datos);
+  
+  // Convertir explícitamente todos los números a enteros
+  const combinacion = combinacionBase.map(num => Math.floor(num));
   
   // Verificación final: asegurarse que no sea una secuencia simple
   const esSecuencial = esSecuenciaPerfecta(combinacion);
@@ -37,7 +40,16 @@ export async function generarPrediccionPersonalizada(userId, datos) {
     combinacion.sort((a, b) => a - b);
   }
   
-  return combinacion;
+  // Verificación adicional para asegurarnos de que todos los números sean enteros
+  const combinacionFinal = combinacion.map(num => {
+    const entero = Math.floor(num);
+    // Asegurar que estamos en el rango correcto (1-56)
+    return Math.max(1, Math.min(56, entero));
+  });
+  
+  console.log(`✅ ${tipoSorteo}: Predicción final verificada: ${combinacionFinal.join(', ')}`);
+  
+  return combinacionFinal;
 }
 
 // Función auxiliar para verificar secuencias perfectas
@@ -369,7 +381,9 @@ function seleccionarPorFrecuencia(frecuencia, rng, factorFrecuencia = 0.6) {
     
     const seleccionados = [];
     for (let i = 0; i < Math.min(6, numerosConPeso.length); i++) {
-      seleccionados.push(numerosConPeso[i].numero);
+      // Asegurarse de que solo se guarda el número entero, no el peso
+      const numeroEntero = Math.floor(numerosConPeso[i].numero);
+      seleccionados.push(numeroEntero);
     }
     
     return seleccionados.sort((a, b) => a - b);
