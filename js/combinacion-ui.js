@@ -127,6 +127,20 @@ export class UIManager {
       e.stopPropagation();
       this.evaluarCombinacion();
     });
+
+    // Validación en tiempo real para inputs de combinación
+    const inputsCombinacion = document.querySelectorAll('.combo-input');
+    inputsCombinacion.forEach((input, index) => {
+      input.addEventListener('input', (e) => {
+        e.stopPropagation();
+        this.validarInputEnTiempoReal(input, index);
+      });
+      
+      input.addEventListener('blur', (e) => {
+        e.stopPropagation();
+        this.validarInputEnTiempoReal(input, index);
+      });
+    });
     
     this.btnMostrarExplicacion.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -284,6 +298,97 @@ export class UIManager {
   }
 
   /**
+   * Validar input de combinación en tiempo real
+   */
+  validarInputEnTiempoReal(input, index) {
+    const valor = parseInt(input.value);
+    const inputsCombinacion = document.querySelectorAll('.combo-input');
+    
+    // Limpiar estilos previos
+    input.classList.remove('border-red-500', 'bg-red-100');
+    input.classList.add('border-gray-300');
+    
+    // Limpiar mensajes de error previos
+    this.limpiarMensajesError();
+    
+    // Validar si el input está vacío
+    if (input.value.trim() === '') {
+      return;
+    }
+    
+    // Validar rango (1-56)
+    if (isNaN(valor) || valor < 1 || valor > 56) {
+      this.mostrarErrorEnInput(input, 'Número debe estar entre 1 y 56');
+      input.value = '';
+      return;
+    }
+    
+    // Validar duplicados
+    const valores = Array.from(inputsCombinacion)
+      .map(inp => parseInt(inp.value))
+      .filter(val => !isNaN(val));
+    
+    const duplicados = valores.filter((val, idx) => 
+      valores.indexOf(val) !== idx || (val === valor && valores.indexOf(val) !== index)
+    );
+    
+    if (duplicados.length > 0) {
+      this.mostrarErrorEnInput(input, 'Número duplicado no permitido');
+      input.value = '';
+      return;
+    }
+    
+    // Si llegamos aquí, el valor es válido
+    input.classList.remove('border-gray-300');
+    input.classList.add('border-green-500', 'bg-green-50');
+  }
+
+  /**
+   * Mostrar error en input específico
+   */
+  mostrarErrorEnInput(input, mensaje) {
+    input.classList.remove('border-gray-300', 'border-green-500', 'bg-green-50');
+    input.classList.add('border-red-500', 'bg-red-100');
+    
+    // Crear o actualizar mensaje de error
+    let errorDiv = document.getElementById('error-combinacion-tiempo-real');
+    if (!errorDiv) {
+      errorDiv = document.createElement('div');
+      errorDiv.id = 'error-combinacion-tiempo-real';
+      errorDiv.className = 'mt-2 text-center';
+      
+      const comboBtnContainer = document.querySelector('#evaluar-combinacion-btn').parentNode;
+      comboBtnContainer.insertBefore(errorDiv, comboBtnContainer.firstChild);
+    }
+    
+    errorDiv.innerHTML = `
+      <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-3 animate-pulse">
+        <p class="text-red-700 font-semibold text-sm">⚠️ ${mensaje}</p>
+      </div>
+    `;
+    
+    // Hacer scroll suave hacia el error
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    // Auto-ocultar después de 3 segundos
+    setTimeout(() => {
+      if (errorDiv) {
+        errorDiv.remove();
+      }
+    }, 3000);
+  }
+
+  /**
+   * Limpiar mensajes de error de tiempo real
+   */
+  limpiarMensajesError() {
+    const errorDiv = document.getElementById('error-combinacion-tiempo-real');
+    if (errorDiv) {
+      errorDiv.remove();
+    }
+  }
+
+  /**
    * Evaluar un número individual
    */
   evaluarNumeroIndividual() {
@@ -322,6 +427,9 @@ export class UIManager {
    * Evaluar combinación completa
    */
   evaluarCombinacion() {
+    // Limpiar mensajes de error en tiempo real
+    this.limpiarMensajesError();
+    
     const inputsCombinacion = document.querySelectorAll('.combo-input');
     const numeros = Array.from(inputsCombinacion)
       .map(input => parseInt(input.value))
