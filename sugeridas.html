@@ -131,6 +131,17 @@
       .then(data => {
         document.getElementById("footer-container").innerHTML = data;
       });
+    
+    // Definir togglePrediccionIA en el ámbito global para que esté disponible para el onclick
+    window.togglePrediccionIA = function() {
+      // Esta función se ejecutará mientras se carga el módulo y redirigirá a la función real cuando esté disponible
+      console.log("Redirigiendo a la implementación del módulo...");
+      if (window.togglePrediccionIAImpl) {
+        window.togglePrediccionIAImpl();
+      } else {
+        console.error("La implementación de togglePrediccionIA no está lista aún");
+      }
+    };
   </script>
   <script type="module">
     import { cargarDatosHistoricos, generarCombinacionesAleatorias } from './js/dataParser.js';
@@ -204,8 +215,8 @@
       }
     }
 
-    // Hacer la función global para el onclick
-    window.togglePrediccionIA = togglePrediccionIA;
+    // Hacer la implementación disponible para el redireccionador global
+    window.togglePrediccionIAImpl = togglePrediccionIA;
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
@@ -389,16 +400,17 @@
     });
 
   </script>
-        cantidadSeleccionada = parseInt(btn.dataset.cantidad);
-      });
-    });
+  <script type="module">
+    // Código de autenticación y verificación de usuario
+    import { auth, onAuthStateChanged } from './js/firebase-init.js';
+    import { cargarDatosHistoricos } from './js/dataParser.js';
 
     // Verificar autenticación y cargar datos
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
       } else {
-        usuarioID = user.uid;
+        const usuarioID = user.uid;
         
         // Actualizar título con número de sorteo
         actualizarTituloSorteo();

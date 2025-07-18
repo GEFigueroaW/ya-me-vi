@@ -374,7 +374,6 @@ function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAna
   
   return resultadoFinal;
 }
-}
 
 // Nuevo método: Calcular probabilidades
 function calcularProbabilidades(numeros) {
