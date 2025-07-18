@@ -294,18 +294,22 @@
         try {
           if (!window.prediccionesGeneradas) {
             console.log('🔄 Iniciando generación de predicciones IA...');
-            generarPrediccionesPorSorteo()
-              .then(() => {
-                window.prediccionesGeneradas = true;
-                console.log('✅ Predicciones IA generadas exitosamente');
-              })
-              .catch(error => {
-                console.error('❌ Error generando predicciones IA:', error);
-                const mensajeEstado = document.getElementById('mensaje-estado');
-                if (mensajeEstado) {
-                  mensajeEstado.textContent = 'Error al generar predicciones. Intente nuevamente.';
-                }
-              });
+            if (window.generarPrediccionesPorSorteo) {
+              window.generarPrediccionesPorSorteo()
+                .then(() => {
+                  window.prediccionesGeneradas = true;
+                  console.log('✅ Predicciones IA generadas exitosamente');
+                })
+                .catch(error => {
+                  console.error('❌ Error generando predicciones IA:', error);
+                  const mensajeEstado = document.getElementById('mensaje-estado');
+                  if (mensajeEstado) {
+                    mensajeEstado.textContent = 'Error al generar predicciones. Intente nuevamente.';
+                  }
+                });
+            } else {
+              console.error('❌ generarPrediccionesPorSorteo no está disponible en window');
+            }
           } else {
             console.log('✅ Usando predicciones IA ya generadas');
           }
@@ -345,7 +349,11 @@
         
         // Generar proyecciones automáticamente
         setTimeout(() => {
-          generarProyeccionesAnalisis();
+          if (window.generarProyeccionesAnalisis) {
+            window.generarProyeccionesAnalisis();
+          } else {
+            console.error('❌ generarProyeccionesAnalisis no está disponible en window');
+          }
         }, 300);
       } else {
         // Cerrar esta caja
@@ -509,8 +517,21 @@
       `;
       
       try {
-        const combinaciones = generarCombinacionesAleatorias(window.cantidadSeleccionada);
-        mostrarCombinaciones(combinaciones);
+        if (window.generarCombinacionesAleatorias) {
+          const combinaciones = window.generarCombinacionesAleatorias(window.cantidadSeleccionada);
+          if (window.mostrarCombinaciones) {
+            window.mostrarCombinaciones(combinaciones);
+          } else {
+            console.error('❌ mostrarCombinaciones no está disponible');
+          }
+        } else {
+          console.error('❌ generarCombinacionesAleatorias no está disponible');
+          container.innerHTML = `
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <strong>Error:</strong> Función de generación no disponible. Recargue la página.
+            </div>
+          `;
+        }
       } catch (error) {
         console.error('❌ Error generando combinaciones:', error);
         container.innerHTML = `
@@ -524,7 +545,11 @@
     // Botón para generar nueva proyección de análisis
     document.getElementById('btn-generar-analisis').addEventListener('click', async () => {
       console.log('📊 Regenerando proyecciones de análisis...');
-      await generarProyeccionesAnalisis();
+      if (window.generarProyeccionesAnalisis) {
+        await window.generarProyeccionesAnalisis();
+      } else {
+        console.error('❌ generarProyeccionesAnalisis no está disponible');
+      }
     });
 
     // Función para mostrar combinaciones
@@ -1018,6 +1043,14 @@
       actualizarTituloSorteo();
     });
 
+    // Hacer funciones disponibles globalmente desde el módulo
+    window.generarProyeccionesAnalisis = generarProyeccionesAnalisis;
+    window.generarPrediccionesPorSorteo = generarPrediccionesPorSorteo;
+    window.mostrarCombinaciones = mostrarCombinaciones;
+    window.generarCombinacionesAleatorias = generarCombinacionesAleatorias;
+    window.obtenerNumeroSorteoActual = obtenerNumeroSorteoActual;
+    window.actualizarTituloSorteo = actualizarTituloSorteo;
+
   </script>
   <script type="module">
     // Código de autenticación y verificación de usuario
@@ -1040,7 +1073,15 @@
           console.log('📊 Datos históricos cargados para predicciones IA');
           
           // Actualizar el título con el número real una vez que tenemos los datos
-          actualizarTituloSorteo();
+          if (window.actualizarTituloSorteo) {
+            window.actualizarTituloSorteo();
+          } else {
+            setTimeout(() => {
+              if (window.actualizarTituloSorteo) {
+                window.actualizarTituloSorteo();
+              }
+            }, 1000);
+          }
           
           // Cargar predicciones almacenadas para el usuario autenticado
           cargarPrediccionesAlmacenadas(window.usuarioActualID);
@@ -1051,7 +1092,9 @@
         } catch (error) {
           console.error('❌ Error cargando datos históricos:', error);
           // Usar fallback para el título
-          actualizarTituloSorteo();
+          if (window.actualizarTituloSorteo) {
+            window.actualizarTituloSorteo();
+          }
         }
       }
     });
@@ -1116,43 +1159,86 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🔧 Verificando funciones toggle...');
       
-      // Verificar que las funciones estén disponibles globalmente
-      if (typeof window.toggleAleatorias === 'function') {
-        console.log('✅ toggleAleatorias disponible');
-      } else {
-        console.error('❌ toggleAleatorias NO disponible');
+      // Función para esperar a que las funciones del módulo estén disponibles
+      function esperarFuncionesModulo() {
+        return new Promise((resolve) => {
+          let intentos = 0;
+          const maxIntentos = 50; // 5 segundos máximo
+          
+          const checkInterval = setInterval(() => {
+            if (window.generarProyeccionesAnalisis && 
+                window.generarPrediccionesPorSorteo && 
+                window.generarCombinacionesAleatorias &&
+                window.actualizarTituloSorteo) {
+              clearInterval(checkInterval);
+              console.log('✅ Todas las funciones del módulo están disponibles');
+              resolve();
+            } else if (intentos >= maxIntentos) {
+              clearInterval(checkInterval);
+              console.error('❌ Timeout esperando funciones del módulo');
+              resolve();
+            }
+            intentos++;
+          }, 100);
+        });
       }
       
-      if (typeof window.togglePrediccionIA === 'function') {
-        console.log('✅ togglePrediccionIA disponible');
-      } else {
-        console.error('❌ togglePrediccionIA NO disponible');
-      }
-      
-      if (typeof window.toggleAnalisis === 'function') {
-        console.log('✅ toggleAnalisis disponible');
-      } else {
-        console.error('❌ toggleAnalisis NO disponible');
-      }
-      
-      // Verificar elementos del DOM
-      const elementos = [
-        'aleatorias-container',
-        'prediccion-container', 
-        'analisis-container',
-        'titulo-sorteo'
-      ];
-      
-      elementos.forEach(id => {
-        const elemento = document.getElementById(id);
-        if (elemento) {
-          console.log(`✅ Elemento ${id} encontrado`);
+      // Esperar y luego verificar
+      esperarFuncionesModulo().then(() => {
+        // Verificar que las funciones estén disponibles globalmente
+        if (typeof window.toggleAleatorias === 'function') {
+          console.log('✅ toggleAleatorias disponible');
         } else {
-          console.error(`❌ Elemento ${id} NO encontrado`);
+          console.error('❌ toggleAleatorias NO disponible');
         }
+        
+        if (typeof window.togglePrediccionIA === 'function') {
+          console.log('✅ togglePrediccionIA disponible');
+        } else {
+          console.error('❌ togglePrediccionIA NO disponible');
+        }
+        
+        if (typeof window.toggleAnalisis === 'function') {
+          console.log('✅ toggleAnalisis disponible');
+        } else {
+          console.error('❌ toggleAnalisis NO disponible');
+        }
+        
+        if (typeof window.generarCombinacionesAleatorias === 'function') {
+          console.log('✅ generarCombinacionesAleatorias disponible');
+        } else {
+          console.error('❌ generarCombinacionesAleatorias NO disponible');
+        }
+        
+        if (typeof window.actualizarTituloSorteo === 'function') {
+          console.log('✅ actualizarTituloSorteo disponible');
+          // Actualizar título inmediatamente si ya tenemos datos
+          if (window.datosHistoricos) {
+            window.actualizarTituloSorteo();
+          }
+        } else {
+          console.error('❌ actualizarTituloSorteo NO disponible');
+        }
+        
+        // Verificar elementos del DOM
+        const elementos = [
+          'aleatorias-container',
+          'prediccion-container', 
+          'analisis-container',
+          'titulo-sorteo'
+        ];
+        
+        elementos.forEach(id => {
+          const elemento = document.getElementById(id);
+          if (elemento) {
+            console.log(`✅ Elemento ${id} encontrado`);
+          } else {
+            console.error(`❌ Elemento ${id} NO encontrado`);
+          }
+        });
+        
+        console.log('🔧 Verificación completada');
       });
-      
-      console.log('🔧 Verificación completada');
     });
   </script>
 
