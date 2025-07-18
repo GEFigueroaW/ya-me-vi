@@ -1201,16 +1201,11 @@ window.cargarDatosHistoricos = window.cargarDatosHistoricos || async function(mo
 window.obtenerUltimoSorteoMelate = function() {
   console.log('🔍 Obteniendo último sorteo de Melate...');
   
-  // Variable para almacenar la promesa de lectura del CSV
-  let csvPromise = null;
-  
-  // Función para leer directamente el CSV de Melate
-  function leerCSVMelate() {
-    // Si ya tenemos una promesa en curso, la devolvemos
-    if (csvPromise) return csvPromise;
+  return new Promise((resolve, reject) => {
+    // Intentar leer directamente desde el CSV sin depender de datos en memoria
+    console.log('🔄 Leyendo directamente desde Melate.csv...');
     
-    // Crear nueva promesa
-    csvPromise = fetch('assets/Melate.csv')
+    fetch('assets/Melate.csv')
       .then(response => {
         if (!response.ok) {
           throw new Error(`Error al cargar Melate.csv: ${response.status}`);
@@ -1218,31 +1213,70 @@ window.obtenerUltimoSorteoMelate = function() {
         return response.text();
       })
       .then(csvText => {
-        // Procesar el CSV para encontrar el último número de sorteo
+        // Dividir por líneas y encontrar la primera línea con datos (después del encabezado)
         const lineas = csvText.split('\n');
-        if (lineas.length > 1) { // Verificar que hay al menos la cabecera y una línea
-          // La segunda línea debería tener el último sorteo (después de la cabecera)
-          const primeraLinea = lineas[1].split(',');
-          if (primeraLinea.length > 1) {
-            const ultimoSorteo = parseInt(primeraLinea[1]);
-            if (!isNaN(ultimoSorteo)) {
-              console.log(`✅ Último sorteo leído directamente de CSV: ${ultimoSorteo}`);
-              return ultimoSorteo;
-            }
-          }
+        console.log(`📊 CSV leído con ${lineas.length} líneas`);
+        
+        if (lineas.length <= 1) {
+          throw new Error('CSV vacío o sin datos válidos');
         }
-        throw new Error('No se pudo leer el último sorteo del CSV');
+        
+        // Verificar si la primera línea es un encabezado
+        let indiceInicio = 0;
+        if (lineas[0].includes('NPRODUCTO') || lineas[0].includes('CONCURSO')) {
+          indiceInicio = 1;
+        }
+        
+        // Obtener la primera línea con datos (que contiene el sorteo más reciente)
+        const primeraLineaDatos = lineas[indiceInicio].split(',');
+        console.log(`🔍 Primera línea de datos: ${primeraLineaDatos.join(',')}`);
+        
+        if (primeraLineaDatos.length < 2) {
+          throw new Error('Formato de CSV inválido, no se encontró la columna de concurso');
+        }
+        
+        // El número de concurso está en la segunda columna (índice 1)
+        const ultimoSorteo = parseInt(primeraLineaDatos[1].trim());
+        if (isNaN(ultimoSorteo)) {
+          throw new Error(`No se pudo convertir a número: "${primeraLineaDatos[1]}"`);
+        }
+        
+        console.log(`✅ Último sorteo leído directamente: ${ultimoSorteo}`);
+        resolve(ultimoSorteo);
       })
       .catch(error => {
-        console.error('❌ Error al leer el CSV de Melate:', error);
-        return 4082; // Último sorteo conocido como fallback
+        console.error('❌ Error al leer CSV de Melate:', error);
+        
+        // Si hay un error, intentar usar los datos históricos ya cargados
+        if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+          try {
+            const sorteos = window.datosHistoricos.melate.sorteos;
+            if (sorteos.length > 0) {
+              let ultimoSorteo = 0;
+              
+              // Buscar el sorteo con el número más alto
+              for (const sorteo of sorteos) {
+                const numConcurso = parseInt(sorteo.concurso);
+                if (!isNaN(numConcurso) && numConcurso > ultimoSorteo) {
+                  ultimoSorteo = numConcurso;
+                }
+              }
+              
+              if (ultimoSorteo > 0) {
+                console.log(`✅ Último sorteo encontrado en datos cargados: ${ultimoSorteo}`);
+                resolve(ultimoSorteo);
+                return;
+              }
+            }
+          } catch (err) {
+            console.error('❌ Error al buscar en datos históricos:', err);
+          }
+        }
+        
+        // Como último recurso, rechazar la promesa
+        reject(error);
       });
-    
-    return csvPromise;
-  }
-  
-  // Intentar leer el CSV directamente
-  return leerCSVMelate();
+  });
 };
 
 // Confirmar que las funciones están disponibles

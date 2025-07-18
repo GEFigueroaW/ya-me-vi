@@ -77,7 +77,7 @@ function cargarDatosHistoricos(tipo) {
 function procesarCSV(texto, tipoSorteo) {
   const lineas = texto.split('\n');
   // Eliminar la primera línea si es un encabezado
-  if (lineas[0].includes('Concurso') || lineas[0].includes('Sorteo')) {
+  if (lineas[0].includes('NPRODUCTO') || lineas[0].includes('CONCURSO') || lineas[0].includes('Concurso') || lineas[0].includes('Sorteo')) {
     lineas.shift();
   }
   
@@ -90,12 +90,12 @@ function procesarCSV(texto, tipoSorteo) {
     if (partes.length < 7) return; // Asegurar que tengamos al menos los números
     
     try {
-      // Para Melate/Revancha: [Concurso, Fecha, N1, N2, N3, N4, N5, N6, Adicional]
-      // Para Revanchita: [Concurso, Fecha, N1, N2, N3, N4, N5, N6]
+      // Formato actual: [NPRODUCTO, CONCURSO, R1, R2, R3, R4, R5, R6, R7, BOLSA, FECHA]
+      // El número de concurso está en la segunda columna (índice 1)
       const sorteo = {
-        concurso: partes[0].trim(),
-        fecha: partes[1].trim(),
-        numeros: partes.slice(2, 8).map(n => parseInt(n.trim(), 10))
+        concurso: partes[1].trim(), // Número de concurso está en la columna CONCURSO (índice 1)
+        fecha: partes[10].trim(), // Fecha está en la última columna (índice 10)
+        numeros: partes.slice(2, 8).map(n => parseInt(n.trim(), 10)) // Los números están entre índices 2-7
       };
       
       // Para Melate y Revancha, guardar también el adicional si existe

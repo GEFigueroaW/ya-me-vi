@@ -801,69 +801,123 @@
       try {
         console.log('🎯 Actualizando título con el número del próximo sorteo...');
         
-        // Número por defecto en caso de error
-        let proximoSorteo = 4083; // Sabemos que el próximo sorteo es 4083 (4082 + 1)
+        // Mostrar mensaje de carga
+        const tituloElement = document.getElementById('titulo-sorteo');
+        if (tituloElement) {
+          tituloElement.textContent = `Cargando datos del próximo sorteo...`;
+        }
         
-        // Intentar usar la función especializada si está disponible (ahora retorna una promesa)
-        if (typeof window.obtenerUltimoSorteoMelate === 'function') {
-          console.log('🔍 Usando obtenerUltimoSorteoMelate() para leer directamente del CSV...');
-          
-          // La función ahora retorna una promesa
-          Promise.resolve(window.obtenerUltimoSorteoMelate())
-            .then(ultimoSorteo => {
-              if (ultimoSorteo && !isNaN(ultimoSorteo)) {
-                proximoSorteo = ultimoSorteo + 1;
-                console.log(`✅ Último sorteo obtenido: ${ultimoSorteo}, próximo: ${proximoSorteo}`);
-              } else {
-                console.warn('⚠️ No se pudo obtener un número válido de sorteo');
-              }
-              actualizarTituloConProximoSorteo(proximoSorteo);
-            })
-            .catch(error => {
-              console.error('❌ Error al obtener último sorteo:', error);
-              actualizarTituloConProximoSorteo(proximoSorteo);
-            });
-        } else {
-          // Si la función no está disponible, leer directamente el CSV
-          console.log('🔍 Función obtenerUltimoSorteoMelate no disponible, leyendo CSV directamente...');
-          
-          fetch('assets/Melate.csv')
-            .then(response => {
-              if (!response.ok) {
-                throw new Error(`Error al cargar Melate.csv: ${response.status}`);
-              }
-              return response.text();
-            })
-            .then(csvText => {
-              // Procesar el CSV para encontrar el último número de sorteo
-              const lineas = csvText.split('\n');
-              if (lineas.length > 1) { // Verificar que hay al menos la cabecera y una línea
-                // La segunda línea debería tener el último sorteo (después de la cabecera)
-                const primeraLinea = lineas[1].split(',');
-                if (primeraLinea.length > 1) {
-                  const ultimoSorteo = parseInt(primeraLinea[1]);
-                  if (!isNaN(ultimoSorteo)) {
-                    proximoSorteo = ultimoSorteo + 1;
-                    console.log(`✅ Último sorteo leído de CSV: ${ultimoSorteo}, próximo: ${proximoSorteo}`);
-                  } else {
-                    console.warn('⚠️ No se pudo interpretar el número de sorteo del CSV');
+        // MÉTODO PRINCIPAL: Leer directamente del CSV
+        console.log('🔍 Leyendo directamente del archivo CSV de Melate...');
+        
+        fetch('assets/Melate.csv')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Error al cargar Melate.csv: ${response.status}`);
+            }
+            return response.text();
+          })
+          .then(csvText => {
+            // Dividir por líneas y encontrar la primera línea con datos (después del encabezado)
+            const lineas = csvText.split('\n');
+            console.log(`� CSV leído con ${lineas.length} líneas`);
+            
+            if (lineas.length <= 1) {
+              throw new Error('CSV vacío o sin datos válidos');
+            }
+            
+            // Verificar si la primera línea es un encabezado
+            let indiceInicio = 0;
+            if (lineas[0].includes('NPRODUCTO') || lineas[0].includes('CONCURSO')) {
+              indiceInicio = 1;
+            }
+            
+            // Obtener la primera línea con datos (que contiene el sorteo más reciente)
+            const primeraLineaDatos = lineas[indiceInicio].split(',');
+            console.log(`🔍 Primera línea de datos: ${primeraLineaDatos.join(',')}`);
+            
+            if (primeraLineaDatos.length < 2) {
+              throw new Error('Formato de CSV inválido, no se encontró la columna de concurso');
+            }
+            
+            // El número de concurso está en la segunda columna (índice 1)
+            const ultimoSorteo = parseInt(primeraLineaDatos[1].trim());
+            if (isNaN(ultimoSorteo)) {
+              throw new Error(`No se pudo convertir a número: "${primeraLineaDatos[1]}"`);
+            }
+            
+            // Calcular próximo sorteo (último + 1)
+            const proximoSorteo = ultimoSorteo + 1;
+            console.log(`✅ Último sorteo leído: ${ultimoSorteo}, próximo sorteo: ${proximoSorteo}`);
+            
+            // Actualizar el título con el número obtenido
+            actualizarTituloConProximoSorteo(proximoSorteo);
+          })
+          .catch(error => {
+            console.error('❌ Error al leer directamente del CSV:', error);
+            
+            // MÉTODO ALTERNATIVO: Intentar usar datos históricos ya cargados
+            console.log('� Intentando usar datos históricos ya cargados...');
+            
+            if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+              const sorteos = window.datosHistoricos.melate.sorteos;
+              console.log(`📊 Datos cargados con ${sorteos.length} sorteos`);
+              
+              if (sorteos.length > 0) {
+                let ultimoSorteo = 0;
+                
+                // Buscar el sorteo con el número más alto
+                for (const sorteo of sorteos) {
+                  const numConcurso = parseInt(sorteo.concurso);
+                  if (!isNaN(numConcurso) && numConcurso > ultimoSorteo) {
+                    ultimoSorteo = numConcurso;
                   }
+                }
+                
+                if (ultimoSorteo > 0) {
+                  const proximoSorteo = ultimoSorteo + 1;
+                  console.log(`✅ Último sorteo encontrado en datos históricos: ${ultimoSorteo}, próximo: ${proximoSorteo}`);
+                  actualizarTituloConProximoSorteo(proximoSorteo);
+                  return;
                 }
               }
               
-              // Actualizar el título con el número obtenido
-              actualizarTituloConProximoSorteo(proximoSorteo);
-            })
-            .catch(error => {
-              console.error('❌ Error al procesar el archivo CSV:', error);
-              // En caso de error, usar el número por defecto
-              actualizarTituloConProximoSorteo(proximoSorteo);
-            });
-        }
+              console.warn('⚠️ No se pudo encontrar un número de sorteo válido en los datos históricos');
+            } else {
+              console.warn('⚠️ No hay datos históricos disponibles');
+            }
+            
+            // ÚLTIMO RECURSO: Usar cálculo basado en fecha actual
+            console.log('⚠️ Usando cálculo por fecha como último recurso...');
+            
+            const fecha = new Date();
+            const year = fecha.getFullYear();
+            const month = fecha.getMonth() + 1;
+            const day = fecha.getDate();
+            
+            // Generar un ID único basado en la fecha para debugging
+            const dateId = `${year}${month.toString().padStart(2, '0')}${day.toString().padStart(2, '0')}`;
+            console.log(`📅 Fecha actual: ${day}/${month}/${year} (ID: ${dateId})`);
+            
+            // Mostrar error genérico para que sea más visible el problema
+            console.error(`❌❌❌ ERROR CRÍTICO: No se pudo determinar el próximo número de sorteo`);
+            console.error(`Por favor, revisa el formato y contenido del archivo Melate.csv`);
+            
+            // Mostrar un mensaje genérico que no incluye número específico
+            actualizarTituloConMensajeGenerico();
+          });
       } catch (error) {
-        console.error('❌ Error al actualizar título del sorteo:', error);
-        // Fallback por si hay algún error
-        actualizarTituloConProximoSorteo(4083);
+        console.error('❌ Error general:', error);
+        actualizarTituloConMensajeGenerico();
+      }
+    }
+    
+    // Función para mostrar un mensaje genérico en caso de error
+    function actualizarTituloConMensajeGenerico() {
+      const tituloElement = document.getElementById('titulo-sorteo');
+      if (tituloElement) {
+        tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el próximo sorteo`;
+        console.log(`📝 Título actualizado con mensaje genérico`);
       }
     }
     
