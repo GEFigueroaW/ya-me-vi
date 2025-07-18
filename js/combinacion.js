@@ -397,46 +397,16 @@ function verificarCalidadDatos() {
  * Mostrar indicador de datos reales
  */
 function mostrarIndicadorDatosReales(estadisticas) {
-  const indicador = document.createElement('div');
-  indicador.className = 'fixed top-20 right-4 bg-green-500 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm z-20';
-  indicador.innerHTML = `
-    <div class="flex items-center gap-2">
-      <span class="animate-pulse">🟢</span>
-      <span>Datos Reales</span>
-    </div>
-  `;
-  
-  document.body.appendChild(indicador);
-  
-  // Remover después de 5 segundos
-  setTimeout(() => {
-    if (indicador.parentNode) {
-      indicador.remove();
-    }
-  }, 5000);
+  // Función desactivada - ya no muestra el indicador verde
+  console.log('✅ Datos reales cargados correctamente');
 }
 
 /**
  * Mostrar indicador de datos de prueba
  */
 function mostrarIndicadorDatosPrueba() {
-  const indicador = document.createElement('div');
-  indicador.className = 'fixed top-20 right-4 bg-orange-500 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm z-20';
-  indicador.innerHTML = `
-    <div class="flex items-center gap-2">
-      <span class="animate-pulse">🟠</span>
-      <span>Datos de Prueba</span>
-    </div>
-  `;
-  
-  document.body.appendChild(indicador);
-  
-  // Remover después de 7 segundos
-  setTimeout(() => {
-    if (indicador.parentNode) {
-      indicador.remove();
-    }
-  }, 7000);
+  // Función desactivada - ya no muestra el indicador naranja
+  console.log('🔄 Usando datos de prueba para demostración');
 }
 
 /**

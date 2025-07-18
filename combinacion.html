@@ -104,25 +104,25 @@
     <div class="max-w-6xl mx-auto">
       
       <!-- Sección de evaluación de número individual (Acordeón) -->
-      <div id="seccion-numero-individual" class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl mb-4 border border-white border-opacity-50 shadow-xl overflow-hidden">
-        <h2 id="trigger-numero-individual" class="text-xl md:text-2xl font-bold p-6 text-center text-gray-800 cursor-pointer hover:bg-white hover:bg-opacity-70 transition-colors duration-300 flex justify-between items-center h-full">
+      <div id="seccion-numero-individual" class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl mb-4 border border-white border-opacity-50 shadow-xl overflow-hidden max-w-3xl mx-auto">
+        <h2 id="trigger-numero-individual" class="text-md md:text-lg font-bold p-4 text-center text-gray-800 cursor-pointer hover:bg-white hover:bg-opacity-70 transition-colors duration-300 flex justify-between items-center h-full">
           <span>🔍 Ingresa tu Número de la Suerte</span>
-          <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          <svg class="w-5 h-5 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
         </h2>
-        <div id="content-numero-individual" class="section-content p-6 pt-0 hidden">
+        <div id="content-numero-individual" class="section-content p-4 pt-0 hidden">
           <div class="max-w-md mx-auto">
-            <p class="text-center text-gray-700 mb-4">Ingresa un número entre el 1 y el 56.</p>
-            <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-6">
-              <input type="number" id="numero-individual" class="w-20 sm:w-24 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400" min="1" max="56" placeholder="">
-              <button id="evaluar-numero-btn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
+            <p class="text-center text-gray-700 mb-3">Ingresa un número entre el 1 y el 56.</p>
+            <div class="flex flex-col sm:flex-row gap-3 items-center justify-center mb-4">
+              <input type="number" id="numero-individual" class="w-20 sm:w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400" min="1" max="56" placeholder="">
+              <button id="evaluar-numero-btn" class="px-5 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
                 Evaluar
               </button>
             </div>
           </div>
           
           <!-- Botón para mostrar explicación (siempre visible y más sutil) -->
-          <div class="mt-4 text-center">
-            <button id="mostrar-explicacion-btn" class="bg-white bg-opacity-50 hover:bg-opacity-60 rounded-lg px-4 py-2 text-sm text-gray-800 transition-all duration-300 border border-white border-opacity-50 shadow-lg">
+          <div class="mt-3 text-center">
+            <button id="mostrar-explicacion-btn" class="bg-white bg-opacity-50 hover:bg-opacity-60 rounded-lg px-3 py-1 text-xs text-gray-800 transition-all duration-300 border border-white border-opacity-50 shadow-lg">
               <span id="explicacion-text">💡 ¿Cómo interpretar resultados?</span>
               <span id="explicacion-icon">👁️</span>
             </button>
@@ -171,32 +171,32 @@
       </div>
 
       <!-- Sección de evaluación de combinación (Acordeón) -->
-      <div id="seccion-combinacion" class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl mb-8 border border-white border-opacity-50 shadow-xl overflow-hidden">
-        <h2 id="trigger-combinacion" class="text-xl md:text-2xl font-bold p-6 text-center text-gray-800 cursor-pointer hover:bg-white hover:bg-opacity-70 transition-colors duration-300 flex justify-between items-center h-full">
+      <div id="seccion-combinacion" class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl mb-8 border border-white border-opacity-50 shadow-xl overflow-hidden max-w-3xl mx-auto">
+        <h2 id="trigger-combinacion" class="text-md md:text-lg font-bold p-4 text-center text-gray-800 cursor-pointer hover:bg-white hover:bg-opacity-70 transition-colors duration-300 flex justify-between items-center h-full">
           <span>🔍 Ingresa tu Combinación de la Suerte</span>
-          <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          <svg class="w-5 h-5 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
         </h2>
-        <div id="content-combinacion" class="section-content p-6 pt-0 hidden">
+        <div id="content-combinacion" class="section-content p-4 pt-0 hidden">
           <div class="max-w-2xl mx-auto">
-            <p class="text-center text-gray-700 mb-6">Ingresa tu combinación de 6 números (1-56)</p>
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
-              <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+            <p class="text-center text-gray-700 mb-3">Ingresa tu combinación de 6 números (1-56)</p>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
             </div>
             <div class="text-center">
-              <button id="evaluar-combinacion-btn" class="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
+              <button id="evaluar-combinacion-btn" class="px-5 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
                 🎯 Evaluar Combinación
               </button>
             </div>
           </div>
           
           <!-- Botón para mostrar explicación (siempre visible y más sutil) -->
-          <div class="mt-4 text-center">
-            <button id="mostrar-explicacion-btn-combo" class="bg-white bg-opacity-50 hover:bg-opacity-60 rounded-lg px-4 py-2 text-sm text-gray-800 transition-all duration-300 border border-white border-opacity-50 shadow-lg">
+          <div class="mt-3 text-center">
+            <button id="mostrar-explicacion-btn-combo" class="bg-white bg-opacity-50 hover:bg-opacity-60 rounded-lg px-3 py-1 text-xs text-gray-800 transition-all duration-300 border border-white border-opacity-50 shadow-lg">
               <span id="explicacion-combo-text">💡 ¿Cómo interpretar resultados?</span>
               <span id="explicacion-combo-icon">👁️</span>
             </button>

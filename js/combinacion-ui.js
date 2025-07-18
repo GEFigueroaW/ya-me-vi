@@ -206,13 +206,34 @@ export class UIManager {
     // Verificar si el contenido clickeado está actualmente visible
     const isCurrentlyOpen = !contentToShow.classList.contains('hidden');
     
-    // Cerrar todas las secciones
+    // Cerrar todas las secciones y limpiar inputs
     this.triggers.forEach(trigger => {
       const otherContentId = trigger.id.replace('trigger-', 'content-');
       const otherContent = document.getElementById(otherContentId);
       const otherIcon = trigger.querySelector('svg');
       
       if (otherContent) {
+        // Si esta sección se está cerrando, limpiar sus inputs
+        if (otherContentId === contentId && isCurrentlyOpen) {
+          // Limpiar input de número individual
+          if (otherContentId === 'content-numero-individual' && this.inputNumero) {
+            this.inputNumero.value = '';
+          }
+          
+          // Limpiar inputs de combinación
+          if (otherContentId === 'content-combinacion') {
+            const inputsCombinacion = document.querySelectorAll('.combo-input');
+            inputsCombinacion.forEach(input => {
+              input.value = '';
+              input.classList.remove('border-red-500', 'bg-red-100', 'border-green-500', 'bg-green-50');
+              input.classList.add('border-gray-300');
+            });
+            
+            // Limpiar mensajes de error
+            this.limpiarMensajesError();
+          }
+        }
+        
         otherContent.classList.add('hidden');
         if (otherIcon) {
           otherIcon.classList.remove('rotate-180');
@@ -229,6 +250,13 @@ export class UIManager {
       console.log('✅ Sección abierta:', contentId);
     } else {
       console.log('✅ Sección cerrada:', contentId);
+      
+      // Limpiar resultados al cerrar
+      if (contentId === 'content-numero-individual') {
+        this.resultadoNumero.innerHTML = '';
+      } else if (contentId === 'content-combinacion') {
+        this.resultadoCombinacion.innerHTML = '';
+      }
     }
   }
 
