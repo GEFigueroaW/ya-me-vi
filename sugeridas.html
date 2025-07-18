@@ -213,7 +213,10 @@
       }
       
       if (contenido.classList.contains('hidden')) {
-        // Expandir
+        // Cerrar la caja de aleatorias si está abierta
+        cerrarCajaAleatorias();
+        
+        // Expandir esta caja
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
         container.style.opacity = '1';
@@ -259,13 +262,55 @@
       }
       
       if (contenido.classList.contains('hidden')) {
-        // Expandir
+        // Cerrar la caja de predicciones IA si está abierta
+        cerrarCajaPredicciones();
+        
+        // Expandir esta caja
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
       } else {
-        // Colapsar
+        // Colapsar y limpiar resultados
         contenido.classList.add('hidden');
         arrow.style.transform = 'rotate(0deg)';
+        
+        // Limpiar las combinaciones generadas cuando se cierra
+        limpiarCombinacionesAleatorias();
+      }
+    }
+
+    // Función auxiliar para cerrar la caja de aleatorias
+    function cerrarCajaAleatorias() {
+      const contenido = document.getElementById('contenido-aleatorias');
+      const arrow = document.getElementById('arrow-icon-aleatorias');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.classList.add('hidden');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        
+        // Limpiar las combinaciones generadas cuando se cierra
+        limpiarCombinacionesAleatorias();
+      }
+    }
+
+    // Función auxiliar para cerrar la caja de predicciones
+    function cerrarCajaPredicciones() {
+      const contenido = document.getElementById('contenido-predicciones');
+      const arrow = document.getElementById('arrow-icon');
+      const container = document.getElementById('prediccion-container');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.classList.add('hidden');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        if (container) container.style.opacity = '0.5';
+      }
+    }
+
+    // Función para limpiar las combinaciones aleatorias generadas
+    function limpiarCombinacionesAleatorias() {
+      const container = document.getElementById('combinaciones-container');
+      if (container) {
+        container.innerHTML = '';
+        console.log('🧹 Combinaciones aleatorias limpiadas');
       }
     }
 
@@ -289,14 +334,6 @@
     // Botón para generar combinaciones aleatorias
     document.getElementById('btn-generar').addEventListener('click', async () => {
       console.log(`🎲 Generando ${cantidadSeleccionada} combinaciones aleatorias...`);
-      
-      // Asegurar que la caja esté abierta cuando se generan combinaciones
-      const contenido = document.getElementById('contenido-aleatorias');
-      const arrow = document.getElementById('arrow-icon-aleatorias');
-      if (contenido && contenido.classList.contains('hidden')) {
-        contenido.classList.remove('hidden');
-        if (arrow) arrow.style.transform = 'rotate(180deg)';
-      }
       
       const container = document.getElementById('combinaciones-container');
       container.innerHTML = `
@@ -359,6 +396,31 @@
       document.getElementById('btn-generar-nuevas').addEventListener('click', () => {
         generarYMostrarCombinaciones();
       });
+    }
+
+    // Función principal para generar y mostrar combinaciones
+    function generarYMostrarCombinaciones() {
+      console.log(`🎲 Generando ${cantidadSeleccionada} combinaciones aleatorias...`);
+      
+      const container = document.getElementById('combinaciones-container');
+      container.innerHTML = `
+        <div class="text-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p class="text-white">Generando combinaciones...</p>
+        </div>
+      `;
+      
+      try {
+        const combinaciones = generarCombinacionesAleatorias(cantidadSeleccionada);
+        mostrarCombinaciones(combinaciones);
+      } catch (error) {
+        console.error('❌ Error generando combinaciones:', error);
+        container.innerHTML = `
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong>Error:</strong> No se pudieron generar las combinaciones. ${error.message}
+          </div>
+        `;
+      }
     }
 
     // Función para generar un conjunto de números aleatorios como fallback
