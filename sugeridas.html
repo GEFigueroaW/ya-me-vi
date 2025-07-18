@@ -253,13 +253,13 @@
       container.innerHTML = html;
     }
 
-    // Función para generar predicciones por sorteo
+    // Función para generar predicciones por sorteo con análisis avanzado de IA
     async function generarPrediccionesPorSorteo() {
-      console.log('🤖 Generando predicciones por IA...');
+      console.log('🤖 Generando predicciones avanzadas con IA...');
       
       const mensajeEstado = document.getElementById('mensaje-estado');
       if (mensajeEstado) {
-        mensajeEstado.textContent = 'Generando predicciones personalizadas...';
+        mensajeEstado.textContent = 'Generando predicciones con 5 métodos de análisis...';
       }
       
       try {
@@ -268,9 +268,9 @@
           datosHistoricos = await cargarDatosHistoricos('todos');
         }
         
-        // Generar predicciones para cada sorteo
+        // Generar predicciones para cada sorteo usando un ID único por usuario
         const sorteos = ['melate', 'revancha', 'revanchita'];
-        const userId = 'usuario123'; // ID de usuario fijo para demostración
+        const userId = firebase.auth().currentUser?.uid || 'usuario123';
         
         for (const sorteo of sorteos) {
           try {
@@ -284,28 +284,36 @@
               continue;
             }
             
-            // Crear objeto de datos específico para este sorteo
+            // Crear objeto de datos específico para este sorteo con metadatos adicionales
             const datosSorteo = {
               numeros: datosHistoricos[sorteo].numeros,
               datos: datosHistoricos[sorteo].sorteos,
-              sorteo: sorteo
+              sorteo: sorteo, // Identificador clave para diferenciar cada juego
+              ultimoSorteo: datosHistoricos[sorteo].ultimoSorteo,
+              fechaGeneracion: new Date().toISOString()
             };
             
             // Log para depuración
-            console.log(`🔍 Preparando predicción para ${sorteo}:`, {
+            console.log(`🔍 Preparando predicción con IA para ${sorteo}:`, {
               tipoSorteo: sorteo,
               cantidadNumeros: datosHistoricos[sorteo].numeros.length,
               cantidadSorteos: datosHistoricos[sorteo].sorteos.length,
               ultimoSorteo: datosHistoricos[sorteo].ultimoSorteo
             });
             
-            // Llamar a generarPrediccionPersonalizada con los parámetros en el orden correcto
+            // Mostrar spinner mientras se procesa
+            const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+            if (elementoCombo) {
+              elementoCombo.innerHTML = '<span class="animate-pulse">Analizando datos...</span>';
+            }
+            
+            // Generar predicción personalizada usando los 5 métodos de análisis
             // La función espera (userId, datos)
             const prediccion = await generarPrediccionPersonalizada(userId, datosSorteo);
             
-            const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
             if (elementoCombo && prediccion && prediccion.length === 6) {
               elementoCombo.textContent = prediccion.join(' - ');
+              console.log(`✅ Predicción IA para ${sorteo} generada:`, prediccion);
             }
           } catch (error) {
             console.error(`❌ Error generando predicción para ${sorteo}:`, error);
@@ -317,11 +325,11 @@
         }
         
         if (mensajeEstado) {
-          mensajeEstado.textContent = 'Predicciones generadas exitosamente';
+          mensajeEstado.textContent = 'Predicciones generadas con análisis completo de 5 métodos';
         }
         
       } catch (error) {
-        console.error('❌ Error generando predicciones:', error);
+        console.error('❌ Error en el sistema de predicción:', error);
         if (mensajeEstado) {
           mensajeEstado.textContent = 'Error al generar predicciones';
         }
@@ -362,72 +370,6 @@
         }
       }
     });
-
-    // Función para generar predicciones IA por sorteo
-    async function generarPrediccionesPorSorteo() {
-      if (!usuarioID || !datosHistoricos) {
-        console.error('❌ Faltan datos para generar predicciones IA');
-        document.getElementById('mensaje-estado').textContent = 'Error: No se pueden generar predicciones';
-        return;
-      }
-
-      const mensajeEstado = document.getElementById('mensaje-estado');
-      mensajeEstado.textContent = 'Generando predicciones personalizadas...';
-
-      const sorteos = ['melate', 'revancha', 'revanchita'];
-      let prediccionesCompletadas = 0;
-      
-      for (const sorteo of sorteos) {
-        try {
-          // Asegurarnos de que usamos los datos específicos de cada sorteo
-          const datosSorteo = datosHistoricos.datosPorSorteo && datosHistoricos.datosPorSorteo[sorteo];
-          
-          if (!datosSorteo || !datosSorteo.numeros || datosSorteo.numeros.length === 0) {
-            console.warn(`⚠️ No hay datos suficientes para ${sorteo}, usando fallback`);
-            const elementoId = `combinacion-${sorteo}`;
-            const elemento = document.getElementById(elementoId);
-            if (elemento) {
-              elemento.textContent = 'Datos insuficientes';
-            }
-            continue;
-          }
-          
-          console.log(`🎯 Generando predicción IA para ${sorteo} con ${datosSorteo.numeros.length} números históricos...`);
-          
-          // Crear objeto con los datos específicos y etiquetado correctamente
-          const datosSorteoEspecificos = {
-            numeros: datosSorteo.numeros,
-            datos: datosSorteo.datos || [],
-            sorteo: sorteo // Identificar claramente qué sorteo es
-          };
-          
-          // Pasamos el ID de usuario y los datos específicos del sorteo
-          const prediccion = await generarPrediccionPersonalizada(usuarioID, datosSorteoEspecificos);
-          const elementoId = `combinacion-${sorteo}`;
-          const elemento = document.getElementById(elementoId);
-          
-          if (elemento) {
-            elemento.textContent = prediccion.join(' - ');
-            console.log(`✅ Predicción IA para ${sorteo}:`, prediccion);
-            prediccionesCompletadas++;
-          }
-        } catch (error) {
-          console.error(`❌ Error generando predicción IA para ${sorteo}:`, error);
-          const elementoId = `combinacion-${sorteo}`;
-          const elemento = document.getElementById(elementoId);
-          if (elemento) {
-            elemento.textContent = 'Error al generar';
-          }
-        }
-      }
-      
-      // Actualizar mensaje de estado
-      if (prediccionesCompletadas === sorteos.length) {
-        mensajeEstado.textContent = '✅ Predicciones generadas exitosamente';
-      } else {
-        mensajeEstado.textContent = `⚠️ ${prediccionesCompletadas}/${sorteos.length} predicciones generadas`;
-      }
-    }
 
     // Función para generar un número aleatorio entre min y max (inclusive)
     function numeroAleatorio(min, max) {

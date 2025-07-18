@@ -100,39 +100,113 @@ function determinarTipoSorteo(datos) {
   return 'melate';
 }
 
-// Generar pool de 1000 combinaciones inteligentes con los 5 métodos
+// Generar pool de 1000 combinaciones inteligentes con análisis multimétodo avanzado
 function generarPoolCombinaciones(datos) {
-  console.log('🏭 Generando pool de 1000 combinaciones con 5 métodos de análisis...');
+  // Identificar tipo de sorteo para log específico
+  const tipoSorteo = datos.sorteo || 'desconocido';
+  console.log(`🏭 [${tipoSorteo}] Generando pool de 1000 combinaciones con análisis avanzado...`);
   
   const pool = [];
   const todosLosNumeros = datos.numeros || [];
   
-  // Análisis completo una sola vez - LOS 5 MÉTODOS
-  const frecuencia = calcularFrecuencia(todosLosNumeros);                    // 1. Estadística
-  const probabilidad = calcularProbabilidades(todosLosNumeros);              // 2. Probabilidad
-  const patrones = analizarPatrones(datos.datos || []);                      // 3. Patrones
-  const deltaAnalisis = analizarNumerosDelta(datos.datos || []);             // 4. Números Delta
-  const desviacionAnalisis = analizarDesviacionEstandar(datos.datos || []);  // 5. Desviación Estándar
+  // Análisis completo usando los 5 MÉTODOS CIENTÍFICOS DE PREDICCIÓN
+  console.log(`📊 [${tipoSorteo}] Iniciando análisis multimétodo de 5 capas:`);
   
-  console.log('📊 Análisis completo: Frecuencia, Probabilidad, Patrones, Delta, Desviación');
+  // 1. Análisis de frecuencias históricas
+  const frecuencia = calcularFrecuencia(todosLosNumeros);
+  console.log(`✅ [${tipoSorteo}] Método 1: Análisis estadístico de frecuencias completado`);
   
-  // Generar 1000 combinaciones variadas usando los 5 métodos
+  // 2. Cálculo de probabilidades matemáticas
+  const probabilidad = calcularProbabilidades(todosLosNumeros);
+  console.log(`✅ [${tipoSorteo}] Método 2: Cálculo de probabilidades completado`);
+  
+  // 3. Reconocimiento de patrones secuenciales
+  const patrones = analizarPatrones(datos.datos || []);
+  console.log(`✅ [${tipoSorteo}] Método 3: Reconocimiento de patrones completado`);
+  
+  // 4. Análisis de números delta (diferencias entre números ganadores)
+  const deltaAnalisis = analizarNumerosDelta(datos.datos || []);
+  console.log(`✅ [${tipoSorteo}] Método 4: Análisis de números delta completado`);
+  
+  // 5. Estudio de desviación estándar y dispersión
+  const desviacionAnalisis = analizarDesviacionEstandar(datos.datos || []);
+  console.log(`✅ [${tipoSorteo}] Método 5: Análisis de desviación estándar completado`);
+  
+  // 6. NUEVO MÉTODO: Análisis de tendencias temporales recientes (último trimestre)
+  const tendenciasRecientes = analizarTendenciasRecientes(datos.datos || []);
+  console.log(`✅ [${tipoSorteo}] Método 6: Análisis de tendencias temporales recientes completado`);
+  
+  console.log(`📊 [${tipoSorteo}] Análisis multimétodo completo (6 métodos)`);
+  
+  // Generar 1000 combinaciones variadas usando todos los métodos
   for (let i = 0; i < 1000; i++) {
     const semilla = i * 7919; // Número primo para mejor distribución
-    const combinacion = generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAnalisis, desviacionAnalisis, semilla);
+    const combinacion = generarCombinacionAvanzada(
+      frecuencia, 
+      probabilidad, 
+      patrones, 
+      deltaAnalisis, 
+      desviacionAnalisis,
+      tendenciasRecientes,
+      semilla,
+      tipoSorteo
+    );
     pool.push(combinacion);
   }
   
-  console.log('✅ Pool de 1000 combinaciones generado con análisis completo');
+  console.log(`✅ [${tipoSorteo}] Pool de 1000 combinaciones generado con análisis de 6 métodos`);
   return pool;
 }
 
-// Generar combinación avanzada con los 5 métodos
-function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAnalisis, desviacionAnalisis, semilla) {
+// NUEVO MÉTODO: Análisis de tendencias temporales recientes
+function analizarTendenciasRecientes(datosSorteos) {
+  // Obtener solo los sorteos del último trimestre (aprox. 12 sorteos)
+  const sorteosTrimestre = datosSorteos.slice(0, 12);
+  
+  // Inicializar mapa de tendencias
+  const tendencias = Array(56).fill(0);
+  
+  // Analizar tendencias recientes con mayor peso en los sorteos más recientes
+  sorteosTrimestre.forEach((sorteo, idx) => {
+    // Peso decreciente: los sorteos más recientes tienen más influencia
+    const peso = 1 - (idx / sorteosTrimestre.length);
+    
+    sorteo.numeros?.forEach(numero => {
+      if (numero >= 1 && numero <= 56) {
+        tendencias[numero - 1] += peso;
+      }
+    });
+  });
+  
+  // Normalizar tendencias a valores entre 0 y 1
+  const maxTendencia = Math.max(...tendencias);
+  if (maxTendencia > 0) {
+    for (let i = 0; i < tendencias.length; i++) {
+      tendencias[i] = tendencias[i] / maxTendencia;
+    }
+  }
+  
+  return tendencias;
+}
+
+// Generar combinación avanzada con análisis multimétodo
+function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAnalisis, desviacionAnalisis, tendenciasRecientes, semilla, tipoSorteo) {
   const rng = crearGeneradorAleatorio(semilla);
   
-  // Distribuir estrategias uniformemente
-  const estrategia = semilla % 5;
+  // Distribuir estrategias con más opciones
+  const estrategia = semilla % 6; // Ahora 6 estrategias diferentes
+  
+  // Log de la estrategia seleccionada
+  const estrategiaTexto = [
+    "Análisis de frecuencias históricas", 
+    "Cálculo de probabilidades", 
+    "Reconocimiento de patrones", 
+    "Análisis de números delta", 
+    "Estudio de desviación estándar",
+    "Análisis de tendencias recientes"
+  ][estrategia];
+  
+  console.log(`🔮 [${tipoSorteo}] Generando combinación con método: ${estrategiaTexto}`);
   
   switch (estrategia) {
     case 0: // Basado en estadística/frecuencia
@@ -145,8 +219,10 @@ function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAna
       return seleccionarPorDelta(deltaAnalisis, rng);
     case 4: // Basado en desviación estándar
       return seleccionarPorDesviacion(desviacionAnalisis, rng);
+    case 5: // NUEVO: Basado en tendencias recientes
+      return seleccionarPorTendencias(tendenciasRecientes, rng);
     default:
-      return seleccionarEstrategiaMixta(frecuencia, patrones, rng);
+      return seleccionarEstrategiaMixta(frecuencia, patrones, tendenciasRecientes, rng);
   }
 }
 
@@ -278,17 +354,58 @@ function seleccionarPorDelta(deltaAnalisis, rng) {
   return numeros.sort((a, b) => a - b);
 }
 
-// Estrategia mixta
-function seleccionarEstrategiaMixta(frecuencia, patrones, rng) {
+// Seleccionar por tendencias recientes
+function seleccionarPorTendencias(tendencias, rng) {
   const numeros = [];
   const usado = new Set();
   
-  // 3 números de alta frecuencia
+  // Convertir en formato compatible
+  const tendenciasFormateadas = tendencias.map((valor, idx) => ({
+    numero: idx + 1,
+    score: valor
+  }));
+  
+  while (numeros.length < 6 && tendenciasFormateadas.length > 0) {
+    // Selección ponderada basada en las tendencias
+    const suma = tendenciasFormateadas.reduce((total, item) => total + item.score, 0);
+    let seleccion = rng() * suma;
+    
+    for (let i = 0; i < tendenciasFormateadas.length; i++) {
+      seleccion -= tendenciasFormateadas[i].score;
+      if (seleccion <= 0) {
+        const numero = tendenciasFormateadas[i].numero;
+        if (!usado.has(numero)) {
+          numeros.push(numero);
+          usado.add(numero);
+        }
+        break;
+      }
+    }
+  }
+  
+  // Si no pudimos seleccionar 6 números, completar aleatoriamente
+  while (numeros.length < 6) {
+    const numero = Math.floor(rng() * 56) + 1;
+    if (!usado.has(numero)) {
+      numeros.push(numero);
+      usado.add(numero);
+    }
+  }
+  
+  return numeros.sort((a, b) => a - b);
+}
+
+// Estrategia mixta avanzada
+function seleccionarEstrategiaMixta(frecuencia, patrones, tendencias, rng) {
+  const numeros = [];
+  const usado = new Set();
+  
+  // 2 números de alta frecuencia histórica
   const frecuenciaOrdenada = frecuencia
     .map((item, index) => ({ numero: index + 1, score: item.score }))
     .sort((a, b) => b.score - a.score);
   
-  for (let i = 0; i < Math.min(3, frecuenciaOrdenada.length); i++) {
+  for (let i = 0; i < Math.min(2, frecuenciaOrdenada.length); i++) {
     const numero = frecuenciaOrdenada[i].numero;
     if (!usado.has(numero)) {
       numeros.push(numero);
@@ -296,9 +413,63 @@ function seleccionarEstrategiaMixta(frecuencia, patrones, rng) {
     }
   }
   
-  // 3 números aleatorios
+  // 2 números basados en patrones
+  const patronesFormateados = patrones.map((valor, idx) => ({
+    numero: idx + 1,
+    score: valor
+  }));
+  
+  let intentos = 0;
+  while (numeros.length < 4 && intentos < 50) {
+    intentos++;
+    // Selección ponderada basada en patrones
+    const suma = patronesFormateados.reduce((total, item) => total + item.score, 0);
+    if (suma === 0) break;
+    
+    let seleccion = rng() * suma;
+    for (let i = 0; i < patronesFormateados.length; i++) {
+      seleccion -= patronesFormateados[i].score;
+      if (seleccion <= 0) {
+        const numero = patronesFormateados[i].numero;
+        if (!usado.has(numero)) {
+          numeros.push(numero);
+          usado.add(numero);
+        }
+        break;
+      }
+    }
+  }
+  
+  // 2 números basados en tendencias recientes
+  const tendenciasFormateadas = tendencias.map((valor, idx) => ({
+    numero: idx + 1,
+    score: valor
+  }));
+  
+  intentos = 0;
+  while (numeros.length < 6 && intentos < 50) {
+    intentos++;
+    // Selección ponderada basada en tendencias
+    const suma = tendenciasFormateadas.reduce((total, item) => total + item.score, 0);
+    if (suma === 0) break;
+    
+    let seleccion = rng() * suma;
+    for (let i = 0; i < tendenciasFormateadas.length; i++) {
+      seleccion -= tendenciasFormateadas[i].score;
+      if (seleccion <= 0) {
+        const numero = tendenciasFormateadas[i].numero;
+        if (!usado.has(numero)) {
+          numeros.push(numero);
+          usado.add(numero);
+        }
+        break;
+      }
+    }
+  }
+  
+  // Si todavía no tenemos 6 números, completar aleatoriamente
   while (numeros.length < 6) {
-    const numero = (rng() % 56) + 1;
+    const numero = Math.floor(rng() * 56) + 1;
     if (!usado.has(numero)) {
       numeros.push(numero);
       usado.add(numero);
