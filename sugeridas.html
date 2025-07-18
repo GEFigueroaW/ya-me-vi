@@ -447,6 +447,21 @@
         
         // Generar predicciones si no se han generado
         try {
+          // Verificamos si tenemos la función de predicción por frecuencia disponible
+          if (window.generarPrediccionPorFrecuencia) {
+            console.log('✅ Función generarPrediccionPorFrecuencia disponible desde módulo global');
+            
+            // Si tenemos datos históricos, podemos usarla para las predicciones
+            if (window.datosHistoricos && window.currentUserId) {
+              // Generar predicción por frecuencia
+              const prediccion = window.generarPrediccionPorFrecuencia(window.currentUserId, window.datosHistoricos);
+              console.log('🔮 Predicción por frecuencia generada:', prediccion);
+              
+              // Almacenar la predicción para uso posterior
+              window.prediccionIA = prediccion;
+            }
+          }
+          
           // Verificamos directamente si la función está disponible
           console.log('� Verificando disponibilidad de funciones:', {
             generarPrediccionesPorSorteo: typeof generarPrediccionesPorSorteo !== 'undefined',
@@ -511,12 +526,32 @@
         console.log('✅ Caja análisis abierta');
         
         // Generar proyecciones automáticamente con mejor manejo de errores
-        console.log('🔍 Verificando función generarProyeccionesAnalisis:', {
-          disponible: typeof generarProyeccionesAnalisis !== 'undefined',
-          windowFn: typeof window.generarProyeccionesAnalisis !== 'undefined'
+        console.log('🔍 Verificando funciones de análisis:', {
+          suma: typeof window.analizarSumaNumeros === 'function',
+          pares: typeof window.analizarParesImpares === 'function',
+          decada: typeof window.analizarDecadaPorPosicion === 'function'
         });
         
         try {
+          // Primero verificamos si tenemos las funciones de análisis disponibles
+          if (window.analizarSumaNumeros && window.analizarParesImpares && window.analizarDecadaPorPosicion) {
+            console.log('✅ Usando funciones de análisis del módulo global');
+            
+            // Si tenemos datos históricos, realizamos los análisis
+            if (window.datosHistoricos) {
+              // Realizar los análisis usando las funciones del módulo
+              const sumAnalisis = window.analizarSumaNumeros(window.datosHistoricos);
+              const paresAnalisis = window.analizarParesImpares(window.datosHistoricos);
+              const decadaAnalisis = window.analizarDecadaPorPosicion(window.datosHistoricos);
+              
+              // Agregar los análisis a los datos
+              window.datosHistoricos.sumAnalisis = sumAnalisis;
+              window.datosHistoricos.paresAnalisis = paresAnalisis;
+              window.datosHistoricos.decadaAnalisis = decadaAnalisis;
+            }
+          }
+          
+          // Continuamos con la generación de proyecciones
           const fnProyecciones = window.generarProyeccionesAnalisis || generarProyeccionesAnalisis;
           
           if (fnProyecciones) {
@@ -1621,6 +1656,34 @@
             console.error('❌ Error precargando datos históricos:', error);
           });
       }
+    });
+  </script>
+
+  <!-- Scripts de módulos ES6 -->
+  <script type="module" src="js/dataParser.js"></script>
+  <script type="module" src="js/dataParserGlobal.js"></script>
+  
+  <!-- Script para arreglar las funciones de análisis -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔍 Verificando funciones de análisis...');
+      
+      // Esperar a que el módulo dataParserGlobal.js exponga las funciones
+      setTimeout(() => {
+        const funcionesAnalisis = [
+          'analizarSumaNumeros',
+          'analizarParesImpares',
+          'analizarDecadaPorPosicion'
+        ];
+        
+        funcionesAnalisis.forEach(fn => {
+          if (typeof window[fn] === 'function') {
+            console.log(`✅ Función ${fn} disponible globalmente`);
+          } else {
+            console.error(`❌ Función ${fn} NO disponible globalmente`);
+          }
+        });
+      }, 1000); // Esperar 1 segundo para asegurarse de que los módulos se hayan cargado
     });
   </script>
 </body>

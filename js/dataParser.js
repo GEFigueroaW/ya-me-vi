@@ -1085,7 +1085,7 @@ export function analizarDecadaTerminacion(datos) {
 }
 
 // === NUEVO ANÁLISIS DE DÉCADA POR POSICIÓN ===
-function analizarDecadaPorPosicion(datos) {
+export function analizarDecadaPorPosicion(datos) {
   // Devuelve un objeto con decadasPorPosicion para cada sorteo
   const decadas = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-56'];
   const posiciones = [0,1,2,3,4,5];
