@@ -1230,9 +1230,27 @@ window.obtenerUltimoSorteoMelate = function() {
     }
   }
   
-  // Si no encontramos un último sorteo, usar un fallback
-  console.warn('⚠️ Usando fallback para último sorteo');
-  return 4056; // Número base como fallback
+  // Si no encontramos un último sorteo, usar un fallback dinámico
+  console.warn('⚠️ Usando fallback dinámico para último sorteo');
+  
+  // Calcular un fallback basado en la fecha actual
+  // Base: Sorteo 4057 en julio de 2025
+  const fechaActual = new Date();
+  const fechaReferencia = new Date(2025, 6, 18); // 18 de julio de 2025
+  const sorteoReferencia = 4056; // Último sorteo conocido en la fecha de referencia
+  
+  // Calcular diferencia en días
+  const diferenciaMilisegundos = fechaActual - fechaReferencia;
+  const diferenciaDias = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
+  
+  // Estimar sorteos adicionales (2 por semana = 1 cada 3.5 días en promedio)
+  const sorteosAdicionales = Math.floor(diferenciaDias / 3.5);
+  
+  // Calcular el número de sorteo estimado
+  const ultimoSorteoEstimado = sorteoReferencia + Math.max(0, sorteosAdicionales);
+  console.log(`📊 Fallback dinámico: último sorteo estimado ${ultimoSorteoEstimado} (${sorteosAdicionales} sorteos desde la referencia)`);
+  
+  return ultimoSorteoEstimado;
 };
 
 // Confirmar que las funciones están disponibles
