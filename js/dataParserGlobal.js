@@ -474,7 +474,8 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
     try {
         // Verificar y preparar datos
         if (!datos || !datos.sorteos || datos.sorteos.length === 0) {
-            console.warn('⚠️ No hay datos históricos, generando datos de análisis');
+            console.error('❌ No hay datos históricos disponibles');
+            throw new Error('Se requieren datos históricos para un análisis preciso');
             datos = {
                 sorteos: Array(10).fill(null).map(() => ({
                     numeros: generarNumerosUnicos(6),
@@ -533,7 +534,13 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
         const decadaAnalisis = window.analizarDecadaPorPosicion({ [nombreSorteo]: datos });
         const decadasFrecuentes = decadaAnalisis[nombreSorteo].decadasPorPosicion.map(p => p.decadaMasFrecuente);
         console.log(`✓ Décadas más frecuentes por posición: ${decadasFrecuentes.join(', ')}`);
-        const numerosPorFrecuencia = Array.from(frecuencias.entries())
+
+        // Aplicar pesos de análisis
+        const numerosFrecuencia = analisisFrecuencias.top.slice(0, Math.ceil(6 * PESOS_ANALISIS.frecuencias));
+        const numerosSuma = generarNumerosPorRango(rangoSuma, Math.ceil(6 * PESOS_ANALISIS.suma));
+        const numerosParidad = generarNumerosPorParidad(distribucionParidad, Math.ceil(6 * PESOS_ANALISIS.paridad));
+        const numerosDecada = generarNumerosPorDecadas(decadasFrecuentes, Math.ceil(6 * PESOS_ANALISIS.decadas));
+        const numerosAleatorios = generarNumerosUnicos(Math.ceil(6 * PESOS_ANALISIS.aleatorio));
             .sort(([,a], [,b]) => b - a)
             .slice(0, 10)
             .map(([num]) => parseInt(num));
