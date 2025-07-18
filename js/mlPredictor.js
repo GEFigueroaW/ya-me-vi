@@ -5,14 +5,19 @@ function hashCode(str) {
 
 // === Generar predicción personalizada con IA avanzada ===
 export async function generarPrediccionPersonalizada(userId, datos) {
-  console.log('🤖 Generando predicción personalizada con IA avanzada para usuario:', userId);
+  // Obtener el tipo de sorteo de los datos
+  const tipoSorteo = datos.sorteo || 'desconocido';
+  
+  console.log(`🤖 Generando predicción personalizada con IA avanzada para ${tipoSorteo} - usuario: ${userId}`);
   
   const numeros = datos.numeros || [];
   
   if (numeros.length === 0) {
-    console.warn('⚠️ No hay números históricos, usando predicción por defecto');
+    console.warn(`⚠️ No hay números históricos para ${tipoSorteo}, usando predicción por defecto`);
     return [3, 7, 15, 23, 31, 42];
   }
+  
+  console.log(`📊 Datos para ${tipoSorteo}: ${numeros.length} números, ${(datos.datos || []).length} sorteos`);
 
   // Usar el nuevo sistema de 1000 combinaciones aleatorias
   return generarCombinacionPersonalizada(userId, datos);
@@ -20,43 +25,58 @@ export async function generarPrediccionPersonalizada(userId, datos) {
 
 // Sistema de 1000 combinaciones aleatorias consistentes
 function generarCombinacionPersonalizada(userId, datos) {
-  console.log('🎯 Generando combinación personalizada del pool de 1000 para usuario:', userId);
+  // Determinar qué sorteo es basado en el contexto de los datos
+  const tipoSorteo = determinarTipoSorteo(datos);
+  
+  console.log(`🎯 Generando combinación personalizada del pool para ${tipoSorteo} - usuario: ${userId}`);
   
   // Generar hash único basado en los datos para garantizar consistencia
   const hashDatos = generarHashDatos(datos);
+  console.log(`🔢 Hash de datos para ${tipoSorteo}: ${hashDatos}`);
   
   // Generar el pool de 1000 combinaciones basadas en datos históricos
   const poolCombinaciones = generarPoolCombinaciones(datos);
-  
-  // Determinar qué sorteo es basado en el contexto de los datos
-  const tipoSorteo = determinarTipoSorteo(datos);
   
   // Seleccionar una combinación específica para este usuario y sorteo
   // La combinación será la misma mientras no cambien los datos históricos
   const hashUsuario = hashCode(userId);
   const hashSorteo = hashCode(tipoSorteo);
   const hashCompleto = hashUsuario + hashSorteo + hashDatos;
+  
+  console.log(`🔑 Componentes del hash para ${tipoSorteo}:`, {
+    hashUsuario,
+    hashSorteo,
+    hashDatos,
+    hashCompleto
+  });
+  
   const indiceCombinacion = hashCompleto % poolCombinaciones.length;
   
   const combinacionSeleccionada = poolCombinaciones[indiceCombinacion];
   
-  console.log(`✅ Combinación ${indiceCombinacion + 1}/1000 seleccionada para usuario ${userId} en ${tipoSorteo}:`, combinacionSeleccionada);
-  console.log(`🔒 Hash datos: ${hashDatos} (garantiza consistencia hasta actualización)`);
+  console.log(`✅ ${tipoSorteo}: Combinación ${indiceCombinacion + 1}/1000 seleccionada para usuario ${userId}:`, combinacionSeleccionada);
   return combinacionSeleccionada;
 }
 
 // Generar hash de los datos para garantizar consistencia
 function generarHashDatos(datos) {
-  let hashString = '';
+  // Asegurarse de que el tipo de sorteo influye en el hash
+  const tipoSorteo = datos.sorteo || 'desconocido';
+  let hashString = `tipo:${tipoSorteo}|`;
   
   if (datos.datos && datos.datos.length > 0) {
     // Usar los primeros 10 sorteos como "firma" de los datos
     const sorteosMuestra = datos.datos.slice(0, 10);
-    hashString = sorteosMuestra.map(s => `${s.numeroSorteo}-${s.numeros.join('')}`).join('|');
+    hashString += sorteosMuestra.map(s => `${s.concurso || 'sorteo'}-${(s.numeros || []).join('')}`).join('|');
   } else if (datos.numeros && datos.numeros.length > 0) {
     // Usar los primeros 60 números como "firma"
-    hashString = datos.numeros.slice(0, 60).join('');
+    hashString += datos.numeros.slice(0, 60).join('');
   }
+  
+  // Añadir el tipo de sorteo al final también para mayor seguridad
+  hashString += `|sorteo:${tipoSorteo}`;
+  
+  console.log(`🔐 Generando hash para ${tipoSorteo} a partir de: "${hashString.substring(0, 50)}..."`);
   
   return hashCode(hashString);
 }

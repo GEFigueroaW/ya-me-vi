@@ -291,9 +291,17 @@
               sorteo: sorteo
             };
             
+            // Log para depuración
+            console.log(`🔍 Preparando predicción para ${sorteo}:`, {
+              tipoSorteo: sorteo,
+              cantidadNumeros: datosHistoricos[sorteo].numeros.length,
+              cantidadSorteos: datosHistoricos[sorteo].sorteos.length,
+              ultimoSorteo: datosHistoricos[sorteo].ultimoSorteo
+            });
+            
             // Llamar a generarPrediccionPersonalizada con los parámetros en el orden correcto
-            // La función espera (datos, userId) y no (userId, datos)
-            const prediccion = await generarPrediccionPersonalizada(datosSorteo, userId);
+            // La función espera (userId, datos)
+            const prediccion = await generarPrediccionPersonalizada(userId, datosSorteo);
             
             const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
             if (elementoCombo && prediccion && prediccion.length === 6) {
