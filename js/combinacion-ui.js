@@ -459,6 +459,15 @@ export class UIManager {
       const html = this.generarHtmlCombinacion(numeros, analisisIndividual);
       this.resultadoCombinacion.innerHTML = html;
       
+      // Agregar event listener para el botón de explicación en resultados
+      const btnExplicacionResultados = document.getElementById('mostrar-explicacion-btn-resultados');
+      if (btnExplicacionResultados) {
+        btnExplicacionResultados.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.toggleExplicacion(this.explicacionCombinacion);
+        });
+      }
+      
     } catch (error) {
       console.error('❌ Error al analizar combinación:', error);
       this.mostrarError(this.resultadoCombinacion, `Error al procesar el análisis. Error: ${error.message}`);
@@ -592,6 +601,14 @@ export class UIManager {
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
             ${htmlSorteos.revanchita}
           </div>
+        </div>
+        
+        <!-- Botón para mostrar explicación en resultados -->
+        <div class="mt-6 mb-6 text-center">
+          <button id="mostrar-explicacion-btn-resultados" class="bg-white bg-opacity-50 hover:bg-opacity-60 rounded-lg px-6 py-3 text-sm text-gray-800 transition-all duration-300 border border-white border-opacity-50 shadow-lg">
+            <span>💡 ¿Cómo interpretar resultados?</span>
+            <span>👁️</span>
+          </button>
         </div>
         
         <div class="bg-gradient-to-r from-purple-500 to-pink-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-400">
