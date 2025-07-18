@@ -2,6 +2,15 @@
 // Módulo de compatibilidad para exponer funciones de dataParser.js globalmente
 // Facilita el uso de funciones de análisis en archivos HTML sin módulos ES6
 
+// Definir constantes de análisis
+const PESOS_ANALISIS = {
+    frecuencias: 0.22,    // 22% Frecuencias históricas
+    suma: 0.22,          // 22% Suma de números
+    paridad: 0.22,       // 22% Balance pares/impares
+    decadas: 0.22,       // 22% Distribución por décadas
+    aleatorio: 0.12      // 12% Factor aleatorio
+};
+
 // Definir las funciones de análisis directamente
 function generarNumerosUnicos(cantidad = 6) {
     const numeros = new Set();
@@ -174,27 +183,98 @@ try {
 async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
     console.log(`🎲 Iniciando generación de proyección para ${nombreSorteo}`);
     
-    // Generar una combinación usando análisis o emergencia
-    function generarCombinacion() {
-        const numeros = new Set();
-        while(numeros.size < 6) {
-            numeros.add(Math.floor(Math.random() * 56) + 1);
-        }
-        return Array.from(numeros).sort((a, b) => a - b);
-    }
-    
     try {
-        const combinacion = generarCombinacion();
-        return {
-            numeros: combinacion,
-            detalle: 'Análisis completado exitosamente'
+        // 1. Análisis de frecuencias (22%)
+        const frecuencias = new Map();
+        datos.numeros.forEach(num => {
+            frecuencias.set(num, (frecuencias.get(num) || 0) + 1);
+        });
+        const numerosPorFrecuencia = Array.from(frecuencias.entries())
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 10)
+            .map(([num]) => parseInt(num));
+
+        // 2. Análisis por suma (22%)
+        const numerosPorSuma = [];
+        const sumaObjetivo = 175; // Promedio típico
+        while (numerosPorSuma.length < 10) {
+            const num = Math.floor(Math.random() * 56) + 1;
+            const sumaActual = numerosPorSuma.reduce((a,b) => a + b, 0);
+            if (sumaActual + num <= sumaObjetivo) {
+                numerosPorSuma.push(num);
+            }
+        }
+
+        // 3. Análisis por paridad (22%)
+        const numerosPorParidad = [];
+        let pares = 0, impares = 0;
+        while (numerosPorParidad.length < 10) {
+            const num = Math.floor(Math.random() * 56) + 1;
+            if ((num % 2 === 0 && pares < 5) || (num % 2 !== 0 && impares < 5)) {
+                numerosPorParidad.push(num);
+                num % 2 === 0 ? pares++ : impares++;
+            }
+        }
+
+        // 4. Análisis por décadas (22%)
+        const numerosPorDecada = [];
+        const decadas = [[1,10], [11,20], [21,30], [31,40], [41,50], [51,56]];
+        decadas.forEach(([min, max]) => {
+            const cantidad = Math.ceil(10 / decadas.length);
+            for (let i = 0; i < cantidad; i++) {
+                numerosPorDecada.push(
+                    Math.floor(Math.random() * (max - min + 1)) + min
+                );
+            }
+        });
+
+        // 5. Factor aleatorio (12%)
+        const numerosAleatorios = [];
+        while (numerosAleatorios.length < 6) {
+            const num = Math.floor(Math.random() * 56) + 1;
+            if (!numerosAleatorios.includes(num)) {
+                numerosAleatorios.push(num);
+            }
+        }
+
+        // Combinar todos los análisis según los pesos especificados
+        const numerosConPeso = new Map();
+        
+        // Aplicar pesos a cada número según su origen
+        const aplicarPeso = (numeros, peso) => {
+            numeros.forEach(num => {
+                numerosConPeso.set(num, (numerosConPeso.get(num) || 0) + peso);
+            });
         };
+
+        aplicarPeso(numerosPorFrecuencia, PESOS_ANALISIS.frecuencias);
+        aplicarPeso(numerosPorSuma, PESOS_ANALISIS.suma);
+        aplicarPeso(numerosPorParidad, PESOS_ANALISIS.paridad);
+        aplicarPeso(numerosPorDecada, PESOS_ANALISIS.decadas);
+        aplicarPeso(numerosAleatorios, PESOS_ANALISIS.aleatorio);
+
+        // Seleccionar los 6 números con mayor peso
+        const combinacionFinal = Array.from(numerosConPeso.entries())
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 6)
+            .map(([num]) => parseInt(num))
+            .sort((a, b) => a - b);
+
+        return {
+            numeros: combinacionFinal,
+            detalle: 'Análisis completado exitosamente usando todos los criterios'
+        };
+
     } catch (error) {
         console.error(`Error en generación para ${nombreSorteo}:`, error);
-        const combinacionEmergencia = generarCombinacion();
+        // Generar combinación de emergencia
+        const numerosEmergencia = new Set();
+        while (numerosEmergencia.size < 6) {
+            numerosEmergencia.add(Math.floor(Math.random() * 56) + 1);
+        }
         return {
-            numeros: combinacionEmergencia,
-            detalle: 'Generación de emergencia'
+            numeros: Array.from(numerosEmergencia).sort((a, b) => a - b),
+            detalle: 'Generación de emergencia (análisis no disponible)'
         };
     }
 }
@@ -202,9 +282,24 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
 // Implementación de generarProyeccionesAnalisis
 window.generarProyeccionesAnalisis = async function() {
     console.log('📊 Generando proyecciones usando funciones de análisis...');
+    
+    const actualizarUI = (sorteo, numeros, detalle, error = false) => {
+        const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+        const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+        
+        if (elementoProyeccion) {
+            elementoProyeccion.textContent = error ? '-- -- -- -- -- --' : numeros.join(' - ');
+            elementoProyeccion.classList.toggle('text-red-500', error);
+        }
+        
+        if (elementoDetalle) {
+            elementoDetalle.textContent = detalle;
+            elementoDetalle.classList.toggle('text-red-500', error);
+        }
+    };
   
-  try {
-    // Esperar a que los datos históricos estén disponibles o cargarlos si no existen
+    try {
+        // Esperar a que los datos históricos estén disponibles o cargarlos si no existen
     if (!window.datosHistoricos) {
       console.log('⏳ Esperando a que los datos históricos se carguen...');
       
