@@ -241,15 +241,46 @@
         console.error("La implementación de togglePrediccionIA no está lista aún");
       }
     };
+
+    // Definir toggleAleatorias en el ámbito global
+    window.toggleAleatorias = function() {
+      console.log("Redirigiendo a la implementación del módulo...");
+      if (window.toggleAleatoriasImpl) {
+        window.toggleAleatoriasImpl();
+      } else {
+        console.error("La implementación de toggleAleatorias no está lista aún");
+      }
+    };
+
+    // Definir toggleAnalisis en el ámbito global
+    window.toggleAnalisis = function() {
+      console.log("Redirigiendo a la implementación del módulo...");
+      if (window.toggleAnalisisImpl) {
+        window.toggleAnalisisImpl();
+      } else {
+        console.error("La implementación de toggleAnalisis no está lista aún");
+      }
+    };
   </script>
   <script type="module">
     import { cargarDatosHistoricos, generarCombinacionesAleatorias, analizarSumaNumeros, analizarParesImpares, analizarDecadaTerminacion, calcularFrecuencias } from './js/dataParser.js';
     import { generarPrediccionPersonalizada } from './js/mlPredictor.js';
 
+    // Variables globales para compartir entre scripts
+    window.cantidadSeleccionada = 1;
+    window.datosHistoricos = null;
+    window.prediccionesGeneradas = false;
+    window.usuarioActualID = null; // Variable para almacenar el ID del usuario actual
+    window.prediccionesAlmacenadas = {
+      melate: null,
+      revancha: null,
+      revanchita: null
+    };
+
     let cantidadSeleccionada = 1;
     let datosHistoricos = null;
     let prediccionesGeneradas = false;
-    let usuarioActualID = null; // Variable para almacenar el ID del usuario actual
+    let usuarioActualID = null;
     let prediccionesAlmacenadas = {
       melate: null,
       revancha: null,
@@ -259,8 +290,8 @@
     // Función para obtener el número de sorteo actual basado en el último sorteo de Melate
     function obtenerNumeroSorteoActual() {
       // Si tenemos datos históricos, obtenemos el último sorteo de Melate y le sumamos 1
-      if (datosHistoricos && datosHistoricos.melate && datosHistoricos.melate.ultimoSorteo) {
-        const ultimoSorteo = parseInt(datosHistoricos.melate.ultimoSorteo);
+      if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.ultimoSorteo) {
+        const ultimoSorteo = parseInt(window.datosHistoricos.melate.ultimoSorteo);
         if (!isNaN(ultimoSorteo)) {
           return ultimoSorteo + 1;
         }
@@ -285,6 +316,9 @@
       }
     }
 
+    // Hacer función global
+    window.actualizarTituloSorteo = actualizarTituloSorteo;
+
     // Función para toggle (expandir/colapsar) la predicción IA
     function togglePrediccionIA() {
       const contenido = document.getElementById('contenido-predicciones');
@@ -307,11 +341,11 @@
         container.style.opacity = '1';
         
         try {
-          if (!prediccionesGeneradas) {
+          if (!window.prediccionesGeneradas) {
             console.log('🔄 Iniciando generación de predicciones...');
             generarPrediccionesPorSorteo()
               .then(() => {
-                prediccionesGeneradas = true;
+                window.prediccionesGeneradas = true;
                 console.log('✅ Predicciones generadas exitosamente');
               })
               .catch(error => {
@@ -363,6 +397,9 @@
         limpiarCombinacionesAleatorias();
       }
     }
+
+    // Hacer la implementación disponible para el redireccionador global
+    window.toggleAleatoriasImpl = toggleAleatorias;
 
     // Función auxiliar para cerrar la caja de aleatorias
     function cerrarCajaAleatorias() {
@@ -442,7 +479,7 @@
     }
 
     // Hacer la función disponible globalmente
-    window.toggleAnalisis = toggleAnalisis;
+    window.toggleAnalisisImpl = toggleAnalisis;
 
     // Hacer la función disponible globalmente
     window.toggleAleatorias = toggleAleatorias;
@@ -457,13 +494,14 @@
       btn.addEventListener('click', () => {
         document.querySelectorAll('.cantidad-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        window.cantidadSeleccionada = parseInt(btn.dataset.cantidad);
         cantidadSeleccionada = parseInt(btn.dataset.cantidad);
       });
     });
 
     // Botón para generar combinaciones aleatorias
     document.getElementById('btn-generar').addEventListener('click', async () => {
-      console.log(`🎲 Generando ${cantidadSeleccionada} combinaciones aleatorias...`);
+      console.log(`🎲 Generando ${window.cantidadSeleccionada} combinaciones aleatorias...`);
       
       const container = document.getElementById('combinaciones-container');
       container.innerHTML = `
@@ -474,7 +512,7 @@
       `;
       
       try {
-        const combinaciones = generarCombinacionesAleatorias(cantidadSeleccionada);
+        const combinaciones = generarCombinacionesAleatorias(window.cantidadSeleccionada);
         mostrarCombinaciones(combinaciones);
       } catch (error) {
         console.error('❌ Error generando combinaciones:', error);
@@ -567,15 +605,16 @@
       
       try {
         // Asegurar que tenemos datos históricos
-        if (!datosHistoricos) {
-          datosHistoricos = await cargarDatosHistoricos('todos');
+        if (!window.datosHistoricos) {
+          window.datosHistoricos = await cargarDatosHistoricos('todos');
+          datosHistoricos = window.datosHistoricos;
         }
         
         const sorteos = ['melate', 'revancha', 'revanchita'];
         
         for (const sorteo of sorteos) {
           try {
-            if (!datosHistoricos[sorteo] || !datosHistoricos[sorteo].numeros) {
+            if (!window.datosHistoricos[sorteo] || !window.datosHistoricos[sorteo].numeros) {
               console.warn(`⚠️ No hay datos disponibles para ${sorteo}`);
               continue;
             }
@@ -587,7 +626,7 @@
             if (elementoDetalle) elementoDetalle.textContent = 'Procesando 4 tipos de análisis...';
             
             // Generar proyección
-            const proyeccion = await generarProyeccionPorAnalisis(datosHistoricos[sorteo], sorteo);
+            const proyeccion = await generarProyeccionPorAnalisis(window.datosHistoricos[sorteo], sorteo);
             
             if (elementoProyeccion && proyeccion.numeros) {
               elementoProyeccion.textContent = proyeccion.numeros.join(' - ');
@@ -805,9 +844,10 @@
       
       try {
         // Cargar datos históricos si no están cargados
-        if (!datosHistoricos) {
-          datosHistoricos = await Promise.race([cargarDatosHistoricos('todos'), timeoutPromise]);
-          if (datosHistoricos === 'timeout') {
+        if (!window.datosHistoricos) {
+          window.datosHistoricos = await Promise.race([cargarDatosHistoricos('todos'), timeoutPromise]);
+          datosHistoricos = window.datosHistoricos;
+          if (window.datosHistoricos === 'timeout') {
             throw new Error('Tiempo de espera agotado al cargar datos históricos');
           }
         }
@@ -815,7 +855,7 @@
         // Generar predicciones para cada sorteo usando el ID real del usuario
         const sorteos = ['melate', 'revancha', 'revanchita'];
         // Usar el ID real del usuario autenticado para predicciones personalizadas
-        const userId = usuarioActualID || 'usuario-no-autenticado';
+        const userId = window.usuarioActualID || 'usuario-no-autenticado';
         
         // Intentar cargar predicciones almacenadas
         cargarPrediccionesAlmacenadas(userId);
@@ -823,7 +863,7 @@
         for (const sorteo of sorteos) {
           try {
             // Verificar que existan datos para este sorteo
-            if (!datosHistoricos[sorteo] || !datosHistoricos[sorteo].numeros || datosHistoricos[sorteo].numeros.length === 0) {
+            if (!window.datosHistoricos[sorteo] || !window.datosHistoricos[sorteo].numeros || window.datosHistoricos[sorteo].numeros.length === 0) {
               console.warn(`⚠️ No hay datos históricos disponibles para ${sorteo}`);
               const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
               if (elementoCombo) {
@@ -836,15 +876,15 @@
             const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
             
             // Si ya tenemos una predicción almacenada y válida para este sorteo, usarla
-            if (prediccionesAlmacenadas[sorteo] && 
-                prediccionesAlmacenadas[sorteo].userId === userId && 
-                prediccionesAlmacenadas[sorteo].ultimoSorteo === datosHistoricos[sorteo].ultimoSorteo) {
+            if (window.prediccionesAlmacenadas[sorteo] && 
+                window.prediccionesAlmacenadas[sorteo].userId === userId && 
+                window.prediccionesAlmacenadas[sorteo].ultimoSorteo === window.datosHistoricos[sorteo].ultimoSorteo) {
                 
               console.log(`🔄 Usando predicción almacenada para ${sorteo}`);
               
-              if (elementoCombo && prediccionesAlmacenadas[sorteo].prediccion) {
-                elementoCombo.textContent = prediccionesAlmacenadas[sorteo].prediccion.join(' - ');
-                console.log(`✅ Predicción almacenada para ${sorteo} cargada:`, prediccionesAlmacenadas[sorteo].prediccion);
+              if (elementoCombo && window.prediccionesAlmacenadas[sorteo].prediccion) {
+                elementoCombo.textContent = window.prediccionesAlmacenadas[sorteo].prediccion.join(' - ');
+                console.log(`✅ Predicción almacenada para ${sorteo} cargada:`, window.prediccionesAlmacenadas[sorteo].prediccion);
               }
               continue;
             }
@@ -853,19 +893,19 @@
             
             // Crear objeto de datos específico para este sorteo con metadatos adicionales
             const datosSorteo = {
-              numeros: datosHistoricos[sorteo].numeros,
-              datos: datosHistoricos[sorteo].sorteos,
+              numeros: window.datosHistoricos[sorteo].numeros,
+              datos: window.datosHistoricos[sorteo].sorteos,
               sorteo: sorteo, // Identificador clave para diferenciar cada juego
-              ultimoSorteo: datosHistoricos[sorteo].ultimoSorteo,
+              ultimoSorteo: window.datosHistoricos[sorteo].ultimoSorteo,
               fechaGeneracion: new Date().toISOString()
             };
             
             // Log para depuración
             console.log(`🔍 Preparando predicción con IA para ${sorteo}:`, {
               tipoSorteo: sorteo,
-              cantidadNumeros: datosHistoricos[sorteo].numeros.length,
-              cantidadSorteos: datosHistoricos[sorteo].sorteos.length,
-              ultimoSorteo: datosHistoricos[sorteo].ultimoSorteo
+              cantidadNumeros: window.datosHistoricos[sorteo].numeros.length,
+              cantidadSorteos: window.datosHistoricos[sorteo].sorteos.length,
+              ultimoSorteo: window.datosHistoricos[sorteo].ultimoSorteo
             });
             
             // Mostrar spinner mientras se procesa
@@ -882,12 +922,13 @@
               console.log(`✅ Predicción IA para ${sorteo} generada:`, prediccion);
               
               // Almacenar la predicción para uso futuro
-              prediccionesAlmacenadas[sorteo] = {
+              window.prediccionesAlmacenadas[sorteo] = {
                 userId: userId,
                 prediccion: prediccion,
-                ultimoSorteo: datosHistoricos[sorteo].ultimoSorteo,
+                ultimoSorteo: window.datosHistoricos[sorteo].ultimoSorteo,
                 timestamp: new Date().getTime()
               };
+              prediccionesAlmacenadas[sorteo] = window.prediccionesAlmacenadas[sorteo];
               
               // Guardar en localStorage
               guardarPrediccionesAlmacenadas();
@@ -916,7 +957,7 @@
     // Función para guardar predicciones en localStorage
     function guardarPrediccionesAlmacenadas() {
       try {
-        localStorage.setItem('ya-me-vi-predicciones', JSON.stringify(prediccionesAlmacenadas));
+        localStorage.setItem('ya-me-vi-predicciones', JSON.stringify(window.prediccionesAlmacenadas));
         console.log('💾 Predicciones guardadas en localStorage');
       } catch (error) {
         console.error('❌ Error guardando predicciones en localStorage:', error);
@@ -933,11 +974,12 @@
           // Solo restaurar si el userId coincide
           for (const sorteo in prediccionesGuardadas) {
             if (prediccionesGuardadas[sorteo] && prediccionesGuardadas[sorteo].userId === userId) {
+              window.prediccionesAlmacenadas[sorteo] = prediccionesGuardadas[sorteo];
               prediccionesAlmacenadas[sorteo] = prediccionesGuardadas[sorteo];
             }
           }
           
-          console.log('📂 Predicciones cargadas desde localStorage:', prediccionesAlmacenadas);
+          console.log('📂 Predicciones cargadas desde localStorage:', window.prediccionesAlmacenadas);
         }
       } catch (error) {
         console.error('❌ Error cargando predicciones desde localStorage:', error);
@@ -949,6 +991,7 @@
     
     // Cargar datos históricos al inicio
     cargarDatosHistoricos('todos').then(datos => {
+      window.datosHistoricos = datos;
       datosHistoricos = datos;
       console.log('✅ Datos históricos cargados en sugeridas.html');
       // Actualizar el título con el número real una vez que tenemos los datos
@@ -968,18 +1011,27 @@
       if (!user) {
         window.location.href = "index.html";
       } else {
-        usuarioActualID = user.uid; // Guardar el ID del usuario actual para usar en predicciones
-        console.log('👤 Usuario autenticado:', usuarioActualID);
+        window.usuarioActualID = user.uid; // Guardar el ID del usuario actual para usar en predicciones
+        usuarioActualID = user.uid;
+        console.log('👤 Usuario autenticado:', window.usuarioActualID);
         
         // Actualizar título con número de sorteo
-        actualizarTituloSorteo();
+        if (window.actualizarTituloSorteo) {
+          window.actualizarTituloSorteo();
+        }
         
         try {
-          datosHistoricos = await cargarDatosHistoricos('todos');
+          window.datosHistoricos = await cargarDatosHistoricos('todos');
+          datosHistoricos = window.datosHistoricos;
           console.log('📊 Datos históricos cargados para predicciones IA');
           
+          // Actualizar el título con el número real una vez que tenemos los datos
+          if (window.actualizarTituloSorteo) {
+            window.actualizarTituloSorteo();
+          }
+          
           // Cargar predicciones almacenadas para el usuario autenticado
-          cargarPrediccionesAlmacenadas(usuarioActualID);
+          cargarPrediccionesAlmacenadas(window.usuarioActualID);
         } catch (error) {
           console.error('❌ Error cargando datos históricos:', error);
         }
