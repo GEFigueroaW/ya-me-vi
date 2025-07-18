@@ -1207,20 +1207,55 @@ window.obtenerUltimoSorteoMelate = function() {
       const sorteos = window.datosHistoricos.melate.sorteos;
       
       if (sorteos.length > 0) {
+        console.log(`📊 Analizando ${sorteos.length} sorteos de Melate para encontrar el último`);
+        
         // Buscar el sorteo con el número más alto
         let ultimoSorteo = 0;
+        let sorteosIdentificados = 0;
+        let sorteosNoIdentificados = 0;
         
         for (const sorteo of sorteos) {
-          // Convertir el número de concurso a entero y tomar el máximo
-          const numConcurso = parseInt(sorteo.concurso);
-          if (!isNaN(numConcurso) && numConcurso > ultimoSorteo) {
-            ultimoSorteo = numConcurso;
+          // Imprimir algunos datos de muestra para diagnóstico
+          if (sorteo === sorteos[0]) {
+            console.log(`🔍 Muestra del primer sorteo:`, {
+              concurso: sorteo.concurso,
+              tipo: typeof sorteo.concurso,
+              numeros: sorteo.numeros ? sorteo.numeros.join(',') : 'no disponible'
+            });
+          }
+          
+          // Intentar convertir el número de concurso con mejor manejo de errores
+          let numConcurso = 0;
+          
+          // Si es una cadena, intentar extraer sólo los dígitos antes de convertir
+          if (typeof sorteo.concurso === 'string') {
+            const digitosMatch = sorteo.concurso.match(/\d+/);
+            if (digitosMatch) {
+              numConcurso = parseInt(digitosMatch[0]);
+            } else {
+              numConcurso = parseInt(sorteo.concurso);
+            }
+          } else if (typeof sorteo.concurso === 'number') {
+            numConcurso = sorteo.concurso;
+          }
+          
+          if (!isNaN(numConcurso) && numConcurso > 0) {
+            sorteosIdentificados++;
+            if (numConcurso > ultimoSorteo) {
+              ultimoSorteo = numConcurso;
+            }
+          } else {
+            sorteosNoIdentificados++;
           }
         }
         
+        console.log(`📊 Resultados del análisis: ${sorteosIdentificados} sorteos identificados, ${sorteosNoIdentificados} no identificados`);
+        
         if (ultimoSorteo > 0) {
-          console.log(`✅ Último sorteo de Melate: ${ultimoSorteo}`);
+          console.log(`✅ Último sorteo de Melate identificado: ${ultimoSorteo}`);
           return ultimoSorteo;
+        } else {
+          console.warn(`⚠️ No se pudo identificar ningún número de sorteo válido entre ${sorteos.length} sorteos`);
         }
       }
       
@@ -1233,11 +1268,23 @@ window.obtenerUltimoSorteoMelate = function() {
   // Si no encontramos un último sorteo, usar un fallback dinámico
   console.warn('⚠️ Usando fallback dinámico para último sorteo');
   
+  // Verificar si hay datos históricos pero no se pudo procesar el número de concurso
+  if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+    // Imprimir más información de depuración
+    const sorteos = window.datosHistoricos.melate.sorteos;
+    if (sorteos.length > 0) {
+      console.log(`🔍 Depurando: Se encontraron ${sorteos.length} sorteos, pero no se pudo identificar el último número de concurso`);
+      // Mostrar los primeros 3 concursos para debug
+      const muestraConcursos = sorteos.slice(0, 3).map(s => `"${s.concurso}"`).join(', ');
+      console.log(`🔍 Muestra de concursos: ${muestraConcursos}`);
+    }
+  }
+  
   // Calcular un fallback basado en la fecha actual
-  // Base: Sorteo 4057 en julio de 2025
+  // Base: Sorteo 4083 es el próximo después del 4082 (último conocido)
   const fechaActual = new Date();
   const fechaReferencia = new Date(2025, 6, 18); // 18 de julio de 2025
-  const sorteoReferencia = 4056; // Último sorteo conocido en la fecha de referencia
+  const sorteoReferencia = 4082; // Último sorteo conocido en el CSV
   
   // Calcular diferencia en días
   const diferenciaMilisegundos = fechaActual - fechaReferencia;
