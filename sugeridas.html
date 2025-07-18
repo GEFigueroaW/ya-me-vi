@@ -30,32 +30,47 @@
     <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown">Combinaciones Sugeridas</h1>
 
     <!-- Sección de combinaciones aleatorias -->
-    <div class="analisis-transparente rounded-xl p-6 max-w-4xl mx-auto mb-8">
-      <!-- Descripción -->
-      <div class="text-center mb-8">
-        <p class="text-lg text-white mb-4">
-          Genera TUS combinaciones de números completamente al azar
+    <div id="aleatorias-container" class="analisis-transparente rounded-xl p-6 max-w-4xl mx-auto mb-8 cursor-pointer hover:shadow-xl transition-all duration-300" onclick="toggleAleatorias()">
+      <!-- Botón del acordeón -->
+      <div class="text-center">
+        <p class="text-lg text-white mb-2">
+          Genera TUS combinaciones completamente al azar
         </p>
-        <p class="text-sm text-gray-300">
-          Números aleatorios del 1 al 56 • Sin análisis • Sin patrones • Solo suerte
-        </p>
-      </div>
-
-      <!-- Selector de cantidad -->
-      <div class="mb-6">
-        <p class="text-white text-sm mb-3">¿Cuántas combinaciones deseas?</p>
-        <div class="flex justify-center gap-3">
-          <button id="btn-1" class="cantidad-btn active" data-cantidad="1">1</button>
-          <button id="btn-3" class="cantidad-btn" data-cantidad="3">3</button>
-          <button id="btn-5" class="cantidad-btn" data-cantidad="5">5</button>
+        
+        <!-- Indicador de expansión -->
+        <div class="flex justify-center items-center">
+          <span class="text-sm text-gray-300 mr-2">Haz clic para ver</span>
+          <svg id="arrow-icon-aleatorias" class="w-5 h-5 text-gray-300 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
         </div>
       </div>
 
-      <!-- Botón para generar combinaciones -->
-      <div class="text-center">
-        <button id="btn-generar" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-          🎲 Generar Combinaciones Aleatorias
-        </button>
+      <!-- Contenido expandible (oculto por defecto) -->
+      <div id="contenido-aleatorias" class="hidden mt-6">
+        <!-- Descripción -->
+        <div class="text-center mb-8">
+          <p class="text-sm text-gray-300">
+            Números aleatorios del 1 al 56 • Sin análisis • Sin patrones • Solo suerte
+          </p>
+        </div>
+
+        <!-- Selector de cantidad -->
+        <div class="mb-6">
+          <p class="text-white text-sm mb-3">¿Cuántas combinaciones deseas?</p>
+          <div class="flex justify-center gap-3">
+            <button id="btn-1" class="cantidad-btn active" data-cantidad="1">1</button>
+            <button id="btn-3" class="cantidad-btn" data-cantidad="3">3</button>
+            <button id="btn-5" class="cantidad-btn" data-cantidad="5">5</button>
+          </div>
+        </div>
+
+        <!-- Botón para generar combinaciones -->
+        <div class="text-center">
+          <button id="btn-generar" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+            🎲 Generar Combinaciones Aleatorias
+          </button>
+        </div>
       </div>
     </div>
 
@@ -232,6 +247,30 @@
 
     // Hacer la implementación disponible para el redireccionador global
     window.togglePrediccionIAImpl = togglePrediccionIA;
+
+    // Función para toggle (expandir/colapsar) la sección de aleatorias
+    function toggleAleatorias() {
+      const contenido = document.getElementById('contenido-aleatorias');
+      const arrow = document.getElementById('arrow-icon-aleatorias');
+      
+      if (!contenido || !arrow) {
+        console.error('❌ Elementos de UI aleatorias no encontrados');
+        return;
+      }
+      
+      if (contenido.classList.contains('hidden')) {
+        // Expandir
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        // Colapsar
+        contenido.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // Hacer la función disponible globalmente
+    window.toggleAleatorias = toggleAleatorias;
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
