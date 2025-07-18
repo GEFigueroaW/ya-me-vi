@@ -23,25 +23,77 @@ function generarNumerosUnicos(cantidad = 6) {
 window.analizarSumaNumeros = function(datos) {
     console.log('🔄 Ejecutando analizarSumaNumeros');
     const resultado = {};
-    Object.keys(datos).forEach(sorteo => {
+    
+    Object.entries(datos).forEach(([sorteo, datosSorteo]) => {
+        if (!datosSorteo || !datosSorteo.sorteos || !datosSorteo.sorteos.length) {
+            console.warn(`⚠️ No hay datos válidos para analizar suma en ${sorteo}`);
+            return;
+        }
+
+        // Calcular sumas de cada sorteo
+        const sumas = datosSorteo.sorteos.map(sorteo => 
+            sorteo.numeros.reduce((a, b) => a + b, 0)
+        );
+
+        // Encontrar el rango más frecuente
+        const rangos = {
+            '100-149': 0,
+            '150-199': 0,
+            '200-249': 0,
+            '250-299': 0
+        };
+
+        sumas.forEach(suma => {
+            if (suma < 150) rangos['100-149']++;
+            else if (suma < 200) rangos['150-199']++;
+            else if (suma < 250) rangos['200-249']++;
+            else rangos['250-299']++;
+        });
+
+        const rangoMasFrecuente = Object.entries(rangos)
+            .sort(([,a], [,b]) => b - a)[0][0];
+
         resultado[sorteo] = {
-            rangoMasFrecuente: ['150-199'],
-            detalle: 'Análisis de suma',
-            numeros: generarNumerosUnicos()
+            rangoMasFrecuente: [rangoMasFrecuente],
+            detalle: `Rango de suma más frecuente: ${rangoMasFrecuente}`,
+            sumas: sumas
         };
     });
+    
     return resultado;
 };
 
 window.analizarParesImpares = function(datos) {
     console.log('🔄 Ejecutando analizarParesImpares');
     const resultado = {};
-    Object.keys(datos).forEach(sorteo => {
+    
+    Object.entries(datos).forEach(([sorteo, datosSorteo]) => {
+        if (!datosSorteo || !datosSorteo.sorteos || !datosSorteo.sorteos.length) {
+            console.warn(`⚠️ No hay datos válidos para analizar paridad en ${sorteo}`);
+            return;
+        }
+
+        // Analizar distribución de pares e impares en cada sorteo
+        const distribuciones = {};
+        
+        datosSorteo.sorteos.forEach(sorteo => {
+            const pares = sorteo.numeros.filter(n => n % 2 === 0).length;
+            const impares = 6 - pares;
+            const distribucion = `${pares}p-${impares}i`;
+            distribuciones[distribucion] = (distribuciones[distribucion] || 0) + 1;
+        });
+
+        // Encontrar la distribución más frecuente
+        const distribucionMasFrecuente = Object.entries(distribuciones)
+            .sort(([,a], [,b]) => b - a)[0][0];
+
         resultado[sorteo] = {
-            distribucionMasFrecuente: ['3p-3i'],
-            detalle: 'Balance pares/impares'
+            distribucionMasFrecuente: [distribucionMasFrecuente],
+            detalle: `Distribución más frecuente: ${distribucionMasFrecuente}`,
+            distribuciones: distribuciones
         };
     });
+    
     return resultado;
 };
 
@@ -66,11 +118,33 @@ window.analizarDecadaPorPosicion = function(datos) {
 
 window.generarPrediccionPorFrecuencia = function(datos) {
     console.log('🔄 Ejecutando generarPrediccionPorFrecuencia');
-    const numeros = new Set();
-    while(numeros.size < 6) {
-        numeros.add(Math.floor(Math.random() * 56) + 1);
+    
+    if (!datos || !Array.isArray(datos)) {
+        console.error('❌ Datos inválidos para análisis de frecuencia');
+        return generarNumerosUnicos(6);
     }
-    return Array.from(numeros).sort((a, b) => a - b);
+
+    // Calcular frecuencias
+    const frecuencias = new Map();
+    datos.forEach(num => {
+        frecuencias.set(num, (frecuencias.get(num) || 0) + 1);
+    });
+
+    // Ordenar números por frecuencia
+    const numerosPorFrecuencia = Array.from(frecuencias.entries())
+        .sort(([,a], [,b]) => b - a)
+        .map(([num]) => parseInt(num));
+
+    // Seleccionar números más frecuentes pero con algo de aleatoriedad
+    const seleccionados = new Set();
+    const top15 = numerosPorFrecuencia.slice(0, 15);
+
+    while (seleccionados.size < 6) {
+        const indiceAleatorio = Math.floor(Math.random() * top15.length);
+        seleccionados.add(top15[indiceAleatorio]);
+    }
+
+    return Array.from(seleccionados).sort((a, b) => a - b);
 };
 const funcionesRespaldo = {
   analizarSumaNumeros: function(datos) {
@@ -101,10 +175,33 @@ const funcionesRespaldo = {
   }
 };
 
-// Exponer las funciones globalmente, usando respaldos si las originales fallan
-window.analizarSumaNumeros = analizarSumaNumeros || funcionesRespaldo.analizarSumaNumeros;
-window.analizarParesImpares = analizarParesImpares || funcionesRespaldo.analizarParesImpares;
-window.generarPrediccionPorFrecuencia = generarPrediccionPorFrecuencia || funcionesRespaldo.generarPrediccionPorFrecuencia;
+// Exponer las funciones globalmente
+window.analizarSumaNumeros = function(...args) {
+    try {
+        return analizarSumaNumeros(...args);
+    } catch (error) {
+        console.error('Error en analizarSumaNumeros, usando respaldo:', error);
+        return funcionesRespaldo.analizarSumaNumeros(...args);
+    }
+};
+
+window.analizarParesImpares = function(...args) {
+    try {
+        return analizarParesImpares(...args);
+    } catch (error) {
+        console.error('Error en analizarParesImpares, usando respaldo:', error);
+        return funcionesRespaldo.analizarParesImpares(...args);
+    }
+};
+
+window.generarPrediccionPorFrecuencia = function(...args) {
+    try {
+        return generarPrediccionPorFrecuencia(...args);
+    } catch (error) {
+        console.error('Error en generarPrediccionPorFrecuencia, usando respaldo:', error);
+        return funcionesRespaldo.generarPrediccionPorFrecuencia(...args);
+    }
+};
 
 // Intentar importar la función analizarDecadaPorPosicion
 // Esta función puede no estar exportada correctamente en dataParser.js
@@ -184,7 +281,12 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
     console.log(`🎲 Iniciando generación de proyección para ${nombreSorteo}`);
     
     try {
+        if (!datos || !datos.numeros || !datos.sorteos) {
+            throw new Error('Datos inválidos para análisis');
+        }
+
         // 1. Análisis de frecuencias (22%)
+        console.log('📊 Analizando frecuencias...');
         const frecuencias = new Map();
         datos.numeros.forEach(num => {
             frecuencias.set(num, (frecuencias.get(num) || 0) + 1);
