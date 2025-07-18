@@ -14,13 +14,35 @@ export async function generarPrediccionPersonalizada(userId, datos) {
   
   if (numeros.length === 0) {
     console.warn(`⚠️ No hay números históricos para ${tipoSorteo}, usando predicción por defecto`);
-    return [3, 7, 15, 23, 31, 42];
+    // Generar predicciones por defecto diferentes según el tipo de sorteo
+    switch (tipoSorteo) {
+      case 'melate':
+        return [7, 13, 23, 27, 42, 56];
+      case 'revancha':
+        return [3, 19, 24, 31, 38, 51];
+      case 'revanchita':
+        return [5, 12, 26, 33, 47, 54];
+      default:
+        return [3, 7, 15, 23, 31, 42];
+    }
   }
   
   console.log(`📊 Datos para ${tipoSorteo}: ${numeros.length} números, ${(datos.datos || []).length} sorteos`);
 
-  // Generar combinación personalizada
-  const combinacionBase = generarCombinacionPersonalizada(userId, datos);
+  // Generar combinación personalizada con identificador único por sorteo y usuario
+  const usuarioSorteoId = `${userId}-${tipoSorteo}`;
+  const combinacionBase = generarCombinacionPersonalizada(usuarioSorteoId, datos);
+  
+  // Verificar que tengamos una combinación válida (debería ser un array)
+  if (!Array.isArray(combinacionBase)) {
+    console.error(`❌ Error: combinación no válida para ${tipoSorteo}:`, combinacionBase);
+    // Generar una combinación aleatoria como respaldo
+    const respaldo = new Set();
+    while (respaldo.size < 6) {
+      respaldo.add(Math.floor(Math.random() * 56) + 1);
+    }
+    return Array.from(respaldo).sort((a, b) => a - b);
+  }
   
   // Convertir explícitamente todos los números a enteros
   const combinacion = combinacionBase.map(num => Math.floor(num));
@@ -29,23 +51,44 @@ export async function generarPrediccionPersonalizada(userId, datos) {
   const esSecuencial = esSecuenciaPerfecta(combinacion);
   if (esSecuencial) {
     console.warn(`⚠️ Detectada secuencia simple en ${tipoSorteo}, aplicando corrección final`);
-    // Modificar un número para romper la secuencia
-    const indiceAleatorio = Math.floor(Math.random() * 6);
-    let nuevoNumero;
-    do {
-      nuevoNumero = Math.floor(Math.random() * 56) + 1;
-    } while (combinacion.includes(nuevoNumero));
+    // Modificar varios números para romper la secuencia
+    const indicesModificar = [1, 3, 5]; // Modificamos números específicos
     
-    combinacion[indiceAleatorio] = nuevoNumero;
+    for (const indice of indicesModificar) {
+      if (indice < combinacion.length) {
+        let nuevoNumero;
+        do {
+          nuevoNumero = Math.floor(Math.random() * 56) + 1;
+        } while (combinacion.includes(nuevoNumero));
+        
+        combinacion[indice] = nuevoNumero;
+      }
+    }
+    
     combinacion.sort((a, b) => a - b);
   }
   
-  // Verificación adicional para asegurarnos de que todos los números sean enteros
-  const combinacionFinal = combinacion.map(num => {
+  // Verificación adicional para asegurarnos de que todos los números sean enteros únicos
+  const numerosUnicos = new Set();
+  
+  // Primero procesamos los números existentes
+  for (const num of combinacion) {
     const entero = Math.floor(num);
     // Asegurar que estamos en el rango correcto (1-56)
-    return Math.max(1, Math.min(56, entero));
-  });
+    const numeroValido = Math.max(1, Math.min(56, entero));
+    numerosUnicos.add(numeroValido);
+  }
+  
+  // Si no tenemos 6 números únicos, completar
+  while (numerosUnicos.size < 6) {
+    // Usar hash del usuario y tipo de sorteo para tener una semilla consistente
+    const semilla = hashCode(`${userId}-${tipoSorteo}-${numerosUnicos.size}`);
+    const numeroAleatorio = 1 + (semilla % 56);
+    numerosUnicos.add(numeroAleatorio);
+  }
+  
+  // Convertir a array y ordenar
+  const combinacionFinal = Array.from(numerosUnicos).sort((a, b) => a - b);
   
   console.log(`✅ ${tipoSorteo}: Predicción final verificada: ${combinacionFinal.join(', ')}`);
   
@@ -262,12 +305,15 @@ function analizarTendenciasRecientes(datosSorteos) {
 // Generar combinación avanzada con análisis multimétodo
 function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAnalisis, desviacionAnalisis, tendenciasRecientes, semilla, tipoSorteo) {
   // Asegurarnos de que cada tipo de sorteo tenga una semilla bien diferenciada
-  const semillaModificada = semilla + tipoSorteo.charCodeAt(0) * 1000;
+  const hashTipoSorteo = Array.from(tipoSorteo).reduce((sum, char, i) => sum + char.charCodeAt(0) * (i + 1), 0);
+  const semillaModificada = semilla + hashTipoSorteo;
+  
+  // Crear generador aleatorio con semilla específica para este tipo de sorteo
   const rng = crearGeneradorAleatorio(semillaModificada);
   
-  // Distribuir estrategias con más opciones, usando la primera letra del tipo de sorteo
-  // para asegurarnos de que diferentes tipos de sorteo tengan diferentes estrategias
-  const estrategia = (semillaModificada + tipoSorteo.charCodeAt(0)) % 6; // Ahora 6 estrategias diferentes
+  // Determinar estrategia basada en el tipo de sorteo
+  // Se usa un hash más elaborado para asegurar buena distribución
+  const estrategia = Math.abs((semillaModificada + hashTipoSorteo * 13) % 6);
   
   // Log de la estrategia seleccionada
   const estrategiaTexto = [
@@ -279,24 +325,55 @@ function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAna
     "Análisis de tendencias recientes"
   ][estrategia];
   
-  console.log(`🔮 [${tipoSorteo}] Generando combinación con método: ${estrategiaTexto}`);
+  console.log(`🔮 [${tipoSorteo}] Generando combinación con método: ${estrategiaTexto} (Semilla: ${semillaModificada})`);
   
+  // Obtener combinación según la estrategia seleccionada
+  let combinacion;
   switch (estrategia) {
     case 0: // Basado en estadística/frecuencia
-      return seleccionarPorFrecuencia(frecuencia, rng, 0.7);
+      combinacion = seleccionarPorFrecuencia(frecuencia, rng, 0.7);
+      break;
     case 1: // Basado en probabilidad
-      return seleccionarPorProbabilidad(probabilidad, rng);
+      combinacion = seleccionarPorProbabilidad(probabilidad, rng);
+      break;
     case 2: // Basado en patrones
-      return seleccionarPorPatrones(patrones, rng);
+      combinacion = seleccionarPorPatrones(patrones, rng);
+      break;
     case 3: // Basado en análisis delta
-      return seleccionarPorDelta(deltaAnalisis, rng);
+      combinacion = seleccionarPorDelta(deltaAnalisis, rng);
+      break;
     case 4: // Basado en desviación estándar
-      return seleccionarPorDesviacion(desviacionAnalisis, rng);
+      combinacion = seleccionarPorDesviacion(desviacionAnalisis, rng);
+      break;
     case 5: // NUEVO: Basado en tendencias recientes
-      return seleccionarPorTendencias(tendenciasRecientes, rng);
+      combinacion = seleccionarPorTendencias(tendenciasRecientes, rng);
+      break;
     default:
-      return seleccionarEstrategiaMixta(frecuencia, patrones, tendenciasRecientes, rng);
+      combinacion = seleccionarEstrategiaMixta(frecuencia, patrones, tendenciasRecientes, rng);
+      break;
   }
+  
+  // Verificación final: asegurarse de que tenemos 6 números enteros únicos
+  const resultado = new Set();
+  
+  // Primero agregamos los números válidos de la combinación generada
+  for (const num of combinacion) {
+    if (Number.isInteger(num) && num >= 1 && num <= 56) {
+      resultado.add(num);
+    }
+  }
+  
+  // Si no tenemos 6 números, completamos con números aleatorios
+  while (resultado.size < 6) {
+    resultado.add(Math.floor(rng() * 56) + 1);
+  }
+  
+  // Convertir a array, ordenar y retornar
+  const resultadoFinal = Array.from(resultado).sort((a, b) => a - b);
+  console.log(`✅ [${tipoSorteo}] Combinación final generada: ${resultadoFinal.join(', ')}`);
+  
+  return resultadoFinal;
+}
 }
 
 // Nuevo método: Calcular probabilidades
@@ -343,9 +420,23 @@ function seleccionarPorDesviacion(desviacionAnalisis, rng) {
 
 // Generador de números aleatorios con semilla (LCG)
 function crearGeneradorAleatorio(semilla) {
-  let seed = semilla || Date.now(); // Usar fecha actual si no hay semilla
+  // Asegurar que la semilla es un número
+  let seed = typeof semilla === 'number' ? semilla : (Date.now() % 2**32); 
+  
+  // Añadir un valor aleatorio para evitar semillas idénticas en ejecuciones rápidas
+  seed = (seed + Math.floor(Math.random() * 10000)) % (2**32);
+  
+  // Valor inicial para evitar patrones iniciales
+  seed = (seed * 747796405 + 2891336453) % (2**32);
+  
+  console.log(`🎲 Inicializando generador aleatorio con semilla: ${seed}`);
+  
   return function() {
+    // Algoritmo LCG mejorado para mejor distribución
     seed = (seed * 1664525 + 1013904223) % (2**32);
+    // Aplicar operación XOR para reducir patrones
+    seed = seed ^ (seed >> 16);
+    
     // Devolver un valor entre 0 y 1, similar a Math.random()
     const normalized = seed / (2**32);
     return normalized;
@@ -369,22 +460,51 @@ function seleccionarPorFrecuencia(frecuencia, rng, factorFrecuencia = 0.6) {
     // Verificar si es array de objetos con score o array simple
     const tieneScore = typeof frecuencia[0] === 'object' && frecuencia[0].hasOwnProperty('score');
     
-    const numerosConPeso = frecuencia.map((item, index) => {
-      const score = tieneScore ? (item.score || 0) : (typeof item === 'number' ? item : 0);
-      return {
-        numero: index + 1,
-        peso: score * factorFrecuencia + rng() * (1 - factorFrecuencia)
-      };
-    });
+    // Generar una lista completa de números con sus pesos
+    const numerosConPeso = [];
+    for (let i = 0; i < 56; i++) {
+      const item = tieneScore ? frecuencia[i] : { score: frecuencia[i] || 0 };
+      const score = item && typeof item === 'object' ? (item.score || 0) : 0;
+      
+      // Añadir variabilidad al peso para evitar repeticiones
+      // Multiplicar por el índice + 1 para asegurar diferenciación
+      const variacion = (i + 1) * 0.01 * (rng() + 0.5);
+      
+      numerosConPeso.push({
+        numero: i + 1,
+        peso: score * factorFrecuencia + rng() * (1 - factorFrecuencia) + variacion
+      });
+    }
     
+    // Ordenar por peso descendente
     numerosConPeso.sort((a, b) => b.peso - a.peso);
     
+    // Seleccionar los 6 mejores números (asegurando que son únicos)
     const seleccionados = [];
-    for (let i = 0; i < Math.min(6, numerosConPeso.length); i++) {
-      // Asegurarse de que solo se guarda el número entero, no el peso
+    const numerosUsados = new Set();
+    
+    // Primero intentamos con los mejores scores
+    for (let i = 0; i < numerosConPeso.length && seleccionados.length < 6; i++) {
       const numeroEntero = Math.floor(numerosConPeso[i].numero);
-      seleccionados.push(numeroEntero);
+      
+      // Asegurar que es un número válido y único
+      if (numeroEntero >= 1 && numeroEntero <= 56 && !numerosUsados.has(numeroEntero)) {
+        seleccionados.push(numeroEntero);
+        numerosUsados.add(numeroEntero);
+      }
     }
+    
+    // Si no logramos 6 números (muy improbable pero por seguridad)
+    while (seleccionados.length < 6) {
+      const nuevoNumero = Math.floor(rng() * 56) + 1;
+      if (!numerosUsados.has(nuevoNumero)) {
+        seleccionados.push(nuevoNumero);
+        numerosUsados.add(nuevoNumero);
+      }
+    }
+    
+    // Log para depuración
+    console.log("Números seleccionados por frecuencia:", seleccionados);
     
     return seleccionados.sort((a, b) => a - b);
   } catch (error) {
