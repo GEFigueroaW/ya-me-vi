@@ -30,9 +30,9 @@
     <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown">Combinaciones Sugeridas</h1>
 
     <!-- Sección de combinaciones aleatorias -->
-    <div id="aleatorias-container" class="analisis-transparente rounded-xl p-6 max-w-4xl mx-auto mb-8 cursor-pointer hover:shadow-xl transition-all duration-300" onclick="toggleAleatorias()">
+    <div id="aleatorias-container" class="analisis-transparente rounded-xl p-6 max-w-4xl mx-auto mb-8 hover:shadow-xl transition-all duration-300">
       <!-- Botón del acordeón -->
-      <div class="text-center">
+      <div class="text-center cursor-pointer" onclick="toggleAleatorias()">
         <p class="text-lg text-white mb-2">
           Genera TUS combinaciones completamente al azar
         </p>
@@ -71,12 +71,12 @@
             🎲 Generar Combinaciones Aleatorias
           </button>
         </div>
-      </div>
-    </div>
 
-    <!-- Contenedor de combinaciones generadas aleatorias -->
-    <div id="combinaciones-container" class="max-w-6xl mx-auto mb-8">
-      <!-- Contenido se genera dinámicamente aquí -->
+        <!-- Contenedor de combinaciones generadas aleatorias (dentro de la caja) -->
+        <div id="combinaciones-container" class="mt-6">
+          <!-- Contenido se genera dinámicamente aquí -->
+        </div>
+      </div>
     </div>
 
     <!-- Combinaciones sugeridas por IA -->
@@ -290,6 +290,14 @@
     document.getElementById('btn-generar').addEventListener('click', async () => {
       console.log(`🎲 Generando ${cantidadSeleccionada} combinaciones aleatorias...`);
       
+      // Asegurar que la caja esté abierta cuando se generan combinaciones
+      const contenido = document.getElementById('contenido-aleatorias');
+      const arrow = document.getElementById('arrow-icon-aleatorias');
+      if (contenido && contenido.classList.contains('hidden')) {
+        contenido.classList.remove('hidden');
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+      }
+      
       const container = document.getElementById('combinaciones-container');
       container.innerHTML = `
         <div class="text-center py-8">
@@ -316,28 +324,41 @@
       const container = document.getElementById('combinaciones-container');
       
       const html = `
-        <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
+        <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
           <h3 class="text-xl font-bold text-white mb-4 text-center">
             🎲 ${combinaciones.length} Combinación${combinaciones.length > 1 ? 'es' : ''} Aleatoria${combinaciones.length > 1 ? 's' : ''}
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             ${combinaciones.map((combo, index) => `
-              <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center">
+              <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-300 border-opacity-30">
                 <h4 class="text-lg font-semibold text-white mb-2">Combinación ${index + 1}</h4>
-                <div class="flex justify-center space-x-2">
+                <div class="flex justify-center space-x-2 mb-3">
                   ${combo.map(num => `
                     <span class="bg-white text-purple-600 font-bold py-1 px-2 rounded text-sm">
                       ${num}
                     </span>
                   `).join('')}
                 </div>
+                <button onclick="copiarCombinacion('${combo.join(', ')}')" class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full transition-all duration-300">
+                  📋 Copiar
+                </button>
               </div>
             `).join('')}
+          </div>
+          <div class="text-center mt-6">
+            <button id="btn-generar-nuevas" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+              🔄 Generar Nuevas Combinaciones
+            </button>
           </div>
         </div>
       `;
       
       container.innerHTML = html;
+      
+      // Agregar evento al botón de generar nuevas
+      document.getElementById('btn-generar-nuevas').addEventListener('click', () => {
+        generarYMostrarCombinaciones();
+      });
     }
 
     // Función para generar un conjunto de números aleatorios como fallback
@@ -576,61 +597,6 @@
       return combinaciones;
     }
 
-    // Función para mostrar las combinaciones en la UI
-    function mostrarCombinaciones(combinaciones) {
-      const container = document.getElementById('combinaciones-container');
-      const cantidad = combinaciones.length;
-      
-      // Determinar el grid según la cantidad
-      let gridClass = 'grid-cols-1';
-      if (cantidad === 3) {
-        gridClass = 'grid-cols-1 md:grid-cols-3';
-      } else if (cantidad === 5) {
-        gridClass = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
-      }
-      
-      let html = `
-        <div class="mb-6">
-          <h2 class="text-2xl font-bold mb-4 text-white">🎲 ${cantidad === 1 ? 'Tu Combinación Aleatoria' : `Tus ${cantidad} Combinaciones Aleatorias`}</h2>
-        </div>
-        
-        <div class="grid ${gridClass} gap-6 mb-8 justify-center">
-      `;
-      
-      combinaciones.forEach((combinacion, index) => {
-        html += `
-          <div class="analisis-transparente rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition-all duration-300 hover:transform hover:scale-105 max-w-sm mx-auto">
-            <h3 class="text-lg font-semibold mb-4 text-white">${cantidad === 1 ? 'Tu Combinación' : `Combinación ${index + 1}`}</h3>
-            <div class="text-center">
-              <div class="text-2xl font-bold text-white mb-4">
-                ${combinacion.join(' - ')}
-              </div>
-              <button onclick="copiarCombinacion('${combinacion.join(', ')}')" class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full transition-all duration-300">
-                📋 Copiar
-              </button>
-            </div>
-          </div>
-        `;
-      });
-      
-      html += `
-        </div>
-        
-        <div class="text-center">
-          <button id="btn-generar-nuevas" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl">
-            🔄 Generar Nuevas Combinaciones
-          </button>
-        </div>
-      `;
-      
-      container.innerHTML = html;
-      
-      // Agregar evento al botón de generar nuevas
-      document.getElementById('btn-generar-nuevas').addEventListener('click', () => {
-        generarYMostrarCombinaciones();
-      });
-    }
-
     // Función para copiar combinación al portapapeles
     window.copiarCombinacion = function(combinacion) {
       navigator.clipboard.writeText(combinacion).then(() => {
@@ -655,17 +621,6 @@
         }, 2000);
       });
     };
-
-    // Función principal para generar y mostrar combinaciones
-    function generarYMostrarCombinaciones() {
-      const combinaciones = generarCombinaciones();
-      mostrarCombinaciones(combinaciones);
-    }
-
-    // Event listener para el botón principal (aleatorio)
-    document.getElementById('btn-generar').addEventListener('click', () => {
-      generarYMostrarCombinaciones();
-    });
 
   </script>
 
