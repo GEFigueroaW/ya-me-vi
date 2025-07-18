@@ -469,30 +469,44 @@ try {
 
 // Función auxiliar para generar proyección
 async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
-    console.log(`🎲 Iniciando generación de proyección completa para ${nombreSorteo}`);
+    console.log(`🎲 Iniciando análisis completo para ${nombreSorteo}`);
     
     try {
-        if (!datos) {
-            console.warn('⚠️ No hay datos disponibles, usando datos de emergencia');
+        // Verificar datos y preparar estructura
+        if (!datos || !datos.sorteos || datos.sorteos.length === 0) {
+            console.warn('⚠️ Generando datos de respaldo para análisis completo');
             datos = {
-                numeros: generarNumerosUnicos(6),
                 sorteos: Array(10).fill(null).map(() => ({
                     numeros: generarNumerosUnicos(6),
                     fecha: new Date()
-                }))
+                })),
+                numeros: []
             };
+            // Generar pool de números para análisis
+            datos.sorteos.forEach(sorteo => {
+                datos.numeros.push(...sorteo.numeros);
+            });
         }
 
         // 1. Análisis de frecuencias (22%)
         console.log('📊 Analizando frecuencias históricas...');
-        const frecuencias = new Map();
-        datos.numeros.forEach(num => {
-            frecuencias.set(num, (frecuencias.get(num) || 0) + 1);
+        const frecuenciasMap = new Map();
+        datos.sorteos.forEach(sorteo => {
+            sorteo.numeros.forEach(num => {
+                frecuenciasMap.set(num, (frecuenciasMap.get(num) || 0) + 1);
+            });
         });
         
-        const numerosPorFrecuencia = Array.from(frecuencias.entries())
+        // Obtener números por frecuencia
+        const numerosPorFrecuencia = Array.from(frecuenciasMap.entries())
             .sort(([,a], [,b]) => b - a)
+            .slice(0, 15)
             .map(([num]) => parseInt(num));
+
+        const analisisFrecuencias = {
+            top: numerosPorFrecuencia.slice(0, 6),
+            total: numerosPorFrecuencia
+        };
 
         // 2. Análisis por suma (22%)
         console.log('📊 Analizando sumas de números...');
@@ -559,21 +573,28 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
             }
         }
 
-        // Combinar todos los análisis según los pesos especificados
+        // Combinar todos los análisis
         const numerosConPeso = new Map();
         
-        // Aplicar pesos a cada número según su origen
-        const aplicarPeso = (numeros, peso) => {
+        // Función mejorada para aplicar pesos
+        const aplicarPeso = (numeros, peso, fuente) => {
             numeros.forEach(num => {
-                numerosConPeso.set(num, (numerosConPeso.get(num) || 0) + peso);
+                const pesoActual = numerosConPeso.get(num) || { peso: 0, fuentes: [] };
+                numerosConPeso.set(num, {
+                    peso: pesoActual.peso + peso,
+                    fuentes: [...pesoActual.fuentes, fuente]
+                });
             });
         };
 
-        aplicarPeso(numerosPorFrecuencia, PESOS_ANALISIS.frecuencias);
-        aplicarPeso(numerosPorSuma, PESOS_ANALISIS.suma);
-        aplicarPeso(numerosPorParidad, PESOS_ANALISIS.paridad);
-        aplicarPeso(numerosPorDecada, PESOS_ANALISIS.decadas);
-        aplicarPeso(numerosAleatorios, PESOS_ANALISIS.aleatorio);
+        // Aplicar pesos con trazabilidad
+        aplicarPeso(analisisFrecuencias.top, PESOS_ANALISIS.frecuencias, 'frecuencia');
+        aplicarPeso(numerosPorSuma, PESOS_ANALISIS.suma, 'suma');
+        aplicarPeso(numerosPorParidad, PESOS_ANALISIS.paridad, 'paridad');
+        aplicarPeso(decadasFrecuentes.flatMap(d => {
+            const [min, max] = d.split('-').map(Number);
+            return Array.from({length: max - min + 1}, (_, i) => min + i);
+        }), PESOS_ANALISIS.decadas, 'decadas');
 
         // Seleccionar los 6 números con mayor peso
         const combinacionFinal = Array.from(numerosConPeso.entries())
@@ -582,9 +603,31 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
             .map(([num]) => parseInt(num))
             .sort((a, b) => a - b);
 
+        // Seleccionar números finales usando todos los criterios
+        const combinacionFinal = Array.from(numerosConPeso.entries())
+            .sort(([,a], [,b]) => b.peso - a.peso)
+            .slice(0, 6)
+            .map(([num]) => parseInt(num))
+            .sort((a, b) => a - b);
+
         return {
             numeros: combinacionFinal,
-            detalle: 'Análisis completado exitosamente usando todos los criterios'
+            detalle: `Análisis completo (${new Date().toLocaleTimeString()})`,
+            analisis: {
+                frecuencias: analisisFrecuencias,
+                suma: {
+                    rango: rangoSuma,
+                    promedio: sumaPromedio
+                },
+                paridad: {
+                    distribucion: distribucionParidad,
+                    objetivo: paresObjetivo
+                },
+                decadas: {
+                    distribucion: decadasFrecuentes,
+                    analisisPosicional: decadaAnalisis[nombreSorteo].decadasPorPosicion
+                }
+            }
         };
 
     } catch (error) {
@@ -647,9 +690,9 @@ window.toggleAnalisis = async function() {
 };
 
 window.generarProyeccionesAnalisis = async function() {
-    console.log('📊 Generando proyecciones usando funciones de análisis...');
+    console.log('📊 Iniciando análisis completo para todos los sorteos...');
     
-    const actualizarUI = (sorteo, numeros, detalle, error = false) => {
+    const actualizarUI = (sorteo, numeros, detalle, estadisticas = null, error = false) => {
         const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
         const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
         
@@ -659,7 +702,17 @@ window.generarProyeccionesAnalisis = async function() {
         }
         
         if (elementoDetalle) {
-            elementoDetalle.textContent = detalle;
+            if (estadisticas) {
+                const detalleAnalisis = [
+                    `Frecuencias (${(PESOS_ANALISIS.frecuencias * 100).toFixed(0)}%)`,
+                    `Suma (${(PESOS_ANALISIS.suma * 100).toFixed(0)}%)`,
+                    `Paridad (${(PESOS_ANALISIS.paridad * 100).toFixed(0)}%)`,
+                    `Décadas (${(PESOS_ANALISIS.decadas * 100).toFixed(0)}%)`
+                ].join(', ');
+                elementoDetalle.textContent = `Análisis completo: ${detalleAnalisis}`;
+            } else {
+                elementoDetalle.textContent = detalle;
+            }
             elementoDetalle.classList.toggle('text-red-500', error);
         }
     };
