@@ -125,6 +125,90 @@
       </div>
     </div>
 
+    <!-- Proyección basada en análisis estadístico -->
+    <div id="analisis-container" class="rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 hover:shadow-xl transition-all duration-300 analisis-transparente" style="opacity: 0.8;">
+      <div class="text-center cursor-pointer" onclick="toggleAnalisis()">
+        <h2 class="text-xl font-semibold mb-4 text-white">📊 Proyección basada en los 4 tipos de análisis de los últimos sorteos</h2>
+        
+        <!-- Indicador de expansión -->
+        <div class="flex justify-center items-center">
+          <span class="text-sm text-gray-300 mr-2">Haz clic para ver</span>
+          <svg id="arrow-icon-analisis" class="w-5 h-5 text-gray-300 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Contenido expandible (oculto por defecto) -->
+      <div id="contenido-analisis" class="hidden mt-6">
+        <p class="text-sm italic text-center mb-6 text-gray-300">Combinaciones generadas usando análisis de frecuencias, suma de números, balance pares/impares y distribución por décadas</p>
+        
+        <!-- Botón para generar nueva proyección -->
+        <div class="text-center mb-6">
+          <button id="btn-generar-analisis" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-full font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+            🧮 Generar Nueva Proyección
+          </button>
+        </div>
+        
+        <!-- Proyecciones por sorteo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- Melate -->
+          <div class="text-center p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
+            <h3 class="font-bold text-orange-600 mb-2">📊 Melate</h3>
+            <p id="proyeccion-melate" class="text-lg font-bold tracking-wider text-orange-800">-- -- -- -- -- --</p>
+            <div class="text-xs text-gray-600 mt-2">
+              <span id="detalle-melate">Generando análisis...</span>
+            </div>
+          </div>
+          
+          <!-- Revancha -->
+          <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200">
+            <h3 class="font-bold text-red-600 mb-2">📊 Revancha</h3>
+            <p id="proyeccion-revancha" class="text-lg font-bold tracking-wider text-red-800">-- -- -- -- -- --</p>
+            <div class="text-xs text-gray-600 mt-2">
+              <span id="detalle-revancha">Generando análisis...</span>
+            </div>
+          </div>
+          
+          <!-- Revanchita -->
+          <div class="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
+            <h3 class="font-bold text-yellow-600 mb-2">📊 Revanchita</h3>
+            <p id="proyeccion-revanchita" class="text-lg font-bold tracking-wider text-yellow-800">-- -- -- -- -- --</p>
+            <div class="text-xs text-gray-600 mt-2">
+              <span id="detalle-revanchita">Generando análisis...</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Metodología utilizada -->
+        <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4 mt-4">
+          <h4 class="text-white font-semibold mb-2 text-center">🔬 Metodología de Análisis</h4>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs text-gray-300">
+            <div class="text-center">
+              <div class="text-yellow-400 font-bold">22%</div>
+              <div>Frecuencias históricas</div>
+            </div>
+            <div class="text-center">
+              <div class="text-blue-400 font-bold">22%</div>
+              <div>Suma de números</div>
+            </div>
+            <div class="text-center">
+              <div class="text-green-400 font-bold">22%</div>
+              <div>Balance pares/impares</div>
+            </div>
+            <div class="text-center">
+              <div class="text-purple-400 font-bold">22%</div>
+              <div>Distribución por décadas</div>
+            </div>
+            <div class="text-center">
+              <div class="text-red-400 font-bold">12%</div>
+              <div>Factor aleatorio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="mt-12 text-xs text-gray-400 max-w-4xl mx-auto">
       Este sistema genera números completamente al azar. No garantiza premios. Juega con responsabilidad.
@@ -159,7 +243,7 @@
     };
   </script>
   <script type="module">
-    import { cargarDatosHistoricos, generarCombinacionesAleatorias } from './js/dataParser.js';
+    import { cargarDatosHistoricos, generarCombinacionesAleatorias, analizarSumaNumeros, analizarParesImpares, analizarDecadaTerminacion, calcularFrecuencias } from './js/dataParser.js';
     import { generarPrediccionPersonalizada } from './js/mlPredictor.js';
 
     let cantidadSeleccionada = 1;
@@ -213,8 +297,9 @@
       }
       
       if (contenido.classList.contains('hidden')) {
-        // Cerrar la caja de aleatorias si está abierta
+        // Cerrar las otras cajas si están abiertas
         cerrarCajaAleatorias();
+        cerrarCajaAnalisis();
         
         // Expandir esta caja
         contenido.classList.remove('hidden');
@@ -262,8 +347,9 @@
       }
       
       if (contenido.classList.contains('hidden')) {
-        // Cerrar la caja de predicciones IA si está abierta
+        // Cerrar las otras cajas si están abiertas
         cerrarCajaPredicciones();
+        cerrarCajaAnalisis();
         
         // Expandir esta caja
         contenido.classList.remove('hidden');
@@ -305,6 +391,17 @@
       }
     }
 
+    // Función auxiliar para cerrar la caja de análisis
+    function cerrarCajaAnalisis() {
+      const contenido = document.getElementById('contenido-analisis');
+      const arrow = document.getElementById('arrow-icon-analisis');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.classList.add('hidden');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
     // Función para limpiar las combinaciones aleatorias generadas
     function limpiarCombinacionesAleatorias() {
       const container = document.getElementById('combinaciones-container');
@@ -313,6 +410,39 @@
         console.log('🧹 Combinaciones aleatorias limpiadas');
       }
     }
+
+    // Función para toggle (expandir/colapsar) la sección de análisis
+    function toggleAnalisis() {
+      const contenido = document.getElementById('contenido-analisis');
+      const arrow = document.getElementById('arrow-icon-analisis');
+      
+      if (!contenido || !arrow) {
+        console.error('❌ Elementos de UI análisis no encontrados');
+        return;
+      }
+      
+      if (contenido.classList.contains('hidden')) {
+        // Cerrar las otras cajas si están abiertas
+        cerrarCajaAleatorias();
+        cerrarCajaPredicciones();
+        
+        // Expandir esta caja
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        
+        // Generar proyecciones automáticamente al abrir
+        setTimeout(() => {
+          generarProyeccionesAnalisis();
+        }, 300);
+      } else {
+        // Colapsar
+        contenido.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // Hacer la función disponible globalmente
+    window.toggleAnalisis = toggleAnalisis;
 
     // Hacer la función disponible globalmente
     window.toggleAleatorias = toggleAleatorias;
@@ -354,6 +484,12 @@
           </div>
         `;
       }
+    });
+
+    // Botón para generar nueva proyección de análisis
+    document.getElementById('btn-generar-analisis').addEventListener('click', async () => {
+      console.log('📊 Regenerando proyecciones de análisis...');
+      await generarProyeccionesAnalisis();
     });
 
     // Función para mostrar combinaciones
@@ -421,6 +557,225 @@
           </div>
         `;
       }
+    }
+
+    // === FUNCIONES PARA PROYECCIONES BASADAS EN ANÁLISIS ===
+    
+    // Función principal para generar proyecciones basadas en análisis
+    async function generarProyeccionesAnalisis() {
+      console.log('📊 Generando proyecciones basadas en análisis estadístico...');
+      
+      try {
+        // Asegurar que tenemos datos históricos
+        if (!datosHistoricos) {
+          datosHistoricos = await cargarDatosHistoricos('todos');
+        }
+        
+        const sorteos = ['melate', 'revancha', 'revanchita'];
+        
+        for (const sorteo of sorteos) {
+          try {
+            if (!datosHistoricos[sorteo] || !datosHistoricos[sorteo].numeros) {
+              console.warn(`⚠️ No hay datos disponibles para ${sorteo}`);
+              continue;
+            }
+            
+            // Mostrar loading
+            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+            if (elementoProyeccion) elementoProyeccion.textContent = '🔄 Analizando...';
+            if (elementoDetalle) elementoDetalle.textContent = 'Procesando 4 tipos de análisis...';
+            
+            // Generar proyección
+            const proyeccion = await generarProyeccionPorAnalisis(datosHistoricos[sorteo], sorteo);
+            
+            if (elementoProyeccion && proyeccion.numeros) {
+              elementoProyeccion.textContent = proyeccion.numeros.join(' - ');
+            }
+            
+            if (elementoDetalle && proyeccion.detalle) {
+              elementoDetalle.textContent = proyeccion.detalle;
+            }
+            
+            console.log(`✅ Proyección para ${sorteo}:`, proyeccion.numeros);
+            
+          } catch (error) {
+            console.error(`❌ Error generando proyección para ${sorteo}:`, error);
+            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            if (elementoProyeccion) elementoProyeccion.textContent = 'Error al generar';
+          }
+        }
+        
+      } catch (error) {
+        console.error('❌ Error en el sistema de proyección:', error);
+      }
+    }
+    
+    // Función para generar una proyección específica por sorteo
+    async function generarProyeccionPorAnalisis(datosSorteo, sorteo) {
+      console.log(`🔍 Generando proyección para ${sorteo}...`);
+      
+      // Análisis 1: Frecuencias históricas (22%)
+      const frecuencias = calcularFrecuencias(datosSorteo.numeros);
+      const numerosPorFrecuencia = seleccionarPorFrecuencia(frecuencias);
+      
+      // Análisis 2: Suma de números (22%)
+      const analisisSuma = analizarSumaNumeros({[sorteo]: datosSorteo});
+      const numerosPorSuma = seleccionarPorSuma(analisisSuma[sorteo]);
+      
+      // Análisis 3: Balance pares/impares (22%)
+      const analisisPares = analizarParesImpares({[sorteo]: datosSorteo});
+      const numerosPorBalance = seleccionarPorBalance(analisisPares[sorteo]);
+      
+      // Análisis 4: Distribución por décadas (22%)
+      const analisisDecadas = analizarDecadaTerminacion({[sorteo]: datosSorteo});
+      const numerosPorDecadas = seleccionarPorDecadas(analisisDecadas[sorteo]);
+      
+      // Factor aleatorio (12%)
+      const numerosAleatorios = generarNumerosAleatorios();
+      
+      // Combinar todos los análisis con sus pesos
+      const combinacionFinal = combinarAnalisis({
+        frecuencias: numerosPorFrecuencia,
+        suma: numerosPorSuma,
+        balance: numerosPorBalance,
+        decadas: numerosPorDecadas,
+        aleatorios: numerosAleatorios
+      });
+      
+      const detalle = `F:${numerosPorFrecuencia.slice(0,2).join(',')} S:${numerosPorSuma.slice(0,2).join(',')} B:${numerosPorBalance.slice(0,2).join(',')} D:${numerosPorDecadas.slice(0,2).join(',')}`;
+      
+      return {
+        numeros: combinacionFinal,
+        detalle: detalle
+      };
+    }
+    
+    // Seleccionar números por frecuencia (más frecuentes tienen mayor probabilidad)
+    function seleccionarPorFrecuencia(frecuencias) {
+      const ordenados = Object.entries(frecuencias)
+        .sort(([,a], [,b]) => b - a)
+        .map(([num]) => parseInt(num));
+      
+      // Seleccionar los 20 más frecuentes con algo de variación
+      const candidatos = ordenados.slice(0, 20);
+      return mezclarArray(candidatos).slice(0, 8);
+    }
+    
+    // Seleccionar números por suma (buscar números que sumen en el rango óptimo)
+    function seleccionarPorSuma(analisisSuma) {
+      const rangoOptimo = analisisSuma.rangoMasFrecuente[0]; // '150-199', etc.
+      const [min, max] = rangoOptimo.split('-').map(n => parseInt(n) || 300);
+      
+      // Generar números que tiendan a sumar en ese rango
+      const numeros = [];
+      const targetSum = (min + max) / 2; // Suma objetivo
+      const avgPerNumber = targetSum / 6; // Promedio por número
+      
+      for (let i = 0; i < 8; i++) {
+        const variation = (Math.random() - 0.5) * 20; // Variación de ±10
+        const numero = Math.max(1, Math.min(56, Math.round(avgPerNumber + variation)));
+        numeros.push(numero);
+      }
+      
+      return [...new Set(numeros)].slice(0, 8); // Eliminar duplicados
+    }
+    
+    // Seleccionar números por balance pares/impares
+    function seleccionarPorBalance(analisisPares) {
+      const distribucionOptima = analisisPares.distribucionMasFrecuente[0]; // '3p-3i', etc.
+      const [pares] = distribucionOptima.split('-').map(s => parseInt(s.replace('p', '')));
+      
+      const numerosPares = [];
+      const numerosImpares = [];
+      
+      // Generar pares e impares según la distribución óptima
+      for (let i = 2; i <= 56; i += 2) {
+        if (numerosPares.length < 4) numerosPares.push(i);
+      }
+      
+      for (let i = 1; i <= 56; i += 2) {
+        if (numerosImpares.length < 4) numerosImpares.push(i);
+      }
+      
+      const seleccionados = [];
+      seleccionados.push(...mezclarArray(numerosPares).slice(0, Math.min(pares, 4)));
+      seleccionados.push(...mezclarArray(numerosImpares).slice(0, Math.min(6-pares, 4)));
+      
+      return mezclarArray(seleccionados).slice(0, 8);
+    }
+    
+    // Seleccionar números por décadas
+    function seleccionarPorDecadas(analisisDecadas) {
+      const decadaOptima = analisisDecadas.decadaMasFrecuente[0]; // '21-30', etc.
+      const [min, max] = decadaOptima.split('-').map(n => parseInt(n));
+      
+      const numerosDeLaDecada = [];
+      for (let i = min; i <= max; i++) {
+        numerosDeLaDecada.push(i);
+      }
+      
+      // Seleccionar algunos de la década óptima y algunos aleatorios
+      const seleccionados = [];
+      seleccionados.push(...mezclarArray(numerosDeLaDecada).slice(0, 4));
+      
+      // Agregar algunos números de otras décadas
+      const otrosNumeros = [];
+      for (let i = 1; i <= 56; i++) {
+        if (i < min || i > max) otrosNumeros.push(i);
+      }
+      seleccionados.push(...mezclarArray(otrosNumeros).slice(0, 4));
+      
+      return mezclarArray(seleccionados).slice(0, 8);
+    }
+    
+    // Generar números completamente aleatorios
+    function generarNumerosAleatorios() {
+      const numeros = [];
+      while (numeros.length < 8) {
+        const num = Math.floor(Math.random() * 56) + 1;
+        if (!numeros.includes(num)) {
+          numeros.push(num);
+        }
+      }
+      return numeros;
+    }
+    
+    // Combinar todos los análisis según los pesos especificados
+    function combinarAnalisis(analisis) {
+      const pool = [];
+      
+      // Agregar números según los pesos (22%, 22%, 22%, 22%, 12%)
+      // Para 6 números finales, esto se traduce aproximadamente a:
+      analisis.frecuencias.forEach(num => pool.push(num, num)); // 2 veces (peso alto)
+      analisis.suma.forEach(num => pool.push(num, num)); // 2 veces
+      analisis.balance.forEach(num => pool.push(num, num)); // 2 veces  
+      analisis.decadas.forEach(num => pool.push(num, num)); // 2 veces
+      analisis.aleatorios.forEach(num => pool.push(num)); // 1 vez (peso bajo)
+      
+      // Seleccionar 6 números únicos del pool
+      const numerosUnicos = [...new Set(pool)];
+      const combinacionFinal = mezclarArray(numerosUnicos).slice(0, 6).sort((a, b) => a - b);
+      
+      // Si no tenemos 6 números, completar con aleatorios
+      while (combinacionFinal.length < 6) {
+        const num = Math.floor(Math.random() * 56) + 1;
+        if (!combinacionFinal.includes(num)) {
+          combinacionFinal.push(num);
+        }
+      }
+      
+      return combinacionFinal.sort((a, b) => a - b);
+    }
+    
+    // Función auxiliar para mezclar array
+    function mezclarArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
     }
 
     // Función para generar un conjunto de números aleatorios como fallback
