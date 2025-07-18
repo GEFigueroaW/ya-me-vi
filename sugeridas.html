@@ -143,19 +143,12 @@
       <div id="contenido-analisis" class="hidden mt-6">
         <p class="text-sm italic text-center mb-6 text-gray-300">Combinaciones generadas usando análisis de frecuencias, suma de números, balance pares/impares y distribución por décadas</p>
         
-        <!-- Botón para generar nueva proyección -->
-        <div class="text-center mb-6">
-          <button id="btn-generar-analisis" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-full font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-            🧮 Generar Nueva Proyección
-          </button>
-        </div>
-        
         <!-- Proyecciones por sorteo -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <!-- Melate -->
-          <div class="text-center p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
-            <h3 class="font-bold text-orange-600 mb-2">📊 Melate</h3>
-            <p id="proyeccion-melate" class="text-lg font-bold tracking-wider text-orange-800">-- -- -- -- -- --</p>
+          <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200">
+            <h3 class="font-bold text-red-600 mb-2">📊 Melate</h3>
+            <p id="proyeccion-melate" class="text-lg font-bold tracking-wider text-red-800">-- -- -- -- -- --</p>
             <div class="text-xs text-gray-600 mt-2">
               <span id="detalle-melate">Generando análisis...</span>
             </div>
@@ -525,61 +518,117 @@
         isAnalisisOpen = true;
         console.log('✅ Caja análisis abierta');
         
-        // Generar proyecciones automáticamente con mejor manejo de errores
-        console.log('🔍 Verificando funciones de análisis:', {
-          suma: typeof window.analizarSumaNumeros === 'function',
-          pares: typeof window.analizarParesImpares === 'function',
-          decada: typeof window.analizarDecadaPorPosicion === 'function'
-        });
-        
-        try {
-          // Primero verificamos si tenemos las funciones de análisis disponibles
-          if (window.analizarSumaNumeros && window.analizarParesImpares && window.analizarDecadaPorPosicion) {
-            console.log('✅ Usando funciones de análisis del módulo global');
+        // Siempre intentar cargar los datos históricos si no están disponibles
+        const cargarYAnalizarDatos = async () => {
+          try {
+            console.log('🔄 Verificando y cargando datos históricos...');
             
-            // Si tenemos datos históricos, realizamos los análisis
-            if (window.datosHistoricos) {
-              // Realizar los análisis usando las funciones del módulo
-              const sumAnalisis = window.analizarSumaNumeros(window.datosHistoricos);
-              const paresAnalisis = window.analizarParesImpares(window.datosHistoricos);
-              const decadaAnalisis = window.analizarDecadaPorPosicion(window.datosHistoricos);
-              
-              // Agregar los análisis a los datos
-              window.datosHistoricos.sumAnalisis = sumAnalisis;
-              window.datosHistoricos.paresAnalisis = paresAnalisis;
-              window.datosHistoricos.decadaAnalisis = decadaAnalisis;
+            // Si los datos no están cargados, intentamos cargarlos
+            if (!window.datosHistoricos) {
+              if (typeof window.cargarDatosHistoricos === 'function') {
+                console.log('� Cargando datos históricos...');
+                try {
+                  window.datosHistoricos = await window.cargarDatosHistoricos('todos');
+                  console.log('✅ Datos históricos cargados correctamente');
+                } catch (err) {
+                  console.error('❌ Error cargando datos históricos:', err);
+                }
+              } else {
+                console.error('❌ Función cargarDatosHistoricos no disponible');
+              }
             }
-          }
-          
-          // Continuamos con la generación de proyecciones
-          const fnProyecciones = window.generarProyeccionesAnalisis || generarProyeccionesAnalisis;
-          
-          if (fnProyecciones) {
-            console.log('🔄 Generando proyecciones de análisis...');
-            // Ejecutar inmediatamente para mejor respuesta
-            fnProyecciones().catch(error => {
-              console.error('❌ Error en proyecciones de análisis:', error);
-              // Actualizar interfaz con error
+            
+            // Verificar funciones de análisis
+            console.log('🔍 Verificando funciones de análisis:', {
+              suma: typeof window.analizarSumaNumeros === 'function',
+              pares: typeof window.analizarParesImpares === 'function',
+              decada: typeof window.analizarDecadaPorPosicion === 'function'
+            });
+            
+            // Realizar análisis con las funciones disponibles
+            if (window.analizarSumaNumeros && window.analizarParesImpares && window.analizarDecadaPorPosicion) {
+              console.log('✅ Usando funciones de análisis del módulo global');
+              
+              // Si tenemos datos históricos, realizamos los análisis
+              if (window.datosHistoricos) {
+                // Mostrar mensaje de actualización
+                ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                  const elem = document.getElementById(`proyeccion-${sorteo}`);
+                  const detalle = document.getElementById(`detalle-${sorteo}`);
+                  if (elem) elem.textContent = '🔄 Actualizando...';
+                  if (detalle) detalle.textContent = 'Generando proyecciones...';
+                });
+                
+                // Realizar los análisis usando las funciones del módulo
+                const sumAnalisis = window.analizarSumaNumeros(window.datosHistoricos);
+                const paresAnalisis = window.analizarParesImpares(window.datosHistoricos);
+                const decadaAnalisis = window.analizarDecadaPorPosicion(window.datosHistoricos);
+                
+                // Agregar los análisis a los datos
+                window.datosHistoricos.sumAnalisis = sumAnalisis;
+                window.datosHistoricos.paresAnalisis = paresAnalisis;
+                window.datosHistoricos.decadaAnalisis = decadaAnalisis;
+                
+                // Generar proyecciones
+                const fnProyecciones = window.generarProyeccionesAnalisis || generarProyeccionesAnalisis;
+                
+                if (fnProyecciones) {
+                  console.log('🔄 Generando proyecciones de análisis...');
+                  await fnProyecciones().catch(error => {
+                    console.error('❌ Error en proyecciones de análisis:', error);
+                    // Actualizar interfaz con error
+                    ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                      const elem = document.getElementById(`proyeccion-${sorteo}`);
+                      const detalle = document.getElementById(`detalle-${sorteo}`);
+                      if (elem) elem.textContent = 'Error al generar';
+                      if (detalle) detalle.textContent = 'Intente nuevamente';
+                    });
+                  });
+                } else {
+                  console.error('❌ función generarProyeccionesAnalisis no está disponible');
+                  // Actualizar interfaz con error
+                  ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                    const elem = document.getElementById(`proyeccion-${sorteo}`);
+                    const detalle = document.getElementById(`detalle-${sorteo}`);
+                    if (elem) elem.textContent = 'Sistema no disponible';
+                    if (detalle) detalle.textContent = 'Recargue la página';
+                  });
+                }
+              } else {
+                console.error('❌ No hay datos históricos disponibles');
+                // Mostrar mensaje de error
+                ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                  const elem = document.getElementById(`proyeccion-${sorteo}`);
+                  const detalle = document.getElementById(`detalle-${sorteo}`);
+                  if (elem) elem.textContent = 'Sin datos disponibles';
+                  if (detalle) detalle.textContent = 'Error al cargar los datos';
+                });
+              }
+            } else {
+              console.error('❌ Faltan funciones de análisis');
+              // Mostrar mensaje de error
               ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
                 const elem = document.getElementById(`proyeccion-${sorteo}`);
                 const detalle = document.getElementById(`detalle-${sorteo}`);
-                if (elem) elem.textContent = 'Error al generar';
-                if (detalle) detalle.textContent = 'Intente nuevamente';
+                if (elem) elem.textContent = 'Sistema no disponible';
+                if (detalle) detalle.textContent = 'Error en módulos de análisis';
               });
-            });
-          } else {
-            console.error('❌ función generarProyeccionesAnalisis no está disponible');
-            // Actualizar interfaz con error
+            }
+          } catch (error) {
+            console.error('❌ Error general al generar proyecciones:', error);
+            // Mostrar mensaje de error general
             ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
               const elem = document.getElementById(`proyeccion-${sorteo}`);
               const detalle = document.getElementById(`detalle-${sorteo}`);
-              if (elem) elem.textContent = 'Sistema no disponible';
-              if (detalle) detalle.textContent = 'Recargue la página';
+              if (elem) elem.textContent = 'Error inesperado';
+              if (detalle) detalle.textContent = 'Intente nuevamente más tarde';
             });
           }
-        } catch (error) {
-          console.error('❌ Error general al generar proyecciones:', error);
-        }
+        };
+        
+        // Ejecutar el proceso de análisis inmediatamente
+        cargarYAnalizarDatos();
+        
       } else {
         // Cerrar esta caja
         contenido.classList.add('hidden');
@@ -871,15 +920,8 @@
       }
     });
 
-    // Botón para generar nueva proyección de análisis
-    document.getElementById('btn-generar-analisis').addEventListener('click', async () => {
-      console.log('📊 Regenerando proyecciones de análisis...');
-      if (window.generarProyeccionesAnalisis) {
-        await window.generarProyeccionesAnalisis();
-      } else {
-        console.error('❌ generarProyeccionesAnalisis no está disponible');
-      }
-    });
+    // El botón de generar nueva proyección ha sido eliminado
+    // La generación de proyecciones ahora ocurre automáticamente al abrir la caja de análisis
 
     // Función para mostrar combinaciones
     function mostrarCombinaciones(combinaciones) {
@@ -1662,6 +1704,7 @@
   <!-- Scripts de módulos ES6 -->
   <script type="module" src="js/dataParser.js"></script>
   <script type="module" src="js/dataParserGlobal.js"></script>
+  <script src="js/dataLoader.js"></script>
   
   <!-- Script para arreglar las funciones de análisis -->
   <script>
