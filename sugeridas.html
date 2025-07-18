@@ -726,25 +726,44 @@
     function obtenerNumeroSorteoActual() {
       console.log('🔍 Obteniendo número de sorteo actual...');
       
-      // Si tenemos datos históricos, obtenemos el último sorteo de Melate y le sumamos 1
-      if (window.datosHistoricos && 
-          window.datosHistoricos.melate && 
-          window.datosHistoricos.melate.ultimoSorteo) {
-        const ultimoSorteo = parseInt(window.datosHistoricos.melate.ultimoSorteo);
-        if (!isNaN(ultimoSorteo) && ultimoSorteo > 0) {
-          const proximoSorteo = ultimoSorteo + 1;
-          console.log(`✅ Próximo sorteo calculado: ${proximoSorteo} (último: ${ultimoSorteo})`);
-          return proximoSorteo;
-        } else {
-          console.error('❌ Último sorteo no es un número válido:', window.datosHistoricos.melate.ultimoSorteo);
+      // Primero intentamos obtener el último sorteo desde los datos históricos del Melate
+      if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+        try {
+          // Ordenar los sorteos por número de concurso (descendente) para obtener el último
+          const sorteos = window.datosHistoricos.melate.sorteos;
+          
+          if (sorteos.length > 0) {
+            // Buscar el sorteo con el número más alto
+            let ultimoSorteoNum = 0;
+            
+            for (const sorteo of sorteos) {
+              // Convertir el número de concurso a entero y tomar el máximo
+              const numConcurso = parseInt(sorteo.concurso);
+              if (!isNaN(numConcurso) && numConcurso > ultimoSorteoNum) {
+                ultimoSorteoNum = numConcurso;
+              }
+            }
+            
+            if (ultimoSorteoNum > 0) {
+              const proximoSorteo = ultimoSorteoNum + 1;
+              console.log(`✅ Próximo sorteo calculado: ${proximoSorteo} (último: ${ultimoSorteoNum})`);
+              return proximoSorteo;
+            }
+          }
+          
+          console.warn('⚠️ No se encontraron sorteos válidos en los datos');
+        } catch (error) {
+          console.error('❌ Error al procesar los sorteos:', error);
         }
       } else {
         // Mostrar qué datos tenemos disponibles para debug
         console.warn('⚠️ Datos históricos incompletos:', {
           datosHistoricos: !!window.datosHistoricos,
           melate: window.datosHistoricos ? !!window.datosHistoricos.melate : false,
-          ultimoSorteo: window.datosHistoricos && window.datosHistoricos.melate ? 
-                        window.datosHistoricos.melate.ultimoSorteo : 'no disponible'
+          tieneSorteos: window.datosHistoricos && window.datosHistoricos.melate ? 
+                        !!window.datosHistoricos.melate.sorteos : false,
+          numSorteos: window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos ? 
+                      window.datosHistoricos.melate.sorteos.length : 0
         });
       }
       
@@ -773,7 +792,24 @@
     // Función para actualizar el título con el número de sorteo
     function actualizarTituloSorteo() {
       try {
-        const numeroSorteo = obtenerNumeroSorteoActual();
+        // Primero intentar usar la función especializada para obtener el último sorteo
+        let ultimoSorteo = null;
+        let proximoSorteo = null;
+        
+        if (typeof window.obtenerUltimoSorteoMelate === 'function') {
+          ultimoSorteo = window.obtenerUltimoSorteoMelate();
+          if (ultimoSorteo && !isNaN(ultimoSorteo)) {
+            proximoSorteo = ultimoSorteo + 1;
+            console.log(`📊 Próximo sorteo: ${proximoSorteo} (basado en último: ${ultimoSorteo})`);
+          }
+        }
+        
+        // Si no se pudo obtener, usar el método tradicional
+        if (!proximoSorteo) {
+          proximoSorteo = obtenerNumeroSorteoActual();
+          console.log(`📊 Usando método alternativo para próximo sorteo: ${proximoSorteo}`);
+        }
+        
         const tituloElement = document.getElementById('titulo-sorteo');
         if (tituloElement) {
           // Usar animación para hacer más visible el cambio
@@ -782,9 +818,9 @@
           
           // Actualizar el contenido y restaurar la opacidad
           setTimeout(() => {
-            tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
+            tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${proximoSorteo}`;
             tituloElement.style.opacity = 1;
-            console.log(`📝 Título actualizado con sorteo: ${numeroSorteo}`);
+            console.log(`📝 Título actualizado con próximo sorteo: ${proximoSorteo}`);
           }, 300);
         } else {
           console.error('❌ Elemento titulo-sorteo no encontrado');

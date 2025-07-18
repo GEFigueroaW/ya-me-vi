@@ -1197,6 +1197,44 @@ window.cargarDatosHistoricos = window.cargarDatosHistoricos || async function(mo
   return resultado;
 };
 
+// Función para obtener el último número de sorteo de Melate
+window.obtenerUltimoSorteoMelate = function() {
+  console.log('🔍 Obteniendo último sorteo de Melate...');
+  
+  // Verificar si tenemos datos históricos cargados
+  if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+    try {
+      const sorteos = window.datosHistoricos.melate.sorteos;
+      
+      if (sorteos.length > 0) {
+        // Buscar el sorteo con el número más alto
+        let ultimoSorteo = 0;
+        
+        for (const sorteo of sorteos) {
+          // Convertir el número de concurso a entero y tomar el máximo
+          const numConcurso = parseInt(sorteo.concurso);
+          if (!isNaN(numConcurso) && numConcurso > ultimoSorteo) {
+            ultimoSorteo = numConcurso;
+          }
+        }
+        
+        if (ultimoSorteo > 0) {
+          console.log(`✅ Último sorteo de Melate: ${ultimoSorteo}`);
+          return ultimoSorteo;
+        }
+      }
+      
+      console.warn('⚠️ No se encontraron sorteos válidos en los datos');
+    } catch (error) {
+      console.error('❌ Error al procesar los sorteos:', error);
+    }
+  }
+  
+  // Si no encontramos un último sorteo, usar un fallback
+  console.warn('⚠️ Usando fallback para último sorteo');
+  return 4056; // Número base como fallback
+};
+
 // Confirmar que las funciones están disponibles
 console.log('✅ dataParserGlobal.js cargado correctamente');
 console.log('📊 Funciones de análisis disponibles globalmente:');
@@ -1206,3 +1244,4 @@ console.log('  - analizarDecadaPorPosicion');
 console.log('  - generarPrediccionPorFrecuencia');
 console.log('  - generarProyeccionesAnalisis');
 console.log('  - cargarDatosHistoricos');
+console.log('  - obtenerUltimoSorteoMelate');
