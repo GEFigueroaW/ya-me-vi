@@ -472,9 +472,9 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
     console.log(`🎲 Iniciando análisis completo para ${nombreSorteo}`);
     
     try {
-        // Verificar datos y preparar estructura
+        // Verificar y preparar datos
         if (!datos || !datos.sorteos || datos.sorteos.length === 0) {
-            console.warn('⚠️ Generando datos de respaldo para análisis completo');
+            console.warn('⚠️ No hay datos históricos, generando datos de análisis');
             datos = {
                 sorteos: Array(10).fill(null).map(() => ({
                     numeros: generarNumerosUnicos(6),
@@ -482,10 +482,16 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
                 })),
                 numeros: []
             };
-            // Generar pool de números para análisis
+            // Generar pool de números para análisis completo
             datos.sorteos.forEach(sorteo => {
                 datos.numeros.push(...sorteo.numeros);
             });
+        }
+        
+        // Actualizar mensaje en la UI para mostrar que es análisis completo
+        const elementoDetalle = document.getElementById(`detalle-${nombreSorteo.toLowerCase()}`);
+        if (elementoDetalle) {
+            elementoDetalle.textContent = 'Realizando análisis completo...';
         }
 
         // 1. Análisis de frecuencias (22%)
@@ -692,7 +698,7 @@ window.toggleAnalisis = async function() {
 window.generarProyeccionesAnalisis = async function() {
     console.log('📊 Iniciando análisis completo para todos los sorteos...');
     
-    const actualizarUI = (sorteo, numeros, detalle, estadisticas = null, error = false) => {
+    const actualizarUI = (sorteo, numeros, detalle, error = false) => {
         const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
         const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
         
@@ -702,17 +708,13 @@ window.generarProyeccionesAnalisis = async function() {
         }
         
         if (elementoDetalle) {
-            if (estadisticas) {
-                const detalleAnalisis = [
-                    `Frecuencias (${(PESOS_ANALISIS.frecuencias * 100).toFixed(0)}%)`,
-                    `Suma (${(PESOS_ANALISIS.suma * 100).toFixed(0)}%)`,
-                    `Paridad (${(PESOS_ANALISIS.paridad * 100).toFixed(0)}%)`,
-                    `Décadas (${(PESOS_ANALISIS.decadas * 100).toFixed(0)}%)`
-                ].join(', ');
-                elementoDetalle.textContent = `Análisis completo: ${detalleAnalisis}`;
-            } else {
-                elementoDetalle.textContent = detalle;
-            }
+            const detalleAnalisis = [
+                `Frecuencias (${(PESOS_ANALISIS.frecuencias * 100).toFixed(0)}%)`,
+                `Suma (${(PESOS_ANALISIS.suma * 100).toFixed(0)}%)`,
+                `Paridad (${(PESOS_ANALISIS.paridad * 100).toFixed(0)}%)`,
+                `Décadas (${(PESOS_ANALISIS.decadas * 100).toFixed(0)}%)`
+            ].join(', ');
+            elementoDetalle.textContent = error ? detalle : `Análisis completo usando: ${detalleAnalisis}`;
             elementoDetalle.classList.toggle('text-red-500', error);
         }
     };
