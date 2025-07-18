@@ -381,26 +381,108 @@ window.generarProyeccionesAnalisis = async function() {
         }
       }
       
-      // Función interna para generar proyección usando los 4 análisis especificados
+      // Función interna para generar proyección usando los 4 tipos de análisis
       async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
         console.log(`🎲 Iniciando generación de proyección para ${nombreSorteo}`);
+        
+        // Función para generar números basados en análisis específico
+        function generarNumerosPorAnalisis(tipo, datos) {
+            const numeros = new Set();
+            switch(tipo) {
+                case 'frecuencias':
+                    // Análisis de frecuencias históricas (22%)
+                    const frecuencias = {};
+                    datos.numeros.forEach(n => frecuencias[n] = (frecuencias[n] || 0) + 1);
+                    const masComunes = Object.entries(frecuencias)
+                        .sort(([,a], [,b]) => b - a)
+                        .slice(0, 10)
+                        .map(([num]) => parseInt(num));
+                    while(numeros.size < 6) {
+                        numeros.add(masComunes[Math.floor(Math.random() * masComunes.length)]);
+                    }
+                    break;
+                    
+                case 'suma':
+                    // Análisis de suma de números (22%)
+                    const sumaObjetivo = 150; // Suma típica
+                    while(numeros.size < 6) {
+                        const num = Math.floor(Math.random() * 56) + 1;
+                        const sumaActual = Array.from(numeros).reduce((a,b) => a + b, 0);
+                        if (sumaActual + num <= sumaObjetivo) numeros.add(num);
+                    }
+                    break;
+                    
+                case 'paridad':
+                    // Balance pares/impares (22%)
+                    let pares = 0, impares = 0;
+                    while(numeros.size < 6) {
+                        const num = Math.floor(Math.random() * 56) + 1;
+                        if (num % 2 === 0 && pares < 3) {
+                            numeros.add(num);
+                            pares++;
+                        } else if (num % 2 !== 0 && impares < 3) {
+                            numeros.add(num);
+                            impares++;
+                        }
+                    }
+                    break;
+                    
+                case 'decadas':
+                    // Distribución por décadas (22%)
+                    const decadas = [
+                        [1,10], [11,20], [21,30], 
+                        [31,40], [41,50], [51,56]
+                    ];
+                    decadas.forEach(([min, max]) => {
+                        if (numeros.size < 6) {
+                            numeros.add(Math.floor(Math.random() * (max - min + 1)) + min);
+                        }
+                    });
+                    break;
+                    
+                case 'aleatorio':
+                    // Factor aleatorio (12%)
+                    while(numeros.size < 6) {
+                        numeros.add(Math.floor(Math.random() * 56) + 1);
+                    }
+                    break;
+            }
+            return Array.from(numeros).sort((a,b) => a - b);
+        }
         
         // Asegurar que los elementos de UI existen
         const elementoProyeccion = document.getElementById(`proyeccion-${nombreSorteo}`);
         const elementoDetalle = document.getElementById(`detalle-${nombreSorteo}`);
         
         try {
-            // Generar números usando los análisis
-            const analisisSuma = window.analizarSumaNumeros({ [nombreSorteo]: datos });
-            const analisisParidad = window.analizarParesImpares({ [nombreSorteo]: datos });
-            const analisisDecadas = window.analizarDecadaPorPosicion({ [nombreSorteo]: datos });
+            // Generar números usando los 5 tipos de análisis con sus respectivos pesos
+            const numerosGenerados = {
+                frecuencias: generarNumerosPorAnalisis('frecuencias', datos),
+                suma: generarNumerosPorAnalisis('suma', datos),
+                paridad: generarNumerosPorAnalisis('paridad', datos),
+                decadas: generarNumerosPorAnalisis('decadas', datos),
+                aleatorio: generarNumerosPorAnalisis('aleatorio', datos)
+            };
             
-            // Generar combinación final
-            const combinacion = window.generarPrediccionPorFrecuencia(datos.numeros || []);
+            // Combinar los números basados en los pesos de cada análisis
+            const numerosFrecuentes = new Map();
+            Object.entries(numerosGenerados).forEach(([tipo, nums]) => {
+                nums.forEach(num => {
+                    const pesoActual = numerosFrecuentes.get(num) || 0;
+                    numerosFrecuentes.set(num, pesoActual + PESOS_ANALISIS[tipo]);
+                });
+            });
             
-            // Actualizar UI
+            // Seleccionar los 6 números con mayor peso
+            const combinacionFinal = Array.from(numerosFrecuentes.entries())
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 6)
+                .map(([num]) => num)
+                .sort((a, b) => a - b);
+            
+            // Actualizar UI con la combinación final
             if (elementoProyeccion) {
-                elementoProyeccion.textContent = combinacion.join(' - ');
+                elementoProyeccion.textContent = combinacionFinal.join(' - ');
                 elementoProyeccion.style.display = 'block';
             }
             
