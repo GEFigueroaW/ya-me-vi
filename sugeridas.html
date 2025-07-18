@@ -270,10 +270,30 @@
         
         // Generar predicciones para cada sorteo
         const sorteos = ['melate', 'revancha', 'revanchita'];
+        const userId = 'usuario123'; // ID de usuario fijo para demostración
         
         for (const sorteo of sorteos) {
           try {
-            const prediccion = await generarPrediccionPersonalizada(datosHistoricos[sorteo], 'usuario123');
+            // Verificar que existan datos para este sorteo
+            if (!datosHistoricos[sorteo] || !datosHistoricos[sorteo].numeros || datosHistoricos[sorteo].numeros.length === 0) {
+              console.warn(`⚠️ No hay datos históricos disponibles para ${sorteo}`);
+              const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+              if (elementoCombo) {
+                elementoCombo.textContent = 'Datos insuficientes';
+              }
+              continue;
+            }
+            
+            // Crear objeto de datos específico para este sorteo
+            const datosSorteo = {
+              numeros: datosHistoricos[sorteo].numeros,
+              datos: datosHistoricos[sorteo].sorteos,
+              sorteo: sorteo
+            };
+            
+            // Llamar a generarPrediccionPersonalizada con los parámetros en el orden correcto
+            // La función espera (datos, userId) y no (userId, datos)
+            const prediccion = await generarPrediccionPersonalizada(datosSorteo, userId);
             
             const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
             if (elementoCombo && prediccion && prediccion.length === 6) {
@@ -351,16 +371,30 @@
       
       for (const sorteo of sorteos) {
         try {
-          const datosSorteo = datosHistoricos.datosPorSorteo[sorteo];
-          console.log(`🎯 Generando predicción IA para ${sorteo}...`);
+          // Asegurarnos de que usamos los datos específicos de cada sorteo
+          const datosSorteo = datosHistoricos.datosPorSorteo && datosHistoricos.datosPorSorteo[sorteo];
           
-          // Agregar información del sorteo a los datos
-          const datosSorteoConTipo = {
-            ...datosSorteo,
-            sorteo: sorteo
+          if (!datosSorteo || !datosSorteo.numeros || datosSorteo.numeros.length === 0) {
+            console.warn(`⚠️ No hay datos suficientes para ${sorteo}, usando fallback`);
+            const elementoId = `combinacion-${sorteo}`;
+            const elemento = document.getElementById(elementoId);
+            if (elemento) {
+              elemento.textContent = 'Datos insuficientes';
+            }
+            continue;
+          }
+          
+          console.log(`🎯 Generando predicción IA para ${sorteo} con ${datosSorteo.numeros.length} números históricos...`);
+          
+          // Crear objeto con los datos específicos y etiquetado correctamente
+          const datosSorteoEspecificos = {
+            numeros: datosSorteo.numeros,
+            datos: datosSorteo.datos || [],
+            sorteo: sorteo // Identificar claramente qué sorteo es
           };
           
-          const prediccion = await generarPrediccionPersonalizada(usuarioID, datosSorteoConTipo);
+          // Pasamos el ID de usuario y los datos específicos del sorteo
+          const prediccion = await generarPrediccionPersonalizada(usuarioID, datosSorteoEspecificos);
           const elementoId = `combinacion-${sorteo}`;
           const elemento = document.getElementById(elementoId);
           
