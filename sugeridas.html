@@ -7,8 +7,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
+  <script src="js/init.js"></script>
+  <script src="js/dataParser.js"></script>
+  <script src="js/dataParserGlobal.js"></script>
 </head>
-<body class="overflow-x-hidden">
+<body class="overflow-x-hidden" onload="if(window.yaMeVi)window.yaMeVi.init()">
 
   <!-- Fondo -->
   <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>

@@ -2,8 +2,13 @@
 // Módulo de compatibilidad para exponer funciones de dataParser.js globalmente
 // Facilita el uso de funciones de análisis en archivos HTML sin módulos ES6
 
-// Definir funciones en el ámbito global inmediatamente
-(function(global) {
+// Verificar inicialización
+function verificarInicializacion() {
+    if (!window.yaMeVi || !window.yaMeVi.initialized) {
+        throw new Error('Sistema YA ME VI no inicializado');
+    }
+    return true;
+}
     // Funciones de análisis base
     global.analizarSumaNumeros = function(datos) {
         console.log('🔄 Ejecutando analizarSumaNumeros');
@@ -475,8 +480,15 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
 
 // Implementación de generarProyeccionesAnalisis
 // Manejador de eventos para el contenedor de análisis
-window.toggleAnalisis = function() {
+window.toggleAnalisis = async function() {
     console.log('🔄 Toggle análisis clicked');
+    
+    // Verificar inicialización
+    if (!verificarInicializacion()) {
+        console.error('❌ Sistema no inicializado');
+        return;
+    }
+
     const contenido = document.getElementById('contenido-analisis');
     const arrow = document.getElementById('arrow-icon-analisis');
     
