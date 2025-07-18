@@ -150,6 +150,7 @@
     let cantidadSeleccionada = 1;
     let datosHistoricos = null;
     let prediccionesGeneradas = false;
+    let usuarioActualID = null; // Variable para almacenar el ID del usuario actual
 
     // Función para obtener el número de sorteo actual basado en el último sorteo de Melate
     function obtenerNumeroSorteoActual() {
@@ -329,9 +330,10 @@
           }
         }
         
-        // Generar predicciones para cada sorteo usando un ID único por usuario
+        // Generar predicciones para cada sorteo usando el ID real del usuario
         const sorteos = ['melate', 'revancha', 'revanchita'];
-        const userId = 'usuario123'; // ID fijo para garantizar resultados consistentes
+        // Usar el ID real del usuario autenticado para predicciones personalizadas
+        const userId = usuarioActualID || 'usuario-no-autenticado';
         
         for (const sorteo of sorteos) {
           try {
@@ -421,7 +423,8 @@
       if (!user) {
         window.location.href = "index.html";
       } else {
-        const usuarioID = user.uid;
+        usuarioActualID = user.uid; // Guardar el ID del usuario actual para usar en predicciones
+        console.log('👤 Usuario autenticado:', usuarioActualID);
         
         // Actualizar título con número de sorteo
         actualizarTituloSorteo();
