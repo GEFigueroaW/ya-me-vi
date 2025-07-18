@@ -19,8 +19,42 @@ export async function generarPrediccionPersonalizada(userId, datos) {
   
   console.log(`📊 Datos para ${tipoSorteo}: ${numeros.length} números, ${(datos.datos || []).length} sorteos`);
 
-  // Usar el nuevo sistema de 1000 combinaciones aleatorias
-  return generarCombinacionPersonalizada(userId, datos);
+  // Generar combinación personalizada
+  const combinacion = generarCombinacionPersonalizada(userId, datos);
+  
+  // Verificación final: asegurarse que no sea una secuencia simple
+  const esSecuencial = esSecuenciaPerfecta(combinacion);
+  if (esSecuencial) {
+    console.warn(`⚠️ Detectada secuencia simple en ${tipoSorteo}, aplicando corrección final`);
+    // Modificar un número para romper la secuencia
+    const indiceAleatorio = Math.floor(Math.random() * 6);
+    let nuevoNumero;
+    do {
+      nuevoNumero = Math.floor(Math.random() * 56) + 1;
+    } while (combinacion.includes(nuevoNumero));
+    
+    combinacion[indiceAleatorio] = nuevoNumero;
+    combinacion.sort((a, b) => a - b);
+  }
+  
+  return combinacion;
+}
+
+// Función auxiliar para verificar secuencias perfectas
+function esSecuenciaPerfecta(numeros) {
+  if (!Array.isArray(numeros) || numeros.length < 3) return false;
+  
+  // Ordenar los números
+  const numerosOrdenados = [...numeros].sort((a, b) => a - b);
+  
+  // Verificar si forman una secuencia perfecta
+  for (let i = 1; i < numerosOrdenados.length; i++) {
+    if (numerosOrdenados[i] !== numerosOrdenados[i-1] + 1) {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 // Sistema de 1000 combinaciones aleatorias consistentes
@@ -215,10 +249,13 @@ function analizarTendenciasRecientes(datosSorteos) {
 
 // Generar combinación avanzada con análisis multimétodo
 function generarCombinacionAvanzada(frecuencia, probabilidad, patrones, deltaAnalisis, desviacionAnalisis, tendenciasRecientes, semilla, tipoSorteo) {
-  const rng = crearGeneradorAleatorio(semilla);
+  // Asegurarnos de que cada tipo de sorteo tenga una semilla bien diferenciada
+  const semillaModificada = semilla + tipoSorteo.charCodeAt(0) * 1000;
+  const rng = crearGeneradorAleatorio(semillaModificada);
   
-  // Distribuir estrategias con más opciones
-  const estrategia = semilla % 6; // Ahora 6 estrategias diferentes
+  // Distribuir estrategias con más opciones, usando la primera letra del tipo de sorteo
+  // para asegurarnos de que diferentes tipos de sorteo tengan diferentes estrategias
+  const estrategia = (semillaModificada + tipoSorteo.charCodeAt(0)) % 6; // Ahora 6 estrategias diferentes
   
   // Log de la estrategia seleccionada
   const estrategiaTexto = [
@@ -438,18 +475,38 @@ function seleccionarPorTendencias(tendencias, rng) {
     
     // Generar un valor aleatorio entre 0 y suma total
     const rawRandom = rng();
-    const scaledRandom = rawRandom / (2**32) * suma;
+    const scaledRandom = rawRandom * suma;
     
-    // Selección ponderada
+    // Selección ponderada con protección anti-secuencial
     let acumulado = 0;
+    let ultimoNumero = numeros.length > 0 ? numeros[numeros.length - 1] : 0;
+    
+    // Primera pasada: intentar encontrar un número que no sea secuencial
     for (let i = 0; i < tendenciasFormateadas.length; i++) {
       acumulado += tendenciasFormateadas[i].score;
       if (scaledRandom <= acumulado) {
         const numero = tendenciasFormateadas[i].numero;
-        if (!usado.has(numero)) {
+        // Evitar números secuenciales (no elegir un número que sea inmediatamente siguiente al último)
+        if (!usado.has(numero) && (numero !== ultimoNumero + 1)) {
           numeros.push(numero);
           usado.add(numero);
           break;
+        }
+      }
+    }
+    
+    // Segunda pasada: si no se encontró un número no secuencial, elegir cualquiera
+    if (numeros.length === intentos - 1) {
+      acumulado = 0;
+      for (let i = 0; i < tendenciasFormateadas.length; i++) {
+        acumulado += tendenciasFormateadas[i].score;
+        if (scaledRandom <= acumulado) {
+          const numero = tendenciasFormateadas[i].numero;
+          if (!usado.has(numero)) {
+            numeros.push(numero);
+            usado.add(numero);
+            break;
+          }
         }
       }
     }
@@ -464,7 +521,41 @@ function seleccionarPorTendencias(tendencias, rng) {
     }
   }
   
-  return numeros.sort((a, b) => a - b);
+  // Ordenar los números seleccionados
+  const numerosOrdenados = numeros.sort((a, b) => a - b);
+  
+  // Verificar si tenemos una secuencia perfecta (1,2,3,4,5,6 o similar)
+  let esSecuenciaPerfecta = true;
+  for (let i = 1; i < numerosOrdenados.length; i++) {
+    if (numerosOrdenados[i] !== numerosOrdenados[i-1] + 1) {
+      esSecuenciaPerfecta = false;
+      break;
+    }
+  }
+  
+  // Si es una secuencia perfecta, reemplazar uno de los números para romperla
+  if (esSecuenciaPerfecta) {
+    console.log("Detectada secuencia perfecta, corrigiendo...");
+    // Reemplazar un número aleatorio de la secuencia (excepto el primero y el último)
+    const indiceAReemplazar = 1 + Math.floor(Math.random() * (numerosOrdenados.length - 2));
+    const numeroAntiguo = numerosOrdenados[indiceAReemplazar];
+    
+    // Buscar un número que no esté en la secuencia
+    let nuevoNumero;
+    do {
+      nuevoNumero = Math.floor(Math.random() * 56) + 1;
+    } while (usado.has(nuevoNumero));
+    
+    // Reemplazar el número
+    usado.delete(numeroAntiguo);
+    usado.add(nuevoNumero);
+    numerosOrdenados[indiceAReemplazar] = nuevoNumero;
+    
+    // Reordenar
+    numerosOrdenados.sort((a, b) => a - b);
+  }
+  
+  return numerosOrdenados;
 }
 
 // Estrategia mixta avanzada
