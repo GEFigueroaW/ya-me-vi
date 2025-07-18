@@ -231,36 +231,162 @@
         document.getElementById("footer-container").innerHTML = data;
       });
     
-    // Definir togglePrediccionIA en el ámbito global para que esté disponible para el onclick
-    window.togglePrediccionIA = function() {
-      // Esta función se ejecutará mientras se carga el módulo y redirigirá a la función real cuando esté disponible
-      console.log("Redirigiendo a la implementación del módulo...");
-      if (window.togglePrediccionIAImpl) {
-        window.togglePrediccionIAImpl();
-      } else {
-        console.error("La implementación de togglePrediccionIA no está lista aún");
-      }
-    };
+    // Variables globales
+    let isAleatoriaOpen = false;
+    let isPrediccionOpen = false;
+    let isAnalisisOpen = false;
 
-    // Definir toggleAleatorias en el ámbito global
-    window.toggleAleatorias = function() {
-      console.log("Redirigiendo a la implementación del módulo...");
-      if (window.toggleAleatoriasImpl) {
-        window.toggleAleatoriasImpl();
-      } else {
-        console.error("La implementación de toggleAleatorias no está lista aún");
+    // Funciones toggle simples y directas
+    function toggleAleatorias() {
+      console.log('🎲 Toggle aleatorias clicked');
+      const contenido = document.getElementById('contenido-aleatorias');
+      const arrow = document.getElementById('arrow-icon-aleatorias');
+      
+      if (!contenido || !arrow) {
+        console.error('❌ Elementos aleatorias no encontrados');
+        return;
       }
-    };
+      
+      if (contenido.classList.contains('hidden')) {
+        // Cerrar otras cajas
+        cerrarCajaPredicciones();
+        cerrarCajaAnalisis();
+        
+        // Abrir esta caja
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        isAleatoriaOpen = true;
+        console.log('✅ Caja aleatorias abierta');
+      } else {
+        // Cerrar esta caja
+        contenido.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+        isAleatoriaOpen = false;
+        limpiarCombinacionesAleatorias();
+        console.log('✅ Caja aleatorias cerrada');
+      }
+    }
 
-    // Definir toggleAnalisis en el ámbito global
-    window.toggleAnalisis = function() {
-      console.log("Redirigiendo a la implementación del módulo...");
-      if (window.toggleAnalisisImpl) {
-        window.toggleAnalisisImpl();
-      } else {
-        console.error("La implementación de toggleAnalisis no está lista aún");
+    function togglePrediccionIA() {
+      console.log('🤖 Toggle predicción IA clicked');
+      const contenido = document.getElementById('contenido-predicciones');
+      const arrow = document.getElementById('arrow-icon');
+      const container = document.getElementById('prediccion-container');
+      
+      if (!contenido || !arrow || !container) {
+        console.error('❌ Elementos predicción no encontrados');
+        return;
       }
-    };
+      
+      if (contenido.classList.contains('hidden')) {
+        // Cerrar otras cajas
+        cerrarCajaAleatorias();
+        cerrarCajaAnalisis();
+        
+        // Abrir esta caja
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        container.style.opacity = '1';
+        isPrediccionOpen = true;
+        console.log('✅ Caja predicción abierta');
+        
+        // Generar predicciones si no se han generado
+        if (!window.prediccionesGeneradas) {
+          generarPrediccionesPorSorteo();
+        }
+      } else {
+        // Cerrar esta caja
+        contenido.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+        container.style.opacity = '0.5';
+        isPrediccionOpen = false;
+        console.log('✅ Caja predicción cerrada');
+      }
+    }
+
+    function toggleAnalisis() {
+      console.log('📊 Toggle análisis clicked');
+      const contenido = document.getElementById('contenido-analisis');
+      const arrow = document.getElementById('arrow-icon-analisis');
+      
+      if (!contenido || !arrow) {
+        console.error('❌ Elementos análisis no encontrados');
+        return;
+      }
+      
+      if (contenido.classList.contains('hidden')) {
+        // Cerrar otras cajas
+        cerrarCajaAleatorias();
+        cerrarCajaPredicciones();
+        
+        // Abrir esta caja
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        isAnalisisOpen = true;
+        console.log('✅ Caja análisis abierta');
+        
+        // Generar proyecciones automáticamente
+        setTimeout(() => {
+          generarProyeccionesAnalisis();
+        }, 300);
+      } else {
+        // Cerrar esta caja
+        contenido.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+        isAnalisisOpen = false;
+        console.log('✅ Caja análisis cerrada');
+      }
+    }
+
+    // Funciones auxiliares para cerrar cajas
+    function cerrarCajaAleatorias() {
+      const contenido = document.getElementById('contenido-aleatorias');
+      const arrow = document.getElementById('arrow-icon-aleatorias');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.classList.add('hidden');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        isAleatoriaOpen = false;
+        limpiarCombinacionesAleatorias();
+      }
+    }
+
+    function cerrarCajaPredicciones() {
+      const contenido = document.getElementById('contenido-predicciones');
+      const arrow = document.getElementById('arrow-icon');
+      const container = document.getElementById('prediccion-container');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.classList.add('hidden');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        if (container) container.style.opacity = '0.5';
+        isPrediccionOpen = false;
+      }
+    }
+
+    function cerrarCajaAnalisis() {
+      const contenido = document.getElementById('contenido-analisis');
+      const arrow = document.getElementById('arrow-icon-analisis');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.classList.add('hidden');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        isAnalisisOpen = false;
+      }
+    }
+
+    function limpiarCombinacionesAleatorias() {
+      const container = document.getElementById('combinaciones-container');
+      if (container) {
+        container.innerHTML = '';
+        console.log('🧹 Combinaciones aleatorias limpiadas');
+      }
+    }
+
+    // Hacer funciones disponibles globalmente
+    window.toggleAleatorias = toggleAleatorias;
+    window.togglePrediccionIA = togglePrediccionIA;
+    window.toggleAnalisis = toggleAnalisis;
   </script>
   <script type="module">
     import { cargarDatosHistoricos, generarCombinacionesAleatorias, analizarSumaNumeros, analizarParesImpares, analizarDecadaTerminacion, calcularFrecuencias } from './js/dataParser.js';
@@ -289,22 +415,35 @@
 
     // Función para obtener el número de sorteo actual basado en el último sorteo de Melate
     function obtenerNumeroSorteoActual() {
+      console.log('🔍 Obteniendo número de sorteo actual...');
+      
       // Si tenemos datos históricos, obtenemos el último sorteo de Melate y le sumamos 1
-      if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.ultimoSorteo) {
+      if (window.datosHistoricos && 
+          window.datosHistoricos.melate && 
+          window.datosHistoricos.melate.ultimoSorteo) {
         const ultimoSorteo = parseInt(window.datosHistoricos.melate.ultimoSorteo);
-        if (!isNaN(ultimoSorteo)) {
-          return ultimoSorteo + 1;
+        if (!isNaN(ultimoSorteo) && ultimoSorteo > 0) {
+          const proximoSorteo = ultimoSorteo + 1;
+          console.log(`✅ Próximo sorteo calculado: ${proximoSorteo} (último: ${ultimoSorteo})`);
+          return proximoSorteo;
         }
       }
       
-      // Fallback si no hay datos disponibles
+      // Fallback mejorado si no hay datos disponibles
       const fecha = new Date();
       const year = fecha.getFullYear();
       const month = fecha.getMonth() + 1;
       const day = fecha.getDate();
       
-      const numeroSorteo = Math.floor(5000 + (month * 100) + day);
-      return numeroSorteo;
+      // Calcular número de sorteo basado en fecha actual (estimación)
+      // Melate se realiza miércoles y sábados, aproximadamente 104 sorteos por año
+      const inicioAno = new Date(year, 0, 1);
+      const diasDelAno = Math.floor((fecha - inicioAno) / (1000 * 60 * 60 * 24));
+      const sorteosAproximados = Math.floor(diasDelAno / 3.5); // Aproximadamente cada 3.5 días
+      
+      const numeroEstimado = 5000 + sorteosAproximados;
+      console.log(`⚠️ Usando número estimado: ${numeroEstimado} (fallback)`);
+      return numeroEstimado;
     }
 
     // Función para actualizar el título con el número de sorteo
@@ -313,176 +452,16 @@
       const tituloElement = document.getElementById('titulo-sorteo');
       if (tituloElement) {
         tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
+        console.log(`📝 Título actualizado con sorteo: ${numeroSorteo}`);
+      } else {
+        console.error('❌ Elemento titulo-sorteo no encontrado');
       }
     }
 
     // Hacer función global
     window.actualizarTituloSorteo = actualizarTituloSorteo;
 
-    // Función para toggle (expandir/colapsar) la predicción IA
-    function togglePrediccionIA() {
-      const contenido = document.getElementById('contenido-predicciones');
-      const arrow = document.getElementById('arrow-icon');
-      const container = document.getElementById('prediccion-container');
-      
-      if (!contenido || !arrow || !container) {
-        console.error('❌ Elementos de UI no encontrados');
-        return;
-      }
-      
-      if (contenido.classList.contains('hidden')) {
-        // Cerrar las otras cajas si están abiertas
-        cerrarCajaAleatorias();
-        cerrarCajaAnalisis();
-        
-        // Expandir esta caja
-        contenido.classList.remove('hidden');
-        arrow.style.transform = 'rotate(180deg)';
-        container.style.opacity = '1';
-        
-        try {
-          if (!window.prediccionesGeneradas) {
-            console.log('🔄 Iniciando generación de predicciones...');
-            generarPrediccionesPorSorteo()
-              .then(() => {
-                window.prediccionesGeneradas = true;
-                console.log('✅ Predicciones generadas exitosamente');
-              })
-              .catch(error => {
-                console.error('❌ Error generando predicciones:', error);
-                const mensajeEstado = document.getElementById('mensaje-estado');
-                if (mensajeEstado) {
-                  mensajeEstado.textContent = 'Error al generar predicciones. Intente nuevamente.';
-                }
-              });
-          }
-        } catch (error) {
-          console.error('❌ Error en togglePrediccionIA:', error);
-        }
-      } else {
-        // Colapsar
-        contenido.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
-        container.style.opacity = '0.5';
-      }
-    }
 
-    // Hacer la implementación disponible para el redireccionador global
-    window.togglePrediccionIAImpl = togglePrediccionIA;
-
-    // Función para toggle (expandir/colapsar) la sección de aleatorias
-    function toggleAleatorias() {
-      const contenido = document.getElementById('contenido-aleatorias');
-      const arrow = document.getElementById('arrow-icon-aleatorias');
-      
-      if (!contenido || !arrow) {
-        console.error('❌ Elementos de UI aleatorias no encontrados');
-        return;
-      }
-      
-      if (contenido.classList.contains('hidden')) {
-        // Cerrar las otras cajas si están abiertas
-        cerrarCajaPredicciones();
-        cerrarCajaAnalisis();
-        
-        // Expandir esta caja
-        contenido.classList.remove('hidden');
-        arrow.style.transform = 'rotate(180deg)';
-      } else {
-        // Colapsar y limpiar resultados
-        contenido.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
-        
-        // Limpiar las combinaciones generadas cuando se cierra
-        limpiarCombinacionesAleatorias();
-      }
-    }
-
-    // Hacer la implementación disponible para el redireccionador global
-    window.toggleAleatoriasImpl = toggleAleatorias;
-
-    // Función auxiliar para cerrar la caja de aleatorias
-    function cerrarCajaAleatorias() {
-      const contenido = document.getElementById('contenido-aleatorias');
-      const arrow = document.getElementById('arrow-icon-aleatorias');
-      
-      if (contenido && !contenido.classList.contains('hidden')) {
-        contenido.classList.add('hidden');
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
-        
-        // Limpiar las combinaciones generadas cuando se cierra
-        limpiarCombinacionesAleatorias();
-      }
-    }
-
-    // Función auxiliar para cerrar la caja de predicciones
-    function cerrarCajaPredicciones() {
-      const contenido = document.getElementById('contenido-predicciones');
-      const arrow = document.getElementById('arrow-icon');
-      const container = document.getElementById('prediccion-container');
-      
-      if (contenido && !contenido.classList.contains('hidden')) {
-        contenido.classList.add('hidden');
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
-        if (container) container.style.opacity = '0.5';
-      }
-    }
-
-    // Función auxiliar para cerrar la caja de análisis
-    function cerrarCajaAnalisis() {
-      const contenido = document.getElementById('contenido-analisis');
-      const arrow = document.getElementById('arrow-icon-analisis');
-      
-      if (contenido && !contenido.classList.contains('hidden')) {
-        contenido.classList.add('hidden');
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
-      }
-    }
-
-    // Función para limpiar las combinaciones aleatorias generadas
-    function limpiarCombinacionesAleatorias() {
-      const container = document.getElementById('combinaciones-container');
-      if (container) {
-        container.innerHTML = '';
-        console.log('🧹 Combinaciones aleatorias limpiadas');
-      }
-    }
-
-    // Función para toggle (expandir/colapsar) la sección de análisis
-    function toggleAnalisis() {
-      const contenido = document.getElementById('contenido-analisis');
-      const arrow = document.getElementById('arrow-icon-analisis');
-      
-      if (!contenido || !arrow) {
-        console.error('❌ Elementos de UI análisis no encontrados');
-        return;
-      }
-      
-      if (contenido.classList.contains('hidden')) {
-        // Cerrar las otras cajas si están abiertas
-        cerrarCajaAleatorias();
-        cerrarCajaPredicciones();
-        
-        // Expandir esta caja
-        contenido.classList.remove('hidden');
-        arrow.style.transform = 'rotate(180deg)';
-        
-        // Generar proyecciones automáticamente al abrir
-        setTimeout(() => {
-          generarProyeccionesAnalisis();
-        }, 300);
-      } else {
-        // Colapsar
-        contenido.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
-      }
-    }
-
-    // Hacer la función disponible globalmente
-    window.toggleAnalisisImpl = toggleAnalisis;
-
-    // Hacer la función disponible globalmente
-    window.toggleAleatorias = toggleAleatorias;
 
     // Botón de regreso
     document.getElementById('btn-back').addEventListener('click', () => {
@@ -996,8 +975,13 @@
       console.log('✅ Datos históricos cargados en sugeridas.html');
       // Actualizar el título con el número real una vez que tenemos los datos
       actualizarTituloSorteo();
+      
+      // Marcar que ya tenemos datos disponibles  
+      window.prediccionesGeneradas = false; // Reset para forzar regeneración con datos reales
     }).catch(error => {
       console.error('❌ Error cargando datos históricos:', error);
+      // Usar fallback para el título
+      actualizarTituloSorteo();
     });
 
   </script>
@@ -1015,25 +999,25 @@
         usuarioActualID = user.uid;
         console.log('👤 Usuario autenticado:', window.usuarioActualID);
         
-        // Actualizar título con número de sorteo
-        if (window.actualizarTituloSorteo) {
-          window.actualizarTituloSorteo();
-        }
-        
         try {
+          // Cargar datos históricos
           window.datosHistoricos = await cargarDatosHistoricos('todos');
           datosHistoricos = window.datosHistoricos;
           console.log('📊 Datos históricos cargados para predicciones IA');
           
           // Actualizar el título con el número real una vez que tenemos los datos
-          if (window.actualizarTituloSorteo) {
-            window.actualizarTituloSorteo();
-          }
+          actualizarTituloSorteo();
           
           // Cargar predicciones almacenadas para el usuario autenticado
           cargarPrediccionesAlmacenadas(window.usuarioActualID);
+          
+          // Reset de predicciones para asegurar datos frescos
+          window.prediccionesGeneradas = false;
+          
         } catch (error) {
           console.error('❌ Error cargando datos históricos:', error);
+          // Usar fallback para el título
+          actualizarTituloSorteo();
         }
       }
     });
@@ -1091,6 +1075,51 @@
       });
     };
 
+  </script>
+
+  <script>
+    // Script de verificación para debug
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔧 Verificando funciones toggle...');
+      
+      // Verificar que las funciones estén disponibles globalmente
+      if (typeof window.toggleAleatorias === 'function') {
+        console.log('✅ toggleAleatorias disponible');
+      } else {
+        console.error('❌ toggleAleatorias NO disponible');
+      }
+      
+      if (typeof window.togglePrediccionIA === 'function') {
+        console.log('✅ togglePrediccionIA disponible');
+      } else {
+        console.error('❌ togglePrediccionIA NO disponible');
+      }
+      
+      if (typeof window.toggleAnalisis === 'function') {
+        console.log('✅ toggleAnalisis disponible');
+      } else {
+        console.error('❌ toggleAnalisis NO disponible');
+      }
+      
+      // Verificar elementos del DOM
+      const elementos = [
+        'aleatorias-container',
+        'prediccion-container', 
+        'analisis-container',
+        'titulo-sorteo'
+      ];
+      
+      elementos.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+          console.log(`✅ Elemento ${id} encontrado`);
+        } else {
+          console.error(`❌ Elemento ${id} NO encontrado`);
+        }
+      });
+      
+      console.log('🔧 Verificación completada');
+    });
   </script>
 
   <style>
