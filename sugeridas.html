@@ -257,6 +257,24 @@
         arrow.style.transform = 'rotate(180deg)';
         isAleatoriaOpen = true;
         console.log('✅ Caja aleatorias abierta');
+        
+        // Preparar botones y contenedor para generación de combinaciones
+        document.querySelectorAll('.cantidad-btn').forEach(btn => {
+          if (btn.dataset.cantidad === '1') {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+        
+        // Asegurar cantidad seleccionada
+        window.cantidadSeleccionada = 1;
+        
+        // Verificar funcionalidad de generación aleatoria
+        console.log('🔍 Verificando función generarCombinacionesAleatorias:', {
+          disponible: typeof generarCombinacionesAleatorias !== 'undefined',
+          windowFn: typeof window.generarCombinacionesAleatorias !== 'undefined'
+        });
       } else {
         // Cerrar esta caja
         contenido.classList.add('hidden');
@@ -290,32 +308,42 @@
         isPrediccionOpen = true;
         console.log('✅ Caja predicción abierta');
         
+        // Actualizar título del sorteo inmediatamente
+        actualizarTituloSorteo();
+        
         // Generar predicciones si no se han generado
         try {
-          if (!window.prediccionesGeneradas) {
+          // Verificamos directamente si la función está disponible
+          console.log('� Verificando disponibilidad de funciones:', {
+            generarPrediccionesPorSorteo: typeof generarPrediccionesPorSorteo !== 'undefined',
+            windowFn: typeof window.generarPrediccionesPorSorteo !== 'undefined'
+          });
+          
+          const fnPredicciones = window.generarPrediccionesPorSorteo || generarPrediccionesPorSorteo;
+          
+          if (fnPredicciones) {
             console.log('🔄 Iniciando generación de predicciones IA...');
-            if (window.generarPrediccionesPorSorteo) {
-              window.generarPrediccionesPorSorteo()
-                .then(() => {
-                  window.prediccionesGeneradas = true;
-                  console.log('✅ Predicciones IA generadas exitosamente');
-                })
-                .catch(error => {
-                  console.error('❌ Error generando predicciones IA:', error);
-                  const mensajeEstado = document.getElementById('mensaje-estado');
-                  if (mensajeEstado) {
-                    mensajeEstado.textContent = 'Error al generar predicciones. Intente nuevamente.';
-                  }
-                });
-            } else {
-              console.error('❌ generarPrediccionesPorSorteo no está disponible en window');
-            }
+            fnPredicciones()
+              .then(() => {
+                window.prediccionesGeneradas = true;
+                console.log('✅ Predicciones IA generadas exitosamente');
+              })
+              .catch(error => {
+                console.error('❌ Error generando predicciones IA:', error);
+                const mensajeEstado = document.getElementById('mensaje-estado');
+                if (mensajeEstado) {
+                  mensajeEstado.textContent = 'Error al generar predicciones. Intente nuevamente.';
+                }
+              });
           } else {
-            console.log('✅ Usando predicciones IA ya generadas');
+            console.error('❌ función generarPrediccionesPorSorteo no está disponible');
+            const mensajeEstado = document.getElementById('mensaje-estado');
+            if (mensajeEstado) {
+              mensajeEstado.textContent = 'Sistema de predicciones no disponible. Intente recargar la página.';
+            }
           }
         } catch (error) {
           console.error('❌ Error en sistema de predicción IA:', error);
-        }
       } else {
         // Cerrar esta caja
         contenido.classList.add('hidden');
@@ -347,14 +375,40 @@
         isAnalisisOpen = true;
         console.log('✅ Caja análisis abierta');
         
-        // Generar proyecciones automáticamente
-        setTimeout(() => {
-          if (window.generarProyeccionesAnalisis) {
-            window.generarProyeccionesAnalisis();
+        // Generar proyecciones automáticamente con mejor manejo de errores
+        console.log('🔍 Verificando función generarProyeccionesAnalisis:', {
+          disponible: typeof generarProyeccionesAnalisis !== 'undefined',
+          windowFn: typeof window.generarProyeccionesAnalisis !== 'undefined'
+        });
+        
+        try {
+          const fnProyecciones = window.generarProyeccionesAnalisis || generarProyeccionesAnalisis;
+          
+          if (fnProyecciones) {
+            console.log('🔄 Generando proyecciones de análisis...');
+            // Ejecutar inmediatamente para mejor respuesta
+            fnProyecciones().catch(error => {
+              console.error('❌ Error en proyecciones de análisis:', error);
+              // Actualizar interfaz con error
+              ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                const elem = document.getElementById(`proyeccion-${sorteo}`);
+                const detalle = document.getElementById(`detalle-${sorteo}`);
+                if (elem) elem.textContent = 'Error al generar';
+                if (detalle) detalle.textContent = 'Intente nuevamente';
+              });
+            });
           } else {
-            console.error('❌ generarProyeccionesAnalisis no está disponible en window');
+            console.error('❌ función generarProyeccionesAnalisis no está disponible');
+            // Actualizar interfaz con error
+            ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+              const elem = document.getElementById(`proyeccion-${sorteo}`);
+              const detalle = document.getElementById(`detalle-${sorteo}`);
+              if (elem) elem.textContent = 'Sistema no disponible';
+              if (detalle) detalle.textContent = 'Recargue la página';
+            });
           }
-        }, 300);
+        } catch (error) {
+          console.error('❌ Error general al generar proyecciones:', error);
       } else {
         // Cerrar esta caja
         contenido.classList.add('hidden');
@@ -418,6 +472,15 @@
     import { cargarDatosHistoricos, generarCombinacionesAleatorias, analizarSumaNumeros, analizarParesImpares, analizarDecadaTerminacion, calcularFrecuencias } from './js/dataParser.js';
     import { generarPrediccionPersonalizada } from './js/mlPredictor.js';
 
+    // Exportar funciones al objeto window inmediatamente para asegurar disponibilidad
+    window.cargarDatosHistoricos = cargarDatosHistoricos;
+    window.generarCombinacionesAleatorias = generarCombinacionesAleatorias;
+    window.analizarSumaNumeros = analizarSumaNumeros;
+    window.analizarParesImpares = analizarParesImpares;
+    window.analizarDecadaTerminacion = analizarDecadaTerminacion;
+    window.calcularFrecuencias = calcularFrecuencias;
+    window.generarPrediccionPersonalizada = generarPrediccionPersonalizada;
+
     // Variables globales para compartir entre scripts
     window.cantidadSeleccionada = 1;
     window.datosHistoricos = null;
@@ -452,35 +515,67 @@
           const proximoSorteo = ultimoSorteo + 1;
           console.log(`✅ Próximo sorteo calculado: ${proximoSorteo} (último: ${ultimoSorteo})`);
           return proximoSorteo;
+        } else {
+          console.error('❌ Último sorteo no es un número válido:', window.datosHistoricos.melate.ultimoSorteo);
         }
+      } else {
+        // Mostrar qué datos tenemos disponibles para debug
+        console.warn('⚠️ Datos históricos incompletos:', {
+          datosHistoricos: !!window.datosHistoricos,
+          melate: window.datosHistoricos ? !!window.datosHistoricos.melate : false,
+          ultimoSorteo: window.datosHistoricos && window.datosHistoricos.melate ? 
+                        window.datosHistoricos.melate.ultimoSorteo : 'no disponible'
+        });
       }
       
       // Fallback mejorado si no hay datos disponibles
       const fecha = new Date();
       const year = fecha.getFullYear();
-      const month = fecha.getMonth() + 1;
-      const day = fecha.getDate();
       
-      // Calcular número de sorteo basado en fecha actual (estimación)
-      // Melate se realiza miércoles y sábados, aproximadamente 104 sorteos por año
+      // Calcular número de sorteo basado en fecha actual (estimación más precisa)
+      // Base: Sorteo 3698 fue el 31/12/2022
+      // 104 sorteos por año (2 por semana)
+      const base = 3698;
+      const anoBase = 2022;
+      const anosDiferencia = year - anoBase;
+      
+      // Estimar sorteos desde el inicio del año base hasta hoy
       const inicioAno = new Date(year, 0, 1);
       const diasDelAno = Math.floor((fecha - inicioAno) / (1000 * 60 * 60 * 24));
-      const sorteosAproximados = Math.floor(diasDelAno / 3.5); // Aproximadamente cada 3.5 días
+      const sorteosEsteAno = Math.floor(diasDelAno / 3.5); // Cada 3.5 días en promedio
       
-      const numeroEstimado = 5000 + sorteosAproximados;
+      // Estimar número de sorteo (base + 104 sorteos por cada año completo + sorteos de este año)
+      const numeroEstimado = Math.floor(base + (anosDiferencia * 104) + sorteosEsteAno);
       console.log(`⚠️ Usando número estimado: ${numeroEstimado} (fallback)`);
       return numeroEstimado;
     }
 
     // Función para actualizar el título con el número de sorteo
     function actualizarTituloSorteo() {
-      const numeroSorteo = obtenerNumeroSorteoActual();
-      const tituloElement = document.getElementById('titulo-sorteo');
-      if (tituloElement) {
-        tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
-        console.log(`📝 Título actualizado con sorteo: ${numeroSorteo}`);
-      } else {
-        console.error('❌ Elemento titulo-sorteo no encontrado');
+      try {
+        const numeroSorteo = obtenerNumeroSorteoActual();
+        const tituloElement = document.getElementById('titulo-sorteo');
+        if (tituloElement) {
+          // Usar animación para hacer más visible el cambio
+          tituloElement.style.transition = "opacity 0.3s ease";
+          tituloElement.style.opacity = 0.3;
+          
+          // Actualizar el contenido y restaurar la opacidad
+          setTimeout(() => {
+            tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
+            tituloElement.style.opacity = 1;
+            console.log(`📝 Título actualizado con sorteo: ${numeroSorteo}`);
+          }, 300);
+        } else {
+          console.error('❌ Elemento titulo-sorteo no encontrado');
+        }
+      } catch (error) {
+        console.error('❌ Error al actualizar título del sorteo:', error);
+        // Fallback por si hay algún error
+        const tituloElement = document.getElementById('titulo-sorteo');
+        if (tituloElement) {
+          tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el próximo sorteo`;
+        }
       }
     }
 
@@ -517,18 +612,81 @@
       `;
       
       try {
-        if (window.generarCombinacionesAleatorias) {
-          const combinaciones = window.generarCombinacionesAleatorias(window.cantidadSeleccionada);
-          if (window.mostrarCombinaciones) {
-            window.mostrarCombinaciones(combinaciones);
+        // Verificar las funciones disponibles
+        const fnGenerarCombinaciones = window.generarCombinacionesAleatorias || generarCombinacionesAleatorias;
+        const fnMostrarCombinaciones = window.mostrarCombinaciones || mostrarCombinaciones;
+        
+        console.log('🔍 Funciones para aleatorias:', {
+          generarFn: !!fnGenerarCombinaciones,
+          mostrarFn: !!fnMostrarCombinaciones
+        });
+        
+        if (fnGenerarCombinaciones) {
+          // Directamente usar la función para generar combinaciones
+          const combinaciones = fnGenerarCombinaciones(window.cantidadSeleccionada);
+          
+          if (fnMostrarCombinaciones) {
+            // Mostrar las combinaciones generadas
+            fnMostrarCombinaciones(combinaciones);
           } else {
-            console.error('❌ mostrarCombinaciones no está disponible');
+            // Fallback si la función mostrar no está disponible
+            console.error('❌ mostrarCombinaciones no está disponible, usando mostrado directo');
+            // Mostrar combinaciones directamente
+            const html = `
+              <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
+                <h3 class="text-xl font-bold text-white mb-4 text-center">
+                  🎲 ${combinaciones.length} Combinación${combinaciones.length > 1 ? 'es' : ''} Aleatoria${combinaciones.length > 1 ? 's' : ''}
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  ${combinaciones.map((combo, index) => `
+                    <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-300 border-opacity-30">
+                      <h4 class="text-lg font-semibold text-white mb-2">Combinación ${index + 1}</h4>
+                      <div class="flex justify-center space-x-2 mb-3">
+                        ${combo.map(num => `
+                          <span class="bg-white text-purple-600 font-bold py-1 px-2 rounded text-sm">
+                            ${num}
+                          </span>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+            container.innerHTML = html;
           }
         } else {
           console.error('❌ generarCombinacionesAleatorias no está disponible');
+          // Generar fallback básico de combinaciones aleatorias
+          const combinacionesFallback = [];
+          
+          for (let i = 0; i < window.cantidadSeleccionada; i++) {
+            const comboFallback = new Set();
+            while (comboFallback.size < 6) {
+              comboFallback.add(Math.floor(Math.random() * 56) + 1);
+            }
+            combinacionesFallback.push([...comboFallback].sort((a, b) => a - b));
+          }
+          
           container.innerHTML = `
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              <strong>Error:</strong> Función de generación no disponible. Recargue la página.
+            <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
+              <h3 class="text-xl font-bold text-white mb-4 text-center">
+                🎲 ${combinacionesFallback.length} Combinación${combinacionesFallback.length > 1 ? 'es' : ''} Aleatoria${combinacionesFallback.length > 1 ? 's' : ''}
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${combinacionesFallback.map((combo, index) => `
+                  <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-300 border-opacity-30">
+                    <h4 class="text-lg font-semibold text-white mb-2">Combinación ${index + 1}</h4>
+                    <div class="flex justify-center space-x-2 mb-3">
+                      ${combo.map(num => `
+                        <span class="bg-white text-purple-600 font-bold py-1 px-2 rounded text-sm">
+                          ${num}
+                        </span>
+                      `).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
             </div>
           `;
         }
@@ -1275,5 +1433,59 @@
       box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
     }
   </style>
+  <script>
+    // Script de verificación para debug
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔍 Verificando disponibilidad de funciones críticas:');
+      
+      // Lista de funciones necesarias
+      const funcionesRequeridas = [
+        'cargarDatosHistoricos',
+        'generarCombinacionesAleatorias',
+        'generarPrediccionPersonalizada',
+        'generarPrediccionesPorSorteo',
+        'generarProyeccionesAnalisis',
+        'mostrarCombinaciones',
+        'obtenerNumeroSorteoActual',
+        'actualizarTituloSorteo'
+      ];
+      
+      // Verificar cada función
+      const estadoFunciones = {};
+      funcionesRequeridas.forEach(fn => {
+        estadoFunciones[fn] = {
+          global: typeof window[fn] === 'function',
+          local: typeof window[fn] === 'function' // Igual que global para consistencia
+        };
+      });
+      
+      console.table(estadoFunciones);
+      
+      // Verificar si hay funciones faltantes
+      const faltantes = funcionesRequeridas.filter(fn => !estadoFunciones[fn].global);
+      
+      if (faltantes.length > 0) {
+        console.error('❌ Funciones críticas no disponibles:', faltantes.join(', '));
+      } else {
+        console.log('✅ Todas las funciones críticas están disponibles');
+        // Actualizar el título del sorteo inmediatamente
+        actualizarTituloSorteo();
+      }
+      
+      // Pre-cargar datos históricos para mejorar la experiencia del usuario
+      if (typeof window.cargarDatosHistoricos === 'function') {
+        window.cargarDatosHistoricos('todos')
+          .then(datos => {
+            console.log('✅ Datos históricos precargados correctamente');
+            window.datosHistoricos = datos;
+            // Actualizar título con el número correcto
+            actualizarTituloSorteo();
+          })
+          .catch(error => {
+            console.error('❌ Error precargando datos históricos:', error);
+          });
+      }
+    });
+  </script>
 </body>
 </html>
