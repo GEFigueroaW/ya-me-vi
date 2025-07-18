@@ -216,6 +216,8 @@
   <script src="js/firebase-init.js" type="module"></script>
   <script src="js/dataParser.js" type="module"></script>
   <script src="js/mlPredictor.js" type="module"></script>
+  <script src="js/actualizarTituloSorteo.js"></script>
+  <script src="js/startupFunctions.js"></script>
   <script>
     // Implementaciones fallback para funciones críticas
     // Esto garantiza que siempre haya una implementación disponible
@@ -797,18 +799,11 @@
     }
 
     // Función para actualizar el título con el número de sorteo
+    // Esta es una implementación simple que solo llama a nuestra función actualizada
     function actualizarTituloSorteo() {
-      try {
-        console.log('🎯 Actualizando título con el número del próximo sorteo...');
-        
-        // Mostrar mensaje de carga
-        const tituloElement = document.getElementById('titulo-sorteo');
-        if (tituloElement) {
-          tituloElement.textContent = `Cargando datos del próximo sorteo...`;
-        }
-        
-        // MÉTODO PRINCIPAL: Leer directamente del CSV
-        console.log('🔍 Leyendo directamente del archivo CSV de Melate...');
+      // La implementación real ahora está en js/actualizarTituloSorteo.js
+      // Esto es solo un wrapper por compatibilidad
+      console.log('🎯 Usando la implementación optimizada de actualizarTituloSorteo');
         
         fetch('assets/Melate.csv')
           .then(response => {
