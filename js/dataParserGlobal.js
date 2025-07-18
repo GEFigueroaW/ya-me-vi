@@ -187,21 +187,50 @@ window.analizarParesImpares = function(datos) {
 };
 
 window.analizarDecadaPorPosicion = function(datos) {
-    console.log('🔄 Ejecutando analizarDecadaPorPosicion');
+    console.log('🔄 Ejecutando análisis completo por décadas');
     const resultado = {};
-    Object.keys(datos).forEach(sorteo => {
+    
+    Object.entries(datos).forEach(([sorteo, datosSorteo]) => {
+        if (!datosSorteo || !datosSorteo.sorteos || !datosSorteo.sorteos.length) {
+            console.warn(`⚠️ No hay datos válidos para analizar décadas en ${sorteo}`);
+            return;
+        }
+
+        const decadas = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-56'];
+        const posiciones = [0, 1, 2, 3, 4, 5];
+        
+        // Analizar cada posición
+        const decadasPorPosicion = posiciones.map(pos => {
+            const frecuenciasPorDecada = {};
+            decadas.forEach(decada => frecuenciasPorDecada[decada] = 0);
+            
+            // Contar frecuencias para esta posición
+            datosSorteo.sorteos.forEach(sorteo => {
+                const num = sorteo.numeros[pos];
+                const decada = decadas.find(d => {
+                    const [min, max] = d.split('-').map(Number);
+                    return num >= min && num <= max;
+                });
+                if (decada) frecuenciasPorDecada[decada]++;
+            });
+            
+            // Encontrar la década más frecuente
+            const decadaMasFrecuente = Object.entries(frecuenciasPorDecada)
+                .sort(([,a], [,b]) => b - a)[0][0];
+            
+            return {
+                posicion: ['1er', '2do', '3er', '4to', '5to', '6to'][pos],
+                decadaMasFrecuente,
+                frecuencias: frecuenciasPorDecada
+            };
+        });
+        
         resultado[sorteo] = {
-            decadasPorPosicion: [
-                { decadaMasFrecuente: '1-10' },
-                { decadaMasFrecuente: '11-20' },
-                { decadaMasFrecuente: '21-30' },
-                { decadaMasFrecuente: '31-40' },
-                { decadaMasFrecuente: '41-50' },
-                { decadaMasFrecuente: '51-56' }
-            ],
-            detalle: 'Análisis por décadas'
+            decadasPorPosicion,
+            detalle: 'Análisis completo de distribución por décadas usando datos históricos'
         };
     });
+    
     return resultado;
 };
 
@@ -769,17 +798,23 @@ window.generarProyeccionesAnalisis = async function() {
         try {
             elementoProyeccion.textContent = '🔄 Analizando...';
             elementoProyeccion.style.display = 'block';
-            elementoDetalle.textContent = 'Procesando análisis de números...';
+            elementoDetalle.textContent = 'Procesando análisis completo...';
             elementoDetalle.style.display = 'block';
 
-            // Generar proyección
+            // Generar proyección usando análisis completo
             const resultado = await generarProyeccionPorAnalisis(window.datosHistoricos[sorteo], sorteo);
             
-            // Actualizar UI con el resultado
+            // Actualizar UI con el resultado detallado
             elementoProyeccion.textContent = resultado.numeros.join(' - ');
-            elementoDetalle.textContent = 'Combinación generada usando análisis de números';
+            const detalleAnalisis = [
+                `Frecuencias (${(PESOS_ANALISIS.frecuencias * 100).toFixed(0)}%)`,
+                `Suma (${(PESOS_ANALISIS.suma * 100).toFixed(0)}%)`,
+                `Paridad (${(PESOS_ANALISIS.paridad * 100).toFixed(0)}%)`,
+                `Décadas (${(PESOS_ANALISIS.decadas * 100).toFixed(0)}%)`
+            ].join(', ');
+            elementoDetalle.textContent = `Análisis completo usando: ${detalleAnalisis}`;
             
-            console.log(`✅ Proyección generada para ${sorteo}:`, resultado);
+            console.log(`✅ Proyección generada para ${sorteo} usando análisis completo:`, resultado);
         } catch (error) {
             console.error(`❌ Error en proyección para ${sorteo}:`, error);
             
@@ -817,30 +852,43 @@ window.generarProyeccionesAnalisis = async function() {
       async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
         console.log(`🎲 Iniciando generación de proyección para ${nombreSorteo}`);
         
-        // Función para generar números basados en análisis específico
+        // Función mejorada para generar números basados en análisis específico
         function generarNumerosPorAnalisis(tipo, datos) {
             const numeros = new Set();
             switch(tipo) {
                 case 'frecuencias':
                     // Análisis de frecuencias históricas (22%)
-                    const frecuencias = {};
-                    datos.numeros.forEach(n => frecuencias[n] = (frecuencias[n] || 0) + 1);
-                    const masComunes = Object.entries(frecuencias)
+                    const frecuencias = new Map();
+                    datos.sorteos.forEach(sorteo => {
+                        sorteo.numeros.forEach(num => {
+                            frecuencias.set(num, (frecuencias.get(num) || 0) + 1);
+                        });
+                    });
+                    const masComunes = Array.from(frecuencias.entries())
                         .sort(([,a], [,b]) => b - a)
-                        .slice(0, 10)
+                        .slice(0, 15)
                         .map(([num]) => parseInt(num));
+                    
+                    // Seleccionar números basados en frecuencia real
                     while(numeros.size < 6) {
-                        numeros.add(masComunes[Math.floor(Math.random() * masComunes.length)]);
+                        const indice = Math.floor(Math.random() * masComunes.length);
+                        numeros.add(masComunes[indice]);
                     }
                     break;
                     
                 case 'suma':
                     // Análisis de suma de números (22%)
-                    const sumaObjetivo = 150; // Suma típica
+                    const sumasHistoricas = datos.sorteos.map(sorteo => 
+                        sorteo.numeros.reduce((a, b) => a + b, 0)
+                    );
+                    const sumaPromedio = Math.floor(
+                        sumasHistoricas.reduce((a, b) => a + b, 0) / sumasHistoricas.length
+                    );
+                    
                     while(numeros.size < 6) {
                         const num = Math.floor(Math.random() * 56) + 1;
                         const sumaActual = Array.from(numeros).reduce((a,b) => a + b, 0);
-                        if (sumaActual + num <= sumaObjetivo) numeros.add(num);
+                        if (sumaActual + num <= sumaPromedio * 1.1) // Permitir 10% de variación numeros.add(num);
                     }
                     break;
                     
