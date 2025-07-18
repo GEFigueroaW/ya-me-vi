@@ -291,8 +291,26 @@
         console.log('✅ Caja predicción abierta');
         
         // Generar predicciones si no se han generado
-        if (!window.prediccionesGeneradas) {
-          generarPrediccionesPorSorteo();
+        try {
+          if (!window.prediccionesGeneradas) {
+            console.log('🔄 Iniciando generación de predicciones IA...');
+            generarPrediccionesPorSorteo()
+              .then(() => {
+                window.prediccionesGeneradas = true;
+                console.log('✅ Predicciones IA generadas exitosamente');
+              })
+              .catch(error => {
+                console.error('❌ Error generando predicciones IA:', error);
+                const mensajeEstado = document.getElementById('mensaje-estado');
+                if (mensajeEstado) {
+                  mensajeEstado.textContent = 'Error al generar predicciones. Intente nuevamente.';
+                }
+              });
+          } else {
+            console.log('✅ Usando predicciones IA ya generadas');
+          }
+        } catch (error) {
+          console.error('❌ Error en sistema de predicción IA:', error);
         }
       } else {
         // Cerrar esta caja
@@ -585,6 +603,7 @@
       try {
         // Asegurar que tenemos datos históricos
         if (!window.datosHistoricos) {
+          console.log('🔄 Cargando datos históricos para análisis...');
           window.datosHistoricos = await cargarDatosHistoricos('todos');
           datosHistoricos = window.datosHistoricos;
         }
@@ -595,6 +614,10 @@
           try {
             if (!window.datosHistoricos[sorteo] || !window.datosHistoricos[sorteo].numeros) {
               console.warn(`⚠️ No hay datos disponibles para ${sorteo}`);
+              const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+              const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+              if (elementoProyeccion) elementoProyeccion.textContent = 'Sin datos disponibles';
+              if (elementoDetalle) elementoDetalle.textContent = 'Requiere datos históricos';
               continue;
             }
             
@@ -604,7 +627,7 @@
             if (elementoProyeccion) elementoProyeccion.textContent = '🔄 Analizando...';
             if (elementoDetalle) elementoDetalle.textContent = 'Procesando 4 tipos de análisis...';
             
-            // Generar proyección
+            // Generar proyección usando los 4 análisis especificados
             const proyeccion = await generarProyeccionPorAnalisis(window.datosHistoricos[sorteo], sorteo);
             
             if (elementoProyeccion && proyeccion.numeros) {
@@ -616,16 +639,27 @@
             }
             
             console.log(`✅ Proyección para ${sorteo}:`, proyeccion.numeros);
+            console.log(`📝 Detalle ${sorteo}:`, proyeccion.detalle);
             
           } catch (error) {
             console.error(`❌ Error generando proyección para ${sorteo}:`, error);
             const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
             if (elementoProyeccion) elementoProyeccion.textContent = 'Error al generar';
+            if (elementoDetalle) elementoDetalle.textContent = 'Error en el análisis';
           }
         }
         
+        console.log('✅ Todas las proyecciones de análisis completadas');
+        
       } catch (error) {
         console.error('❌ Error en el sistema de proyección:', error);
+        // Mostrar error en todas las cajas
+        const sorteos = ['melate', 'revancha', 'revanchita'];
+        sorteos.forEach(sorteo => {
+          const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+          if (elementoProyeccion) elementoProyeccion.textContent = 'Sistema no disponible';
+        });
       }
     }
     
