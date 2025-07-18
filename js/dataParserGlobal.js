@@ -2,6 +2,29 @@
 // Módulo de compatibilidad para exponer funciones de dataParser.js globalmente
 // Facilita el uso de funciones de análisis en archivos HTML sin módulos ES6
 
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Inicializando sistema de análisis...');
+    
+    // Verificar elementos UI
+    const contenedorAnalisis = document.getElementById('analisis-container');
+    if (contenedorAnalisis) {
+        contenedorAnalisis.style.opacity = '1';
+        
+        // Cargar datos históricos inmediatamente
+        try {
+            await window.cargarDatosHistoricos('todos');
+            console.log('✅ Datos históricos cargados correctamente');
+            
+            // Intentar generar proyecciones automáticamente
+            const resultado = await window.generarProyeccionesAnalisis();
+            console.log('✅ Proyecciones generadas:', resultado);
+        } catch (error) {
+            console.error('❌ Error en inicialización:', error);
+        }
+    }
+});
+
 // Definir constantes de análisis
 const PESOS_ANALISIS = {
     frecuencias: 0.22,    // 22% Frecuencias históricas
@@ -175,33 +198,38 @@ const funcionesRespaldo = {
   }
 };
 
-// Exponer las funciones globalmente
-window.analizarSumaNumeros = function(...args) {
-    try {
-        return analizarSumaNumeros(...args);
-    } catch (error) {
-        console.error('Error en analizarSumaNumeros, usando respaldo:', error);
-        return funcionesRespaldo.analizarSumaNumeros(...args);
-    }
-};
+// Exponer las funciones directamente al objeto window
+(function() {
+    // Funciones de análisis base
+    window.analizarSumaNumeros = analizarSumaNumeros;
+    window.analizarParesImpares = analizarParesImpares;
+    window.generarPrediccionPorFrecuencia = generarPrediccionPorFrecuencia;
+    window.analizarDecadaPorPosicion = analizarDecadaPorPosicion;
+    
+    // Proyección y análisis principal
+    window.generarProyeccionPorAnalisis = generarProyeccionPorAnalisis;
+    window.generarProyeccionesAnalisis = generarProyeccionesAnalisis;
+    
+    // Verificar que las funciones estén disponibles
+    const funcionesRequeridas = [
+        'analizarSumaNumeros',
+        'analizarParesImpares',
+        'analizarDecadaPorPosicion',
+        'generarPrediccionPorFrecuencia',
+        'generarProyeccionPorAnalisis',
+        'generarProyeccionesAnalisis'
+    ];
 
-window.analizarParesImpares = function(...args) {
-    try {
-        return analizarParesImpares(...args);
-    } catch (error) {
-        console.error('Error en analizarParesImpares, usando respaldo:', error);
-        return funcionesRespaldo.analizarParesImpares(...args);
-    }
-};
-
-window.generarPrediccionPorFrecuencia = function(...args) {
-    try {
-        return generarPrediccionPorFrecuencia(...args);
-    } catch (error) {
-        console.error('Error en generarPrediccionPorFrecuencia, usando respaldo:', error);
-        return funcionesRespaldo.generarPrediccionPorFrecuencia(...args);
-    }
-};
+    funcionesRequeridas.forEach(funcion => {
+        if (typeof window[funcion] !== 'function') {
+            console.error(`❌ Función ${funcion} no disponible. Usando respaldo.`);
+            window[funcion] = funcionesRespaldo[funcion] || function() {
+                console.warn(`⚠️ Función de respaldo para ${funcion} ejecutada`);
+                return null;
+            };
+        }
+    });
+})();
 
 // Intentar importar la función analizarDecadaPorPosicion
 // Esta función puede no estar exportada correctamente en dataParser.js
@@ -382,6 +410,25 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
 }
 
 // Implementación de generarProyeccionesAnalisis
+// Manejador de eventos para el contenedor de análisis
+window.toggleAnalisis = function() {
+    const contenido = document.getElementById('contenido-analisis');
+    const arrow = document.getElementById('arrow-icon-analisis');
+    
+    if (contenido && arrow) {
+        const estaOculto = contenido.classList.contains('hidden');
+        contenido.classList.toggle('hidden', !estaOculto);
+        arrow.style.transform = estaOculto ? 'rotate(180deg)' : '';
+        
+        if (estaOculto) {
+            // Al mostrar el contenido, generar proyecciones
+            window.generarProyeccionesAnalisis().catch(error => {
+                console.error('❌ Error generando proyecciones:', error);
+            });
+        }
+    }
+};
+
 window.generarProyeccionesAnalisis = async function() {
     console.log('📊 Generando proyecciones usando funciones de análisis...');
     
