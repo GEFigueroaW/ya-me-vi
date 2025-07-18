@@ -151,8 +151,17 @@
     let datosHistoricos = null;
     let prediccionesGeneradas = false;
 
-    // Función para obtener el número de sorteo actual
+    // Función para obtener el número de sorteo actual basado en el último sorteo de Melate
     function obtenerNumeroSorteoActual() {
+      // Si tenemos datos históricos, obtenemos el último sorteo de Melate y le sumamos 1
+      if (datosHistoricos && datosHistoricos.melate && datosHistoricos.melate.ultimoSorteo) {
+        const ultimoSorteo = parseInt(datosHistoricos.melate.ultimoSorteo);
+        if (!isNaN(ultimoSorteo)) {
+          return ultimoSorteo + 1;
+        }
+      }
+      
+      // Fallback si no hay datos disponibles
       const fecha = new Date();
       const year = fecha.getFullYear();
       const month = fecha.getMonth() + 1;
@@ -167,7 +176,7 @@
       const numeroSorteo = obtenerNumeroSorteoActual();
       const tituloElement = document.getElementById('titulo-sorteo');
       if (tituloElement) {
-        tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo "${numeroSorteo}"`;
+        tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
       }
     }
 
@@ -388,13 +397,15 @@
       }
     }
 
-    // Inicializar
+    // Inicializar con valor temporal
     actualizarTituloSorteo();
     
     // Cargar datos históricos al inicio
     cargarDatosHistoricos('todos').then(datos => {
       datosHistoricos = datos;
       console.log('✅ Datos históricos cargados en sugeridas.html');
+      // Actualizar el título con el número real una vez que tenemos los datos
+      actualizarTituloSorteo();
     }).catch(error => {
       console.error('❌ Error cargando datos históricos:', error);
     });
