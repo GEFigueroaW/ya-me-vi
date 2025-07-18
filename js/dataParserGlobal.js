@@ -1201,103 +1201,48 @@ window.cargarDatosHistoricos = window.cargarDatosHistoricos || async function(mo
 window.obtenerUltimoSorteoMelate = function() {
   console.log('🔍 Obteniendo último sorteo de Melate...');
   
-  // Verificar si tenemos datos históricos cargados
-  if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
-    try {
-      const sorteos = window.datosHistoricos.melate.sorteos;
-      
-      if (sorteos.length > 0) {
-        console.log(`📊 Analizando ${sorteos.length} sorteos de Melate para encontrar el último`);
-        
-        // Buscar el sorteo con el número más alto
-        let ultimoSorteo = 0;
-        let sorteosIdentificados = 0;
-        let sorteosNoIdentificados = 0;
-        
-        for (const sorteo of sorteos) {
-          // Imprimir algunos datos de muestra para diagnóstico
-          if (sorteo === sorteos[0]) {
-            console.log(`🔍 Muestra del primer sorteo:`, {
-              concurso: sorteo.concurso,
-              tipo: typeof sorteo.concurso,
-              numeros: sorteo.numeros ? sorteo.numeros.join(',') : 'no disponible'
-            });
-          }
-          
-          // Intentar convertir el número de concurso con mejor manejo de errores
-          let numConcurso = 0;
-          
-          // Si es una cadena, intentar extraer sólo los dígitos antes de convertir
-          if (typeof sorteo.concurso === 'string') {
-            const digitosMatch = sorteo.concurso.match(/\d+/);
-            if (digitosMatch) {
-              numConcurso = parseInt(digitosMatch[0]);
-            } else {
-              numConcurso = parseInt(sorteo.concurso);
+  // Variable para almacenar la promesa de lectura del CSV
+  let csvPromise = null;
+  
+  // Función para leer directamente el CSV de Melate
+  function leerCSVMelate() {
+    // Si ya tenemos una promesa en curso, la devolvemos
+    if (csvPromise) return csvPromise;
+    
+    // Crear nueva promesa
+    csvPromise = fetch('assets/Melate.csv')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Error al cargar Melate.csv: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then(csvText => {
+        // Procesar el CSV para encontrar el último número de sorteo
+        const lineas = csvText.split('\n');
+        if (lineas.length > 1) { // Verificar que hay al menos la cabecera y una línea
+          // La segunda línea debería tener el último sorteo (después de la cabecera)
+          const primeraLinea = lineas[1].split(',');
+          if (primeraLinea.length > 1) {
+            const ultimoSorteo = parseInt(primeraLinea[1]);
+            if (!isNaN(ultimoSorteo)) {
+              console.log(`✅ Último sorteo leído directamente de CSV: ${ultimoSorteo}`);
+              return ultimoSorteo;
             }
-          } else if (typeof sorteo.concurso === 'number') {
-            numConcurso = sorteo.concurso;
-          }
-          
-          if (!isNaN(numConcurso) && numConcurso > 0) {
-            sorteosIdentificados++;
-            if (numConcurso > ultimoSorteo) {
-              ultimoSorteo = numConcurso;
-            }
-          } else {
-            sorteosNoIdentificados++;
           }
         }
-        
-        console.log(`📊 Resultados del análisis: ${sorteosIdentificados} sorteos identificados, ${sorteosNoIdentificados} no identificados`);
-        
-        if (ultimoSorteo > 0) {
-          console.log(`✅ Último sorteo de Melate identificado: ${ultimoSorteo}`);
-          return ultimoSorteo;
-        } else {
-          console.warn(`⚠️ No se pudo identificar ningún número de sorteo válido entre ${sorteos.length} sorteos`);
-        }
-      }
-      
-      console.warn('⚠️ No se encontraron sorteos válidos en los datos');
-    } catch (error) {
-      console.error('❌ Error al procesar los sorteos:', error);
-    }
+        throw new Error('No se pudo leer el último sorteo del CSV');
+      })
+      .catch(error => {
+        console.error('❌ Error al leer el CSV de Melate:', error);
+        return 4082; // Último sorteo conocido como fallback
+      });
+    
+    return csvPromise;
   }
   
-  // Si no encontramos un último sorteo, usar un fallback dinámico
-  console.warn('⚠️ Usando fallback dinámico para último sorteo');
-  
-  // Verificar si hay datos históricos pero no se pudo procesar el número de concurso
-  if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
-    // Imprimir más información de depuración
-    const sorteos = window.datosHistoricos.melate.sorteos;
-    if (sorteos.length > 0) {
-      console.log(`🔍 Depurando: Se encontraron ${sorteos.length} sorteos, pero no se pudo identificar el último número de concurso`);
-      // Mostrar los primeros 3 concursos para debug
-      const muestraConcursos = sorteos.slice(0, 3).map(s => `"${s.concurso}"`).join(', ');
-      console.log(`🔍 Muestra de concursos: ${muestraConcursos}`);
-    }
-  }
-  
-  // Calcular un fallback basado en la fecha actual
-  // Base: Sorteo 4083 es el próximo después del 4082 (último conocido)
-  const fechaActual = new Date();
-  const fechaReferencia = new Date(2025, 6, 18); // 18 de julio de 2025
-  const sorteoReferencia = 4082; // Último sorteo conocido en el CSV
-  
-  // Calcular diferencia en días
-  const diferenciaMilisegundos = fechaActual - fechaReferencia;
-  const diferenciaDias = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
-  
-  // Estimar sorteos adicionales (2 por semana = 1 cada 3.5 días en promedio)
-  const sorteosAdicionales = Math.floor(diferenciaDias / 3.5);
-  
-  // Calcular el número de sorteo estimado
-  const ultimoSorteoEstimado = sorteoReferencia + Math.max(0, sorteosAdicionales);
-  console.log(`📊 Fallback dinámico: último sorteo estimado ${ultimoSorteoEstimado} (${sorteosAdicionales} sorteos desde la referencia)`);
-  
-  return ultimoSorteoEstimado;
+  // Intentar leer el CSV directamente
+  return leerCSVMelate();
 };
 
 // Confirmar que las funciones están disponibles
