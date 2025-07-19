@@ -250,9 +250,9 @@ async function generarProyeccionesAnalisisSimple() {
     }
 }
 
-// Función simplificada para generar predicciones IA
+// Función simplificada para generar predicciones IA usando el ML real
 async function generarPrediccionesIASimple() {
-    console.log('🤖 Generando predicciones IA...');
+    console.log('🤖 Generando predicciones IA con algoritmo avanzado...');
     
     const sorteos = ['melate', 'revancha', 'revanchita'];
     const userId = window.usuarioActualID || 'usuario-anonimo';
@@ -269,13 +269,26 @@ async function generarPrediccionesIASimple() {
             // Esperar un poco para mostrar el loading
             await new Promise(resolve => setTimeout(resolve, 700));
             
-            // Generar números usando IA simple personalizada
-            const numeros = generarNumerosIAPersonalizada(userId, sorteo);
+            // Usar el ML real si está disponible
+            let numeros;
+            if (window.generarPrediccionPersonalizada && typeof window.generarPrediccionPersonalizada === 'function') {
+                // Preparar datos para el ML
+                const datosParaML = {
+                    sorteo: sorteo,
+                    numeros: window.datosHistoricos?.[sorteo]?.numeros || [],
+                    datos: window.datosHistoricos?.[sorteo]?.sorteos || []
+                };
+                
+                numeros = await window.generarPrediccionPersonalizada(userId, datosParaML);
+                console.log(`✅ Predicción IA ${sorteo} (ML real): ${numeros.join(' - ')}`);
+            } else {
+                // Fallback a la función simplificada
+                numeros = generarNumerosIAPersonalizada(userId, sorteo);
+                console.log(`✅ Predicción IA ${sorteo} (fallback): ${numeros.join(' - ')}`);
+            }
             
             // Mostrar los números
             elementoCombinacion.textContent = numeros.join(' - ');
-            
-            console.log(`✅ Predicción IA ${sorteo}: ${numeros.join(' - ')}`);
             
         } catch (error) {
             console.error(`❌ Error en predicción IA ${sorteo}:`, error);
@@ -286,7 +299,7 @@ async function generarPrediccionesIASimple() {
     // Actualizar mensaje de estado
     const mensajeEstado = document.getElementById('mensaje-estado');
     if (mensajeEstado) {
-        mensajeEstado.textContent = 'Predicciones generadas con análisis de IA personalizado';
+        mensajeEstado.textContent = 'Predicciones generadas con análisis de IA: frecuencia, probabilidad, patrones, delta y desviación estándar';
     }
 }
 
@@ -660,32 +673,40 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Funciones de combinaciones aleatorias disponibles globalmente');
     
+    // DEBUG: Verificar elemento del título inmediatamente
+    const tituloElement = document.getElementById('titulo-sorteo');
+    if (tituloElement) {
+        console.log('✅ Elemento titulo-sorteo encontrado:', tituloElement.textContent);
+    } else {
+        console.log('❌ Elemento titulo-sorteo NO encontrado en DOMContentLoaded');
+    }
+    
     // Intentar actualizar título inmediatamente si el elemento existe
     setTimeout(async () => {
-        console.log('🔄 Primer intento de actualización de título...');
+        console.log('🔄 Primer intento de actualización de título (500ms)...');
         await actualizarTituloSorteoConNombre();
     }, 500);
     
     // Segundo intento después de cargar datos
     setTimeout(async function() {
-        console.log('🔄 Generando números y actualizando título...');
+        console.log('🔄 Generando números y actualizando título (2000ms)...');
         await generarYMostrarNumerosSorteos();
         // Actualizar título después de generar números
         setTimeout(async () => {
-            console.log('🔄 Segundo intento de actualización de título...');
+            console.log('🔄 Segundo intento de actualización de título (3000ms)...');
             await actualizarTituloSorteoConNombre();
         }, 1000);
     }, 2000);
     
     // Tercer intento después de un delay más largo
     setTimeout(async () => {
-        console.log('🔄 Tercer intento de actualización de título...');
+        console.log('🔄 Tercer intento de actualización de título (5000ms)...');
         await actualizarTituloSorteoConNombre();
     }, 5000);
     
     // Cuarto intento más agresivo - forzar título con datos disponibles
     setTimeout(async () => {
-        console.log('🔄 Intento FINAL de actualización de título...');
+        console.log('🔄 Intento FINAL de actualización de título (8000ms)...');
         const tituloElement = document.getElementById('titulo-sorteo');
         if (tituloElement) {
             // Obtener datos disponibles en ese momento usando la misma lógica
@@ -731,6 +752,23 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('❌ Elemento titulo-sorteo no encontrado en intento final');
         }
     }, 8000);
+    
+    // Agregar un listener para verificar cuando se autentica el usuario
+    setTimeout(() => {
+        if (window.auth && typeof window.auth.onAuthStateChanged === 'function') {
+            console.log('🔗 Conectando listener de autenticación desde sugeridas-fix.js');
+            window.auth.onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('🎯 Usuario autenticado detectado en sugeridas-fix.js:', user.displayName || user.email);
+                    // Forzar actualización del título cuando se detecta autenticación
+                    setTimeout(async () => {
+                        console.log('🔄 Actualizando título tras detección de autenticación...');
+                        await actualizarTituloSorteoConNombre();
+                    }, 1000);
+                }
+            });
+        }
+    }, 1000);
 });
 
 // Hacer funciones disponibles globalmente inmediatamente también
