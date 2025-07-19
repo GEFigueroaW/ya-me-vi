@@ -415,6 +415,95 @@ function generarNumerosEmergencia() {
     }
 }
 
+// Función para generar combinaciones aleatorias simples (solo 1 combinación)
+function generarCombinacionAleatoria() {
+    console.log('🎲 Generando 1 combinación aleatoria...');
+    
+    const numeros = new Set();
+    while (numeros.size < 6) {
+        const num = Math.floor(Math.random() * 56) + 1;
+        numeros.add(num);
+    }
+    
+    return Array.from(numeros).sort((a, b) => a - b);
+}
+
+// Función para mostrar la combinación aleatoria en el DOM
+function mostrarCombinacionAleatoria() {
+    const container = document.getElementById('combinaciones-container');
+    if (!container) return;
+    
+    console.log('🎲 Mostrando nueva combinación aleatoria...');
+    
+    // Mostrar loading
+    container.innerHTML = `
+        <div class="text-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+            <p class="text-white">Generando combinación...</p>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        const combinacion = generarCombinacionAleatoria();
+        
+        const html = `
+            <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
+                <h3 class="text-xl font-bold text-white mb-4 text-center">
+                    🎲 Tu Combinación Aleatoria
+                </h3>
+                <div class="flex justify-center">
+                    <div class="bg-purple-500 bg-opacity-20 rounded-lg p-6 text-center border border-purple-300 border-opacity-30 max-w-md">
+                        <div class="flex justify-center space-x-3 mb-4 flex-wrap">
+                            ${combinacion.map(num => `
+                                <span class="bg-white text-purple-600 font-bold py-2 px-3 rounded-lg text-lg m-1 shadow-lg">
+                                    ${num}
+                                </span>
+                            `).join('')}
+                        </div>
+                        <button onclick="copiarCombinacion('${combinacion.join(', ')}')" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition-all duration-300 mb-3">
+                            📋 Copiar Números
+                        </button>
+                        <div class="text-center mt-4">
+                            <button onclick="mostrarCombinacionAleatoria()" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+                                🔄 Generar Nueva Combinación
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        console.log(`✅ Combinación aleatoria mostrada: ${combinacion.join(' - ')}`);
+    }, 800);
+}
+
+// Función para copiar al portapapeles
+function copiarCombinacion(combinacion) {
+    navigator.clipboard.writeText(combinacion)
+        .then(() => {
+            // Mostrar mensaje de éxito
+            const mensaje = document.createElement('div');
+            mensaje.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg z-50 animate__animated animate__fadeInRight';
+            mensaje.textContent = '✅ Combinación copiada al portapapeles';
+            document.body.appendChild(mensaje);
+            
+            setTimeout(() => {
+                mensaje.classList.add('animate__fadeOutRight');
+                setTimeout(() => mensaje.remove(), 500);
+            }, 2000);
+        })
+        .catch(err => {
+            console.error('Error al copiar: ', err);
+            const mensaje = document.createElement('div');
+            mensaje.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg z-50';
+            mensaje.textContent = '❌ Error al copiar';
+            document.body.appendChild(mensaje);
+            
+            setTimeout(() => mensaje.remove(), 2000);
+        });
+}
+
 // Inicializar cuando se carga el DOM
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Inicializando sistema de corrección para sugeridas...');
@@ -428,5 +517,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Hacer funciones disponibles globalmente
 window.generarYMostrarNumerosSorteos = generarYMostrarNumerosSorteos;
 window.generarNumerosEmergencia = generarNumerosEmergencia;
+window.mostrarCombinacionAleatoria = mostrarCombinacionAleatoria;
+window.generarCombinacionAleatoria = generarCombinacionAleatoria;
+window.copiarCombinacion = copiarCombinacion;
 
 console.log('✅ Sistema de corrección para sugeridas cargado');

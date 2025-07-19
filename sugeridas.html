@@ -54,7 +54,7 @@
       <!-- Botón del acordeón -->
       <div class="text-center cursor-pointer" onclick="toggleAleatorias()">
         <p class="text-lg text-white mb-2">
-          Genera TUS combinaciones completamente al azar
+          🎲 Genera TUS combinaciones completamente al azar
         </p>
         
         <!-- Indicador de expansión -->
@@ -73,16 +73,6 @@
           <p class="text-sm text-gray-300">
             Números aleatorios del 1 al 56 • Sin análisis • Sin patrones • Solo suerte
           </p>
-        </div>
-
-        <!-- Selector de cantidad -->
-        <div class="mb-6">
-          <p class="text-white text-sm mb-3">¿Cuántas combinaciones deseas?</p>
-          <div class="flex justify-center gap-3">
-            <button id="btn-1" class="cantidad-btn active" data-cantidad="1">1</button>
-            <button id="btn-3" class="cantidad-btn" data-cantidad="3">3</button>
-            <button id="btn-5" class="cantidad-btn" data-cantidad="5">5</button>
-          </div>
         </div>
 
         <!-- Botón para generar combinaciones -->
@@ -414,18 +404,6 @@
         arrow.style.transform = 'rotate(180deg)';
         isAleatoriaOpen = true;
         console.log('✅ Caja aleatorias abierta');
-        
-        // Preparar botones y contenedor para generación de combinaciones
-        document.querySelectorAll('.cantidad-btn').forEach(btn => {
-          if (btn.dataset.cantidad === '1') {
-            btn.classList.add('active');
-          } else {
-            btn.classList.remove('active');
-          }
-        });
-        
-        // Asegurar cantidad seleccionada
-        window.cantidadSeleccionada = 1;
         
         // Verificar funcionalidad de generación aleatoria
         console.log('🔍 Verificando función generarCombinacionesAleatorias:', {
@@ -973,114 +951,45 @@
       window.location.href = 'home.html';
     });
 
-    // Manejo de botones de cantidad
-    document.querySelectorAll('.cantidad-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.cantidad-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        window.cantidadSeleccionada = parseInt(btn.dataset.cantidad);
-        cantidadSeleccionada = parseInt(btn.dataset.cantidad);
-      });
-    });
-
     // Botón para generar combinaciones aleatorias
-    document.getElementById('btn-generar').addEventListener('click', async () => {
-      console.log(`🎲 Generando ${window.cantidadSeleccionada} combinaciones aleatorias...`);
+    document.getElementById('btn-generar').addEventListener('click', () => {
+      console.log('🎲 Generando combinación aleatoria...');
       
-      const container = document.getElementById('combinaciones-container');
-      container.innerHTML = `
-        <div class="text-center py-8">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-          <p class="text-white">Generando combinaciones...</p>
-        </div>
-      `;
-      
-      try {
-        // Verificar las funciones disponibles
-        const fnGenerarCombinaciones = window.generarCombinacionesAleatorias || generarCombinacionesAleatorias;
-        const fnMostrarCombinaciones = window.mostrarCombinaciones || mostrarCombinaciones;
-        
-        console.log('🔍 Funciones para aleatorias:', {
-          generarFn: !!fnGenerarCombinaciones,
-          mostrarFn: !!fnMostrarCombinaciones
-        });
-        
-        if (fnGenerarCombinaciones) {
-          // Directamente usar la función para generar combinaciones
-          const combinaciones = fnGenerarCombinaciones(window.cantidadSeleccionada);
+      if (typeof window.mostrarCombinacionAleatoria === 'function') {
+        window.mostrarCombinacionAleatoria();
+      } else {
+        // Fallback si la función no está disponible
+        const container = document.getElementById('combinaciones-container');
+        if (container) {
+          container.innerHTML = `
+            <div class="text-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+              <p class="text-white">Generando combinación...</p>
+            </div>
+          `;
           
-          if (fnMostrarCombinaciones) {
-            // Mostrar las combinaciones generadas
-            fnMostrarCombinaciones(combinaciones);
-          } else {
-            // Fallback si la función mostrar no está disponible
-            console.error('❌ mostrarCombinaciones no está disponible, usando mostrado directo');
-            // Mostrar combinaciones directamente
-            const html = `
+          setTimeout(() => {
+            const numeros = [];
+            while (numeros.length < 6) {
+              const num = Math.floor(Math.random() * 56) + 1;
+              if (!numeros.includes(num)) numeros.push(num);
+            }
+            numeros.sort((a, b) => a - b);
+            
+            container.innerHTML = `
               <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
-                <h3 class="text-xl font-bold text-white mb-4 text-center">
-                  🎲 ${combinaciones.length} Combinación${combinaciones.length > 1 ? 'es' : ''} Aleatoria${combinaciones.length > 1 ? 's' : ''}
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  ${combinaciones.map((combo, index) => `
-                    <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-300 border-opacity-30">
-                      <h4 class="text-lg font-semibold text-white mb-2">Combinación ${index + 1}</h4>
-                      <div class="flex justify-center space-x-2 mb-3">
-                        ${combo.map(num => `
-                          <span class="bg-white text-purple-600 font-bold py-1 px-2 rounded text-sm">
-                            ${num}
-                          </span>
-                        `).join('')}
-                      </div>
+                <h3 class="text-xl font-bold text-white mb-4 text-center">🎲 Tu Combinación Aleatoria</h3>
+                <div class="flex justify-center">
+                  <div class="bg-purple-500 bg-opacity-20 rounded-lg p-6 text-center border border-purple-300 border-opacity-30">
+                    <div class="flex justify-center space-x-3 mb-4">
+                      ${numeros.map(num => `<span class="bg-white text-purple-600 font-bold py-2 px-3 rounded-lg text-lg shadow-lg">${num}</span>`).join('')}
                     </div>
-                  `).join('')}
+                  </div>
                 </div>
               </div>
             `;
-            container.innerHTML = html;
-          }
-        } else {
-          console.error('❌ generarCombinacionesAleatorias no está disponible');
-          // Generar fallback básico de combinaciones aleatorias
-          const combinacionesFallback = [];
-          
-          for (let i = 0; i < window.cantidadSeleccionada; i++) {
-            const comboFallback = new Set();
-            while (comboFallback.size < 6) {
-              comboFallback.add(Math.floor(Math.random() * 56) + 1);
-            }
-            combinacionesFallback.push([...comboFallback].sort((a, b) => a - b));
-          }
-          
-          container.innerHTML = `
-            <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
-              <h3 class="text-xl font-bold text-white mb-4 text-center">
-                🎲 ${combinacionesFallback.length} Combinación${combinacionesFallback.length > 1 ? 'es' : ''} Aleatoria${combinacionesFallback.length > 1 ? 's' : ''}
-              </h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                ${combinacionesFallback.map((combo, index) => `
-                  <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-300 border-opacity-30">
-                    <h4 class="text-lg font-semibold text-white mb-2">Combinación ${index + 1}</h4>
-                    <div class="flex justify-center space-x-2 mb-3">
-                      ${combo.map(num => `
-                        <span class="bg-white text-purple-600 font-bold py-1 px-2 rounded text-sm">
-                          ${num}
-                        </span>
-                      `).join('')}
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `;
+          }, 800);
         }
-      } catch (error) {
-        console.error('❌ Error generando combinaciones:', error);
-        container.innerHTML = `
-          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            <strong>Error:</strong> No se pudieron generar las combinaciones. ${error.message}
-          </div>
-        `;
       }
     });
 
@@ -1781,33 +1690,6 @@
     .analisis-transparente {
       background-color: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
-    }
-    
-    .cantidad-btn {
-      background-color: rgba(255, 255, 255, 0.1);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    
-    .cantidad-btn:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: scale(1.05);
-    }
-    
-    .cantidad-btn.active {
-      background-color: rgba(147, 51, 234, 0.8);
-      border-color: rgb(147, 51, 234);
-      box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
     }
   </style>
   <script>
