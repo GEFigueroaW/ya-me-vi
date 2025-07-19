@@ -666,8 +666,38 @@ window.toggleAnalisis = async function() {
     
     if (contenido && arrow) {
         const estaOculto = contenido.classList.contains('hidden');
-        contenido.classList.toggle('hidden', !estaOculto);
-        arrow.style.transform = estaOculto ? 'rotate(180deg)' : '';
+        
+        // Si vamos a mostrar el contenido, siempre generamos nuevas proyecciones
+        if (estaOculto) {
+            // Mostrar estado de carga inmediatamente
+            ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+                const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+                if (elementoProyeccion) elementoProyeccion.textContent = '🔄 Generando nueva proyección...';
+                if (elementoDetalle) elementoDetalle.textContent = 'Calculando números sugeridos...';
+            });
+            
+            // Mostrar el contenido y rotar la flecha
+            contenido.classList.remove('hidden');
+            arrow.style.transform = 'rotate(180deg)';
+
+            // Generar nuevas proyecciones
+            try {
+                await window.generarProyeccionesAnalisis();
+                console.log('✅ Nuevas proyecciones generadas correctamente');
+            } catch (error) {
+                console.error('❌ Error generando nuevas proyecciones:', error);
+                ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                    const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+                    const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+                    if (elementoProyeccion) elementoProyeccion.textContent = 'Error en el análisis';
+                    if (elementoDetalle) elementoDetalle.textContent = 'No se pudieron generar los números';
+                });
+            }
+        } else {
+            // Si vamos a ocultar, solo ocultamos
+            contenido.classList.add('hidden');
+            arrow.style.transform = '';
         
         if (estaOculto) {
             // Mostrar estado de carga
@@ -696,7 +726,12 @@ window.toggleAnalisis = async function() {
 };
 
 window.generarProyeccionesAnalisis = async function() {
-    console.log('📊 Iniciando análisis completo para todos los sorteos...');
+    console.log('📊 Iniciando nuevo análisis para todos los sorteos...');
+    
+    // Limpiar cache de análisis previo si existe
+    if (window.analisisCache) {
+        delete window.analisisCache;
+    }
     
     const actualizarUI = (sorteo, numeros, detalle, error = false) => {
         const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
