@@ -87,63 +87,12 @@ async function obtenerNombreUsuarioSimple() {
     return ''; // Retornar vacío en lugar de fallback
 }
 
-// Función simplificada para actualizar el título
+// Función simplificada para actualizar el título - DESHABILITADA para evitar conflictos
 async function actualizarTituloSorteoConNombre() {
-    console.log('🎯 Actualizando título del sorteo con nombre...');
-    
-    const tituloElement = document.getElementById('titulo-sorteo');
-    if (!tituloElement) {
-        console.error('❌ Elemento titulo-sorteo no encontrado');
-        // Intentar de nuevo después de un pequeño delay
-        setTimeout(() => {
-            const tituloElement2 = document.getElementById('titulo-sorteo');
-            if (tituloElement2) {
-                console.log('✅ Elemento titulo-sorteo encontrado en segundo intento');
-                actualizarTituloSorteoConNombre();
-            }
-        }, 1000);
-        return;
-    }
-    
-    try {
-        let numeroSorteo = 4083; // Valor por defecto
-        
-        // Intentar obtener el número real del último sorteo
-        if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
-            const sorteos = window.datosHistoricos.melate.sorteos;
-            if (sorteos.length > 0) {
-                let ultimoSorteo = 0;
-                sorteos.forEach(sorteo => {
-                    const num = parseInt(sorteo.concurso);
-                    if (!isNaN(num) && num > ultimoSorteo) {
-                        ultimoSorteo = num;
-                    }
-                });
-                if (ultimoSorteo > 0) {
-                    numeroSorteo = ultimoSorteo + 1;
-                }
-            }
-        }
-        
-        // Obtener el nombre del usuario
-        const nombreUsuario = await obtenerNombreUsuarioSimple();
-        
-        // Construir el título con formato exacto solicitado (solo un emoji 🎯)
-        if (nombreUsuario && nombreUsuario !== '') {
-            tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${numeroSorteo}`;
-            console.log(`✅ Título actualizado CON nombre: "${nombreUsuario}", sorteo ${numeroSorteo}`);
-        } else {
-            tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
-            console.log(`⚠️ Título actualizado SIN nombre, sorteo ${numeroSorteo}`);
-        }
-        
-        // Verificar que el título se actualizó correctamente
-        console.log('📝 Título final:', tituloElement.textContent);
-        
-    } catch (error) {
-        console.error('❌ Error actualizando título:', error);
-        tituloElement.textContent = '🎯 Combinaciones sugeridas por IA para TI para el próximo sorteo';
-    }
+    console.log('🚫 actualizarTituloSorteoConNombre DESHABILITADA - se actualiza desde sugeridas.html directamente');
+    // Esta función está deshabilitada porque causa conflictos de doble emoji
+    // La actualización se hace directamente en sugeridas.html en onAuthStateChanged
+    return;
 }
 
 // Variables globales para el estado
@@ -172,8 +121,8 @@ async function generarYMostrarNumerosSorteos() {
         // Generar números para predicciones IA
         await generarPrediccionesIASimple();
         
-        // Actualizar título del sorteo con nombre
-        await actualizarTituloSorteoConNombre();
+        // Actualizar título del sorteo con nombre - DESHABILITADO
+        // await actualizarTituloSorteoConNombre(); // Se actualiza en sugeridas.html directamente
         
         window.numerosSorteosGenerados = true;
         console.log('✅ Todos los números de sorteos generados correctamente');
@@ -559,8 +508,8 @@ async function generarNumerosEmergencia() {
         }
     });
     
-    // Actualizar título con nombre
-    await actualizarTituloSorteoConNombre();
+    // Actualizar título con nombre - DESHABILITADO
+    // await actualizarTituloSorteoConNombre(); // Se actualiza en sugeridas.html directamente
     
     // Actualizar mensaje de estado
     const mensajeEstado = document.getElementById('mensaje-estado');
@@ -671,65 +620,67 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Funciones de combinaciones aleatorias disponibles globalmente');
     
-    // Intentar actualizar título inmediatamente si el elemento existe
-    setTimeout(async () => {
-        console.log('🔄 Primer intento de actualización de título...');
-        await actualizarTituloSorteoConNombre();
-    }, 500);
+    // Intentar actualizar título inmediatamente si el elemento existe - DESHABILITADO
+    // setTimeout(async () => {
+    //     console.log('🔄 Primer intento de actualización de título...');
+    //     await actualizarTituloSorteoConNombre();
+    // }, 500);
     
-    // Segundo intento después de cargar datos
-    setTimeout(async function() {
-        console.log('🔄 Generando números y actualizando título...');
-        await generarYMostrarNumerosSorteos();
-        // Actualizar título después de generar números
-        setTimeout(async () => {
-            console.log('🔄 Segundo intento de actualización de título...');
-            await actualizarTituloSorteoConNombre();
-        }, 1000);
-    }, 2000);
+    // Segundo intento después de cargar datos - DESHABILITADO
+    // setTimeout(async function() {
+    //     console.log('🔄 Generando números y actualizando título...');
+    //     await generarYMostrarNumerosSorteos();
+    //     // Actualizar título después de generar números
+    //     setTimeout(async () => {
+    //         console.log('🔄 Segundo intento de actualización de título...');
+    //         await actualizarTituloSorteoConNombre();
+    //     }, 1000);
+    // }, 2000);
     
-    // Tercer intento después de un delay más largo
-    setTimeout(async () => {
-        console.log('🔄 Tercer intento de actualización de título...');
-        await actualizarTituloSorteoConNombre();
-    }, 5000);
+    // Tercer intento después de un delay más largo - DESHABILITADO
+    // setTimeout(async () => {
+    //     console.log('🔄 Tercer intento de actualización de título...');
+    //     await actualizarTituloSorteoConNombre();
+    // }, 5000);
     
-    // Cuarto intento más agresivo - forzar título con datos disponibles
-    setTimeout(async () => {
-        console.log('🔄 Intento FINAL de actualización de título...');
-        const tituloElement = document.getElementById('titulo-sorteo');
-        if (tituloElement) {
-            // Obtener datos disponibles en ese momento usando la misma lógica
-            let nombreUsuario = '';
-            
-            // Intentar múltiples fuentes siguiendo la misma lógica que main.js
-            if (window.auth && window.auth.currentUser) {
-                const user = window.auth.currentUser;
-                
-                // Intentar displayName primero (Google login)
-                if (user.displayName) {
-                    nombreUsuario = user.displayName.split(' ')[0];
-                }
-                // Si no, usar email
-                else if (user.email) {
-                    nombreUsuario = user.email.split('@')[0];
-                }
-            }
-            // Fallback a variables globales
-            else if (window.usuarioActualNombre) {
-                nombreUsuario = window.usuarioActualNombre.split(' ')[0];
-            } else if (window.usuarioActualEmail) {
-                nombreUsuario = window.usuarioActualEmail.split('@')[0];
-            }
-            
-            if (nombreUsuario) {
-                tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo 4083`;
-                console.log('🎯 TÍTULO FORZADO CON NOMBRE:', nombreUsuario);
-            } else {
-                console.log('❌ No se pudo obtener nombre para título final');
-            }
-        }
-    }, 8000);
+    // Cuarto intento más agresivo - DESHABILITADO para evitar conflictos
+    // setTimeout(async () => {
+    //     console.log('🔄 Intento FINAL de actualización de título...');
+    //     const tituloElement = document.getElementById('titulo-sorteo');
+    //     if (tituloElement) {
+    //         // Obtener datos disponibles en ese momento usando la misma lógica
+    //         let nombreUsuario = '';
+    //         
+    //         // Intentar múltiples fuentes siguiendo la misma lógica que main.js
+    //         if (window.auth && window.auth.currentUser) {
+    //             const user = window.auth.currentUser;
+    //             
+    //             // Intentar displayName primero (Google login)
+    //             if (user.displayName) {
+    //                 nombreUsuario = user.displayName.split(' ')[0];
+    //             }
+    //             // Si no, usar email
+    //             else if (user.email) {
+    //                 nombreUsuario = user.email.split('@')[0];
+    //             }
+    //         }
+    //         // Fallback a variables globales
+    //         else if (window.usuarioActualNombre) {
+    //             nombreUsuario = window.usuarioActualNombre.split(' ')[0];
+    //         } else if (window.usuarioActualEmail) {
+    //             nombreUsuario = window.usuarioActualEmail.split('@')[0];
+    //         }
+    //         
+    //         if (nombreUsuario) {
+    //             tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo 4083`;
+    //             console.log('🎯 TÍTULO FORZADO CON NOMBRE:', nombreUsuario);
+    //         } else {
+    //             console.log('❌ No se pudo obtener nombre para título final');
+    //         }
+    //     }
+    // }, 8000);
+    
+    console.log('ℹ️ Todas las actualizaciones de título están deshabilitadas en sugeridas-fix.js');
 });
 
 // Hacer funciones disponibles globalmente inmediatamente también

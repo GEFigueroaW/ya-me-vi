@@ -1577,77 +1577,41 @@
           }
         }, 4000);
         
-        // Tercer intento más directo
+        // Tercer intento más directo y DEFINITIVO
         setTimeout(() => {
-          console.log('🎯 Tercer intento DIRECTO de actualización del título...');
+          console.log('🎯 INTENTO DEFINITIVO de actualización del título...');
           const tituloElement = document.getElementById('titulo-sorteo');
-          if (tituloElement && window.usuarioActualNombre) {
-            const nombre = window.usuarioActualNombre.split(' ')[0];
-            tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
-            console.log('🎯 TÍTULO ACTUALIZADO DIRECTAMENTE:', nombre);
-          } else if (tituloElement && window.usuarioActualEmail) {
-            const nombre = window.usuarioActualEmail.split('@')[0];
-            tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
-            console.log('🎯 TÍTULO ACTUALIZADO DIRECTAMENTE (email):', nombre);
-          } else if (tituloElement && window.auth && window.auth.currentUser) {
-            const user = window.auth.currentUser;
+          if (tituloElement) {
             let nombre = '';
-            if (user.displayName) {
-              nombre = user.displayName.split(' ')[0];
-            } else if (user.email) {
-              nombre = user.email.split('@')[0];
-            }
-            if (nombre) {
-              tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
-              console.log('🎯 TÍTULO ACTUALIZADO DIRECTAMENTE (Firebase):', nombre);
-            }
-          }
-        }, 6000);
-        
-        // Intento ULTRA agresivo cada 2 segundos hasta que funcione
-        const intervalId = setInterval(() => {
-          const tituloElement = document.getElementById('titulo-sorteo');
-          if (tituloElement && tituloElement.textContent.includes('---')) {
-            console.log('🔄 Intento continuo de actualización de título...');
             
-            let nombre = '';
-            // Buscar en todas las fuentes posibles
-            if (window.auth && window.auth.currentUser) {
-              const user = window.auth.currentUser;
-              if (user.displayName) {
-                nombre = user.displayName.split(' ')[0];
-                console.log('✅ Nombre encontrado en Firebase Auth:', nombre);
-              } else if (user.email) {
-                nombre = user.email.split('@')[0];
-                console.log('✅ Nombre del email:', nombre);
-              }
-            } else if (window.usuarioActualNombre) {
+            // Usar las mismas variables que ya están seteadas arriba
+            if (window.usuarioActualNombre) {
               nombre = window.usuarioActualNombre.split(' ')[0];
-              console.log('✅ Nombre de variable global:', nombre);
+              console.log('✅ Nombre encontrado (variable global):', nombre);
             } else if (window.usuarioActualEmail) {
               nombre = window.usuarioActualEmail.split('@')[0];
-              console.log('✅ Email de variable global:', nombre);
+              console.log('✅ Nombre del email (variable global):', nombre);
+            } else if (user && user.displayName) {
+              nombre = user.displayName.split(' ')[0];
+              console.log('✅ Nombre encontrado (Firebase user):', nombre);
+            } else if (user && user.email) {
+              nombre = user.email.split('@')[0];
+              console.log('✅ Nombre del email (Firebase user):', nombre);
             }
             
             if (nombre) {
               tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
-              console.log('🎯 TÍTULO FORZADO POR INTERVAL:', nombre);
-              clearInterval(intervalId); // Detener el interval una vez que funcione
-            }
-          } else if (tituloElement && !tituloElement.textContent.includes('---') && !tituloElement.textContent.includes('🎯')) {
-            // Si no tiene el emoji, agregarlo
-            if (!tituloElement.textContent.startsWith('🎯')) {
-              tituloElement.textContent = `🎯 ${tituloElement.textContent}`;
-              console.log('🎯 Emoji agregado al título existente');
+              console.log('🎯 ✅ TÍTULO ACTUALIZADO EXITOSAMENTE:', nombre);
+              
+              // Desactivar otras funciones de actualización para evitar conflictos
+              window.actualizarTituloSorteo = function() { console.log('🚫 Actualización de título desactivada para evitar conflictos'); };
+              window.actualizarTituloSorteoConNombre = function() { console.log('🚫 Actualización de título desactivada para evitar conflictos'); };
+            } else {
+              console.log('❌ No se pudo obtener el nombre del usuario');
+              tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI para el sorteo 4083`;
             }
           }
-        }, 2000);
-        
-        // Limpiar el interval después de 30 segundos para evitar bucle infinito
-        setTimeout(() => {
-          clearInterval(intervalId);
-          console.log('🛑 Interval de actualización de título detenido');
-        }, 30000);
+        }, 3000);
         
         try {
           // Cargar datos históricos
