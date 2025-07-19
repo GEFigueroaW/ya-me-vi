@@ -460,10 +460,17 @@ try {
 async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
     console.log(`🎲 Generando nueva proyección para ${nombreSorteo}`);
     
-    // Asegurarnos de que no haya caché
+    // Limpiar cualquier caché anterior
     if (window.ultimasProyecciones) {
         delete window.ultimasProyecciones;
     }
+    
+    // Borrar números anteriores del DOM
+    document.getElementById(`proyeccion-${nombreSorteo.toLowerCase()}`).textContent = '';
+    
+    // Mostrar indicador de carga
+    const spinner = document.querySelector(`#proyeccion-${nombreSorteo.toLowerCase()} + .proyeccion-loading`);
+    if (spinner) spinner.classList.remove('hidden');
     
     try {
         // Verificar y preparar datos
@@ -654,7 +661,7 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
 // Implementación de generarProyeccionesAnalisis
 // Manejador de eventos para el contenedor de análisis
 window.toggleAnalisis = async function() {
-    console.log('🔄 Generando nuevas combinaciones...');
+    console.log('🔄 Iniciando análisis...');
     
     // Verificar inicialización
     if (!verificarInicializacion()) {
@@ -665,14 +672,27 @@ window.toggleAnalisis = async function() {
     const contenido = document.getElementById('contenido-predicciones');
     const arrow = document.getElementById('arrow-icon');
     
-    if (contenido && arrow) {
-        const estaOculto = contenido.classList.contains('hidden');
+    // Verificar elementos
+    if (!contenido || !arrow) {
+        console.error('❌ Elementos de UI no encontrados');
+        return;
+    }
+    
+    const estaOculto = contenido.classList.contains('hidden');
+    
+    // Si vamos a mostrar el contenido, generamos nuevas proyecciones
+    if (estaOculto) {
+        // Primero mostramos UI de carga
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
         
-        // Si vamos a mostrar el contenido, generamos nuevas proyecciones
-        if (estaOculto) {
-            // Primero mostramos UI de carga
-            contenido.classList.remove('hidden');
-            arrow.style.transform = 'rotate(180deg)';
+        // Mostrar spinners y limpiar números anteriores
+        document.querySelectorAll('.proyeccion-loading').forEach(spinner => {
+            spinner.classList.remove('hidden');
+        });
+        ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            if (elementoProyeccion) elementoProyeccion.textContent = '';
             
             ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
                 const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
@@ -754,23 +774,41 @@ window.toggleAnalisis = async function() {
 window.generarProyeccionesAnalisis = async function() {
     console.log('📊 Generando nuevas proyecciones...');
     
+    // Verificar datos históricos
     if (!window.datosHistoricos) {
-        throw new Error('No hay datos históricos disponibles');
+        throw new Error('Los datos históricos son obligatorios para el análisis');
     }
     
     const sorteos = ['melate', 'revancha', 'revanchita'];
     for (const sorteo of sorteos) {
+        // Mostrar estado de carga
+        const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+        const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+        const spinner = elementoProyeccion?.parentElement?.querySelector('.proyeccion-loading');
+        
+        if (spinner) spinner.classList.remove('hidden');
+        if (elementoProyeccion) elementoProyeccion.textContent = '';
+        if (elementoDetalle) elementoDetalle.textContent = 'Analizando datos históricos...';
+        
         try {
+            // Generar nueva proyección
             const resultado = await generarProyeccionPorAnalisis(window.datosHistoricos[sorteo], sorteo);
-            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
-            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
             
+            // Actualizar UI con resultado
             if (elementoProyeccion) {
                 elementoProyeccion.textContent = resultado.numeros.join(' - ');
             }
             if (elementoDetalle) {
-                elementoDetalle.textContent = 'Números sugeridos basados en el análisis histórico';
+                elementoDetalle.textContent = resultado.detalle;
             }
+        } catch (error) {
+            console.error(`Error al generar proyección para ${sorteo}:`, error);
+            if (elementoProyeccion) elementoProyeccion.textContent = '-- -- -- -- -- --';
+            if (elementoDetalle) elementoDetalle.textContent = 'Error al generar predicción';
+        } finally {
+            // Ocultar spinner
+            if (spinner) spinner.classList.add('hidden');
+        }
         } catch (error) {
             console.error(`Error al generar proyección para ${sorteo}:`, error);
         }
