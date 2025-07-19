@@ -28,6 +28,8 @@
       <button class="dream-btn">Viaje</button>
       <button class="dream-btn">Negocio</button>
       <button class="dream-btn">Retiro</button>
+      <button class="dream-btn">Estudios</button>
+      <button class="dream-btn">Tranquilidad</button>
     </div>
   </div>
 
@@ -69,4 +71,27 @@
 
   <style>
     .dream-btn {
-      @apply bg-white text-gray-800 font-semibold px-6 py-3 rounded-full shadow-md hover:bg-gray-200 tra
+      background-color: white;
+      color: #1f2937;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 9999px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin: 0.25rem;
+    }
+    
+    .dream-btn:hover {
+      background-color: #f3f4f6;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dream-btn:active {
+      transform: translateY(0);
+    }
+  </style>
+</body>
+</html>
