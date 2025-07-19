@@ -2,7 +2,7 @@
 // Este archivo resuelve el problema de los números que no se muestran en los sorteos
 
 // Función simplificada para obtener el nombre del usuario
-function obtenerNombreUsuarioSimple() {
+async function obtenerNombreUsuarioSimple() {
     console.log('🔍 Buscando nombre del usuario...');
     
     // 1. Verificar variables globales del usuario
@@ -15,11 +15,30 @@ function obtenerNombreUsuarioSimple() {
     // 2. Verificar Firebase Auth moderno si está disponible
     if (window.auth && window.auth.currentUser) {
         const user = window.auth.currentUser;
+        
+        // 2a. Intentar obtener el perfil guardado en Firestore
+        try {
+            if (window.db && typeof window.getDoc === 'function' && typeof window.doc === 'function') {
+                const profileRef = window.doc(window.db, `users/${user.uid}/profile`, 'info');
+                const profileSnap = await window.getDoc(profileRef);
+                if (profileSnap.exists() && profileSnap.data().name) {
+                    const nombre = profileSnap.data().name.split(' ')[0];
+                    console.log('✅ Nombre encontrado en perfil Firestore:', nombre);
+                    return nombre;
+                }
+            }
+        } catch (error) {
+            console.log('ℹ️ No se pudo acceder al perfil de Firestore:', error.message);
+        }
+        
+        // 2b. Usar displayName de Firebase Auth (Google login)
         if (user.displayName) {
             const nombre = user.displayName.split(' ')[0];
             console.log('✅ Nombre encontrado en Firebase Auth moderno:', nombre);
             return nombre;
         }
+        
+        // 2c. Usar email como último recurso
         if (user.email) {
             const nombre = user.email.split('@')[0];
             console.log('✅ Nombre del email encontrado (Firebase moderno):', nombre);
@@ -64,12 +83,12 @@ function obtenerNombreUsuarioSimple() {
         }
     }
     
-    console.log('❌ No se encontró nombre del usuario, usando fallback');
-    return 'Amigo'; // Fallback más amigable
+    console.log('❌ No se encontró nombre del usuario');
+    return ''; // Retornar vacío en lugar de fallback
 }
 
 // Función simplificada para actualizar el título
-function actualizarTituloSorteoConNombre() {
+async function actualizarTituloSorteoConNombre() {
     console.log('🎯 Actualizando título del sorteo con nombre...');
     
     const tituloElement = document.getElementById('titulo-sorteo');
@@ -107,9 +126,9 @@ function actualizarTituloSorteoConNombre() {
         }
         
         // Obtener el nombre del usuario
-        const nombreUsuario = obtenerNombreUsuarioSimple();
+        const nombreUsuario = await obtenerNombreUsuarioSimple();
         
-        // Construir el título con formato exacto solicitado
+        // Construir el título con formato exacto solicitado (solo un emoji 🎯)
         if (nombreUsuario && nombreUsuario !== '') {
             tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${numeroSorteo}`;
             console.log(`✅ Título actualizado CON nombre: "${nombreUsuario}", sorteo ${numeroSorteo}`);
@@ -154,7 +173,7 @@ async function generarYMostrarNumerosSorteos() {
         await generarPrediccionesIASimple();
         
         // Actualizar título del sorteo con nombre
-        actualizarTituloSorteoConNombre();
+        await actualizarTituloSorteoConNombre();
         
         window.numerosSorteosGenerados = true;
         console.log('✅ Todos los números de sorteos generados correctamente');
@@ -541,7 +560,7 @@ async function generarNumerosEmergencia() {
     });
     
     // Actualizar título con nombre
-    actualizarTituloSorteoConNombre();
+    await actualizarTituloSorteoConNombre();
     
     // Actualizar mensaje de estado
     const mensajeEstado = document.getElementById('mensaje-estado');
@@ -653,44 +672,54 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Funciones de combinaciones aleatorias disponibles globalmente');
     
     // Intentar actualizar título inmediatamente si el elemento existe
-    setTimeout(() => {
+    setTimeout(async () => {
         console.log('🔄 Primer intento de actualización de título...');
-        actualizarTituloSorteoConNombre();
+        await actualizarTituloSorteoConNombre();
     }, 500);
     
     // Segundo intento después de cargar datos
-    setTimeout(function() {
+    setTimeout(async function() {
         console.log('🔄 Generando números y actualizando título...');
-        generarYMostrarNumerosSorteos();
+        await generarYMostrarNumerosSorteos();
         // Actualizar título después de generar números
-        setTimeout(() => {
+        setTimeout(async () => {
             console.log('🔄 Segundo intento de actualización de título...');
-            actualizarTituloSorteoConNombre();
+            await actualizarTituloSorteoConNombre();
         }, 1000);
     }, 2000);
     
     // Tercer intento después de un delay más largo
-    setTimeout(() => {
+    setTimeout(async () => {
         console.log('🔄 Tercer intento de actualización de título...');
-        actualizarTituloSorteoConNombre();
+        await actualizarTituloSorteoConNombre();
     }, 5000);
     
     // Cuarto intento más agresivo - forzar título con datos disponibles
-    setTimeout(() => {
+    setTimeout(async () => {
         console.log('🔄 Intento FINAL de actualización de título...');
         const tituloElement = document.getElementById('titulo-sorteo');
         if (tituloElement) {
-            // Obtener datos disponibles en ese momento
+            // Obtener datos disponibles en ese momento usando la misma lógica
             let nombreUsuario = '';
             
-            // Intentar múltiples fuentes
-            if (window.usuarioActualNombre) {
+            // Intentar múltiples fuentes siguiendo la misma lógica que main.js
+            if (window.auth && window.auth.currentUser) {
+                const user = window.auth.currentUser;
+                
+                // Intentar displayName primero (Google login)
+                if (user.displayName) {
+                    nombreUsuario = user.displayName.split(' ')[0];
+                }
+                // Si no, usar email
+                else if (user.email) {
+                    nombreUsuario = user.email.split('@')[0];
+                }
+            }
+            // Fallback a variables globales
+            else if (window.usuarioActualNombre) {
                 nombreUsuario = window.usuarioActualNombre.split(' ')[0];
             } else if (window.usuarioActualEmail) {
                 nombreUsuario = window.usuarioActualEmail.split('@')[0];
-            } else if (window.auth && window.auth.currentUser) {
-                const user = window.auth.currentUser;
-                nombreUsuario = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
             }
             
             if (nombreUsuario) {

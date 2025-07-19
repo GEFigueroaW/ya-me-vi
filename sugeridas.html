@@ -1589,6 +1589,18 @@
             const nombre = window.usuarioActualEmail.split('@')[0];
             tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
             console.log('🎯 TÍTULO ACTUALIZADO DIRECTAMENTE (email):', nombre);
+          } else if (tituloElement && window.auth && window.auth.currentUser) {
+            const user = window.auth.currentUser;
+            let nombre = '';
+            if (user.displayName) {
+              nombre = user.displayName.split(' ')[0];
+            } else if (user.email) {
+              nombre = user.email.split('@')[0];
+            }
+            if (nombre) {
+              tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
+              console.log('🎯 TÍTULO ACTUALIZADO DIRECTAMENTE (Firebase):', nombre);
+            }
           }
         }, 6000);
         
