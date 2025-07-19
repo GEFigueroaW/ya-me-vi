@@ -43,13 +43,13 @@ async function mostrarBienvenidaConSueño(user) {
       if (dreamSnap.exists()) {
         const { sueño } = dreamSnap.data();
         if (userName) {
-          welcomeMsg.textContent = `¡Bienvenido "${userName}"! Vas tras tu sueño: ${sueño}.`;
+          welcomeMsg.textContent = `¡Bienvenido ${userName}! Vas tras tu sueño: ${sueño}.`;
         } else {
           welcomeMsg.textContent = `¡Bienvenido! Vas tras tu sueño: ${sueño}.`;
         }
       } else {
         if (userName) {
-          welcomeMsg.textContent = `¡Bienvenido "${userName}"!`;
+          welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
         } else {
           welcomeMsg.textContent = '¡Bienvenido!';
         }
@@ -71,7 +71,7 @@ async function mostrarBienvenidaConSueño(user) {
       }
       
       if (userName) {
-        welcomeMsg.textContent = `¡Bienvenido "${userName}"!`;
+        welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
       } else {
         welcomeMsg.textContent = '¡Bienvenido!';
       }
