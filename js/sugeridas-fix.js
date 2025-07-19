@@ -417,7 +417,7 @@ function generarNumerosEmergencia() {
 
 // Función para generar combinaciones aleatorias simples (solo 1 combinación)
 function generarCombinacionAleatoria() {
-    console.log('🎲 Generando 1 combinación aleatoria...');
+    console.log('🎲 INICIO: Generando 1 combinación aleatoria...');
     
     const numeros = new Set();
     while (numeros.size < 6) {
@@ -425,15 +425,22 @@ function generarCombinacionAleatoria() {
         numeros.add(num);
     }
     
-    return Array.from(numeros).sort((a, b) => a - b);
+    const combinacion = Array.from(numeros).sort((a, b) => a - b);
+    console.log('✅ Combinación generada:', combinacion);
+    return combinacion;
 }
 
 // Función para mostrar la combinación aleatoria en el DOM
 function mostrarCombinacionAleatoria() {
-    const container = document.getElementById('combinaciones-container');
-    if (!container) return;
+    console.log('🎲 INICIO: mostrarCombinacionAleatoria ejecutándose...');
     
-    console.log('🎲 Mostrando nueva combinación aleatoria...');
+    const container = document.getElementById('combinaciones-container');
+    if (!container) {
+        console.error('❌ ERROR: No se encontró el elemento combinaciones-container');
+        return;
+    }
+    
+    console.log('✅ Contenedor encontrado, mostrando nueva combinación aleatoria...');
     
     // Mostrar loading
     container.innerHTML = `
@@ -508,13 +515,22 @@ function copiarCombinacion(combinacion) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Inicializando sistema de corrección para sugeridas...');
     
+    // Hacer funciones disponibles inmediatamente
+    window.generarYMostrarNumerosSorteos = generarYMostrarNumerosSorteos;
+    window.generarNumerosEmergencia = generarNumerosEmergencia;
+    window.mostrarCombinacionAleatoria = mostrarCombinacionAleatoria;
+    window.generarCombinacionAleatoria = generarCombinacionAleatoria;
+    window.copiarCombinacion = copiarCombinacion;
+    
+    console.log('✅ Funciones de combinaciones aleatorias disponibles globalmente');
+    
     // Esperar a que otros scripts se carguen
     setTimeout(function() {
         generarYMostrarNumerosSorteos();
     }, 2000);
 });
 
-// Hacer funciones disponibles globalmente
+// Hacer funciones disponibles globalmente inmediatamente también
 window.generarYMostrarNumerosSorteos = generarYMostrarNumerosSorteos;
 window.generarNumerosEmergencia = generarNumerosEmergencia;
 window.mostrarCombinacionAleatoria = mostrarCombinacionAleatoria;

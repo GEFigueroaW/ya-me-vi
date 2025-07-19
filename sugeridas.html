@@ -77,7 +77,7 @@
 
         <!-- Botón para generar combinaciones -->
         <div class="text-center">
-          <button id="btn-generar" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+          <button id="btn-generar" onclick="if(window.mostrarCombinacionAleatoria){window.mostrarCombinacionAleatoria();}else{console.log('❌ Función no disponible');}" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
             🎲 Generar Combinaciones Aleatorias
           </button>
         </div>
@@ -951,47 +951,73 @@
       window.location.href = 'home.html';
     });
 
-    // Botón para generar combinaciones aleatorias
-    document.getElementById('btn-generar').addEventListener('click', () => {
-      console.log('🎲 Generando combinación aleatoria...');
+    // Función para inicializar el botón de combinaciones aleatorias con retry
+    function inicializarBotonAleatorias() {
+      const btnGenerar = document.getElementById('btn-generar');
+      if (!btnGenerar) {
+        console.log('⏳ Botón btn-generar no encontrado, reintentando...');
+        setTimeout(inicializarBotonAleatorias, 500);
+        return;
+      }
+
+      // Remover event listeners anteriores
+      btnGenerar.replaceWith(btnGenerar.cloneNode(true));
+      const nuevoBtn = document.getElementById('btn-generar');
       
-      if (typeof window.mostrarCombinacionAleatoria === 'function') {
-        window.mostrarCombinacionAleatoria();
-      } else {
-        // Fallback si la función no está disponible
-        const container = document.getElementById('combinaciones-container');
-        if (container) {
-          container.innerHTML = `
-            <div class="text-center py-8">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-              <p class="text-white">Generando combinación...</p>
-            </div>
-          `;
-          
-          setTimeout(() => {
-            const numeros = [];
-            while (numeros.length < 6) {
-              const num = Math.floor(Math.random() * 56) + 1;
-              if (!numeros.includes(num)) numeros.push(num);
-            }
-            numeros.sort((a, b) => a - b);
-            
+      nuevoBtn.addEventListener('click', () => {
+        console.log('🎲 Click en botón - Generando combinación aleatoria...');
+        
+        if (typeof window.mostrarCombinacionAleatoria === 'function') {
+          console.log('✅ Función mostrarCombinacionAleatoria encontrada, ejecutando...');
+          window.mostrarCombinacionAleatoria();
+        } else {
+          console.log('⚠️ Función mostrarCombinacionAleatoria no disponible, usando fallback...');
+          // Fallback si la función no está disponible
+          const container = document.getElementById('combinaciones-container');
+          if (container) {
             container.innerHTML = `
-              <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
-                <h3 class="text-xl font-bold text-white mb-4 text-center">🎲 Tu Combinación Aleatoria</h3>
-                <div class="flex justify-center">
-                  <div class="bg-purple-500 bg-opacity-20 rounded-lg p-6 text-center border border-purple-300 border-opacity-30">
-                    <div class="flex justify-center space-x-3 mb-4">
-                      ${numeros.map(num => `<span class="bg-white text-purple-600 font-bold py-2 px-3 rounded-lg text-lg shadow-lg">${num}</span>`).join('')}
+              <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+                <p class="text-white">Generando combinación...</p>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              const numeros = [];
+              while (numeros.length < 6) {
+                const num = Math.floor(Math.random() * 56) + 1;
+                if (!numeros.includes(num)) numeros.push(num);
+              }
+              numeros.sort((a, b) => a - b);
+              
+              container.innerHTML = `
+                <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
+                  <h3 class="text-xl font-bold text-white mb-4 text-center">🎲 Tu Combinación Aleatoria</h3>
+                  <div class="flex justify-center">
+                    <div class="bg-purple-500 bg-opacity-20 rounded-lg p-6 text-center border border-purple-300 border-opacity-30">
+                      <div class="flex justify-center space-x-3 mb-4">
+                        ${numeros.map(num => `<span class="bg-white text-purple-600 font-bold py-2 px-3 rounded-lg text-lg shadow-lg">${num}</span>`).join('')}
+                      </div>
+                      <div class="text-center mt-4">
+                        <button onclick="inicializarBotonAleatorias()" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+                          🔄 Generar Nueva Combinación
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            `;
-          }, 800);
+              `;
+              console.log(`✅ Combinación fallback generada: ${numeros.join(' - ')}`);
+            }, 800);
+          }
         }
-      }
-    });
+      });
+      
+      console.log('✅ Event listener configurado para botón btn-generar');
+    }
+
+    // Inicializar después de que todos los scripts se hayan cargado
+    setTimeout(inicializarBotonAleatorias, 2000);
 
     // El botón de generar nueva proyección ha sido eliminado
     // La generación de proyecciones ahora ocurre automáticamente al abrir la caja de análisis
