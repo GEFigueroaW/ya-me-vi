@@ -9,23 +9,72 @@ const db = getFirestore(app);
 // === Función para mostrar el sueño guardado del usuario ===
 async function mostrarBienvenidaConSueño(user) {
   try {
-    const ref = doc(db, `users/${user.uid}/dream`, 'info');
-    const snap = await getDoc(ref);
+    const dreamRef = doc(db, `users/${user.uid}/dream`, 'info');
+    const dreamSnap = await getDoc(dreamRef);
+
+    // Intentar obtener el perfil del usuario para el nombre
+    const profileRef = doc(db, `users/${user.uid}/profile`, 'info');
+    const profileSnap = await getDoc(profileRef);
 
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) {
-      if (snap.exists()) {
-        const { sueño } = snap.data();
-        welcomeMsg.textContent = `¡Bienvenido! Vas tras tu sueño: ${sueño}.`;
+      // Obtener el nombre del usuario con múltiples fallbacks
+      let userName = '';
+      
+      // 1. Intentar desde el perfil guardado en Firestore
+      if (profileSnap.exists() && profileSnap.data().name) {
+        userName = profileSnap.data().name.split(' ')[0]; // Solo primer nombre
+      }
+      // 2. Si no, usar displayName de Firebase Auth (Google login)
+      else if (user.displayName) {
+        userName = user.displayName.split(' ')[0];
+      }
+      // 3. Si no, usar la parte del email antes del @
+      else if (user.email) {
+        userName = user.email.split('@')[0];
+      }
+      
+      // 4. Verificar si hay datos biométricos y usar fallback
+      const biometricUserInfo = localStorage.getItem('biometric_user_info');
+      if (biometricUserInfo && !userName) {
+        userName = 'Usuario'; // Fallback para usuarios biométricos
+      }
+      
+      if (dreamSnap.exists()) {
+        const { sueño } = dreamSnap.data();
+        if (userName) {
+          welcomeMsg.textContent = `¡Bienvenido "${userName}"! Vas tras tu sueño: ${sueño}.`;
+        } else {
+          welcomeMsg.textContent = `¡Bienvenido! Vas tras tu sueño: ${sueño}.`;
+        }
+      } else {
+        if (userName) {
+          welcomeMsg.textContent = `¡Bienvenido "${userName}"!`;
+        } else {
+          welcomeMsg.textContent = '¡Bienvenido!';
+        }
+      }
+      
+      console.log(`Usuario identificado como: ${userName || 'Anónimo'}`);
+    }
+  } catch (error) {
+    console.error('Error obteniendo datos del usuario:', error);
+    const welcomeMsg = document.getElementById('welcome-msg');
+    if (welcomeMsg) {
+      // Intentar mostrar al menos el nombre aunque falle el sueño
+      let userName = '';
+      
+      if (user && user.displayName) {
+        userName = user.displayName.split(' ')[0];
+      } else if (user && user.email) {
+        userName = user.email.split('@')[0];
+      }
+      
+      if (userName) {
+        welcomeMsg.textContent = `¡Bienvenido "${userName}"!`;
       } else {
         welcomeMsg.textContent = '¡Bienvenido!';
       }
-    }
-  } catch (error) {
-    console.error('Error obteniendo el sueño:', error);
-    const welcomeMsg = document.getElementById('welcome-msg');
-    if (welcomeMsg) {
-      welcomeMsg.textContent = '¡Bienvenido!';
     }
   }
 }
