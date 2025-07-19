@@ -1547,6 +1547,8 @@
         window.location.href = "index.html";
       } else {
         window.usuarioActualID = user.uid; // Guardar el ID del usuario actual para usar en predicciones
+        window.usuarioActualNombre = user.displayName; // Guardar el nombre del usuario
+        window.usuarioActualEmail = user.email; // Guardar el email del usuario
         usuarioActualID = user.uid;
         console.log('👤 Usuario autenticado:', window.usuarioActualID);
         

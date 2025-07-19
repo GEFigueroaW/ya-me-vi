@@ -1,6 +1,62 @@
 // === ARCHIVO DE CORRECCIÓN PARA SUGERIDAS.HTML ===
 // Este archivo resuelve el problema de los números que no se muestran en los sorteos
 
+// Función para obtener el usuario actual y datos de Firebase
+async function obtenerDatosUsuario() {
+    try {
+        // Verificar si Firebase está disponible
+        if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
+            const user = window.firebase.auth().currentUser;
+            if (user) {
+                return user;
+            }
+        }
+        
+        // Fallback: verificar si hay variable global del usuario
+        if (window.usuarioActualID) {
+            return { 
+                uid: window.usuarioActualID,
+                displayName: window.usuarioActualNombre || null,
+                email: window.usuarioActualEmail || null
+            };
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error obteniendo datos del usuario:', error);
+        return null;
+    }
+}
+
+// Función para obtener el nombre del usuario desde múltiples fuentes
+async function obtenerNombreUsuario() {
+    try {
+        const user = await obtenerDatosUsuario();
+        if (!user) return '';
+        
+        // 1. Intentar desde displayName (Google login)
+        if (user.displayName) {
+            return user.displayName.split(' ')[0]; // Solo primer nombre
+        }
+        
+        // 2. Intentar desde email
+        if (user.email) {
+            return user.email.split('@')[0];
+        }
+        
+        // 3. Verificar datos biométricos
+        const biometricUserInfo = localStorage.getItem('biometric_user_info');
+        if (biometricUserInfo) {
+            return 'Usuario';
+        }
+        
+        return '';
+    } catch (error) {
+        console.error('Error obteniendo nombre del usuario:', error);
+        return '';
+    }
+}
+
 // Variables globales para el estado
 window.sistemaInicializado = false;
 window.numerosSorteosGenerados = false;
@@ -28,7 +84,7 @@ async function generarYMostrarNumerosSorteos() {
         await generarPrediccionesIASimple();
         
         // Actualizar título del sorteo
-        actualizarTituloSorteoSimple();
+        await actualizarTituloSorteoSimple();
         
         window.numerosSorteosGenerados = true;
         console.log('✅ Todos los números de sorteos generados correctamente');
@@ -311,7 +367,7 @@ function generarNumerosAleatoriosControlados() {
     return numeros;
 }
 
-function actualizarTituloSorteoSimple() {
+async function actualizarTituloSorteoSimple() {
     const tituloElement = document.getElementById('titulo-sorteo');
     if (!tituloElement) return;
     
@@ -335,8 +391,17 @@ function actualizarTituloSorteoSimple() {
             }
         }
         
-        tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
-        console.log(`📝 Título actualizado: sorteo ${numeroSorteo}`);
+        // Obtener el nombre del usuario
+        const nombreUsuario = await obtenerNombreUsuario();
+        
+        // Construir el título con o sin nombre
+        if (nombreUsuario) {
+            tituloElement.textContent = `Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${numeroSorteo}`;
+            console.log(`📝 Título actualizado con nombre: ${nombreUsuario}, sorteo ${numeroSorteo}`);
+        } else {
+            tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
+            console.log(`📝 Título actualizado sin nombre: sorteo ${numeroSorteo}`);
+        }
         
     } catch (error) {
         console.error('❌ Error actualizando título:', error);
@@ -378,7 +443,7 @@ window.generarPrediccionesPorSorteo = generarPrediccionesIASimple;
 window.actualizarTituloSorteo = actualizarTituloSorteoSimple;
 
 // Función de emergencia que genera todos los números
-function generarNumerosEmergencia() {
+async function generarNumerosEmergencia() {
     console.log('🚨 Generando números de emergencia...');
     
     // Proyecciones de análisis
@@ -406,7 +471,7 @@ function generarNumerosEmergencia() {
     });
     
     // Actualizar título
-    actualizarTituloSorteoSimple();
+    await actualizarTituloSorteoSimple();
     
     // Actualizar mensaje de estado
     const mensajeEstado = document.getElementById('mensaje-estado');
