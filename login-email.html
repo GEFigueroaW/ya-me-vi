@@ -15,13 +15,29 @@
     <h2 class="text-3xl font-bold mb-6">Iniciar sesión</h2>
 
     <form id="login-form" class="flex flex-col gap-4 w-full max-w-xs">
-      <input type="email" id="email" placeholder="Correo electrónico" required class="text-black px-4 py-2 rounded"/>
-      <input type="password" id="password" placeholder="Contraseña" required class="text-black px-4 py-2 rounded"/>
+      <input type="email" id="email" placeholder="Correo electrónico" required class="text-black px-4 py-2 rounded" autocomplete="off"/>
+      <input type="password" id="password" placeholder="Contraseña" required class="text-black px-4 py-2 rounded" autocomplete="off"/>
       <button type="submit" class="border border-white py-2 rounded hover:bg-white hover:text-gray-800 transition-all">Ingresar</button>
     </form>
-<div class="mt-4">
-  <button id="google-login" class="border border-white py-2 px-4 rounded hover:bg-white hover:text-gray-800 transition-all">
+<div class="mt-4 space-y-3">
+  <!-- Botón de login con Google -->
+  <button id="google-login" class="flex items-center justify-center w-full bg-white text-gray-700 py-2 px-4 rounded hover:bg-gray-100 transition-all shadow-md">
+    <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    </svg>
     Iniciar sesión con Google
+  </button>
+
+  <!-- Botón de login con datos biométricos -->
+  <button id="biometric-login" class="flex items-center justify-center w-full border border-white py-2 px-4 rounded hover:bg-white hover:text-gray-800 transition-all" style="display: none;">
+    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M17.81 4.47c-.08 0-.16-.02-.23-.06C15.66 3.42 14 3 12.01 3c-1.98 0-3.86.47-5.57 1.41-.24.13-.54.04-.68-.2-.13-.24-.04-.55.2-.68C7.82 2.52 9.86 2 12.01 2c2.13 0 3.99.47 6.03 1.52.25.13.34.43.21.67-.09.18-.26.28-.44.28zM3.5 9.72c-.1 0-.2-.03-.29-.09-.23-.16-.28-.47-.12-.7.99-1.4 2.25-2.5 3.75-3.27C9.98 4.04 14.05 4.04 17.15 5.66c1.5.77 2.76 1.86 3.75 3.27.16.22.11.54-.12.7-.23.16-.54.11-.7-.12-.9-1.29-2.04-2.25-3.39-2.94-2.87-1.47-6.54-1.47-9.4 0-1.36.69-2.5 1.65-3.4 2.94-.08.14-.23.21-.39.21z"/>
+      <path d="M9.75 21.79c-.13 0-.26-.05-.35-.15-.87-.87-1.34-1.43-2.01-2.64-.69-1.24-1.16-2.63-1.14-3.85 0-1.63.79-3.15 2.11-4.06 1.7-1.18 4.5-1.18 6.2 0 1.32.91 2.11 2.43 2.11 4.06.02 1.22-.45 2.61-1.14 3.85-.67 1.21-1.14 1.77-2.01 2.64-.09.1-.22.15-.35.15-.13 0-.26-.05-.35-.15-.87-.87-1.34-1.43-2.01-2.64-.69-1.24-1.16-2.63-1.14-3.85 0-1.63.79-3.15 2.11-4.06.85-.59 1.85-.59 2.7 0 1.32.91 2.11 2.43 2.11 4.06.02 1.22-.45 2.61-1.14 3.85-.67 1.21-1.14 1.77-2.01 2.64-.09.1-.22.15-.35.15z"/>
+    </svg>
+    Iniciar sesión con datos biométricos
   </button>
 </div>
 
@@ -33,6 +49,44 @@
   </div>
 
   <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+
+  <!-- Script para limpiar campos al cargar la página -->
+  <script>
+    // Limpiar campos automáticamente al cargar la página
+    window.addEventListener('load', function() {
+      // Limpiar campos específicos
+      const emailField = document.getElementById('email');
+      const passwordField = document.getElementById('password');
+      
+      if (emailField) {
+        emailField.value = '';
+        console.log('✅ Campo de email limpiado');
+      }
+      
+      if (passwordField) {
+        passwordField.value = '';
+        console.log('✅ Campo de contraseña limpiado');
+      }
+    });
+
+    // También limpiar cuando se enfoca la página (por si viene de otra pestaña)
+    window.addEventListener('focus', function() {
+      const emailField = document.getElementById('email');
+      const passwordField = document.getElementById('password');
+      
+      if (emailField) emailField.value = '';
+      if (passwordField) passwordField.value = '';
+    });
+
+    // Limpiar campos cuando se recarga la página
+    window.addEventListener('beforeunload', function() {
+      const emailField = document.getElementById('email');
+      const passwordField = document.getElementById('password');
+      
+      if (emailField) emailField.value = '';
+      if (passwordField) passwordField.value = '';
+    });
+  </script>
 
   <script src="js/shared.js"></script>
   <script src="js/login.js" type="module"></script>
