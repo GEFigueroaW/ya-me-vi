@@ -92,7 +92,7 @@
     <!-- Combinaciones sugeridas por IA -->
     <div id="prediccion-container" class="rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300 analisis-transparente" style="opacity: 0.5;" onclick="togglePrediccionIA(); setTimeout(() => { if(window.generarYMostrarNumerosSorteos) window.generarYMostrarNumerosSorteos(); }, 1000);">
       <div class="text-center">
-        <h2 class="text-xl font-semibold mb-4 text-white">🎯 <span id="titulo-sorteo">Combinaciones sugeridas por IA para TI para el sorteo "---"</span></h2>
+        <h2 class="text-xl font-semibold mb-4 text-white"><span id="titulo-sorteo">Combinaciones sugeridas por IA para TI para el sorteo "---"</span></h2>
         
         <!-- Indicador de expansión -->
         <div class="flex justify-center items-center">
@@ -1603,6 +1603,51 @@
             }
           }
         }, 6000);
+        
+        // Intento ULTRA agresivo cada 2 segundos hasta que funcione
+        const intervalId = setInterval(() => {
+          const tituloElement = document.getElementById('titulo-sorteo');
+          if (tituloElement && tituloElement.textContent.includes('---')) {
+            console.log('🔄 Intento continuo de actualización de título...');
+            
+            let nombre = '';
+            // Buscar en todas las fuentes posibles
+            if (window.auth && window.auth.currentUser) {
+              const user = window.auth.currentUser;
+              if (user.displayName) {
+                nombre = user.displayName.split(' ')[0];
+                console.log('✅ Nombre encontrado en Firebase Auth:', nombre);
+              } else if (user.email) {
+                nombre = user.email.split('@')[0];
+                console.log('✅ Nombre del email:', nombre);
+              }
+            } else if (window.usuarioActualNombre) {
+              nombre = window.usuarioActualNombre.split(' ')[0];
+              console.log('✅ Nombre de variable global:', nombre);
+            } else if (window.usuarioActualEmail) {
+              nombre = window.usuarioActualEmail.split('@')[0];
+              console.log('✅ Email de variable global:', nombre);
+            }
+            
+            if (nombre) {
+              tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
+              console.log('🎯 TÍTULO FORZADO POR INTERVAL:', nombre);
+              clearInterval(intervalId); // Detener el interval una vez que funcione
+            }
+          } else if (tituloElement && !tituloElement.textContent.includes('---') && !tituloElement.textContent.includes('🎯')) {
+            // Si no tiene el emoji, agregarlo
+            if (!tituloElement.textContent.startsWith('🎯')) {
+              tituloElement.textContent = `🎯 ${tituloElement.textContent}`;
+              console.log('🎯 Emoji agregado al título existente');
+            }
+          }
+        }, 2000);
+        
+        // Limpiar el interval después de 30 segundos para evitar bucle infinito
+        setTimeout(() => {
+          clearInterval(intervalId);
+          console.log('🛑 Interval de actualización de título detenido');
+        }, 30000);
         
         try {
           // Cargar datos históricos
