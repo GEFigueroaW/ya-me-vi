@@ -264,15 +264,8 @@ window.generarPrediccionPorFrecuencia = function(datos) {
 
     return Array.from(seleccionados).sort((a, b) => a - b);
 };
-const funcionesRespaldo = {
-  analizarSumaNumeros: function(datos) {
-    console.log('🔄 Ejecutando análisis de suma mejorado');
-    const resultado = {};
-    Object.entries(datos).forEach(([sorteo, datosSorteo]) => {
-      if (!datosSorteo || !datosSorteo.sorteos || !datosSorteo.sorteos.length) {
-        console.warn(`⚠️ No hay datos válidos para analizar suma en ${sorteo}`);
-        return;
-      }
+// No se necesita código de respaldo, los datos históricos son obligatorios
+// Los archivos CSV son la base fundamental de la aplicación
 
       const sumas = datosSorteo.sorteos.map(sorteo => 
         sorteo.numeros.reduce((a, b) => a + b, 0)
@@ -492,9 +485,7 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
         // Actualizar mensaje en la UI para mostrar el progreso del análisis
         const elementoDetalle = document.getElementById(`detalle-${nombreSorteo.toLowerCase()}`);
         if (elementoDetalle) {
-            const fecha = new Date().toLocaleTimeString();
-            elementoDetalle.innerHTML = `Análisis completo (${fecha})<br>
-                <small>Frecuencias: 22% | Suma: 22% | Paridad: 22% | Décadas: 22% | Aleatorio: 12%</small>`;
+            elementoDetalle.innerHTML = `Números sugeridos basados en el análisis histórico`;
         }
 
         // 1. Análisis de frecuencias (22%)
