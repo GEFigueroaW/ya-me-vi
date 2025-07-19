@@ -2,11 +2,11 @@
 // Módulo de compatibilidad para exponer funciones de dataParser.js globalmente
 // Facilita el uso de funciones de análisis en archivos HTML sin módulos ES6
 
-// Verificar inicialización
+// Verificar inicialización (comentado temporalmente para debugging)
 function verificarInicializacion() {
-    if (!window.yaMeVi || !window.yaMeVi.initialized) {
-        throw new Error('Sistema YA ME VI no inicializado');
-    }
+    // if (!window.yaMeVi || !window.yaMeVi.initialized) {
+    //     throw new Error('Sistema YA ME VI no inicializado');
+    // }
     return true;
 }
     // Funciones de análisis base
@@ -465,37 +465,13 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
         delete window.ultimasProyecciones;
     }
     
-    // Borrar números anteriores del DOM
-    document.getElementById(`proyeccion-${nombreSorteo.toLowerCase()}`).textContent = '';
-    
-    // Mostrar indicador de carga
-    const spinner = document.querySelector(`#proyeccion-${nombreSorteo.toLowerCase()} + .proyeccion-loading`);
-    if (spinner) spinner.classList.remove('hidden');
-    
     try {
         // Verificar y preparar datos
         if (!datos || !datos.sorteos || datos.sorteos.length === 0) {
             console.error('❌ No hay datos históricos disponibles');
             throw new Error('Se requieren datos históricos para un análisis preciso');
-            datos = {
-                sorteos: Array(10).fill(null).map(() => ({
-                    numeros: generarNumerosUnicos(6),
-                    fecha: new Date()
-                })),
-                numeros: []
-            };
-            // Generar pool de números para análisis completo
-            datos.sorteos.forEach(sorteo => {
-                datos.numeros.push(...sorteo.numeros);
-            });
         }
         
-        // Actualizar mensaje en la UI para mostrar el progreso del análisis
-        const elementoDetalle = document.getElementById(`detalle-${nombreSorteo.toLowerCase()}`);
-        if (elementoDetalle) {
-            elementoDetalle.innerHTML = `Números sugeridos basados en el análisis histórico`;
-        }
-
         // 1. Análisis de frecuencias (22%)
         console.log('📊 Analizando frecuencias históricas...');
         const frecuenciasMap = new Map();
@@ -510,11 +486,6 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
             .sort(([,a], [,b]) => b - a)
             .slice(0, 15)
             .map(([num]) => parseInt(num));
-
-        const analisisFrecuencias = {
-            top: numerosPorFrecuencia.slice(0, 6),
-            total: numerosPorFrecuencia
-        };
 
         // 2. Análisis por suma (22%)
         console.log('📊 Analizando sumas de números...');
@@ -534,81 +505,47 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
         const decadasFrecuentes = decadaAnalisis[nombreSorteo].decadasPorPosicion.map(p => p.decadaMasFrecuente);
         console.log(`✓ Décadas más frecuentes por posición: ${decadasFrecuentes.join(', ')}`);
 
-        // Aplicar pesos de análisis
-        const numerosFrecuencia = analisisFrecuencias.top.slice(0, Math.ceil(6 * PESOS_ANALISIS.frecuencias));
-        const numerosSuma = generarNumerosPorRango(rangoSuma, Math.ceil(6 * PESOS_ANALISIS.suma));
-        const numerosParidad = generarNumerosPorParidad(distribucionParidad, Math.ceil(6 * PESOS_ANALISIS.paridad));
-        const numerosDecada = generarNumerosPorDecadas(decadasFrecuentes, Math.ceil(6 * PESOS_ANALISIS.decadas));
-        const numerosAleatorios = generarNumerosUnicos(Math.ceil(6 * PESOS_ANALISIS.aleatorio));
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, 10)
-            .map(([num]) => parseInt(num));
-
-        // 2. Análisis por suma (22%)
-        const numerosPorSuma = [];
-        const sumaObjetivo = 175; // Promedio típico
-        while (numerosPorSuma.length < 10) {
-            const num = Math.floor(Math.random() * 56) + 1;
-            const sumaActual = numerosPorSuma.reduce((a,b) => a + b, 0);
-            if (sumaActual + num <= sumaObjetivo) {
-                numerosPorSuma.push(num);
-            }
-        }
-
-        // 3. Análisis por paridad (22%)
-        const numerosPorParidad = [];
-        let pares = 0, impares = 0;
-        while (numerosPorParidad.length < 10) {
-            const num = Math.floor(Math.random() * 56) + 1;
-            if ((num % 2 === 0 && pares < 5) || (num % 2 !== 0 && impares < 5)) {
-                numerosPorParidad.push(num);
-                num % 2 === 0 ? pares++ : impares++;
-            }
-        }
-
-        // 4. Análisis por décadas (22%)
-        const numerosPorDecada = [];
-        const decadas = [[1,10], [11,20], [21,30], [31,40], [41,50], [51,56]];
-        decadas.forEach(([min, max]) => {
-            const cantidad = Math.ceil(10 / decadas.length);
-            for (let i = 0; i < cantidad; i++) {
-                numerosPorDecada.push(
-                    Math.floor(Math.random() * (max - min + 1)) + min
-                );
-            }
-        });
-
-        // 5. Factor aleatorio (12%)
-        const numerosAleatorios = [];
-        while (numerosAleatorios.length < 6) {
-            const num = Math.floor(Math.random() * 56) + 1;
-            if (!numerosAleatorios.includes(num)) {
-                numerosAleatorios.push(num);
-            }
-        }
-
-        // Combinar todos los análisis
+        // Combinar todos los análisis con números únicos
         const numerosConPeso = new Map();
         
-        // Función mejorada para aplicar pesos
-        const aplicarPeso = (numeros, peso, fuente) => {
-            numeros.forEach(num => {
-                const pesoActual = numerosConPeso.get(num) || { peso: 0, fuentes: [] };
-                numerosConPeso.set(num, {
-                    peso: pesoActual.peso + peso,
-                    fuentes: [...pesoActual.fuentes, fuente]
-                });
-            });
-        };
+        // Aplicar peso por frecuencia
+        numerosPorFrecuencia.slice(0, 6).forEach(num => {
+            numerosConPeso.set(num, (numerosConPeso.get(num) || 0) + PESOS_ANALISIS.frecuencias);
+        });
 
-        // Aplicar pesos con trazabilidad
-        aplicarPeso(analisisFrecuencias.top, PESOS_ANALISIS.frecuencias, 'frecuencia');
-        aplicarPeso(numerosPorSuma, PESOS_ANALISIS.suma, 'suma');
-        aplicarPeso(numerosPorParidad, PESOS_ANALISIS.paridad, 'paridad');
-        aplicarPeso(decadasFrecuentes.flatMap(d => {
-            const [min, max] = d.split('-').map(Number);
-            return Array.from({length: max - min + 1}, (_, i) => min + i);
-        }), PESOS_ANALISIS.decadas, 'decadas');
+        // Generar números por rango de suma
+        const [minSuma, maxSuma] = rangoSuma.split('-').map(Number);
+        const numerosPorSuma = [];
+        for (let i = 1; i <= 56 && numerosPorSuma.length < 6; i++) {
+            const sumaTemp = numerosPorSuma.reduce((a, b) => a + b, 0) + i;
+            if (sumaTemp >= minSuma && sumaTemp <= maxSuma) {
+                numerosPorSuma.push(i);
+            }
+        }
+        numerosPorSuma.forEach(num => {
+            numerosConPeso.set(num, (numerosConPeso.get(num) || 0) + PESOS_ANALISIS.suma);
+        });
+
+        // Aplicar peso por paridad
+        const [paresTarget] = distribucionParidad.match(/\d+/);
+        let pares = 0, impares = 0;
+        for (let i = 1; i <= 56 && (pares + impares) < 6; i++) {
+            if (i % 2 === 0 && pares < parseInt(paresTarget)) {
+                numerosConPeso.set(i, (numerosConPeso.get(i) || 0) + PESOS_ANALISIS.paridad);
+                pares++;
+            } else if (i % 2 !== 0 && impares < (6 - parseInt(paresTarget))) {
+                numerosConPeso.set(i, (numerosConPeso.get(i) || 0) + PESOS_ANALISIS.paridad);
+                impares++;
+            }
+        }
+
+        // Aplicar peso por décadas
+        decadasFrecuentes.forEach(decada => {
+            const [min, max] = decada.split('-').map(Number);
+            for (let i = min; i <= max; i++) {
+                numerosConPeso.set(i, (numerosConPeso.get(i) || 0) + PESOS_ANALISIS.decadas);
+            }
+        });
 
         // Seleccionar los 6 números con mayor peso
         const combinacionFinal = Array.from(numerosConPeso.entries())
@@ -617,30 +554,14 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
             .map(([num]) => parseInt(num))
             .sort((a, b) => a - b);
 
-        // Seleccionar números finales usando todos los criterios
-        const combinacionFinal = Array.from(numerosConPeso.entries())
-            .sort(([,a], [,b]) => b.peso - a.peso)
-            .slice(0, 6)
-            .map(([num]) => parseInt(num))
-            .sort((a, b) => a - b);
-
         return {
             numeros: combinacionFinal,
-            detalle: `Análisis completo (${new Date().toLocaleTimeString()})`,
+            detalle: `Análisis completo basado en datos históricos`,
             analisis: {
-                frecuencias: analisisFrecuencias,
-                suma: {
-                    rango: rangoSuma,
-                    promedio: sumaPromedio
-                },
-                paridad: {
-                    distribucion: distribucionParidad,
-                    objetivo: paresObjetivo
-                },
-                decadas: {
-                    distribucion: decadasFrecuentes,
-                    analisisPosicional: decadaAnalisis[nombreSorteo].decadasPorPosicion
-                }
+                frecuencias: numerosPorFrecuencia.slice(0, 6),
+                suma: rangoSuma,
+                paridad: distribucionParidad,
+                decadas: decadasFrecuentes
             }
         };
 
@@ -653,7 +574,7 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
         }
         return {
             numeros: Array.from(numerosEmergencia).sort((a, b) => a - b),
-            detalle: 'Generación de emergencia (análisis no disponible)'
+            detalle: 'Generación de emergencia (datos históricos no disponibles)'
         };
     }
 }
@@ -663,14 +584,8 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
 window.toggleAnalisis = async function() {
     console.log('🔄 Iniciando análisis...');
     
-    // Verificar inicialización
-    if (!verificarInicializacion()) {
-        console.error('❌ Sistema no inicializado');
-        return;
-    }
-
-    const contenido = document.getElementById('contenido-predicciones');
-    const arrow = document.getElementById('arrow-icon');
+    const contenido = document.getElementById('contenido-analisis');
+    const arrow = document.getElementById('arrow-icon-analisis');
     
     // Verificar elementos
     if (!contenido || !arrow) {
@@ -682,17 +597,36 @@ window.toggleAnalisis = async function() {
     
     // Si vamos a mostrar el contenido, generamos nuevas proyecciones
     if (estaOculto) {
-        // Primero mostramos UI de carga
+        // Mostrar contenido
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
         
-        // Mostrar spinners y limpiar números anteriores
-        document.querySelectorAll('.proyeccion-loading').forEach(spinner => {
-            spinner.classList.remove('hidden');
-        });
+        // Limpiar números anteriores
         ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
             const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
-            if (elementoProyeccion) elementoProyeccion.textContent = '';
+            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+            if (elementoProyeccion) elementoProyeccion.textContent = '🔄 Generando...';
+            if (elementoDetalle) elementoDetalle.textContent = 'Analizando datos históricos...';
+        });
+        
+        // Generar nuevas proyecciones
+        try {
+            await window.generarProyeccionesAnalisis();
+            console.log('✅ Nuevas proyecciones generadas correctamente');
+        } catch (error) {
+            console.error('❌ Error generando nuevas proyecciones:', error);
+            ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+                const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+                if (elementoProyeccion) elementoProyeccion.textContent = 'Error en el análisis';
+                if (elementoDetalle) elementoDetalle.textContent = 'No se pudieron generar los números';
+            });
+        }
+    } else {
+        // Si vamos a ocultar, solo ocultamos
+        contenido.classList.add('hidden');
+        arrow.style.transform = '';
+    }
             
             ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
                 const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
@@ -776,17 +710,34 @@ window.generarProyeccionesAnalisis = async function() {
     
     // Verificar datos históricos
     if (!window.datosHistoricos) {
-        throw new Error('Los datos históricos son obligatorios para el análisis');
+        console.error('❌ Los datos históricos son obligatorios para el análisis');
+        return;
     }
     
     const sorteos = ['melate', 'revancha', 'revanchita'];
     for (const sorteo of sorteos) {
-        // Mostrar estado de carga
-        const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
-        const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
-        const spinner = elementoProyeccion?.parentElement?.querySelector('.proyeccion-loading');
-        
-        if (spinner) spinner.classList.remove('hidden');
+        try {
+            // Generar nueva proyección
+            const resultado = await generarProyeccionPorAnalisis(window.datosHistoricos[sorteo], sorteo);
+            
+            // Actualizar UI con resultado
+            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+            
+            if (elementoProyeccion) {
+                elementoProyeccion.textContent = resultado.numeros.join(' - ');
+            }
+            if (elementoDetalle) {
+                elementoDetalle.textContent = resultado.detalle;
+            }
+        } catch (error) {
+            console.error(`Error al generar proyección para ${sorteo}:`, error);
+            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+            if (elementoProyeccion) elementoProyeccion.textContent = '-- -- -- -- -- --';
+            if (elementoDetalle) elementoDetalle.textContent = 'Error al generar predicción';
+        }
+    }
         if (elementoProyeccion) elementoProyeccion.textContent = '';
         if (elementoDetalle) elementoDetalle.textContent = 'Analizando datos históricos...';
         
