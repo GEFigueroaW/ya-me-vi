@@ -163,33 +163,56 @@ async function generarYMostrarNumerosSorteos() {
     console.log('🎯 Iniciando generación y visualización de números de sorteos...');
     
     try {
-        // Cargar datos históricos si no están disponibles
+        // PASO 1: Cargar datos históricos OBLIGATORIAMENTE
+        console.log('📊 PASO 1: Cargando datos históricos...');
         if (!window.datosHistoricos) {
-            console.log('📊 Cargando datos históricos...');
             if (typeof window.cargarDatosHistoricos === 'function') {
+                console.log('🔄 Ejecutando cargarDatosHistoricos...');
                 window.datosHistoricos = await window.cargarDatosHistoricos('todos');
+                console.log('✅ Datos históricos cargados:', {
+                    melate: window.datosHistoricos?.melate?.sorteos?.length || 0,
+                    revancha: window.datosHistoricos?.revancha?.sorteos?.length || 0,
+                    revanchita: window.datosHistoricos?.revanchita?.sorteos?.length || 0
+                });
             } else {
-                // Si no hay función de carga, crear datos básicos
-                window.datosHistoricos = crearDatosBasicos();
+                console.error('❌ ERROR CRÍTICO: cargarDatosHistoricos no está disponible');
+                throw new Error('Función cargarDatosHistoricos no disponible');
             }
+        } else {
+            console.log('✅ Datos históricos ya disponibles');
         }
         
-        // Generar números para proyecciones de análisis
+        // VERIFICAR que los datos se cargaron correctamente
+        if (!window.datosHistoricos || Object.keys(window.datosHistoricos).length === 0) {
+            console.error('❌ ERROR CRÍTICO: No se pudieron cargar los datos históricos');
+            throw new Error('Datos históricos no disponibles');
+        }
+        
+        // PASO 2: Generar números para proyecciones de análisis
+        console.log('📊 PASO 2: Generando proyecciones de análisis...');
         await generarProyeccionesAnalisisSimple();
         
-        // Generar números para predicciones IA
+        // PASO 3: Generar números para predicciones IA (CON DATOS HISTÓRICOS)
+        console.log('🤖 PASO 3: Generando predicciones IA con datos históricos...');
         await generarPrediccionesIASimple();
         
-        // Actualizar título del sorteo con nombre
+        // PASO 4: Actualizar título del sorteo con nombre
+        console.log('🎯 PASO 4: Actualizando título del sorteo...');
         await actualizarTituloSorteoConNombre();
         
         window.numerosSorteosGenerados = true;
-        console.log('✅ Todos los números de sorteos generados correctamente');
+        console.log('✅ Todos los números de sorteos generados correctamente con datos históricos reales');
         
     } catch (error) {
-        console.error('❌ Error generando números de sorteos:', error);
-        // Generar números de emergencia
-        generarNumerosEmergencia();
+        console.error('❌ ERROR CRÍTICO generando números de sorteos:', error);
+        console.error('❌ NO SE DEBE USAR FALLBACK - Verificar datos históricos y ML');
+        
+        // NO usar números de emergencia - debe funcionar con datos reales
+        const mensajeEstado = document.getElementById('mensaje-estado');
+        if (mensajeEstado) {
+            mensajeEstado.textContent = 'Error cargando datos históricos. Por favor recarga la página.';
+            mensajeEstado.style.color = '#ef4444';
+        }
     }
 }
 
@@ -269,12 +292,31 @@ async function generarProyeccionesAnalisisSimple() {
     }
 }
 
-// Función simplificada para generar predicciones IA usando el ML real
+// Función para generar predicciones IA usando OBLIGATORIAMENTE el ML real
 async function generarPrediccionesIASimple() {
-    console.log('🤖 Generando predicciones IA con algoritmo avanzado...');
+    console.log('🤖 Generando predicciones IA con algoritmo ML REAL (sin fallback)...');
     
     const sorteos = ['melate', 'revancha', 'revanchita'];
     const userId = window.usuarioActualID || 'usuario-anonimo';
+    
+    // VERIFICAR QUE LOS DATOS HISTÓRICOS ESTÉN DISPONIBLES
+    if (!window.datosHistoricos) {
+        console.log('📊 Cargando datos históricos primero...');
+        if (window.cargarDatosHistoricos && typeof window.cargarDatosHistoricos === 'function') {
+            window.datosHistoricos = await window.cargarDatosHistoricos('todos');
+            console.log('✅ Datos históricos cargados:', window.datosHistoricos);
+        } else {
+            console.error('❌ ERROR CRÍTICO: cargarDatosHistoricos no disponible');
+            return;
+        }
+    }
+    
+    // VERIFICAR QUE EL ML ESTÉ DISPONIBLE
+    if (!window.generarPrediccionPersonalizada || typeof window.generarPrediccionPersonalizada !== 'function') {
+        console.error('❌ ERROR CRÍTICO: generarPrediccionPersonalizada no disponible');
+        console.log('🔍 Funciones disponibles en window:', Object.keys(window).filter(k => k.includes('generar')));
+        return;
+    }
     
     for (const sorteo of sorteos) {
         try {
@@ -283,45 +325,52 @@ async function generarPrediccionesIASimple() {
             if (!elementoCombinacion) continue;
             
             // Mostrar estado de carga
-            elementoCombinacion.innerHTML = '<span class="animate-pulse">Generando IA...</span>';
+            elementoCombinacion.innerHTML = '<span class="animate-pulse">Generando IA con 5 métodos...</span>';
             
             // Esperar un poco para mostrar el loading
             await new Promise(resolve => setTimeout(resolve, 700));
             
-            // Usar el ML real si está disponible
-            let numeros;
-            if (window.generarPrediccionPersonalizada && typeof window.generarPrediccionPersonalizada === 'function') {
-                console.log('✅ Usando algoritmo ML real con 5 métodos para', sorteo);
-                // Preparar datos para el ML
-                const datosParaML = {
-                    sorteo: sorteo,
-                    numeros: window.datosHistoricos?.[sorteo]?.numeros || [],
-                    datos: window.datosHistoricos?.[sorteo]?.sorteos || []
-                };
-                
-                console.log(`📊 Datos para ML ${sorteo}:`, datosParaML);
-                numeros = await window.generarPrediccionPersonalizada(userId, datosParaML);
-                console.log(`✅ Predicción IA ${sorteo} (ML real - 5 métodos): ${numeros.join(' - ')}`);
-            } else {
-                console.log('⚠️ ML real no disponible, usando fallback para', sorteo);
-                // Fallback a la función simplificada
-                numeros = generarNumerosIAPersonalizada(userId, sorteo);
-                console.log(`✅ Predicción IA ${sorteo} (fallback): ${numeros.join(' - ')}`);
+            // Preparar datos para el ML (OBLIGATORIO)
+            const datosParaML = {
+                sorteo: sorteo,
+                numeros: window.datosHistoricos?.[sorteo]?.numeros || [],
+                datos: window.datosHistoricos?.[sorteo]?.sorteos || []
+            };
+            
+            console.log(`📊 Datos para ML ${sorteo}:`, {
+                sorteo: datosParaML.sorteo,
+                cantidadNumeros: datosParaML.numeros.length,
+                cantidadSorteos: datosParaML.datos.length
+            });
+            
+            // USAR SOLO EL ML REAL - SIN FALLBACK
+            console.log(`� Ejecutando ML real para ${sorteo} con 5 métodos: frecuencia, probabilidad, patrones, delta, desviación`);
+            const numeros = await window.generarPrediccionPersonalizada(userId, datosParaML);
+            console.log(`✅ Predicción IA ${sorteo} (ML 5 métodos): ${numeros.join(' - ')}`);
+            
+            // Verificar que la respuesta del ML sea válida
+            if (!Array.isArray(numeros) || numeros.length !== 6) {
+                console.error(`❌ ERROR: ML devolvió respuesta inválida para ${sorteo}:`, numeros);
+                elementoCombinacion.textContent = 'Error en análisis IA';
+                continue;
             }
             
             // Mostrar los números
             elementoCombinacion.textContent = numeros.join(' - ');
             
         } catch (error) {
-            console.error(`❌ Error en predicción IA ${sorteo}:`, error);
-            mostrarErrorEnElemento(`combinacion-${sorteo}`, 'Error al generar');
+            console.error(`❌ Error CRÍTICO en predicción IA ${sorteo}:`, error);
+            const elementoCombinacion = document.getElementById(`combinacion-${sorteo}`);
+            if (elementoCombinacion) {
+                elementoCombinacion.textContent = 'Error en análisis IA';
+            }
         }
     }
     
     // Actualizar mensaje de estado
     const mensajeEstado = document.getElementById('mensaje-estado');
     if (mensajeEstado) {
-        mensajeEstado.textContent = 'Predicciones generadas con análisis de IA: frecuencia, probabilidad, patrones, delta y desviación estándar';
+        mensajeEstado.textContent = 'Predicciones generadas con análisis IA avanzado: frecuencia histórica, probabilidad matemática, reconocimiento de patrones, análisis delta y desviación estándar';
     }
 }
 
@@ -555,43 +604,7 @@ window.generarProyeccionesAnalisis = generarProyeccionesAnalisisSimple;
 window.generarPrediccionesPorSorteo = generarPrediccionesIASimple;
 window.actualizarTituloSorteo = actualizarTituloSorteoConNombre;
 
-// Función de emergencia que genera todos los números
-async function generarNumerosEmergencia() {
-    console.log('🚨 Generando números de emergencia...');
-    
-    // Proyecciones de análisis
-    const sorteos = ['melate', 'revancha', 'revanchita'];
-    const numerosEmergencia = [
-        [7, 13, 23, 31, 42, 56],  // melate
-        [3, 19, 24, 37, 45, 51],  // revancha
-        [5, 12, 26, 33, 41, 54]   // revanchita
-    ];
-    
-    sorteos.forEach((sorteo, index) => {
-        const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
-        const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
-        const elementoCombinacion = document.getElementById(`combinacion-${sorteo}`);
-        
-        if (elementoProyeccion) {
-            elementoProyeccion.textContent = numerosEmergencia[index].join(' - ');
-        }
-        if (elementoDetalle) {
-            elementoDetalle.textContent = 'Números generados (modo emergencia)';
-        }
-        if (elementoCombinacion) {
-            elementoCombinacion.textContent = numerosEmergencia[index].join(' - ');
-        }
-    });
-    
-    // Actualizar título con nombre
-    await actualizarTituloSorteoConNombre();
-    
-    // Actualizar mensaje de estado
-    const mensajeEstado = document.getElementById('mensaje-estado');
-    if (mensajeEstado) {
-        mensajeEstado.textContent = 'Números generados correctamente';
-    }
-}
+// ELIMINADAS LAS FUNCIONES DE EMERGENCIA - DEBE FUNCIONAR CON DATOS REALES
 
 // Función para generar combinaciones aleatorias simples (solo 1 combinación)
 function generarCombinacionAleatoria() {
@@ -687,7 +700,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Hacer funciones disponibles inmediatamente
     window.generarYMostrarNumerosSorteos = generarYMostrarNumerosSorteos;
-    window.generarNumerosEmergencia = generarNumerosEmergencia;
     window.mostrarCombinacionAleatoria = mostrarCombinacionAleatoria;
     window.generarCombinacionAleatoria = generarCombinacionAleatoria;
     window.copiarCombinacion = copiarCombinacion;
@@ -795,7 +807,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Hacer funciones disponibles globalmente inmediatamente también
 window.generarYMostrarNumerosSorteos = generarYMostrarNumerosSorteos;
-window.generarNumerosEmergencia = generarNumerosEmergencia;
 window.mostrarCombinacionAleatoria = mostrarCombinacionAleatoria;
 window.generarCombinacionAleatoria = generarCombinacionAleatoria;
 window.copiarCombinacion = copiarCombinacion;
