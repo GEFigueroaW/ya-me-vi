@@ -5,10 +5,16 @@
 async function obtenerNombreUsuarioSimple() {
     console.log('🔍 Buscando nombre del usuario...');
     
-    // 1. Verificar variables globales del usuario
+    // 1. Primero revisar las variables globales que son seteadas por onAuthStateChanged
     if (window.usuarioActualNombre) {
         const nombre = window.usuarioActualNombre.split(' ')[0];
         console.log('✅ Nombre encontrado en variable global:', nombre);
+        return nombre;
+    }
+    
+    if (window.usuarioActualEmail) {
+        const nombre = window.usuarioActualEmail.split('@')[0];
+        console.log('✅ Nombre del email global encontrado:', nombre);
         return nombre;
     }
     
@@ -16,29 +22,14 @@ async function obtenerNombreUsuarioSimple() {
     if (window.auth && window.auth.currentUser) {
         const user = window.auth.currentUser;
         
-        // 2a. Intentar obtener el perfil guardado en Firestore
-        try {
-            if (window.db && typeof window.getDoc === 'function' && typeof window.doc === 'function') {
-                const profileRef = window.doc(window.db, `users/${user.uid}/profile`, 'info');
-                const profileSnap = await window.getDoc(profileRef);
-                if (profileSnap.exists() && profileSnap.data().name) {
-                    const nombre = profileSnap.data().name.split(' ')[0];
-                    console.log('✅ Nombre encontrado en perfil Firestore:', nombre);
-                    return nombre;
-                }
-            }
-        } catch (error) {
-            console.log('ℹ️ No se pudo acceder al perfil de Firestore:', error.message);
-        }
-        
-        // 2b. Usar displayName de Firebase Auth (Google login)
+        // 2a. Usar displayName de Firebase Auth (Google login)
         if (user.displayName) {
             const nombre = user.displayName.split(' ')[0];
             console.log('✅ Nombre encontrado en Firebase Auth moderno:', nombre);
             return nombre;
         }
         
-        // 2c. Usar email como último recurso
+        // 2b. Usar email como último recurso
         if (user.email) {
             const nombre = user.email.split('@')[0];
             console.log('✅ Nombre del email encontrado (Firebase moderno):', nombre);
@@ -58,28 +49,6 @@ async function obtenerNombreUsuarioSimple() {
             const nombre = user.email.split('@')[0];
             console.log('✅ Nombre del email encontrado (Firebase legacy):', nombre);
             return nombre;
-        }
-    }
-    
-    // 4. Verificar email global
-    if (window.usuarioActualEmail) {
-        const nombre = window.usuarioActualEmail.split('@')[0];
-        console.log('✅ Nombre del email global encontrado:', nombre);
-        return nombre;
-    }
-    
-    // 5. Verificar datos biométricos
-    const biometricUserInfo = localStorage.getItem('biometric_user_info');
-    if (biometricUserInfo) {
-        try {
-            const userData = JSON.parse(biometricUserInfo);
-            if (userData.name) {
-                console.log('✅ Nombre biométrico encontrado:', userData.name);
-                return userData.name.split(' ')[0];
-            }
-        } catch (e) {
-            console.log('✅ Usuario biométrico detectado');
-            return 'Usuario';
         }
     }
     
@@ -125,8 +94,28 @@ async function actualizarTituloSorteoConNombre() {
             }
         }
         
-        // Obtener el nombre del usuario
-        const nombreUsuario = await obtenerNombreUsuarioSimple();
+        // Obtener el nombre del usuario con la lógica simplificada
+        let nombreUsuario = '';
+        
+        console.log('🔍 Verificando fuentes de nombre de usuario:');
+        console.log('- window.usuarioActualNombre:', window.usuarioActualNombre);
+        console.log('- window.usuarioActualEmail:', window.usuarioActualEmail);
+        
+        // Priorizar las variables globales que son seteadas por onAuthStateChanged
+        if (window.usuarioActualNombre) {
+            nombreUsuario = window.usuarioActualNombre.split(' ')[0];
+            console.log('✅ Nombre obtenido de variable global (displayName):', nombreUsuario);
+        } else if (window.usuarioActualEmail) {
+            nombreUsuario = window.usuarioActualEmail.split('@')[0];
+            console.log('✅ Nombre obtenido de email global:', nombreUsuario);
+        } else {
+            // Fallback a Firebase directamente
+            const nombre = await obtenerNombreUsuarioSimple();
+            if (nombre) {
+                nombreUsuario = nombre;
+                console.log('✅ Nombre obtenido de Firebase directamente:', nombreUsuario);
+            }
+        }
         
         // Construir el título con formato exacto solicitado (solo un emoji 🎯)
         if (nombreUsuario && nombreUsuario !== '') {
@@ -702,32 +691,44 @@ document.addEventListener('DOMContentLoaded', function() {
             // Obtener datos disponibles en ese momento usando la misma lógica
             let nombreUsuario = '';
             
+            console.log('🔍 DEBUG - Verificando variables disponibles:');
+            console.log('window.usuarioActualNombre:', window.usuarioActualNombre);
+            console.log('window.usuarioActualEmail:', window.usuarioActualEmail);
+            console.log('window.auth:', window.auth);
+            console.log('window.auth.currentUser:', window.auth?.currentUser);
+            
             // Intentar múltiples fuentes siguiendo la misma lógica que main.js
-            if (window.auth && window.auth.currentUser) {
+            if (window.usuarioActualNombre) {
+                nombreUsuario = window.usuarioActualNombre.split(' ')[0];
+                console.log('✅ Nombre encontrado (variable global):', nombreUsuario);
+            } else if (window.usuarioActualEmail) {
+                nombreUsuario = window.usuarioActualEmail.split('@')[0];
+                console.log('✅ Nombre del email (variable global):', nombreUsuario);
+            } else if (window.auth && window.auth.currentUser) {
                 const user = window.auth.currentUser;
                 
                 // Intentar displayName primero (Google login)
                 if (user.displayName) {
                     nombreUsuario = user.displayName.split(' ')[0];
+                    console.log('✅ Nombre encontrado (Firebase user):', nombreUsuario);
                 }
                 // Si no, usar email
                 else if (user.email) {
                     nombreUsuario = user.email.split('@')[0];
+                    console.log('✅ Nombre del email (Firebase user):', nombreUsuario);
                 }
-            }
-            // Fallback a variables globales
-            else if (window.usuarioActualNombre) {
-                nombreUsuario = window.usuarioActualNombre.split(' ')[0];
-            } else if (window.usuarioActualEmail) {
-                nombreUsuario = window.usuarioActualEmail.split('@')[0];
             }
             
             if (nombreUsuario) {
                 tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo 4083`;
                 console.log('🎯 TÍTULO FORZADO CON NOMBRE:', nombreUsuario);
+                console.log('📝 Título final establecido:', tituloElement.textContent);
             } else {
                 console.log('❌ No se pudo obtener nombre para título final');
+                tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI para el sorteo 4083`;
             }
+        } else {
+            console.log('❌ Elemento titulo-sorteo no encontrado en intento final');
         }
     }, 8000);
 });
