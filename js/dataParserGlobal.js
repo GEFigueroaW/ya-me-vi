@@ -458,7 +458,12 @@ try {
 
 // Función auxiliar para generar proyección
 async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
-    console.log(`🎲 Iniciando análisis completo para ${nombreSorteo}`);
+    console.log(`🎲 Generando nueva proyección para ${nombreSorteo}`);
+    
+    // Asegurarnos de que no haya caché
+    if (window.ultimasProyecciones) {
+        delete window.ultimasProyecciones;
+    }
     
     try {
         // Verificar y preparar datos
@@ -649,7 +654,7 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
 // Implementación de generarProyeccionesAnalisis
 // Manejador de eventos para el contenedor de análisis
 window.toggleAnalisis = async function() {
-    console.log('🔄 Generando nuevo análisis...');
+    console.log('🔄 Generando nuevas combinaciones...');
     
     // Verificar inicialización
     if (!verificarInicializacion()) {
@@ -657,10 +662,35 @@ window.toggleAnalisis = async function() {
         return;
     }
 
-    const contenido = document.getElementById('contenido-analisis');
-    const arrow = document.getElementById('arrow-icon-analisis');
+    const contenido = document.getElementById('contenido-predicciones');
+    const arrow = document.getElementById('arrow-icon');
     
     if (contenido && arrow) {
+        const estaOculto = contenido.classList.contains('hidden');
+        
+        // Si vamos a mostrar el contenido, generamos nuevas proyecciones
+        if (estaOculto) {
+            // Primero mostramos UI de carga
+            contenido.classList.remove('hidden');
+            arrow.style.transform = 'rotate(180deg)';
+            
+            ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+                const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+                if (elementoProyeccion) elementoProyeccion.textContent = '🔄 Generando...';
+                if (elementoDetalle) elementoDetalle.textContent = 'Analizando datos históricos...';
+            });
+            
+            try {
+                await window.generarProyeccionesAnalisis();
+            } catch (error) {
+                console.error('Error al generar proyecciones:', error);
+            }
+        } else {
+            // Solo ocultamos
+            contenido.classList.add('hidden');
+            arrow.style.transform = '';
+        }
         const estaOculto = contenido.classList.contains('hidden');
         
         // Si vamos a mostrar el contenido, siempre generamos nuevas proyecciones
@@ -722,11 +752,28 @@ window.toggleAnalisis = async function() {
 };
 
 window.generarProyeccionesAnalisis = async function() {
-    console.log('📊 Iniciando nuevo análisis para todos los sorteos...');
+    console.log('📊 Generando nuevas proyecciones...');
     
-    // Limpiar cache de análisis previo si existe
-    if (window.analisisCache) {
-        delete window.analisisCache;
+    if (!window.datosHistoricos) {
+        throw new Error('No hay datos históricos disponibles');
+    }
+    
+    const sorteos = ['melate', 'revancha', 'revanchita'];
+    for (const sorteo of sorteos) {
+        try {
+            const resultado = await generarProyeccionPorAnalisis(window.datosHistoricos[sorteo], sorteo);
+            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+            
+            if (elementoProyeccion) {
+                elementoProyeccion.textContent = resultado.numeros.join(' - ');
+            }
+            if (elementoDetalle) {
+                elementoDetalle.textContent = 'Números sugeridos basados en el análisis histórico';
+            }
+        } catch (error) {
+            console.error(`Error al generar proyección para ${sorteo}:`, error);
+        }
     }
     
     const actualizarUI = (sorteo, numeros, detalle, error = false) => {
