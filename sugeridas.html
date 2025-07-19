@@ -37,7 +37,7 @@
   <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
 
     <!-- Botón de regreso -->
-    <button id="btn-back" class="btn-back-improved">
+    <button id="btn-back" class="btn-back-improved" onclick="window.location.href='home.html'">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
       </svg>
@@ -946,10 +946,29 @@
 
 
 
-    // Botón de regreso
-    document.getElementById('btn-back').addEventListener('click', () => {
-      window.location.href = 'home.html';
-    });
+    // Función para inicializar el botón de volver con retry
+    function inicializarBotonVolver() {
+      const btnBack = document.getElementById('btn-back');
+      if (!btnBack) {
+        console.log('⏳ Botón btn-back no encontrado, reintentando...');
+        setTimeout(inicializarBotonVolver, 500);
+        return;
+      }
+
+      // Remover event listeners anteriores
+      btnBack.replaceWith(btnBack.cloneNode(true));
+      const nuevoBtn = document.getElementById('btn-back');
+      
+      nuevoBtn.addEventListener('click', () => {
+        console.log('🔙 Click en botón volver - Navegando a home.html...');
+        window.location.href = 'home.html';
+      });
+      
+      console.log('✅ Event listener configurado para botón btn-back');
+    }
+
+    // Inicializar botón de volver
+    setTimeout(inicializarBotonVolver, 1000);
 
     // Función para inicializar el botón de combinaciones aleatorias con retry
     function inicializarBotonAleatorias() {
