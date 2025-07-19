@@ -12,30 +12,60 @@ function obtenerNombreUsuarioSimple() {
         return nombre;
     }
     
-    // 2. Verificar Firebase Auth si está disponible
-    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
-        const user = firebase.auth().currentUser;
+    // 2. Verificar Firebase Auth moderno si está disponible
+    if (window.auth && window.auth.currentUser) {
+        const user = window.auth.currentUser;
         if (user.displayName) {
             const nombre = user.displayName.split(' ')[0];
-            console.log('✅ Nombre encontrado en Firebase Auth:', nombre);
+            console.log('✅ Nombre encontrado en Firebase Auth moderno:', nombre);
             return nombre;
         }
         if (user.email) {
             const nombre = user.email.split('@')[0];
-            console.log('✅ Nombre del email encontrado:', nombre);
+            console.log('✅ Nombre del email encontrado (Firebase moderno):', nombre);
             return nombre;
         }
     }
     
-    // 3. Verificar datos biométricos
-    const biometricUserInfo = localStorage.getItem('biometric_user_info');
-    if (biometricUserInfo) {
-        console.log('✅ Usuario biométrico detectado');
-        return 'Usuario';
+    // 3. Verificar Firebase Auth legacy si está disponible
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+        const user = firebase.auth().currentUser;
+        if (user.displayName) {
+            const nombre = user.displayName.split(' ')[0];
+            console.log('✅ Nombre encontrado en Firebase Auth legacy:', nombre);
+            return nombre;
+        }
+        if (user.email) {
+            const nombre = user.email.split('@')[0];
+            console.log('✅ Nombre del email encontrado (Firebase legacy):', nombre);
+            return nombre;
+        }
     }
     
-    console.log('❌ No se encontró nombre del usuario');
-    return '';
+    // 4. Verificar email global
+    if (window.usuarioActualEmail) {
+        const nombre = window.usuarioActualEmail.split('@')[0];
+        console.log('✅ Nombre del email global encontrado:', nombre);
+        return nombre;
+    }
+    
+    // 5. Verificar datos biométricos
+    const biometricUserInfo = localStorage.getItem('biometric_user_info');
+    if (biometricUserInfo) {
+        try {
+            const userData = JSON.parse(biometricUserInfo);
+            if (userData.name) {
+                console.log('✅ Nombre biométrico encontrado:', userData.name);
+                return userData.name.split(' ')[0];
+            }
+        } catch (e) {
+            console.log('✅ Usuario biométrico detectado');
+            return 'Usuario';
+        }
+    }
+    
+    console.log('❌ No se encontró nombre del usuario, usando fallback');
+    return 'Amigo'; // Fallback más amigable
 }
 
 // Función simplificada para actualizar el título
@@ -79,14 +109,17 @@ function actualizarTituloSorteoConNombre() {
         // Obtener el nombre del usuario
         const nombreUsuario = obtenerNombreUsuarioSimple();
         
-        // Construir el título con o sin nombre
-        if (nombreUsuario) {
+        // Construir el título con formato exacto solicitado
+        if (nombreUsuario && nombreUsuario !== '') {
             tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${numeroSorteo}`;
             console.log(`✅ Título actualizado CON nombre: "${nombreUsuario}", sorteo ${numeroSorteo}`);
         } else {
             tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
             console.log(`⚠️ Título actualizado SIN nombre, sorteo ${numeroSorteo}`);
         }
+        
+        // Verificar que el título se actualizó correctamente
+        console.log('📝 Título final:', tituloElement.textContent);
         
     } catch (error) {
         console.error('❌ Error actualizando título:', error);
@@ -641,6 +674,33 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('🔄 Tercer intento de actualización de título...');
         actualizarTituloSorteoConNombre();
     }, 5000);
+    
+    // Cuarto intento más agresivo - forzar título con datos disponibles
+    setTimeout(() => {
+        console.log('🔄 Intento FINAL de actualización de título...');
+        const tituloElement = document.getElementById('titulo-sorteo');
+        if (tituloElement) {
+            // Obtener datos disponibles en ese momento
+            let nombreUsuario = '';
+            
+            // Intentar múltiples fuentes
+            if (window.usuarioActualNombre) {
+                nombreUsuario = window.usuarioActualNombre.split(' ')[0];
+            } else if (window.usuarioActualEmail) {
+                nombreUsuario = window.usuarioActualEmail.split('@')[0];
+            } else if (window.auth && window.auth.currentUser) {
+                const user = window.auth.currentUser;
+                nombreUsuario = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+            }
+            
+            if (nombreUsuario) {
+                tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo 4083`;
+                console.log('🎯 TÍTULO FORZADO CON NOMBRE:', nombreUsuario);
+            } else {
+                console.log('❌ No se pudo obtener nombre para título final');
+            }
+        }
+    }, 8000);
 });
 
 // Hacer funciones disponibles globalmente inmediatamente también

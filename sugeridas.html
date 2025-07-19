@@ -1577,6 +1577,21 @@
           }
         }, 4000);
         
+        // Tercer intento más directo
+        setTimeout(() => {
+          console.log('🎯 Tercer intento DIRECTO de actualización del título...');
+          const tituloElement = document.getElementById('titulo-sorteo');
+          if (tituloElement && window.usuarioActualNombre) {
+            const nombre = window.usuarioActualNombre.split(' ')[0];
+            tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
+            console.log('🎯 TÍTULO ACTUALIZADO DIRECTAMENTE:', nombre);
+          } else if (tituloElement && window.usuarioActualEmail) {
+            const nombre = window.usuarioActualEmail.split('@')[0];
+            tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombre} para el sorteo 4083`;
+            console.log('🎯 TÍTULO ACTUALIZADO DIRECTAMENTE (email):', nombre);
+          }
+        }, 6000);
+        
         try {
           // Cargar datos históricos
           window.datosHistoricos = await cargarDatosHistoricos('todos');
