@@ -1549,21 +1549,48 @@
       if (!user) {
         window.location.href = "index.html";
       } else {
-        window.usuarioActualID = user.uid; // Guardar el ID del usuario actual para usar en predicciones
-        window.usuarioActualNombre = user.displayName; // Guardar el nombre del usuario
-        window.usuarioActualEmail = user.email; // Guardar el email del usuario
-        usuarioActualID = user.uid;
-        console.log('👤 Usuario autenticado:', window.usuarioActualID);
-        console.log('📝 Nombre del usuario:', window.usuarioActualNombre);
-        console.log('📧 Email del usuario:', window.usuarioActualEmail);
+        // Establecer variables globales de forma más explícita
+        window.usuarioActualID = user.uid;
+        window.usuarioActualNombre = user.displayName;
+        window.usuarioActualEmail = user.email;
         
-        // Simplemente llamar la función de sugeridas-fix.js que ya maneja todo
+        // También establecer variables sin window para compatibilidad
+        globalThis.usuarioActualID = user.uid;
+        globalThis.usuarioActualNombre = user.displayName;
+        globalThis.usuarioActualEmail = user.email;
+        
+        // Variable local para compatibilidad
+        usuarioActualID = user.uid;
+        
+        console.log('👤 Usuario autenticado:', user.uid);
+        console.log('📝 Nombre del usuario (displayName):', user.displayName);
+        console.log('📧 Email del usuario:', user.email);
+        console.log('� Variables globales establecidas:');
+        console.log('- window.usuarioActualNombre:', window.usuarioActualNombre);
+        console.log('- window.usuarioActualEmail:', window.usuarioActualEmail);
+        console.log('- window.usuarioActualID:', window.usuarioActualID);
+        
+        // Forzar múltiples intentos de actualización del título con diferentes delays
         setTimeout(() => {
-          console.log('🎯 Llamando función de actualización de título desde onAuthStateChanged...');
+          console.log('🎯 Primer intento de actualización desde onAuthStateChanged (1s)...');
           if (window.actualizarTituloSorteoConNombre && typeof window.actualizarTituloSorteoConNombre === 'function') {
             window.actualizarTituloSorteoConNombre();
           }
         }, 1000);
+        
+        setTimeout(() => {
+          console.log('🎯 Segundo intento de actualización desde onAuthStateChanged (3s)...');
+          if (window.actualizarTituloSorteoConNombre && typeof window.actualizarTituloSorteoConNombre === 'function') {
+            window.actualizarTituloSorteoConNombre();
+          }
+        }, 3000);
+        
+        setTimeout(() => {
+          console.log('🎯 Tercer intento de actualización desde onAuthStateChanged (5s)...');
+          if (window.actualizarTituloSorteoConNombre && typeof window.actualizarTituloSorteoConNombre === 'function') {
+            window.actualizarTituloSorteoConNombre();
+          }
+        }, 5000);
         
         try {
           // Cargar datos históricos

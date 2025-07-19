@@ -6,21 +6,40 @@ async function obtenerNombreUsuarioSimple() {
     console.log('🔍 Buscando nombre del usuario...');
     
     // 1. Primero revisar las variables globales que son seteadas por onAuthStateChanged
-    if (window.usuarioActualNombre) {
+    console.log('🔍 DEBUG - Verificando todas las variables disponibles:');
+    console.log('- window.usuarioActualNombre:', window.usuarioActualNombre);
+    console.log('- window.usuarioActualEmail:', window.usuarioActualEmail);
+    console.log('- globalThis.usuarioActualNombre:', globalThis.usuarioActualNombre);
+    console.log('- globalThis.usuarioActualEmail:', globalThis.usuarioActualEmail);
+    
+    if (window.usuarioActualNombre && window.usuarioActualNombre !== 'undefined') {
         const nombre = window.usuarioActualNombre.split(' ')[0];
-        console.log('✅ Nombre encontrado en variable global:', nombre);
+        console.log('✅ Nombre encontrado en window.usuarioActualNombre:', nombre);
         return nombre;
     }
     
-    if (window.usuarioActualEmail) {
+    if (globalThis.usuarioActualNombre && globalThis.usuarioActualNombre !== 'undefined') {
+        const nombre = globalThis.usuarioActualNombre.split(' ')[0];
+        console.log('✅ Nombre encontrado en globalThis.usuarioActualNombre:', nombre);
+        return nombre;
+    }
+    
+    if (window.usuarioActualEmail && window.usuarioActualEmail !== 'undefined') {
         const nombre = window.usuarioActualEmail.split('@')[0];
         console.log('✅ Nombre del email global encontrado:', nombre);
+        return nombre;
+    }
+    
+    if (globalThis.usuarioActualEmail && globalThis.usuarioActualEmail !== 'undefined') {
+        const nombre = globalThis.usuarioActualEmail.split('@')[0];
+        console.log('✅ Nombre del email globalThis encontrado:', nombre);
         return nombre;
     }
     
     // 2. Verificar Firebase Auth moderno si está disponible
     if (window.auth && window.auth.currentUser) {
         const user = window.auth.currentUser;
+        console.log('🔍 Usuario de Firebase disponible:', user);
         
         // 2a. Usar displayName de Firebase Auth (Google login)
         if (user.displayName) {
@@ -52,7 +71,7 @@ async function obtenerNombreUsuarioSimple() {
         }
     }
     
-    console.log('❌ No se encontró nombre del usuario');
+    console.log('❌ No se encontró nombre del usuario en ninguna fuente');
     return ''; // Retornar vacío en lugar de fallback
 }
 
@@ -272,6 +291,7 @@ async function generarPrediccionesIASimple() {
             // Usar el ML real si está disponible
             let numeros;
             if (window.generarPrediccionPersonalizada && typeof window.generarPrediccionPersonalizada === 'function') {
+                console.log('✅ Usando algoritmo ML real con 5 métodos para', sorteo);
                 // Preparar datos para el ML
                 const datosParaML = {
                     sorteo: sorteo,
@@ -279,9 +299,11 @@ async function generarPrediccionesIASimple() {
                     datos: window.datosHistoricos?.[sorteo]?.sorteos || []
                 };
                 
+                console.log(`📊 Datos para ML ${sorteo}:`, datosParaML);
                 numeros = await window.generarPrediccionPersonalizada(userId, datosParaML);
-                console.log(`✅ Predicción IA ${sorteo} (ML real): ${numeros.join(' - ')}`);
+                console.log(`✅ Predicción IA ${sorteo} (ML real - 5 métodos): ${numeros.join(' - ')}`);
             } else {
+                console.log('⚠️ ML real no disponible, usando fallback para', sorteo);
                 // Fallback a la función simplificada
                 numeros = generarNumerosIAPersonalizada(userId, sorteo);
                 console.log(`✅ Predicción IA ${sorteo} (fallback): ${numeros.join(' - ')}`);
@@ -780,3 +802,20 @@ window.copiarCombinacion = copiarCombinacion;
 window.actualizarTituloSorteo = actualizarTituloSorteoConNombre;
 
 console.log('✅ Sistema de corrección para sugeridas cargado');
+
+// Agregar verificación adicional después de que todo esté cargado
+setTimeout(() => {
+    console.log('🔍 VERIFICACIÓN FINAL DE SISTEMA:');
+    console.log('- Elemento titulo-sorteo:', document.getElementById('titulo-sorteo'));
+    console.log('- window.usuarioActualNombre:', window.usuarioActualNombre);
+    console.log('- window.usuarioActualEmail:', window.usuarioActualEmail);
+    console.log('- window.auth disponible:', !!window.auth);
+    console.log('- window.generarPrediccionPersonalizada disponible:', !!window.generarPrediccionPersonalizada);
+    console.log('- window.datosHistoricos disponible:', !!window.datosHistoricos);
+    
+    // Último intento de actualización si hay datos de usuario disponibles
+    if ((window.usuarioActualNombre || window.usuarioActualEmail) && document.getElementById('titulo-sorteo')) {
+        console.log('🎯 ÚLTIMO INTENTO de actualización de título...');
+        actualizarTituloSorteoConNombre();
+    }
+}, 10000);
