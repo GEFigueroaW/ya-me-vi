@@ -231,9 +231,7 @@
 
   <!-- Scripts -->
   <script src="js/shared.js"></script>
-  <script src="js/firebase-init.js" type="module"></script>
-  <script src="js/dataParser.js" type="module"></script>
-  <script src="js/mlPredictor.js" type="module"></script>
+  <!-- Eliminados scripts de módulos conflictivos, todo está en inicializacion-unificada.js -->
   <script src="js/actualizarTituloSorteo.js"></script>
   <script src="js/startupFunctions.js"></script>
   <script>
@@ -697,18 +695,8 @@
     window.togglePrediccionIA = togglePrediccionIA;
     window.toggleAnalisis = toggleAnalisis;
   </script>
-  <script type="module">
-    import { cargarDatosHistoricos, generarCombinacionesAleatorias, analizarSumaNumeros, analizarParesImpares, analizarDecadaTerminacion, calcularFrecuencias } from './js/dataParser.js';
-    import { generarPrediccionPersonalizada } from './js/mlPredictor.js';
-
-    // Exportar funciones al objeto window inmediatamente para asegurar disponibilidad
-    window.cargarDatosHistoricos = cargarDatosHistoricos;
-    window.generarCombinacionesAleatorias = generarCombinacionesAleatorias;
-    window.analizarSumaNumeros = analizarSumaNumeros;
-    window.analizarParesImpares = analizarParesImpares;
-    window.analizarDecadaTerminacion = analizarDecadaTerminacion;
-    window.calcularFrecuencias = calcularFrecuencias;
-    window.generarPrediccionPersonalizada = generarPrediccionPersonalizada;
+  <!-- Script unificado de inicialización del sistema -->
+  <script type="module" src="js/inicializacion-unificada.js"></script>
 
     // Variables globales para compartir entre scripts
     window.cantidadSeleccionada = 1;
@@ -1830,8 +1818,7 @@
   </script>
 
   <!-- Scripts de módulos ES6 -->
-  <script type="module" src="js/dataParser.js"></script>
-  <script type="module" src="js/dataParserGlobal.js"></script>
+  <!-- Eliminados scripts de módulos conflictivos, todo está en inicializacion-unificada.js -->
   <script src="js/dataLoader.js"></script>
   
   <!-- Script de corrección para los números de sorteos -->
