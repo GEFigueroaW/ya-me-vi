@@ -378,11 +378,7 @@ window.generarPrediccionPorFrecuencia = function(datos) {
 
     funcionesRequeridas.forEach(funcion => {
         if (typeof window[funcion] !== 'function') {
-            console.error(`❌ Función ${funcion} no disponible. Usando respaldo.`);
-            window[funcion] = funcionesRespaldo[funcion] || function() {
-                console.warn(`⚠️ Función de respaldo para ${funcion} ejecutada`);
-                return null;
-            };
+            throw new Error(`Función ${funcion} no disponible. Las funciones de análisis son obligatorias.`);
         }
     });
 })();
@@ -653,7 +649,7 @@ async function generarProyeccionPorAnalisis(datos, nombreSorteo) {
 // Implementación de generarProyeccionesAnalisis
 // Manejador de eventos para el contenedor de análisis
 window.toggleAnalisis = async function() {
-    console.log('🔄 Toggle análisis clicked');
+    console.log('🔄 Generando nuevo análisis...');
     
     // Verificar inicialización
     if (!verificarInicializacion()) {

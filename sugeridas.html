@@ -10,6 +10,23 @@
   <script src="js/init.js"></script>
   <script src="js/dataParser.js"></script>
   <script src="js/dataParserGlobal.js"></script>
+  <script>
+    // Asegurar que se generen nuevos números cada vez que se abre la caja de análisis
+    document.addEventListener('DOMContentLoaded', function() {
+      const cajaAnalisis = document.querySelector('[onclick*="toggleAnalisis"]');
+      if (cajaAnalisis) {
+        cajaAnalisis.addEventListener('click', async function(e) {
+          if (this.getAttribute('data-estado') !== 'abierto') {
+            this.setAttribute('data-estado', 'abierto');
+            // Forzar nueva generación
+            await window.generarProyeccionesAnalisis();
+          } else {
+            this.setAttribute('data-estado', 'cerrado');
+          }
+        });
+      }
+    });
+  </script>
 </head>
 <body class="overflow-x-hidden" onload="if(window.yaMeVi)window.yaMeVi.init()">
 
