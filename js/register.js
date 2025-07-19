@@ -7,6 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const googleBtn = document.getElementById("google-register");
   const biometricBtn = document.getElementById("biometric-register");
 
+  // Limpiar campos al cargar el DOM
+  clearFormFields();
+
   // Verificar si los datos biométricos están disponibles
   checkBiometricAvailability();
 
@@ -154,3 +157,31 @@ async function handleBiometricRegistration() {
     alert(errorMessage);
   }
 }
+
+// Función para limpiar campos del formulario
+function clearFormFields() {
+  const emailField = document.getElementById('email');
+  const passwordField = document.getElementById('password');
+  
+  if (emailField) {
+    emailField.value = '';
+    emailField.defaultValue = '';
+  }
+  
+  if (passwordField) {
+    passwordField.value = '';
+    passwordField.defaultValue = '';
+  }
+  
+  console.log('✅ Campos de email y contraseña limpiados');
+}
+
+// Limpiar campos cuando se enfoca la ventana
+window.addEventListener('focus', clearFormFields);
+
+// Limpiar campos al regresar de otras páginas
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    clearFormFields();
+  }
+});

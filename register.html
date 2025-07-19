@@ -15,9 +15,9 @@
     <h2 class="text-3xl font-bold mb-6">Crear cuenta</h2>
 
     <form id="register-form" class="flex flex-col gap-4 w-full max-w-xs">
-      <input type="text" id="name" placeholder="Nombre o sobrenombre" required class="text-black px-4 py-2 rounded"/>
-      <input type="email" id="email" placeholder="Correo electrónico" required class="text-black px-4 py-2 rounded"/>
-      <input type="password" id="password" placeholder="Contraseña" required class="text-black px-4 py-2 rounded"/>
+      <input type="text" id="name" placeholder="Nombre o sobrenombre" required class="text-black px-4 py-2 rounded" autocomplete="off"/>
+      <input type="email" id="email" placeholder="Correo electrónico" required class="text-black px-4 py-2 rounded" autocomplete="off"/>
+      <input type="password" id="password" placeholder="Contraseña" required class="text-black px-4 py-2 rounded" autocomplete="new-password"/>
       <button type="submit" class="border border-white py-2 rounded hover:bg-white hover:text-gray-800 transition-all">Registrarme</button>
     </form>
     <div class="mt-4 space-y-3">
@@ -53,6 +53,44 @@
   </div>
 
   <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+
+  <!-- Script para limpiar campos al cargar la página -->
+  <script>
+    // Limpiar campos automáticamente al cargar la página
+    window.addEventListener('load', function() {
+      // Limpiar campos específicos
+      const emailField = document.getElementById('email');
+      const passwordField = document.getElementById('password');
+      
+      if (emailField) {
+        emailField.value = '';
+        console.log('✅ Campo de email limpiado');
+      }
+      
+      if (passwordField) {
+        passwordField.value = '';
+        console.log('✅ Campo de contraseña limpiado');
+      }
+    });
+
+    // También limpiar cuando se enfoca la página (por si viene de otra pestaña)
+    window.addEventListener('focus', function() {
+      const emailField = document.getElementById('email');
+      const passwordField = document.getElementById('password');
+      
+      if (emailField) emailField.value = '';
+      if (passwordField) passwordField.value = '';
+    });
+
+    // Limpiar campos cuando se recarga la página
+    window.addEventListener('beforeunload', function() {
+      const emailField = document.getElementById('email');
+      const passwordField = document.getElementById('password');
+      
+      if (emailField) emailField.value = '';
+      if (passwordField) passwordField.value = '';
+    });
+  </script>
 
   <script src="js/shared.js"></script>
   <script src="js/register.js" type="module"></script>
