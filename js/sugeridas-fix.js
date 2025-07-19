@@ -1,59 +1,96 @@
 // === ARCHIVO DE CORRECCIÓN PARA SUGERIDAS.HTML ===
 // Este archivo resuelve el problema de los números que no se muestran en los sorteos
 
-// Función para obtener el usuario actual y datos de Firebase
-async function obtenerDatosUsuario() {
+// Función simplificada para obtener el nombre del usuario
+function obtenerNombreUsuarioSimple() {
+    console.log('🔍 Buscando nombre del usuario...');
+    
+    // 1. Verificar variables globales del usuario
+    if (window.usuarioActualNombre) {
+        const nombre = window.usuarioActualNombre.split(' ')[0];
+        console.log('✅ Nombre encontrado en variable global:', nombre);
+        return nombre;
+    }
+    
+    // 2. Verificar Firebase Auth si está disponible
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+        const user = firebase.auth().currentUser;
+        if (user.displayName) {
+            const nombre = user.displayName.split(' ')[0];
+            console.log('✅ Nombre encontrado en Firebase Auth:', nombre);
+            return nombre;
+        }
+        if (user.email) {
+            const nombre = user.email.split('@')[0];
+            console.log('✅ Nombre del email encontrado:', nombre);
+            return nombre;
+        }
+    }
+    
+    // 3. Verificar datos biométricos
+    const biometricUserInfo = localStorage.getItem('biometric_user_info');
+    if (biometricUserInfo) {
+        console.log('✅ Usuario biométrico detectado');
+        return 'Usuario';
+    }
+    
+    console.log('❌ No se encontró nombre del usuario');
+    return '';
+}
+
+// Función simplificada para actualizar el título
+function actualizarTituloSorteoConNombre() {
+    console.log('🎯 Actualizando título del sorteo con nombre...');
+    
+    const tituloElement = document.getElementById('titulo-sorteo');
+    if (!tituloElement) {
+        console.error('❌ Elemento titulo-sorteo no encontrado');
+        // Intentar de nuevo después de un pequeño delay
+        setTimeout(() => {
+            const tituloElement2 = document.getElementById('titulo-sorteo');
+            if (tituloElement2) {
+                console.log('✅ Elemento titulo-sorteo encontrado en segundo intento');
+                actualizarTituloSorteoConNombre();
+            }
+        }, 1000);
+        return;
+    }
+    
     try {
-        // Verificar si Firebase está disponible
-        if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-            const user = window.firebase.auth().currentUser;
-            if (user) {
-                return user;
+        let numeroSorteo = 4083; // Valor por defecto
+        
+        // Intentar obtener el número real del último sorteo
+        if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+            const sorteos = window.datosHistoricos.melate.sorteos;
+            if (sorteos.length > 0) {
+                let ultimoSorteo = 0;
+                sorteos.forEach(sorteo => {
+                    const num = parseInt(sorteo.concurso);
+                    if (!isNaN(num) && num > ultimoSorteo) {
+                        ultimoSorteo = num;
+                    }
+                });
+                if (ultimoSorteo > 0) {
+                    numeroSorteo = ultimoSorteo + 1;
+                }
             }
         }
         
-        // Fallback: verificar si hay variable global del usuario
-        if (window.usuarioActualID) {
-            return { 
-                uid: window.usuarioActualID,
-                displayName: window.usuarioActualNombre || null,
-                email: window.usuarioActualEmail || null
-            };
+        // Obtener el nombre del usuario
+        const nombreUsuario = obtenerNombreUsuarioSimple();
+        
+        // Construir el título con o sin nombre
+        if (nombreUsuario) {
+            tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${numeroSorteo}`;
+            console.log(`✅ Título actualizado CON nombre: "${nombreUsuario}", sorteo ${numeroSorteo}`);
+        } else {
+            tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI para el sorteo ${numeroSorteo}`;
+            console.log(`⚠️ Título actualizado SIN nombre, sorteo ${numeroSorteo}`);
         }
         
-        return null;
     } catch (error) {
-        console.error('Error obteniendo datos del usuario:', error);
-        return null;
-    }
-}
-
-// Función para obtener el nombre del usuario desde múltiples fuentes
-async function obtenerNombreUsuario() {
-    try {
-        const user = await obtenerDatosUsuario();
-        if (!user) return '';
-        
-        // 1. Intentar desde displayName (Google login)
-        if (user.displayName) {
-            return user.displayName.split(' ')[0]; // Solo primer nombre
-        }
-        
-        // 2. Intentar desde email
-        if (user.email) {
-            return user.email.split('@')[0];
-        }
-        
-        // 3. Verificar datos biométricos
-        const biometricUserInfo = localStorage.getItem('biometric_user_info');
-        if (biometricUserInfo) {
-            return 'Usuario';
-        }
-        
-        return '';
-    } catch (error) {
-        console.error('Error obteniendo nombre del usuario:', error);
-        return '';
+        console.error('❌ Error actualizando título:', error);
+        tituloElement.textContent = '🎯 Combinaciones sugeridas por IA para TI para el próximo sorteo';
     }
 }
 
@@ -83,8 +120,8 @@ async function generarYMostrarNumerosSorteos() {
         // Generar números para predicciones IA
         await generarPrediccionesIASimple();
         
-        // Actualizar título del sorteo
-        await actualizarTituloSorteoSimple();
+        // Actualizar título del sorteo con nombre
+        actualizarTituloSorteoConNombre();
         
         window.numerosSorteosGenerados = true;
         console.log('✅ Todos los números de sorteos generados correctamente');
@@ -440,7 +477,7 @@ function shuffleArray(array) {
 // Sobrescribir funciones globales con versiones que funcionan
 window.generarProyeccionesAnalisis = generarProyeccionesAnalisisSimple;
 window.generarPrediccionesPorSorteo = generarPrediccionesIASimple;
-window.actualizarTituloSorteo = actualizarTituloSorteoSimple;
+window.actualizarTituloSorteo = actualizarTituloSorteoConNombre;
 
 // Función de emergencia que genera todos los números
 async function generarNumerosEmergencia() {
@@ -470,8 +507,8 @@ async function generarNumerosEmergencia() {
         }
     });
     
-    // Actualizar título
-    await actualizarTituloSorteoSimple();
+    // Actualizar título con nombre
+    actualizarTituloSorteoConNombre();
     
     // Actualizar mensaje de estado
     const mensajeEstado = document.getElementById('mensaje-estado');
@@ -578,13 +615,32 @@ document.addEventListener('DOMContentLoaded', function() {
     window.mostrarCombinacionAleatoria = mostrarCombinacionAleatoria;
     window.generarCombinacionAleatoria = generarCombinacionAleatoria;
     window.copiarCombinacion = copiarCombinacion;
+    window.actualizarTituloSorteo = actualizarTituloSorteoConNombre;
     
     console.log('✅ Funciones de combinaciones aleatorias disponibles globalmente');
     
-    // Esperar a que otros scripts se carguen
+    // Intentar actualizar título inmediatamente si el elemento existe
+    setTimeout(() => {
+        console.log('🔄 Primer intento de actualización de título...');
+        actualizarTituloSorteoConNombre();
+    }, 500);
+    
+    // Segundo intento después de cargar datos
     setTimeout(function() {
+        console.log('🔄 Generando números y actualizando título...');
         generarYMostrarNumerosSorteos();
+        // Actualizar título después de generar números
+        setTimeout(() => {
+            console.log('🔄 Segundo intento de actualización de título...');
+            actualizarTituloSorteoConNombre();
+        }, 1000);
     }, 2000);
+    
+    // Tercer intento después de un delay más largo
+    setTimeout(() => {
+        console.log('🔄 Tercer intento de actualización de título...');
+        actualizarTituloSorteoConNombre();
+    }, 5000);
 });
 
 // Hacer funciones disponibles globalmente inmediatamente también
@@ -593,5 +649,6 @@ window.generarNumerosEmergencia = generarNumerosEmergencia;
 window.mostrarCombinacionAleatoria = mostrarCombinacionAleatoria;
 window.generarCombinacionAleatoria = generarCombinacionAleatoria;
 window.copiarCombinacion = copiarCombinacion;
+window.actualizarTituloSorteo = actualizarTituloSorteoConNombre;
 
 console.log('✅ Sistema de corrección para sugeridas cargado');

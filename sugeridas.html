@@ -1551,6 +1551,31 @@
         window.usuarioActualEmail = user.email; // Guardar el email del usuario
         usuarioActualID = user.uid;
         console.log('👤 Usuario autenticado:', window.usuarioActualID);
+        console.log('📝 Nombre del usuario:', window.usuarioActualNombre);
+        console.log('📧 Email del usuario:', window.usuarioActualEmail);
+        
+        // Forzar actualización del título después de obtener datos del usuario
+        setTimeout(() => {
+          console.log('🎯 Forzando actualización del título con datos del usuario...');
+          if (window.actualizarTituloSorteo && typeof window.actualizarTituloSorteo === 'function') {
+            window.actualizarTituloSorteo();
+          }
+          // También llamar directamente la función si está disponible
+          if (window.actualizarTituloSorteoConNombre && typeof window.actualizarTituloSorteoConNombre === 'function') {
+            window.actualizarTituloSorteoConNombre();
+          }
+        }, 2000);
+        
+        // Segundo intento después de más tiempo
+        setTimeout(() => {
+          console.log('🎯 Segundo intento de actualización del título...');
+          if (window.actualizarTituloSorteo && typeof window.actualizarTituloSorteo === 'function') {
+            window.actualizarTituloSorteo();
+          }
+          if (window.actualizarTituloSorteoConNombre && typeof window.actualizarTituloSorteoConNombre === 'function') {
+            window.actualizarTituloSorteoConNombre();
+          }
+        }, 4000);
         
         try {
           // Cargar datos históricos
