@@ -467,14 +467,6 @@ function mostrarCombinacionAleatoria() {
                                 </span>
                             `).join('')}
                         </div>
-                        <button onclick="copiarCombinacion('${combinacion.join(', ')}')" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition-all duration-300 mb-3">
-                            📋 Copiar Números
-                        </button>
-                        <div class="text-center mt-4">
-                            <button onclick="mostrarCombinacionAleatoria()" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl">
-                                🔄 Generar Nueva Combinación
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
