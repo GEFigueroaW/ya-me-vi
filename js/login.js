@@ -14,35 +14,171 @@ document.addEventListener("DOMContentLoaded", function () {
   checkBiometricAvailability();
 
   if (loginForm) {
-    loginForm.addEventListener("submit", function (e) {
+    loginForm.addEventListener("submit", async function (e) {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          console.log("Usuario logueado:", userCredential.user);
+      // Mostrar loading
+      if (window.showLoading) {
+        window.showLoading('Iniciando sesión...');
+      }
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log("✅ Usuario logueado:", userCredential.user.email);
+        
+        // Ocultar loading
+        if (window.hideLoading) {
+          window.hideLoading();
+        }
+        
+        // Mostrar mensaje de éxito
+        if (window.showSuccessMessage) {
+          window.showSuccessMessage('¡Bienvenido! Redirigiendo...');
+        }
+        
+        // Redirigir después de un breve delay
+        setTimeout(() => {
           window.location.href = "home.html";
-        })
-        .catch((error) => {
-          console.error("Error al iniciar sesión:", error);
-          alert("Error al iniciar sesión: " + error.message);
-        });
+        }, 1500);
+        
+      } catch (error) {
+        // Ocultar loading
+        if (window.hideLoading) {
+          window.hideLoading();
+        }
+        
+        console.error("❌ Error al iniciar sesión:", error.code, error.message);
+        
+        // Manejar diferentes tipos de errores de Firebase
+        switch (error.code) {
+          case 'auth/user-not-found':
+            console.log('👤 Usuario no encontrado, mostrando diálogo de registro');
+            if (window.showUserNotFoundDialog) {
+              window.showUserNotFoundDialog(email);
+            } else {
+              alert('No existe una cuenta con este email. Por favor regístrate primero.');
+            }
+            break;
+            
+          case 'auth/wrong-password':
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ Contraseña incorrecta. Por favor verifica tu contraseña.');
+            } else {
+              alert('Contraseña incorrecta');
+            }
+            break;
+            
+          case 'auth/invalid-email':
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ El formato del email no es válido.');
+            } else {
+              alert('Email inválido');
+            }
+            break;
+            
+          case 'auth/user-disabled':
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ Esta cuenta ha sido deshabilitada. Contacta al soporte.');
+            } else {
+              alert('Cuenta deshabilitada');
+            }
+            break;
+            
+          case 'auth/too-many-requests':
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ Demasiados intentos fallidos. Espera unos minutos e intenta de nuevo.');
+            } else {
+              alert('Demasiados intentos. Espera unos minutos.');
+            }
+            break;
+            
+          case 'auth/network-request-failed':
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ Error de conexión. Verifica tu conexión a internet.');
+            } else {
+              alert('Error de conexión');
+            }
+            break;
+            
+          default:
+            console.error('🔥 Error no manejado:', error.code);
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ Error inesperado. Por favor intenta de nuevo.');
+            } else {
+              alert('Error al iniciar sesión: ' + error.message);
+            }
+        }
+      }
     });
   }
 
   if (googleBtn) {
-    googleBtn.addEventListener("click", function () {
+    googleBtn.addEventListener("click", async function () {
       const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          console.log("Usuario logueado con Google:", result.user);
+      
+      // Mostrar loading
+      if (window.showLoading) {
+        window.showLoading('Conectando con Google...');
+      }
+      
+      try {
+        const result = await signInWithPopup(auth, provider);
+        console.log("✅ Usuario logueado con Google:", result.user.email);
+        
+        // Ocultar loading
+        if (window.hideLoading) {
+          window.hideLoading();
+        }
+        
+        // Mostrar mensaje de éxito
+        if (window.showSuccessMessage) {
+          window.showSuccessMessage('¡Bienvenido! Redirigiendo...');
+        }
+        
+        // Redirigir después de un breve delay
+        setTimeout(() => {
           window.location.href = "home.html";
-        })
-        .catch((error) => {
-          console.error("Error al iniciar sesión con Google:", error);
-          alert("Error al iniciar sesión con Google: " + error.message);
-        });
+        }, 1500);
+        
+      } catch (error) {
+        // Ocultar loading
+        if (window.hideLoading) {
+          window.hideLoading();
+        }
+        
+        console.error("❌ Error al iniciar sesión con Google:", error.code, error.message);
+        
+        // Manejar errores específicos de Google Auth
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            if (window.showErrorMessage) {
+              window.showErrorMessage('⚠️ Inicio de sesión cancelado. Intenta de nuevo.');
+            }
+            break;
+            
+          case 'auth/popup-blocked':
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ Popup bloqueado. Habilita los popups para este sitio.');
+            }
+            break;
+            
+          case 'auth/network-request-failed':
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ Error de conexión. Verifica tu conexión a internet.');
+            }
+            break;
+            
+          default:
+            console.error('🔥 Error no manejado en Google Auth:', error.code);
+            if (window.showErrorMessage) {
+              window.showErrorMessage('❌ Error al conectar con Google. Intenta de nuevo.');
+            } else {
+              alert("Error al iniciar sesión con Google: " + error.message);
+            }
+        }
+      }
     });
   }
 
