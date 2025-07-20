@@ -50,6 +50,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         
         console.error("❌ Error al iniciar sesión:", error.code, error.message);
+        console.log("🔍 Tipo de error:", typeof error.code);
+        console.log("🔍 Error completo:", error);
         
         // Manejar diferentes tipos de errores de Firebase
         switch (error.code) {
@@ -104,10 +106,23 @@ document.addEventListener("DOMContentLoaded", function () {
             
           default:
             console.error('🔥 Error no manejado:', error.code);
-            if (window.showErrorMessage) {
-              window.showErrorMessage('❌ Error inesperado. Por favor intenta de nuevo.');
+            console.log('📧 Email usado:', email);
+            // Forzar modal de registro para emails no encontrados
+            if (error.message && error.message.includes('no user record') || 
+                error.message && error.message.includes('user not found') ||
+                error.code === 'auth/invalid-credential') {
+              console.log('🚨 Detectado error de usuario no encontrado por mensaje');
+              if (window.showUserNotFoundDialog) {
+                window.showUserNotFoundDialog(email);
+              } else {
+                alert('No existe una cuenta con este email. Por favor regístrate primero.');
+              }
             } else {
-              alert('Error al iniciar sesión: ' + error.message);
+              if (window.showErrorMessage) {
+                window.showErrorMessage('❌ Error inesperado. Por favor intenta de nuevo.');
+              } else {
+                alert('Error al iniciar sesión: ' + error.message);
+              }
             }
         }
       }
