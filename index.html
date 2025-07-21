@@ -20,7 +20,7 @@
       <p class="text-xl md:text-2xl mb-8 font-light">Cumple tu sueño… hoy puede ser el gran día</p>
     </div>
 
-    <div class="flex gap-6 animate__animated animate__fadeInUp">
+    <div class="flex gap-6 animate__animated animate__fadeInUp" id="manual-buttons">
       <a href="login-email.html" class="border border-white px-6 py-2 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300">
         Iniciar sesión
       </a>
@@ -74,6 +74,12 @@
 
         console.log('📱 Dispositivo móvil detectado - iniciando flujo inteligente');
         
+        // En móvil, ocultar botones inmediatamente
+        const manualButtons = document.getElementById('manual-buttons');
+        if (manualButtons) {
+          manualButtons.style.display = 'none';
+        }
+        
         // Esperar a que deviceDetector se inicialice completamente
         await new Promise(resolve => setTimeout(resolve, 500));
         
@@ -81,8 +87,8 @@
         
         console.log('🔍 Flujo determinado:', userFlow);
 
-        // Pequeña demora para mostrar la detección
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Pequeña demora para mostrar la detección (2-3 segundos)
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         if (userFlow.action === 'register') {
           console.log('➡️ Usuario nuevo - redirigiendo a registro');
@@ -95,6 +101,11 @@
       } catch (error) {
         console.error('❌ Error en redirección inteligente:', error);
         hideLoading();
+        // En caso de error, mostrar botones manuales
+        const manualButtons = document.getElementById('manual-buttons');
+        if (manualButtons) {
+          manualButtons.style.display = 'flex';
+        }
       }
     }
 

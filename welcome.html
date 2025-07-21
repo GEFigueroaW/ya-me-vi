@@ -123,11 +123,31 @@
         welcomeMessage.textContent = `Bienvenido, ${userName}`;
 
         // Configurar botón biométrico si está disponible
-        if (biometricInfo.available && localStorage.getItem('biometric_user_info')) {
-          biometricIcon.textContent = biometricInfo.icon;
-          biometricType.textContent = biometricInfo.type;
-          biometricBtn.style.display = 'block';
-          separator.style.display = 'flex';
+        if (biometricInfo.available) {
+          const savedBiometricData = localStorage.getItem('biometric_user_info');
+          
+          if (savedBiometricData) {
+            // Usuario tiene biométricos configurados
+            biometricIcon.textContent = biometricInfo.icon;
+            biometricType.textContent = biometricInfo.type;
+            biometricBtn.style.display = 'block';
+            separator.style.display = 'flex';
+          } else {
+            // Biométricos disponibles pero no configurados
+            biometricIcon.textContent = '⚙️';
+            biometricType.textContent = `Configurar ${biometricInfo.type}`;
+            biometricBtn.innerHTML = `
+              <div class="flex items-center justify-center">
+                <span class="text-2xl mr-3">⚙️</span>
+                <div class="text-left">
+                  <div class="text-lg">Configurar</div>
+                  <div class="text-sm opacity-90">${biometricInfo.type}</div>
+                </div>
+              </div>
+            `;
+            biometricBtn.style.display = 'block';
+            separator.style.display = 'flex';
+          }
         }
 
         hideLoading();
@@ -140,17 +160,35 @@
       }
     }
 
+    // Manejar login biométrico o configuración
+    async function handleBiometricAction() {
+      try {
+        const savedUserInfo = localStorage.getItem('biometric_user_info');
+        
+        if (!savedUserInfo) {
+          // No hay datos biométricos, redirigir a configuración en registro
+          showLoading('Configurando autenticación biométrica...');
+          console.log('⚙️ Redirigiendo a configuración biométrica');
+          window.location.href = 'register.html?setup_biometric=true';
+          return;
+        }
+
+        // Proceder con login biométrico normal
+        await handleBiometricLogin();
+        
+      } catch (error) {
+        console.error('❌ Error en acción biométrica:', error);
+        hideLoading();
+        alert('Error al procesar la autenticación biométrica. Intenta con contraseña.');
+      }
+    }
+
     // Manejar login biométrico
     async function handleBiometricLogin() {
       try {
         showLoading('Verificando identidad...');
         
         const savedUserInfo = localStorage.getItem('biometric_user_info');
-        
-        if (!savedUserInfo) {
-          throw new Error('No hay datos biométricos guardados');
-        }
-
         const userInfo = JSON.parse(savedUserInfo);
         
         // Configuración para autenticación
@@ -205,7 +243,7 @@
     }
 
     // Event listeners
-    biometricBtn.addEventListener('click', handleBiometricLogin);
+    biometricBtn.addEventListener('click', handleBiometricAction);
     
     passwordBtn.addEventListener('click', () => {
       window.location.href = 'login-email.html';
@@ -223,7 +261,9 @@
       });
 
     // Cargar shared.js para el fondo
-    import('./js/shared.js');
+    import('./js/shared.js').then(() => {
+      console.log('✅ Sistema de fondos dinámicos cargado en welcome.html');
+    });
 
     // Inicializar página cuando se carga
     document.addEventListener('DOMContentLoaded', initWelcomePage);

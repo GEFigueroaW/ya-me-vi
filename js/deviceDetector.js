@@ -110,11 +110,20 @@ export class DeviceDetector {
     return new Promise((resolve) => {
       onAuthStateChanged(auth, (user) => {
         if (user) {
+          // Procesar el nombre para mostrar solo el primer nombre
+          let displayName = user.displayName || user.email?.split('@')[0] || 'Usuario';
+          
+          // Si tiene displayName (viene de Google), tomar solo el primer nombre
+          if (user.displayName) {
+            displayName = user.displayName.split(' ')[0]; // Solo el primer nombre
+          }
+          
           resolve({
             type: 'firebase',
-            name: user.displayName || user.email?.split('@')[0] || 'Usuario',
+            name: displayName,
             email: user.email,
-            uid: user.uid
+            uid: user.uid,
+            fullName: user.displayName // Guardar nombre completo por si se necesita
           });
         } else {
           // Verificar datos biométricos
