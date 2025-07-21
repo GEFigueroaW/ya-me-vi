@@ -59,7 +59,7 @@
             <div class="w-12 h-6 bg-white bg-opacity-30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-white peer-focus:ring-opacity-30 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white peer-checked:bg-opacity-50"></div>
           </label>
         </div>
-        <p class="text-xs text-white opacity-80 mt-2">⚡ Activa para acceso rápido y seguro con tu ${deviceDetector?.getBiometricInfo()?.type || 'dispositivo'}</p>
+        <p id="setup-description" class="text-xs text-white opacity-80 mt-2">⚡ Activa para acceso rápido y seguro con tu dispositivo</p>
       </div>
 
       <!-- Separador -->
@@ -74,6 +74,14 @@
         <div class="flex items-center justify-center">
           <span class="text-xl mr-3">🔒</span>
           <span class="text-lg">Usar contraseña</span>
+        </div>
+      </button>
+
+      <!-- Botón de Google (para dispositivos sin biométricos) -->
+      <button id="google-login-btn" class="w-full bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-50 py-4 px-6 rounded-xl hover:bg-opacity-30 transition-all text-white" style="display: none;">
+        <div class="flex items-center justify-center">
+          <span class="text-xl mr-3">🌐</span>
+          <span class="text-lg">Continuar con Google</span>
         </div>
       </button>
 
@@ -114,8 +122,10 @@
     const biometricSetupContainer = document.getElementById('biometric-setup-container');
     const setupBiometricIcon = document.getElementById('setup-biometric-icon');
     const setupBiometricType = document.getElementById('setup-biometric-type');
+    const setupDescription = document.getElementById('setup-description');
     const biometricToggle = document.getElementById('biometric-toggle');
     const passwordBtn = document.getElementById('password-login-btn');
+    const googleBtn = document.getElementById('google-login-btn');
     const newAccountBtn = document.getElementById('new-account-btn');
     const separator = document.getElementById('separator');
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -164,9 +174,13 @@
             // Biométricos disponibles pero no configurados - mostrar toggle
             setupBiometricIcon.textContent = biometricInfo.icon;
             setupBiometricType.textContent = biometricInfo.type;
+            setupDescription.textContent = `⚡ Activa para acceso rápido y seguro con tu ${biometricInfo.type}`;
             biometricSetupContainer.style.display = 'block';
             separator.style.display = 'flex';
           }
+        } else {
+          // No hay biométricos disponibles - mostrar botón de Google
+          googleBtn.style.display = 'block';
         }
 
         hideLoading();
@@ -366,6 +380,10 @@
     
     passwordBtn.addEventListener('click', () => {
       window.location.href = 'login-email.html';
+    });
+    
+    googleBtn.addEventListener('click', () => {
+      window.location.href = 'login.html';
     });
     
     newAccountBtn.addEventListener('click', () => {
