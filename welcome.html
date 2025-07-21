@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bienvenido - YA ME VI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="overflow-hidden">
+
+  <!-- Fondo dinámico -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido principal -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
+    
+    <!-- Mensaje de bienvenida -->
+    <div class="animate__animated animate__fadeInDown mb-8">
+      <div class="text-6xl mb-4">👋</div>
+      <h1 class="text-4xl md:text-5xl font-bold mb-2 drop-shadow-lg">¡Hola de nuevo!</h1>
+      <p id="welcome-message" class="text-xl md:text-2xl mb-4 font-light">Bienvenido, Usuario</p>
+      <p class="text-lg opacity-80">¿Listo para tu siguiente oportunidad?</p>
+    </div>
+
+    <!-- Opciones de inicio de sesión -->
+    <div class="w-full max-w-md space-y-4 animate__animated animate__fadeInUp">
+      
+      <!-- Botón biométrico principal -->
+      <button id="biometric-login-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg" style="display: none;">
+        <div class="flex items-center justify-center">
+          <span id="biometric-icon" class="text-2xl mr-3">🔐</span>
+          <div class="text-left">
+            <div class="text-lg">Continuar con</div>
+            <div id="biometric-type" class="text-sm opacity-90">Biométrico</div>
+          </div>
+        </div>
+      </button>
+
+      <!-- Separador -->
+      <div class="flex items-center my-4" id="separator" style="display: none;">
+        <div class="flex-1 border-t border-white border-opacity-30"></div>
+        <span class="px-4 text-sm opacity-70">o</span>
+        <div class="flex-1 border-t border-white border-opacity-30"></div>
+      </div>
+
+      <!-- Botón de contraseña -->
+      <button id="password-login-btn" class="w-full bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-50 py-4 px-6 rounded-xl hover:bg-opacity-30 transition-all text-white">
+        <div class="flex items-center justify-center">
+          <span class="text-xl mr-3">🔒</span>
+          <span class="text-lg">Usar contraseña</span>
+        </div>
+      </button>
+
+      <!-- Botón para crear nueva cuenta (dispositivo no propio) -->
+      <div class="pt-4 border-t border-white border-opacity-20">
+        <p class="text-sm opacity-70 mb-3">¿Usas un dispositivo que no es tuyo?</p>
+        <button id="new-account-btn" class="w-full bg-transparent border border-white border-opacity-50 py-3 px-6 rounded-xl hover:bg-white hover:bg-opacity-10 transition-all text-white">
+          <div class="flex items-center justify-center">
+            <span class="text-lg mr-2">➕</span>
+            <span>Crear mi propia cuenta</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
+        <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full mb-4"></div>
+        <p id="loading-message">Iniciando sesión...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer legal -->
+  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+
+  <script type="module">
+    import { deviceDetector } from './js/deviceDetector.js';
+    import { auth } from './js/firebase-init.js';
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Elementos del DOM
+    const welcomeMessage = document.getElementById('welcome-message');
+    const biometricBtn = document.getElementById('biometric-login-btn');
+    const biometricIcon = document.getElementById('biometric-icon');
+    const biometricType = document.getElementById('biometric-type');
+    const passwordBtn = document.getElementById('password-login-btn');
+    const newAccountBtn = document.getElementById('new-account-btn');
+    const separator = document.getElementById('separator');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingMessage = document.getElementById('loading-message');
+
+    // Funciones de utilidad
+    function showLoading(message = 'Cargando...') {
+      loadingMessage.textContent = message;
+      loadingOverlay.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      loadingOverlay.classList.add('hidden');
+    }
+
+    // Inicializar página
+    async function initWelcomePage() {
+      try {
+        showLoading('Verificando usuario...');
+        
+        // Obtener información del usuario
+        const userInfo = await deviceDetector.getStoredUserInfo();
+        const biometricInfo = deviceDetector.getBiometricInfo();
+        
+        if (!userInfo) {
+          // No hay usuario, redirigir a registro
+          window.location.href = 'register.html';
+          return;
+        }
+
+        // Personalizar mensaje de bienvenida
+        const userName = userInfo.name || 'Usuario';
+        welcomeMessage.textContent = `Bienvenido, ${userName}`;
+
+        // Configurar botón biométrico si está disponible
+        if (biometricInfo.available && localStorage.getItem('biometric_user_info')) {
+          biometricIcon.textContent = biometricInfo.icon;
+          biometricType.textContent = biometricInfo.type;
+          biometricBtn.style.display = 'block';
+          separator.style.display = 'flex';
+        }
+
+        hideLoading();
+        
+      } catch (error) {
+        console.error('Error inicializando página de bienvenida:', error);
+        hideLoading();
+        // En caso de error, redirigir a la página principal
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Manejar login biométrico
+    async function handleBiometricLogin() {
+      try {
+        showLoading('Verificando identidad...');
+        
+        const savedUserInfo = localStorage.getItem('biometric_user_info');
+        
+        if (!savedUserInfo) {
+          throw new Error('No hay datos biométricos guardados');
+        }
+
+        const userInfo = JSON.parse(savedUserInfo);
+        
+        // Configuración para autenticación
+        const publicKeyCredentialRequestOptions = {
+          challenge: new Uint8Array(32),
+          allowCredentials: [{
+            id: new Uint8Array(userInfo.credentialId.split(',').map(x => parseInt(x))),
+            type: 'public-key',
+          }],
+          userVerification: 'required',
+          timeout: 60000,
+        };
+
+        crypto.getRandomValues(publicKeyCredentialRequestOptions.challenge);
+
+        // Solicitar autenticación biométrica
+        const credential = await navigator.credentials.get({
+          publicKey: publicKeyCredentialRequestOptions
+        });
+
+        if (credential) {
+          console.log("✅ Autenticación biométrica exitosa");
+          
+          // Actualizar última vez de uso
+          userInfo.lastUsed = new Date().toISOString();
+          localStorage.setItem('biometric_user_info', JSON.stringify(userInfo));
+          
+          hideLoading();
+          
+          // Redirigir a la página principal
+          window.location.href = "home.html";
+        } else {
+          throw new Error("No se pudo verificar la autenticación biométrica");
+        }
+
+      } catch (error) {
+        console.error("❌ Error en login biométrico:", error);
+        hideLoading();
+        
+        let errorMessage = "Error en la verificación biométrica. ";
+        
+        if (error.name === 'NotAllowedError') {
+          errorMessage += "Verificación cancelada.";
+        } else if (error.name === 'SecurityError') {
+          errorMessage += "Error de seguridad.";
+        } else {
+          errorMessage += "Por favor, usa tu contraseña.";
+        }
+        
+        alert(errorMessage);
+      }
+    }
+
+    // Event listeners
+    biometricBtn.addEventListener('click', handleBiometricLogin);
+    
+    passwordBtn.addEventListener('click', () => {
+      window.location.href = 'login-email.html';
+    });
+    
+    newAccountBtn.addEventListener('click', () => {
+      window.location.href = 'register.html';
+    });
+
+    // Cargar footer
+    fetch("footer.html")
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("footer-container").innerHTML = data;
+      });
+
+    // Cargar shared.js para el fondo
+    import('./js/shared.js');
+
+    // Inicializar página cuando se carga
+    document.addEventListener('DOMContentLoaded', initWelcomePage);
+  </script>
+</body>
+</html>

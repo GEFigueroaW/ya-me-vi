@@ -13,7 +13,15 @@
   <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
 
   <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
-    <h2 class="text-3xl font-bold mb-6">Crear cuenta</h2>
+    
+    <!-- Mensaje de bienvenida para usuarios nuevos en móvil -->
+    <div id="new-user-welcome" class="mb-6 animate__animated animate__fadeInDown" style="display: none;">
+      <div class="text-5xl mb-3">🎉</div>
+      <h1 class="text-2xl font-bold mb-2">¡Bienvenido a YA ME VI!</h1>
+      <p class="text-sm opacity-80 mb-4">Vamos a crear tu cuenta para comenzar</p>
+    </div>
+    
+    <h2 id="register-title" class="text-3xl font-bold mb-6">Crear cuenta</h2>
 
     <form id="register-form" class="flex flex-col gap-4 w-full max-w-xs">
       <input type="text" id="name" placeholder="👤 Nombre o sobrenombre" required 
@@ -160,6 +168,24 @@
         `;
       }
     };
+  </script>
+
+  <script type="module">
+    import { deviceDetector } from './js/deviceDetector.js';
+    
+    // Verificar si viene de redirección automática para usuario nuevo en móvil
+    document.addEventListener('DOMContentLoaded', () => {
+      if (deviceDetector.isMobileDevice()) {
+        const newUserWelcome = document.getElementById('new-user-welcome');
+        const registerTitle = document.getElementById('register-title');
+        
+        // Mostrar mensaje de bienvenida en móvil
+        newUserWelcome.style.display = 'block';
+        registerTitle.textContent = 'Crear tu cuenta';
+        
+        console.log('📱 Usuario nuevo en móvil - mostrando bienvenida personalizada');
+      }
+    });
   </script>
 
   <script src="js/shared.js"></script>
