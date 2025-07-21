@@ -1370,11 +1370,26 @@
         // Usar el ID real del usuario autenticado para predicciones personalizadas
         const userId = window.usuarioActualID || 'usuario-no-autenticado';
         
-        // Intentar cargar predicciones almacenadas
-        cargarPrediccionesAlmacenadas(userId);
+        // Intentar cargar predicciones almacenadas y verificar si son válidas
+        const prediccionesValidas = cargarPrediccionesAlmacenadas(userId);
+        
+        // Si no hay predicciones válidas (datos cambiaron), generar nuevas
+        if (!prediccionesValidas) {
+          console.log('🔄 Generando nuevas predicciones debido a cambios en los datos históricos');
+        }
         
         for (const sorteo of sorteos) {
           try {
+            // Si ya tenemos una predicción válida para este sorteo, usarla
+            if (prediccionesValidas && window.prediccionesAlmacenadas[sorteo] && window.prediccionesAlmacenadas[sorteo].prediccion) {
+              const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+              if (elementoCombo) {
+                elementoCombo.textContent = window.prediccionesAlmacenadas[sorteo].prediccion.join(' - ');
+                console.log(`✅ Usando predicción almacenada para ${sorteo}:`, window.prediccionesAlmacenadas[sorteo].prediccion);
+              }
+              continue; // Saltar a siguiente sorteo
+            }
+            
             // Verificar que existan datos para este sorteo
             if (!window.datosHistoricos[sorteo] || !window.datosHistoricos[sorteo].numeros || window.datosHistoricos[sorteo].numeros.length === 0) {
               console.warn(`⚠️ No hay datos históricos disponibles para ${sorteo}`);
@@ -1467,36 +1482,95 @@
       }
     }
     
-    // Función para guardar predicciones en localStorage
+    // Función para guardar predicciones en localStorage con hash de datos
     function guardarPrediccionesAlmacenadas() {
       try {
-        localStorage.setItem('ya-me-vi-predicciones', JSON.stringify(window.prediccionesAlmacenadas));
-        console.log('💾 Predicciones guardadas en localStorage');
+        // Calcular hash de los datos actuales para detectar cambios
+        const datosHash = calcularHashDatosHistoricos();
+        
+        const prediccionesConHash = {
+          ...window.prediccionesAlmacenadas,
+          _datosHash: datosHash,
+          _timestamp: new Date().getTime()
+        };
+        
+        localStorage.setItem('ya-me-vi-predicciones', JSON.stringify(prediccionesConHash));
+        console.log('💾 Predicciones guardadas en localStorage con hash:', datosHash);
       } catch (error) {
         console.error('❌ Error guardando predicciones en localStorage:', error);
       }
     }
     
-    // Función para cargar predicciones desde localStorage
+    // Función para cargar predicciones desde localStorage con validación de datos
     function cargarPrediccionesAlmacenadas(userId) {
       try {
         const datosGuardados = localStorage.getItem('ya-me-vi-predicciones');
         if (datosGuardados) {
           const prediccionesGuardadas = JSON.parse(datosGuardados);
           
-          // Solo restaurar si el userId coincide
+          // Verificar si los datos históricos han cambiado
+          const hashActual = calcularHashDatosHistoricos();
+          const hashGuardado = prediccionesGuardadas._datosHash;
+          
+          if (hashActual !== hashGuardado) {
+            console.log('🔄 Datos históricos han cambiado, invalidando predicciones almacenadas');
+            console.log(`Hash anterior: ${hashGuardado}, Hash actual: ${hashActual}`);
+            localStorage.removeItem('ya-me-vi-predicciones');
+            return false; // Indicar que se necesita regenerar
+          }
+          
+          // Solo restaurar si el userId coincide y los datos son válidos
+          let prediccionesRestauradas = 0;
           for (const sorteo in prediccionesGuardadas) {
+            if (sorteo.startsWith('_')) continue; // Saltar metadatos
+            
             if (prediccionesGuardadas[sorteo] && prediccionesGuardadas[sorteo].userId === userId) {
               window.prediccionesAlmacenadas[sorteo] = prediccionesGuardadas[sorteo];
               prediccionesAlmacenadas[sorteo] = prediccionesGuardadas[sorteo];
+              prediccionesRestauradas++;
             }
           }
           
-          console.log('📂 Predicciones cargadas desde localStorage:', window.prediccionesAlmacenadas);
+          console.log(`📂 ${prediccionesRestauradas} predicciones válidas cargadas desde localStorage`);
+          return prediccionesRestauradas > 0;
         }
       } catch (error) {
         console.error('❌ Error cargando predicciones desde localStorage:', error);
       }
+      return false;
+    }
+    
+    // Función para calcular hash de los datos históricos actuales
+    function calcularHashDatosHistoricos() {
+      if (!window.datosHistoricos) return 'no-data';
+      
+      let hashString = '';
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        if (window.datosHistoricos[sorteo] && window.datosHistoricos[sorteo].sorteos) {
+          const sorteos = window.datosHistoricos[sorteo].sorteos;
+          hashString += `${sorteo}:${sorteos.length}`;
+          
+          // Agregar los primeros 3 sorteos como "firma"
+          if (sorteos.length > 0) {
+            const muestra = sorteos.slice(0, 3);
+            hashString += muestra.map(s => `${s.concurso}-${s.numeros.join('')}`).join('|');
+          }
+        }
+      });
+      
+      // Agregar fecha actual truncada a semanas para regenerar periódicamente
+      const semanaActual = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24 * 7));
+      hashString += `|semana:${semanaActual}`;
+      
+      // Calcular hash simple
+      let hash = 0;
+      for (let i = 0; i < hashString.length; i++) {
+        const char = hashString.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convertir a 32 bits
+      }
+      
+      return Math.abs(hash).toString(36); // Base 36 para hash más corto
     }
 
     // Inicializar con valor temporal
@@ -1525,6 +1599,9 @@
     window.generarCombinacionesAleatorias = generarCombinacionesAleatorias;
     window.obtenerNumeroSorteoActual = obtenerNumeroSorteoActual;
     window.actualizarTituloSorteo = actualizarTituloSorteo;
+    window.calcularHashDatosHistoricos = calcularHashDatosHistoricos;
+    window.cargarPrediccionesAlmacenadas = cargarPrediccionesAlmacenadas;
+    window.guardarPrediccionesAlmacenadas = guardarPrediccionesAlmacenadas;
 
   </script>
   <script type="module">
@@ -1544,6 +1621,23 @@
         
         // También establecer variables sin window para compatibilidad
         globalThis.usuarioActualID = user.uid;
+        
+        // Limpiar predicciones obsoletas al iniciar sesión
+        try {
+          const datosGuardados = localStorage.getItem('ya-me-vi-predicciones');
+          if (datosGuardados) {
+            const prediccionesGuardadas = JSON.parse(datosGuardados);
+            const hashActual = window.calcularHashDatosHistoricos ? window.calcularHashDatosHistoricos() : 'unknown';
+            const hashGuardado = prediccionesGuardadas._datosHash;
+            
+            if (hashActual !== hashGuardado) {
+              console.log('🧹 Limpiando predicciones obsoletas al iniciar sesión');
+              localStorage.removeItem('ya-me-vi-predicciones');
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error verificando predicciones al iniciar:', error);
+        }
         globalThis.usuarioActualNombre = user.displayName;
         globalThis.usuarioActualEmail = user.email;
         

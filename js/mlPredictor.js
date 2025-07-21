@@ -1,6 +1,17 @@
-// Utilidad: genera una semilla numérica desde una cadena (userId)
+// Utilidad: genera una semilla numérica desde una cadena (userId) - versión mejorada
 function hashCode(str) {
-  return str.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  let hash = 0;
+  if (str.length === 0) return hash;
+  
+  // Usar un algoritmo de hash más robusto (similar a Java)
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convertir a entero de 32 bits
+  }
+  
+  // Asegurar que el resultado sea positivo y dentro de un rango manejable
+  return Math.abs(hash) % 2147483647; // Usar un número primo grande
 }
 
 // === Generar predicción personalizada con IA avanzada ===
@@ -126,20 +137,29 @@ function generarCombinacionPersonalizada(userId, datos) {
   // Generar el pool de 1000 combinaciones basadas en datos históricos
   const poolCombinaciones = generarPoolCombinaciones(datos);
   
-  // Seleccionar una combinación específica para este usuario y sorteo
-  // La combinación será la misma mientras no cambien los datos históricos
-  const hashUsuario = hashCode(userId);
+  // Crear hash más complejo y único por usuario
+  const hashUsuarioBase = hashCode(userId);
+  const hashUsuarioComplejo = hashCode(`${userId}-${hashUsuarioBase}-${tipoSorteo}-profile`);
   const hashSorteo = hashCode(tipoSorteo);
-  const hashCompleto = hashUsuario + hashSorteo + hashDatos;
   
-  console.log(`🔑 Componentes del hash para ${tipoSorteo}:`, {
-    hashUsuario,
+  // Agregar variabilidad geográfica/temporal para usuarios cercanos
+  const variabilidadUsuario = Math.abs(hashUsuarioComplejo) % 997; // Número primo para mejor distribución
+  const factorPersonalizacion = (hashUsuarioBase * 31 + variabilidadUsuario) % 1009; // Otro número primo
+  
+  // Combinar todos los hashes de manera más sofisticada
+  const hashCompleto = (hashUsuarioComplejo * 17 + hashSorteo * 23 + hashDatos * 29 + factorPersonalizacion) % Number.MAX_SAFE_INTEGER;
+  
+  console.log(`🔑 Componentes del hash avanzado para ${tipoSorteo}:`, {
+    hashUsuarioBase,
+    hashUsuarioComplejo,
     hashSorteo,
     hashDatos,
-    hashCompleto
+    variabilidadUsuario,
+    factorPersonalizacion,
+    hashCompleto: hashCompleto % 1000 // Solo mostrar últimos 3 dígitos para el log
   });
   
-  const indiceCombinacion = hashCompleto % poolCombinaciones.length;
+  const indiceCombinacion = Math.abs(hashCompleto) % poolCombinaciones.length;
   
   const combinacionSeleccionada = poolCombinaciones[indiceCombinacion];
   
@@ -153,13 +173,24 @@ function generarHashDatos(datos) {
   const tipoSorteo = datos.sorteo || 'desconocido';
   let hashString = `tipo:${tipoSorteo}|`;
   
+  // Añadir timestamp de la última modificación de datos para forzar regeneración
+  const fechaActual = new Date();
+  const semanaActual = Math.floor(fechaActual.getTime() / (1000 * 60 * 60 * 24 * 7)); // Cambiar cada semana
+  hashString += `semana:${semanaActual}|`;
+  
   if (datos.datos && datos.datos.length > 0) {
     // Usar los primeros 10 sorteos como "firma" de los datos
     const sorteosMuestra = datos.datos.slice(0, 10);
     hashString += sorteosMuestra.map(s => `${s.concurso || 'sorteo'}-${(s.numeros || []).join('')}`).join('|');
+    
+    // Agregar el total de sorteos para detectar cambios en el dataset
+    hashString += `|total:${datos.datos.length}`;
   } else if (datos.numeros && datos.numeros.length > 0) {
     // Usar los primeros 60 números como "firma"
     hashString += datos.numeros.slice(0, 60).join('');
+    
+    // Agregar el total de números para detectar cambios
+    hashString += `|total:${datos.numeros.length}`;
   }
   
   // Añadir el tipo de sorteo al final también para mayor seguridad
