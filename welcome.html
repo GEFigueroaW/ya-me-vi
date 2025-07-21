@@ -45,21 +45,21 @@
       </button>
 
       <!-- Toggle de configuración biométrica -->
-      <div id="biometric-setup-container" class="w-full bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-50 py-4 px-6 rounded-xl" style="display: none;">
+      <div id="biometric-setup-container" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border border-green-400 py-4 px-6 rounded-xl transition-all duration-300 cursor-pointer shadow-lg" style="display: none;">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <span id="setup-biometric-icon" class="text-2xl mr-3">🔐</span>
-            <div class="text-left">
-              <div class="text-lg">Activar</div>
+            <div class="text-left text-white">
+              <div class="text-lg font-semibold">Activar</div>
               <div id="setup-biometric-type" class="text-sm opacity-90">Biométrico</div>
             </div>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="biometric-toggle" class="sr-only peer">
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <div class="w-12 h-6 bg-white bg-opacity-30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-white peer-focus:ring-opacity-30 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white peer-checked:bg-opacity-50"></div>
           </label>
         </div>
-        <p class="text-xs opacity-70 mt-2">Activa la autenticación biométrica para acceso rápido y seguro</p>
+        <p class="text-xs text-white opacity-80 mt-2">⚡ Activa para acceso rápido y seguro con tu ${deviceDetector?.getBiometricInfo()?.type || 'dispositivo'}</p>
       </div>
 
       <!-- Separador -->
@@ -380,15 +380,11 @@
       })
       .catch(error => console.error('Error cargando footer:', error));
 
-    // Cargar shared.js para el fondo dinámico
-    import('./js/shared.js').then(() => {
-      console.log('✅ Sistema de fondos dinámicos cargado en welcome.html');
-    }).catch(error => {
-      console.error('Error cargando sistema de fondos:', error);
-    });
-
     // Inicializar página cuando se carga
     document.addEventListener('DOMContentLoaded', initWelcomePage);
   </script>
+
+  <!-- Cargar shared.js para el fondo dinámico -->
+  <script src="js/shared.js"></script>
 </body>
 </html>

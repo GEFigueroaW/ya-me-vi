@@ -1,8 +1,9 @@
 
 import { auth } from './firebase-init.js';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { deviceDetector } from './deviceDetector.js';
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const loginForm = document.getElementById("login-form");
   const googleBtn = document.getElementById("google-login");
   const biometricBtn = document.getElementById("biometric-login");
@@ -13,11 +14,32 @@ document.addEventListener("DOMContentLoaded", function () {
   // Verificar si los datos biométricos están disponibles
   checkBiometricAvailability();
 
+  // Obtener información del usuario detectado
+  let detectedUserEmail = null;
+  try {
+    const userInfo = await deviceDetector.getStoredUserInfo();
+    if (userInfo && userInfo.email) {
+      detectedUserEmail = userInfo.email;
+      console.log('📧 Email detectado:', detectedUserEmail);
+    }
+  } catch (error) {
+    console.error('Error obteniendo info del usuario:', error);
+  }
+
   if (loginForm) {
     loginForm.addEventListener("submit", async function (e) {
       e.preventDefault();
-      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+
+      // Usar el email detectado o solicitar al usuario que use Google
+      if (!detectedUserEmail) {
+        if (window.showErrorMessage) {
+          window.showErrorMessage('❌ No se pudo detectar tu email. Por favor, usa "Continuar con Google".');
+        } else {
+          alert('No se pudo detectar tu email. Por favor, usa "Continuar con Google".');
+        }
+        return;
+      }
 
       // Mostrar loading
       if (window.showLoading) {
@@ -25,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, detectedUserEmail, password);
         console.log("✅ Usuario logueado:", userCredential.user.email);
         
         // Ocultar loading
@@ -58,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
           case 'auth/user-not-found':
             console.log('👤 Usuario no encontrado, mostrando diálogo de registro');
             if (window.showUserNotFoundDialog) {
-              window.showUserNotFoundDialog(email);
+              window.showUserNotFoundDialog(detectedUserEmail || 'usuario');
             } else {
               alert('No existe una cuenta con este email. Por favor regístrate primero.');
             }
