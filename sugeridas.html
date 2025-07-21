@@ -253,11 +253,6 @@
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="mt-12 text-xs text-gray-400 max-w-4xl mx-auto">
-      Este sistema genera números completamente al azar. No garantiza premios. Juega con responsabilidad.
-    </footer>
-
     <footer class="bg-black bg-opacity-70 text-white text-xs text-center py-3 px-4 mt-8">
       <div class="mb-2">
         Este sistema se basa en estadísticas, patrones, probabilidad e inteligencia artificial. No garantiza premios. Juega con responsabilidad.
@@ -274,7 +269,6 @@
   <script src="js/shared.js"></script>
   <!-- Eliminados scripts de módulos conflictivos, todo está en inicializacion-unificada.js -->
   <script src="js/actualizarTituloSorteo.js"></script>
-  <script src="js/startupFunctions.js"></script>
   <script>
     // Implementaciones fallback para funciones críticas
     // Esto garantiza que siempre haya una implementación disponible
@@ -774,32 +768,18 @@
   <!-- Script unificado de inicialización del sistema -->
   <script type="module" src="js/inicializacion-unificada.js"></script>
 
+  <script>
     // Variables globales para compartir entre scripts
     window.cantidadSeleccionada = 1;
     window.datosHistoricos = null;
     window.prediccionesGeneradas = false;
-    window.usuarioActualID = null; // Variable para almacenar el ID del usuario actual
+    window.usuarioActualID = null;
     window.prediccionesAlmacenadas = {
       melate: null,
       revancha: null,
       revanchita: null
     };
     window.proyeccionesAlmacenadas = {
-      melate: null,
-      revancha: null,
-      revanchita: null
-    };
-
-    let cantidadSeleccionada = 1;
-    let datosHistoricos = null;
-    let prediccionesGeneradas = false;
-    let usuarioActualID = null;
-    let prediccionesAlmacenadas = {
-      melate: null,
-      revancha: null,
-      revanchita: null
-    };
-    let proyeccionesAlmacenadas = {
       melate: null,
       revancha: null,
       revanchita: null
@@ -880,141 +860,18 @@
     }
 
     // Función para actualizar el título con el número de sorteo
-    // Esta es una implementación simple que solo llama a nuestra función actualizada
     function actualizarTituloSorteo() {
-      // La implementación real ahora está en js/actualizarTituloSorteo.js
-      // Esto es solo un wrapper por compatibilidad
-      console.log('🎯 Usando la implementación optimizada de actualizarTituloSorteo');
-        
-        fetch('assets/Melate.csv')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Error al cargar Melate.csv: ${response.status}`);
-            }
-            return response.text();
-          })
-          .then(csvText => {
-            // Dividir por líneas y encontrar la primera línea con datos (después del encabezado)
-            const lineas = csvText.split('\n');
-            console.log(`� CSV leído con ${lineas.length} líneas`);
-            
-            if (lineas.length <= 1) {
-              throw new Error('CSV vacío o sin datos válidos');
-            }
-            
-            // Verificar si la primera línea es un encabezado
-            let indiceInicio = 0;
-            if (lineas[0].includes('NPRODUCTO') || lineas[0].includes('CONCURSO')) {
-              indiceInicio = 1;
-            }
-            
-            // Obtener la primera línea con datos (que contiene el sorteo más reciente)
-            const primeraLineaDatos = lineas[indiceInicio].split(',');
-            console.log(`🔍 Primera línea de datos: ${primeraLineaDatos.join(',')}`);
-            
-            if (primeraLineaDatos.length < 2) {
-              throw new Error('Formato de CSV inválido, no se encontró la columna de concurso');
-            }
-            
-            // El número de concurso está en la segunda columna (índice 1)
-            const ultimoSorteo = parseInt(primeraLineaDatos[1].trim());
-            if (isNaN(ultimoSorteo)) {
-              throw new Error(`No se pudo convertir a número: "${primeraLineaDatos[1]}"`);
-            }
-            
-            // Calcular próximo sorteo (último + 1)
-            const proximoSorteo = ultimoSorteo + 1;
-            console.log(`✅ Último sorteo leído: ${ultimoSorteo}, próximo sorteo: ${proximoSorteo}`);
-            
-            // Actualizar el título con el número obtenido
-            actualizarTituloConProximoSorteo(proximoSorteo);
-          })
-          .catch(error => {
-            console.error('❌ Error al leer directamente del CSV:', error);
-            
-            // MÉTODO ALTERNATIVO: Intentar usar datos históricos ya cargados
-            console.log('� Intentando usar datos históricos ya cargados...');
-            
-            if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
-              const sorteos = window.datosHistoricos.melate.sorteos;
-              console.log(`📊 Datos cargados con ${sorteos.length} sorteos`);
-              
-              if (sorteos.length > 0) {
-                let ultimoSorteo = 0;
-                
-                // Buscar el sorteo con el número más alto
-                for (const sorteo of sorteos) {
-                  const numConcurso = parseInt(sorteo.concurso);
-                  if (!isNaN(numConcurso) && numConcurso > ultimoSorteo) {
-                    ultimoSorteo = numConcurso;
-                  }
-                }
-                
-                if (ultimoSorteo > 0) {
-                  const proximoSorteo = ultimoSorteo + 1;
-                  console.log(`✅ Último sorteo encontrado en datos históricos: ${ultimoSorteo}, próximo: ${proximoSorteo}`);
-                  actualizarTituloConProximoSorteo(proximoSorteo);
-                  return;
-                }
-              }
-              
-              console.warn('⚠️ No se pudo encontrar un número de sorteo válido en los datos históricos');
-            } else {
-              console.warn('⚠️ No hay datos históricos disponibles');
-            }
-            
-            // ÚLTIMO RECURSO: Usar cálculo basado en fecha actual
-            console.log('⚠️ Usando cálculo por fecha como último recurso...');
-            
-            const fecha = new Date();
-            const year = fecha.getFullYear();
-            const month = fecha.getMonth() + 1;
-            const day = fecha.getDate();
-            
-            // Generar un ID único basado en la fecha para debugging
-            const dateId = `${year}${month.toString().padStart(2, '0')}${day.toString().padStart(2, '0')}`;
-            console.log(`📅 Fecha actual: ${day}/${month}/${year} (ID: ${dateId})`);
-            
-            // Mostrar error genérico para que sea más visible el problema
-            console.error(`❌❌❌ ERROR CRÍTICO: No se pudo determinar el próximo número de sorteo`);
-            console.error(`Por favor, revisa el formato y contenido del archivo Melate.csv`);
-            
-            // Mostrar un mensaje genérico que no incluye número específico
-            actualizarTituloConMensajeGenerico();
-          })
-          .catch(error => {
-            console.error('❌ Error general:', error);
-            actualizarTituloConMensajeGenerico();
-          });
-    }
-    
-    // Función para mostrar un mensaje genérico en caso de error
-    function actualizarTituloConMensajeGenerico() {
-      const tituloElement = document.getElementById('titulo-sorteo');
-      if (tituloElement) {
-        // COMENTADO: Dejamos que sugeridas-fix.js maneje el título
-        // tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el próximo sorteo`;
-        console.log(`📝 Título actualizado con mensaje genérico`);
-      }
-    }
-    
-    // Función auxiliar para actualizar el título con el número de sorteo
-    function actualizarTituloConProximoSorteo(proximoSorteo) {
-      const tituloElement = document.getElementById('titulo-sorteo');
-      if (tituloElement) {
-        // Usar animación para hacer más visible el cambio
-        tituloElement.style.transition = "opacity 0.3s ease";
-        tituloElement.style.opacity = 0.3;
-        
-        // Actualizar el contenido y restaurar la opacidad
-        setTimeout(() => {
-          // COMENTADO: Dejamos que sugeridas-fix.js maneje el título
-          // tituloElement.textContent = `Combinaciones sugeridas por IA para TI para el sorteo ${proximoSorteo}`;
-          tituloElement.style.opacity = 1;
-          console.log(`📝 Título actualizado con próximo sorteo: ${proximoSorteo}`);
-        }, 300);
+      // Llamar a la implementación del archivo dedicado
+      if (typeof window.actualizarTituloSorteoOptimizado === 'function') {
+        window.actualizarTituloSorteoOptimizado();
       } else {
-        console.error('❌ Elemento titulo-sorteo no encontrado');
+        console.log('⚠️ Usando implementación de fallback para título');
+        // Fallback simple
+        const tituloElement = document.getElementById('titulo-sorteo');
+        if (tituloElement && !tituloElement.textContent.includes('sorteo')) {
+          const estimado = 4083 + Math.floor((new Date() - new Date(2025, 6, 18)) / (1000 * 60 * 60 * 24 * 3.5));
+          tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI para el sorteo ${estimado}`;
+        }
       }
     }
 
@@ -2111,12 +1968,6 @@
   <!-- Script de corrección para los números de sorteos -->
   <script src="js/sugeridas-fix.js"></script>
   
-  <!-- Script específico para sincronización Firebase-Título -->
-  <script src="js/firebase-titulo-sync.js"></script>
-  
-  <!-- Script auto-trigger para garantizar números -->
-  <script src="js/auto-trigger-numeros.js"></script>
-  
   <!-- Script de forzado inmediato -->
   <script>
     // Forzar generación inmediata cuando se carga la página
@@ -2218,36 +2069,5 @@
         }
       }, 1000); // Esperar 1 segundo para asegurarse de que los módulos se hayan cargado
     });
-    
-    // Sobrescribir las funciones toggle para asegurar que se generen números
-    const toggleAnalisisOriginal = window.toggleAnalisis;
-    const togglePrediccionIAOriginal = window.togglePrediccionIA;
-    
-    window.toggleAnalisis = function() {
-      if (toggleAnalisisOriginal) {
-        toggleAnalisisOriginal();
-      }
-      
-      // Asegurar que se generen números cuando se abra la caja
-      setTimeout(() => {
-        if (window.generarYMostrarNumerosSorteos) {
-          window.generarYMostrarNumerosSorteos();
-        }
-      }, 500);
-    };
-    
-    window.togglePrediccionIA = function() {
-      if (togglePrediccionIAOriginal) {
-        togglePrediccionIAOriginal();
-      }
-      
-      // Asegurar que se generen números cuando se abra la caja
-      setTimeout(() => {
-        if (window.generarYMostrarNumerosSorteos) {
-          window.generarYMostrarNumerosSorteos();
-        }
-      }, 500);
-    };
-  </script>
 </body>
 </html>
