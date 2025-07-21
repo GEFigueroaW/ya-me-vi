@@ -14,7 +14,7 @@
   <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
 
   <!-- Contenido principal -->
-  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4" id="main-content">
     <div class="animate__animated animate__fadeInDown">
       <h1 class="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">YA ME VI</h1>
       <p class="text-xl md:text-2xl mb-8 font-light">Cumple tu sueño… hoy puede ser el gran día</p>
@@ -74,21 +74,19 @@
 
         console.log('📱 Dispositivo móvil detectado - iniciando flujo inteligente');
         
-        // En móvil, ocultar botones inmediatamente
-        const manualButtons = document.getElementById('manual-buttons');
-        if (manualButtons) {
-          manualButtons.style.display = 'none';
+        // En móvil, ocultar TODO el contenido inmediatamente
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+          mainContent.style.display = 'none';
         }
         
-        // Esperar a que deviceDetector se inicialice completamente
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        // Detección más rápida - reducir tiempos
         const userFlow = await deviceDetector.determineUserFlow();
         
         console.log('🔍 Flujo determinado:', userFlow);
 
-        // Pequeña demora para mostrar la detección (2-3 segundos)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Reducir demora a solo 800ms para hacer más rápido
+        await new Promise(resolve => setTimeout(resolve, 800));
 
         if (userFlow.action === 'register') {
           console.log('➡️ Usuario nuevo - redirigiendo a registro');
@@ -101,10 +99,10 @@
       } catch (error) {
         console.error('❌ Error en redirección inteligente:', error);
         hideLoading();
-        // En caso de error, mostrar botones manuales
-        const manualButtons = document.getElementById('manual-buttons');
-        if (manualButtons) {
-          manualButtons.style.display = 'flex';
+        // En caso de error, mostrar contenido original
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+          mainContent.style.display = 'flex';
         }
       }
     }

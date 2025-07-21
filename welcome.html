@@ -16,10 +16,16 @@
   <!-- Contenido principal -->
   <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
     
+    <!-- Título YA ME VI -->
+    <div class="animate__animated animate__fadeInDown mb-6">
+      <h1 class="text-4xl md:text-5xl font-bold mb-2 drop-shadow-lg">YA ME VI</h1>
+      <p class="text-sm opacity-70">Tu plataforma de análisis de lotería</p>
+    </div>
+    
     <!-- Mensaje de bienvenida -->
     <div class="animate__animated animate__fadeInDown mb-8">
       <div class="text-6xl mb-4">👋</div>
-      <h1 class="text-4xl md:text-5xl font-bold mb-2 drop-shadow-lg">¡Hola de nuevo!</h1>
+      <h2 class="text-3xl md:text-4xl font-bold mb-2 drop-shadow-lg">¡Hola de nuevo!</h2>
       <p id="welcome-message" class="text-xl md:text-2xl mb-4 font-light">Bienvenido, Usuario</p>
       <p class="text-lg opacity-80">¿Listo para tu siguiente oportunidad?</p>
     </div>
@@ -37,6 +43,24 @@
           </div>
         </div>
       </button>
+
+      <!-- Toggle de configuración biométrica -->
+      <div id="biometric-setup-container" class="w-full bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-50 py-4 px-6 rounded-xl" style="display: none;">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <span id="setup-biometric-icon" class="text-2xl mr-3">🔐</span>
+            <div class="text-left">
+              <div class="text-lg">Activar</div>
+              <div id="setup-biometric-type" class="text-sm opacity-90">Biométrico</div>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="biometric-toggle" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+        <p class="text-xs opacity-70 mt-2">Activa la autenticación biométrica para acceso rápido y seguro</p>
+      </div>
 
       <!-- Separador -->
       <div class="flex items-center my-4" id="separator" style="display: none;">
@@ -87,6 +111,10 @@
     const biometricBtn = document.getElementById('biometric-login-btn');
     const biometricIcon = document.getElementById('biometric-icon');
     const biometricType = document.getElementById('biometric-type');
+    const biometricSetupContainer = document.getElementById('biometric-setup-container');
+    const setupBiometricIcon = document.getElementById('setup-biometric-icon');
+    const setupBiometricType = document.getElementById('setup-biometric-type');
+    const biometricToggle = document.getElementById('biometric-toggle');
     const passwordBtn = document.getElementById('password-login-btn');
     const newAccountBtn = document.getElementById('new-account-btn');
     const separator = document.getElementById('separator');
@@ -133,19 +161,10 @@
             biometricBtn.style.display = 'block';
             separator.style.display = 'flex';
           } else {
-            // Biométricos disponibles pero no configurados
-            biometricIcon.textContent = '⚙️';
-            biometricType.textContent = `Configurar ${biometricInfo.type}`;
-            biometricBtn.innerHTML = `
-              <div class="flex items-center justify-center">
-                <span class="text-2xl mr-3">⚙️</span>
-                <div class="text-left">
-                  <div class="text-lg">Configurar</div>
-                  <div class="text-sm opacity-90">${biometricInfo.type}</div>
-                </div>
-              </div>
-            `;
-            biometricBtn.style.display = 'block';
+            // Biométricos disponibles pero no configurados - mostrar toggle
+            setupBiometricIcon.textContent = biometricInfo.icon;
+            setupBiometricType.textContent = biometricInfo.type;
+            biometricSetupContainer.style.display = 'block';
             separator.style.display = 'flex';
           }
         }
@@ -160,26 +179,125 @@
       }
     }
 
-    // Manejar login biométrico o configuración
-    async function handleBiometricAction() {
-      try {
-        const savedUserInfo = localStorage.getItem('biometric_user_info');
-        
-        if (!savedUserInfo) {
-          // No hay datos biométricos, redirigir a configuración en registro
+    // Manejar toggle de configuración biométrica
+    async function handleBiometricToggle() {
+      const isChecked = biometricToggle.checked;
+      
+      if (isChecked) {
+        try {
           showLoading('Configurando autenticación biométrica...');
-          console.log('⚙️ Redirigiendo a configuración biométrica');
-          window.location.href = 'register.html?setup_biometric=true';
-          return;
+          
+          const success = await setupBiometricAuthentication();
+          
+          if (success) {
+            // Configuración exitosa - cambiar a modo login
+            biometricSetupContainer.style.display = 'none';
+            
+            const biometricInfo = deviceDetector.getBiometricInfo();
+            biometricIcon.textContent = biometricInfo.icon;
+            biometricType.textContent = biometricInfo.type;
+            biometricBtn.style.display = 'block';
+            
+            hideLoading();
+            
+            // Mostrar mensaje de éxito
+            alert(`✅ ${biometricInfo.type} configurado exitosamente!`);
+          } else {
+            // Error en configuración
+            biometricToggle.checked = false;
+            hideLoading();
+          }
+          
+        } catch (error) {
+          console.error('Error configurando biométricos:', error);
+          biometricToggle.checked = false;
+          hideLoading();
+          alert('Error al configurar la autenticación biométrica');
+        }
+      } else {
+        // Desactivar biométricos
+        if (confirm('¿Estás seguro de que quieres desactivar la autenticación biométrica?')) {
+          localStorage.removeItem('biometric_user_info');
+          alert('Autenticación biométrica desactivada');
+        } else {
+          biometricToggle.checked = true;
+        }
+      }
+    }
+
+    // Configurar autenticación biométrica
+    async function setupBiometricAuthentication() {
+      try {
+        console.log("🔐 Iniciando configuración biométrica...");
+        
+        // Generar ID único para el usuario
+        const userId = new Uint8Array(64);
+        crypto.getRandomValues(userId);
+        
+        // Configuración para crear credenciales
+        const publicKeyCredentialCreationOptions = {
+          challenge: new Uint8Array(32),
+          rp: {
+            name: "YA ME VI - Lotería",
+            id: window.location.hostname || "localhost",
+          },
+          user: {
+            id: userId,
+            name: "usuario@yemevi.com",
+            displayName: "Usuario YA ME VI",
+          },
+          pubKeyCredParams: [{alg: -7, type: "public-key"}],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required"
+          },
+          timeout: 60000,
+          attestation: "direct"
+        };
+
+        // Llenar el challenge con datos aleatorios
+        crypto.getRandomValues(publicKeyCredentialCreationOptions.challenge);
+
+        // Crear credenciales biométricas
+        const credential = await navigator.credentials.create({
+          publicKey: publicKeyCredentialCreationOptions
+        });
+
+        if (credential) {
+          console.log("✅ Credenciales biométricas creadas exitosamente");
+          
+          // Guardar información básica en localStorage
+          const userInfo = {
+            id: Array.from(userId).join(','),
+            registeredAt: new Date().toISOString(),
+            credentialId: Array.from(new Uint8Array(credential.rawId)).join(','),
+            authenticatorData: Array.from(new Uint8Array(credential.response.authenticatorData)).join(',')
+          };
+          
+          localStorage.setItem('biometric_user_info', JSON.stringify(userInfo));
+          
+          return true;
+        } else {
+          throw new Error("No se pudieron crear las credenciales");
         }
 
-        // Proceder con login biométrico normal
-        await handleBiometricLogin();
-        
       } catch (error) {
-        console.error('❌ Error en acción biométrica:', error);
-        hideLoading();
-        alert('Error al procesar la autenticación biométrica. Intenta con contraseña.');
+        console.error("❌ Error en configuración biométrica:", error);
+        
+        let errorMessage = "Error en la configuración biométrica. ";
+        
+        if (error.name === 'NotAllowedError') {
+          errorMessage += "Acceso denegado por el usuario.";
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage += "Función no soportada en este dispositivo.";
+        } else if (error.name === 'SecurityError') {
+          errorMessage += "Error de seguridad.";
+        } else {
+          errorMessage += error.message || "Error desconocido.";
+        }
+        
+        alert(errorMessage);
+        return false;
       }
     }
 
@@ -243,7 +361,8 @@
     }
 
     // Event listeners
-    biometricBtn.addEventListener('click', handleBiometricAction);
+    biometricBtn.addEventListener('click', handleBiometricLogin);
+    biometricToggle.addEventListener('change', handleBiometricToggle);
     
     passwordBtn.addEventListener('click', () => {
       window.location.href = 'login-email.html';
@@ -258,11 +377,14 @@
       .then(res => res.text())
       .then(data => {
         document.getElementById("footer-container").innerHTML = data;
-      });
+      })
+      .catch(error => console.error('Error cargando footer:', error));
 
-    // Cargar shared.js para el fondo
+    // Cargar shared.js para el fondo dinámico
     import('./js/shared.js').then(() => {
       console.log('✅ Sistema de fondos dinámicos cargado en welcome.html');
+    }).catch(error => {
+      console.error('Error cargando sistema de fondos:', error);
     });
 
     // Inicializar página cuando se carga

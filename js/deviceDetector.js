@@ -9,6 +9,7 @@ export class DeviceDetector {
     this.isTablet = this.detectTablet();
     this.biometricType = null;
     this.biometricIcon = null;
+    this.initialized = false;
     this.init();
   }
 
@@ -32,6 +33,27 @@ export class DeviceDetector {
 
   async init() {
     await this.detectBiometricType();
+    this.initialized = true;
+  }
+
+  // Método para esperar la inicialización
+  async waitForInit() {
+    if (this.initialized) return;
+    
+    // Esperar con timeout máximo de 300ms para ser más rápido
+    const timeout = new Promise(resolve => setTimeout(resolve, 300));
+    const initPromise = new Promise(resolve => {
+      const checkInit = () => {
+        if (this.initialized) {
+          resolve();
+        } else {
+          setTimeout(checkInit, 50);
+        }
+      };
+      checkInit();
+    });
+    
+    await Promise.race([initPromise, timeout]);
   }
 
   async detectBiometricType() {
