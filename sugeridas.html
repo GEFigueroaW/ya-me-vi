@@ -231,7 +231,21 @@
   </div>
 
   <!-- Footer legal -->
-  <div id="footer-container" class="w-full z-10 mt-8"></div>
+  <footer class="bg-black bg-opacity-70 text-white text-xs text-center py-3 px-4 mt-8 relative z-10">
+    <div class="mb-2">
+      "Ya me vi" es una herramienta diseñada con fines de entretenimiento y análisis estadístico. Los resultados
+      que genera se basan en probabilidades, patrones, inteligencia artificial y datos históricos, y no garantizan
+      premios ni la certeza de resultados en sorteos o juegos de azar. El uso de esta aplicación es bajo la exclusiva responsabilidad del usuario.
+    </div>
+    <div class="space-x-2">
+      <a href="aviso-legal.html" class="text-yellow-300 hover:text-yellow-100 underline transition duration-300">Aviso legal</a>
+      <span class="text-gray-400">|</span>
+      <a href="politica-privacidad.html" class="text-yellow-300 hover:text-yellow-100 underline transition duration-300">Política de privacidad</a>
+    </div>
+    <div class="mt-1">
+      © 2025 Ya me vi. Todos los derechos reservados.
+    </div>
+  </footer>
 
   <!-- Scripts -->
   <script src="js/shared.js"></script>
@@ -374,13 +388,6 @@
     };
   </script>
   <script>
-    // Cargar footer legal en todas las páginas
-    fetch("footer.html")
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById("footer-container").innerHTML = data;
-      });
-    
     // Variables globales
     let isAleatoriaOpen = false;
     let isPrediccionOpen = false;
