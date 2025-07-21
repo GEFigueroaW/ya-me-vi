@@ -7,6 +7,35 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* Prevenir scroll automático en móviles */
+    html {
+      scroll-behavior: auto !important;
+    }
+    
+    /* Mejorar estabilidad del acordeón en móvil */
+    .analisis-transparente {
+      transform: translateZ(0);
+      will-change: auto;
+    }
+    
+    .analisis-transparente:focus {
+      outline: none;
+    }
+    
+    /* Prevenir cambios de layout que puedan causar scroll */
+    .contenido-expandible {
+      transition: opacity 0.3s ease;
+    }
+    
+    /* Evitar zoom automático en inputs en iOS */
+    @media screen and (max-width: 768px) {
+      body {
+        position: relative;
+        overflow-x: hidden;
+      }
+    }
+  </style>
   <script src="js/init.js"></script>
   <script src="js/dataParser.js"></script>
   <script src="js/dataParserGlobal.js"></script>
@@ -67,7 +96,7 @@
       </div>
 
       <!-- Contenido expandible (oculto por defecto) -->
-      <div id="contenido-aleatorias" class="hidden mt-6">
+      <div id="contenido-aleatorias" class="hidden mt-6 contenido-expandible">
         <!-- Descripción -->
         <div class="text-center mb-8">
           <p class="text-sm text-gray-300">
@@ -90,7 +119,7 @@
     </div>
 
     <!-- Combinaciones sugeridas por IA -->
-    <div id="prediccion-container" class="rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300 analisis-transparente" style="opacity: 0.5;" onclick="togglePrediccionIA(); setTimeout(() => { if(window.generarYMostrarNumerosSorteos) window.generarYMostrarNumerosSorteos(); }, 1000);">
+    <div id="prediccion-container" class="rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300 analisis-transparente" style="opacity: 0.5;" onclick="togglePrediccionIA();">
       <div class="text-center">
         <p class="text-lg text-white mb-2">
           <span id="titulo-sorteo">🎯 Combinaciones sugeridas por IA para TI para el sorteo "---"</span>
@@ -106,7 +135,7 @@
       </div>
       
       <!-- Contenido expandible (oculto por defecto) -->
-      <div id="contenido-predicciones" class="hidden mt-6">
+      <div id="contenido-predicciones" class="hidden mt-6 contenido-expandible">
         <p class="text-sm italic text-center mb-6 text-gray-300">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
         
         <!-- Predicciones por sorteo -->
@@ -139,7 +168,7 @@
 
     <!-- Proyección basada en análisis estadístico -->
     <div id="analisis-container" class="rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 hover:shadow-xl transition-all duration-300 analisis-transparente" style="opacity: 0.8;">
-      <div class="text-center cursor-pointer" onclick="toggleAnalisis(); setTimeout(() => { if(window.generarYMostrarNumerosSorteos) window.generarYMostrarNumerosSorteos(); }, 1000);">
+      <div class="text-center cursor-pointer" onclick="toggleAnalisis();">
         <p class="text-lg text-white mb-2">
           📊 Proyección basada en los 4 tipos de análisis de los últimos sorteos
         </p>
@@ -154,7 +183,7 @@
       </div>
       
       <!-- Contenido expandible (oculto por defecto) -->
-      <div id="contenido-analisis" class="hidden mt-6">
+      <div id="contenido-analisis" class="hidden mt-6 contenido-expandible">
         <p class="text-sm italic text-center mb-6 text-gray-300">Combinaciones generadas usando análisis de frecuencias, suma de números, balance pares/impares y distribución por décadas</p>
         
         <!-- Proyecciones por sorteo -->
@@ -403,9 +432,16 @@
         cerrarCajaPredicciones();
         cerrarCajaAnalisis();
         
-        // Abrir esta caja
+        // Abrir esta caja con transición suave
+        contenido.style.opacity = '0';
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
+        
+        // Animar la aparición
+        requestAnimationFrame(() => {
+          contenido.style.opacity = '1';
+        });
+        
         isAleatoriaOpen = true;
         console.log('✅ Caja aleatorias abierta');
         
@@ -415,11 +451,15 @@
           windowFn: typeof window.generarCombinacionesAleatorias !== 'undefined'
         });
       } else {
-        // Cerrar esta caja
-        contenido.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
+        // Cerrar esta caja con transición suave
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          arrow.style.transform = 'rotate(0deg)';
+          limpiarCombinacionesAleatorias();
+        }, 300);
+        
         isAleatoriaOpen = false;
-        limpiarCombinacionesAleatorias();
         console.log('✅ Caja aleatorias cerrada');
       }
     }
@@ -440,10 +480,17 @@
         cerrarCajaAleatorias();
         cerrarCajaAnalisis();
         
-        // Abrir esta caja
+        // Abrir esta caja con transición suave
+        contenido.style.opacity = '0';
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
         container.style.opacity = '1';
+        
+        // Animar la aparición
+        requestAnimationFrame(() => {
+          contenido.style.opacity = '1';
+        });
+        
         isPrediccionOpen = true;
         console.log('✅ Caja predicción abierta');
         
@@ -500,10 +547,14 @@
           console.error('❌ Error en sistema de predicción IA:', error);
         }
       } else {
-        // Cerrar esta caja
-        contenido.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
-        container.style.opacity = '0.5';
+        // Cerrar esta caja con transición suave
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          arrow.style.transform = 'rotate(0deg)';
+          container.style.opacity = '0.5';
+        }, 300);
+        
         isPrediccionOpen = false;
         console.log('✅ Caja predicción cerrada');
       }
@@ -524,9 +575,16 @@
         cerrarCajaAleatorias();
         cerrarCajaPredicciones();
         
-        // Abrir esta caja
+        // Abrir esta caja con transición suave
+        contenido.style.opacity = '0';
         contenido.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
+        
+        // Animar la aparición
+        requestAnimationFrame(() => {
+          contenido.style.opacity = '1';
+        });
+        
         isAnalisisOpen = true;
         console.log('✅ Caja análisis abierta');
         
@@ -642,9 +700,13 @@
         cargarYAnalizarDatos();
         
       } else {
-        // Cerrar esta caja
-        contenido.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
+        // Cerrar esta caja con transición suave
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          arrow.style.transform = 'rotate(0deg)';
+        }, 300);
+        
         isAnalisisOpen = false;
         console.log('✅ Caja análisis cerrada');
       }
@@ -656,10 +718,13 @@
       const arrow = document.getElementById('arrow-icon-aleatorias');
       
       if (contenido && !contenido.classList.contains('hidden')) {
-        contenido.classList.add('hidden');
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+          limpiarCombinacionesAleatorias();
+        }, 300);
         isAleatoriaOpen = false;
-        limpiarCombinacionesAleatorias();
       }
     }
 
@@ -669,9 +734,12 @@
       const container = document.getElementById('prediccion-container');
       
       if (contenido && !contenido.classList.contains('hidden')) {
-        contenido.classList.add('hidden');
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
-        if (container) container.style.opacity = '0.5';
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+          if (container) container.style.opacity = '0.5';
+        }, 300);
         isPrediccionOpen = false;
       }
     }
@@ -681,8 +749,11 @@
       const arrow = document.getElementById('arrow-icon-analisis');
       
       if (contenido && !contenido.classList.contains('hidden')) {
-        contenido.classList.add('hidden');
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+        }, 300);
         isAnalisisOpen = false;
       }
     }
