@@ -89,6 +89,8 @@ export class UIManager {
    * Inicializar todos los event listeners
    */
   inicializar() {
+    console.log('🚀 Inicializando UIManager para combinación...');
+    
     // Prevenir la propagación del evento click en los botones internos (no en los triggers)
     document.querySelectorAll('button:not([id^="trigger-"]), input').forEach(element => {
       element.addEventListener('click', (e) => e.stopPropagation());
@@ -104,83 +106,95 @@ export class UIManager {
     });
     
     // Botón de volver
-    this.btnVolver.addEventListener('click', (e) => {
-      e.stopPropagation();
-      window.history.back();
-    });
+    if (this.btnVolver) {
+      this.btnVolver.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.history.back();
+      });
+    }
 
-    // Evaluación del número individual
-    document.getElementById('evaluar-numero-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.evaluarNumeroIndividual();
-    });
-
-    this.inputNumero.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+    // Evaluación del número individual - usando delegación de eventos
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'evaluar-numero-btn') {
         e.stopPropagation();
         this.evaluarNumeroIndividual();
       }
     });
 
-    // Evaluación de la combinación
-    document.getElementById('evaluar-combinacion-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.evaluarCombinacion();
+    // Input de número individual - delegación de eventos para Enter
+    document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.id === 'numero-individual' && e.key === 'Enter') {
+        e.stopPropagation();
+        this.evaluarNumeroIndividual();
+      }
     });
 
-    // Validación en tiempo real para inputs de combinación
-    const inputsCombinacion = document.querySelectorAll('.combo-input');
-    inputsCombinacion.forEach((input, index) => {
-      input.addEventListener('input', (e) => {
+    // Evaluación de la combinación - usando delegación de eventos
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'evaluar-combinacion-btn') {
         e.stopPropagation();
-        this.validarInputEnTiempoReal(input, index);
-      });
-      
-      input.addEventListener('blur', (e) => {
+        this.evaluarCombinacion();
+      }
+    });
+
+    // Validación en tiempo real para inputs de combinación - delegación de eventos
+    document.addEventListener('input', (e) => {
+      if (e.target && e.target.classList.contains('combo-input')) {
         e.stopPropagation();
-        this.validarInputEnTiempoReal(input, index);
-      });
+        const inputs = Array.from(document.querySelectorAll('.combo-input'));
+        const index = inputs.indexOf(e.target);
+        this.validarInputEnTiempoReal(e.target, index);
+      }
     });
     
-    this.btnMostrarExplicacion.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.toggleExplicacion(this.explicacionNumero);
+    document.addEventListener('blur', (e) => {
+      if (e.target && e.target.classList.contains('combo-input')) {
+        e.stopPropagation();
+        const inputs = Array.from(document.querySelectorAll('.combo-input'));
+        const index = inputs.indexOf(e.target);
+        this.validarInputEnTiempoReal(e.target, index);
+      }
+    });
+    
+    // Botones de explicación - delegación de eventos
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'mostrar-explicacion-btn') {
+        e.stopPropagation();
+        this.toggleExplicacion(this.explicacionNumero);
+      }
+      
+      if (e.target && e.target.id === 'mostrar-explicacion-btn-combo') {
+        e.stopPropagation();
+        this.toggleExplicacion(this.explicacionCombinacion);
+      }
     });
 
-    this.btnMostrarExplicacionCombo.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.toggleExplicacion(this.explicacionCombinacion);
-    });
-
-    // Botones de ejemplo práctico
-    if (this.btnToggleHelp) {
-      this.btnToggleHelp.addEventListener('click', (e) => {
+    // Botones de ejemplo práctico - delegación de eventos
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'toggle-help') {
         e.stopPropagation();
         this.toggleHelpContent(this.helpContent, this.helpText, this.helpIcon);
-      });
-    }
-
-    if (this.btnToggleHelpExpandible) {
-      this.btnToggleHelpExpandible.addEventListener('click', (e) => {
+      }
+      
+      if (e.target && e.target.id === 'toggle-help-expandible') {
         e.stopPropagation();
         this.toggleHelpContent(this.helpContentExpandible, this.helpTextExpandible, this.helpIconExpandible);
-      });
-    }
-
-    if (this.btnToggleHelpNumero) {
-      this.btnToggleHelpNumero.addEventListener('click', (e) => {
+      }
+      
+      if (e.target && e.target.id === 'toggle-help-numero') {
         e.stopPropagation();
         this.toggleHelpContent(this.helpContentNumero, this.helpTextNumero, this.helpIconNumero);
-      });
-    }
-
-    if (this.btnToggleHelpCombinacion) {
-      this.btnToggleHelpCombinacion.addEventListener('click', (e) => {
+      }
+      
+      if (e.target && e.target.id === 'toggle-help-combinacion') {
         e.stopPropagation();
         this.toggleHelpContent(this.helpContentCombinacion, this.helpTextCombinacion, this.helpIconCombinacion);
-      });
-    }
+      }
+    });
 
+    console.log('✅ Event listeners configurados con delegación de eventos');
+
+    // Preparar datos históricos
     prepararDatosHistoricos().then(() => {
       console.log('✅ Datos históricos listos para usar en la UI.');
     }).catch(error => {
@@ -420,13 +434,29 @@ export class UIManager {
    * Evaluar un número individual
    */
   evaluarNumeroIndividual() {
+    console.log('🔍 Evaluando número individual...');
+    
     const inputNumero = document.getElementById('numero-individual');
+    const resultadoContainer = document.getElementById('resultado-numero');
+    
+    if (!inputNumero) {
+      console.error('❌ No se encontró el input numero-individual');
+      return;
+    }
+    
+    if (!resultadoContainer) {
+      console.error('❌ No se encontró el container resultado-numero');
+      return;
+    }
+    
     const numero = parseInt(inputNumero.value);
     
     if (isNaN(numero) || numero < 1 || numero > 56) {
-      this.mostrarError(this.resultadoNumero, 'Por favor, ingresa un número válido entre 1 y 56.');
+      this.mostrarError(resultadoContainer, 'Por favor, ingresa un número válido entre 1 y 56.');
       return;
     }
+    
+    console.log(`🎯 Analizando número: ${numero}`);
     
     try {
       const frecuenciaPorSorteo = calcularFrecuenciaPorSorteo(numero);
@@ -443,11 +473,12 @@ export class UIManager {
         revanchita: clasificacionRevanchita
       });
 
-      this.resultadoNumero.innerHTML = html;
+      resultadoContainer.innerHTML = html;
+      console.log('✅ Resultado generado exitosamente');
       
     } catch (error) {
       console.error('❌ Error al analizar número individual:', error);
-      this.mostrarError(this.resultadoNumero, `Error al procesar el análisis. Error: ${error.message}`);
+      this.mostrarError(resultadoContainer, `Error al procesar el análisis. Error: ${error.message}`);
     }
   }
 
