@@ -171,11 +171,20 @@
       try {
         showLoading('Verificando usuario...');
         
+        console.log('🚀 Iniciando página de bienvenida...');
+        
+        // Esperar a que deviceDetector se inicialice completamente
+        await deviceDetector.waitForInit();
+        
         // Obtener información del usuario
         const userInfo = await deviceDetector.getStoredUserInfo();
         const biometricInfo = deviceDetector.getBiometricInfo();
         
+        console.log('👤 Información del usuario:', userInfo);
+        console.log('🔐 Información biométrica:', biometricInfo);
+        
         if (!userInfo) {
+          console.log('❌ No hay usuario, redirigiendo a registro');
           // No hay usuario, redirigir a registro
           window.location.href = 'register.html';
           return;
@@ -187,15 +196,18 @@
 
         // Configurar botón biométrico si está disponible
         if (biometricInfo.available) {
+          console.log('✅ Biométricos disponibles, tipo:', biometricInfo.type);
           const savedBiometricData = localStorage.getItem('biometric_user_info');
           
           if (savedBiometricData) {
+            console.log('✅ Usuario tiene biométricos configurados');
             // Usuario tiene biométricos configurados
             biometricIcon.textContent = biometricInfo.icon;
             biometricType.textContent = biometricInfo.type;
             biometricBtn.style.display = 'block';
             separator.style.display = 'flex';
           } else {
+            console.log('⚙️ Biométricos disponibles pero no configurados - mostrando toggle');
             // Biométricos disponibles pero no configurados - mostrar toggle
             setupBiometricIcon.textContent = biometricInfo.icon;
             setupBiometricType.textContent = biometricInfo.type;
@@ -204,6 +216,7 @@
             separator.style.display = 'flex';
           }
         } else {
+          console.log('❌ No hay biométricos disponibles - mostrando botón de Google');
           // No hay biométricos disponibles - mostrar botón de Google prominente
           googleContainer.style.display = 'block';
           // Ocultar el separador cuando solo hay Google
