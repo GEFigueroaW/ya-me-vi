@@ -1,23 +1,23 @@
 // service-worker.js - Service Worker para YA ME VI PWA
-const CACHE_NAME = 'ya-me-vi-v1.0.1';
+const CACHE_NAME = 'ya-me-vi-v1.0.2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/home.html',
-  '/analisis.html',
-  '/combinacion.html',
-  '/sugeridas.html',
-  '/css/styles.css',
-  '/js/shared.js',
-  '/js/dataParser.js',
-  '/js/mlPredictor.js',
-  '/js/firebase-init.js',
-  '/assets/logo-192.png',
-  '/assets/logo-512.png',
-  '/assets/Melate.csv',
-  '/assets/Revancha.csv',
-  '/assets/Revanchita.csv',
-  '/manifest.json'
+  './',
+  './index.html',
+  './home.html',
+  './analisis.html',
+  './combinacion.html',
+  './sugeridas.html',
+  './css/styles.css',
+  './js/shared.js',
+  './js/dataParser.js',
+  './js/mlPredictor.js',
+  './js/firebase-init.js',
+  './assets/logo-192.png',
+  './assets/logo-512.png',
+  './assets/Melate.csv',
+  './assets/Revancha.csv',
+  './assets/Revanchita.csv',
+  './manifest.json'
 ];
 
 // Instalación del Service Worker
@@ -80,7 +80,7 @@ self.addEventListener('fetch', event => {
         }).catch(() => {
           // Mostrar página offline básica para navegación
           if (event.request.destination === 'document') {
-            return caches.match('/index.html');
+            return caches.match('./index.html');
           }
         });
       })
@@ -101,11 +101,11 @@ self.addEventListener('push', event => {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: '/assets/logo-192.png',
-      badge: '/assets/favicon.ico',
+      icon: './assets/logo-192.png',
+      badge: './assets/favicon.ico',
       vibrate: [100, 50, 100],
       data: {
-        url: data.url || '/'
+        url: data.url || './'
       }
     };
     

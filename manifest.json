@@ -2,12 +2,12 @@
   "name": "YA ME VI - Cumple tu sueño",
   "short_name": "YA ME VI",
   "description": "Análisis de lotería mexicana con IA para Melate, Revancha y Revanchita",
-  "start_url": "/",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#00B44F",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "./",
   "lang": "es",
   "icons": [
     {
