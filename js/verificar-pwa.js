@@ -2,8 +2,6 @@
 export async function verificarLogos() {
   const logosRequeridos = [
     'assets/favicon.ico',
-    'assets/favicon-16.png', 
-    'assets/favicon-32.png',
     'assets/logo-192.png',
     'assets/logo-512.png',
     'assets/logo-512-adaptativo-circular.png'

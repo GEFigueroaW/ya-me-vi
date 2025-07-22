@@ -1,5 +1,5 @@
 // service-worker.js - Service Worker para YA ME VI PWA
-const CACHE_NAME = 'ya-me-vi-v1.0.0';
+const CACHE_NAME = 'ya-me-vi-v1.0.1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -102,7 +102,7 @@ self.addEventListener('push', event => {
     const options = {
       body: data.body,
       icon: '/assets/logo-192.png',
-      badge: '/assets/favicon-32.png',
+      badge: '/assets/favicon.ico',
       vibrate: [100, 50, 100],
       data: {
         url: data.url || '/'
