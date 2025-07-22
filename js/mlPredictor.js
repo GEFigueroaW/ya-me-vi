@@ -103,6 +103,34 @@ export async function generarPrediccionPersonalizada(userId, datos) {
   
   console.log(`✅ ${tipoSorteo}: Predicción final verificada: ${combinacionFinal.join(', ')}`);
   
+  // Registrar generación de sugerencias en la base de datos para el panel admin
+  try {
+    // Importar DatabaseSetup dinámicamente para evitar dependencias circulares
+    if (typeof window !== 'undefined' && window.DatabaseSetup) {
+      const metadata = {
+        algorithm: 'ml_advanced_6_methods',
+        confidence: 0.75,
+        tipoSorteo: tipoSorteo,
+        userId: userId,
+        methodsUsed: [
+          'frecuencia_historica',
+          'probabilidad_matematica', 
+          'reconocimiento_patrones',
+          'analisis_delta',
+          'desviacion_estandar',
+          'tendencias_recientes'
+        ]
+      };
+      
+      // Logging asíncrono sin bloquear la generación
+      window.DatabaseSetup.logSuggestionGeneration([combinacionFinal], tipoSorteo, metadata).catch(error => {
+        console.warn('⚠️ No se pudo registrar generación de sugerencias:', error);
+      });
+    }
+  } catch (error) {
+    console.warn('⚠️ DatabaseSetup no disponible para logging:', error);
+  }
+  
   return combinacionFinal;
 }
 
