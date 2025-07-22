@@ -2,6 +2,7 @@
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { app } from './firebase-init.js';
+import { isUserAdmin, toggleAdminElements } from './adminCheck.js';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -80,9 +81,17 @@ async function mostrarBienvenidaConSueño(user) {
 }
 
 // === Manejo de sesión activa y bienvenida ===
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     mostrarBienvenidaConSueño(user);
+    
+    // Verificar si el usuario es administrador y mostrar/ocultar elementos
+    const isAdmin = await isUserAdmin();
+    toggleAdminElements(isAdmin);
+    
+    if (isAdmin) {
+      console.log('✅ Usuario identificado como administrador');
+    }
   } else {
     window.location.href = "index.html";
   }
@@ -94,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAnalizar = document.getElementById('btn-analizar');
   const btnCombinacion = document.getElementById('btn-combinacion');
   const btnSugeridas = document.getElementById('btn-sugeridas');
+  const btnAdmin = document.getElementById('btn-admin');
 
   // === Botones: alternar visibilidad y redirigir ===
   if (btnAnalizar && btnCombinacion && btnSugeridas) {
@@ -125,5 +135,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   } else {
     console.warn('No se encontraron los botones principales');
+  }
+  
+  // Botón de administración (solo visible para admins)
+  if (btnAdmin) {
+    btnAdmin.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('🔐 Accediendo al panel de administración');
+      window.location.href = "admin.html";
+    });
+    
+    // Verificación adicional de administrador
+    isUserAdmin().then(isAdmin => {
+      if (isAdmin) {
+        btnAdmin.classList.remove('hidden');
+      }
+    });
   }
 });
