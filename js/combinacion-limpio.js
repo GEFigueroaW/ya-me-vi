@@ -326,12 +326,16 @@ function evaluarCombinacion() {
   const inputs = document.querySelectorAll('.combo-input');
   const resultado = document.getElementById('resultado-combinacion');
   
+  console.log('🔍 Inputs encontrados:', inputs.length);
+  console.log('🔍 Container resultado:', !!resultado);
+  
   if (!resultado) {
     console.error('❌ Container resultado no encontrado');
     return;
   }
   
   if (!AppState.datosListos) {
+    console.log('⚠️ Datos no están listos, estado:', AppState.datosListos);
     resultado.innerHTML = `
       <div class="bg-yellow-500 bg-opacity-20 border border-yellow-400 rounded-lg p-4">
         <p class="text-yellow-700 font-semibold">⏳ Cargando datos, intenta en unos segundos...</p>
@@ -343,6 +347,9 @@ function evaluarCombinacion() {
   const numeros = Array.from(inputs)
     .map(input => parseInt(input.value))
     .filter(num => !isNaN(num));
+  
+  console.log('🔢 Números ingresados:', numeros);
+  console.log('🔢 Total números válidos:', numeros.length);
   
   // Validaciones
   if (numeros.length !== 6) {
@@ -389,21 +396,28 @@ function evaluarCombinacion() {
     // Calcular estadísticas de la COMBINACIÓN COMPLETA por sorteo
     const estadisticasCombinacion = {};
     ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-      // Buscar cuántas veces ha salido esta combinación EXACTA usando la función especializada
+      // Buscar cuántas veces ha salido esta combinación EXACTA
       const numerosSorteo = AppState.numerosPorSorteo[sorteo];
       const totalSorteos = Math.floor(numerosSorteo.length / 6);
       
-      // Convertir datos al formato esperado por buscarCombinacionCompleta
-      const datosFormateados = [];
+      // Buscar directamente en el array de números plano
+      let aparicionesCombinacionCompleta = 0;
+      
+      // Revisar cada sorteo (cada 6 números consecutivos)
       for (let i = 0; i < totalSorteos; i++) {
         const sorteoNumeros = [];
         for (let j = 0; j < 6; j++) {
           sorteoNumeros.push(numerosSorteo[i * 6 + j]);
         }
-        datosFormateados.push({ numeros: sorteoNumeros });
+        
+        // Verificar si este sorteo contiene exactamente los mismos números (en cualquier orden)
+        const numerosOrdenados = [...numeros].sort((a, b) => a - b);
+        const sorteoOrdenado = [...sorteoNumeros].sort((a, b) => a - b);
+        
+        if (JSON.stringify(numerosOrdenados) === JSON.stringify(sorteoOrdenado)) {
+          aparicionesCombinacionCompleta++;
+        }
       }
-      
-      const aparicionesCombinacionCompleta = buscarCombinacionCompleta(numeros, datosFormateados);
       
       // Calcular índice para la combinación completa (sin factor, son apariciones reales)
       const indiceCombinacionCompleta = totalSorteos > 0 ? 
@@ -674,10 +688,13 @@ function configurarBotones() {
   
   // Botón evaluar combinación
   const btnCombinacion = document.getElementById('evaluar-combinacion-btn');
+  console.log('🔍 Buscando botón combinación...');
+  console.log('🔍 Botón combinación encontrado:', !!btnCombinacion);
+  
   if (btnCombinacion) {
     btnCombinacion.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('👆 Click evaluar combinación');
+      console.log('👆 Click evaluar combinación - INICIANDO');
       evaluarCombinacion();
     });
     console.log('✅ Botón combinación configurado');
@@ -732,13 +749,16 @@ async function inicializar() {
   
   try {
     // Configurar UI inmediatamente
+    console.log('🔧 Configurando interfaz...');
     configurarAcordeon();
     configurarBotones();
     
     // Cargar datos
+    console.log('📊 Iniciando carga de datos...');
     await cargarDatos();
     
     console.log('✅ Aplicación completamente lista');
+    console.log('📈 Estado AppState:', AppState);
     
     // Exportar funciones globales para debug
     window.YaMeVi = {
@@ -813,8 +833,10 @@ async function inicializar() {
 
 // Múltiples estrategias de inicialización
 if (document.readyState === 'loading') {
+  console.log('📄 DOM está cargando, esperando...');
   document.addEventListener('DOMContentLoaded', inicializar);
 } else {
+  console.log('📄 DOM ya está listo, inicializando...');
   setTimeout(inicializar, 100);
 }
 
@@ -825,3 +847,28 @@ setTimeout(() => {
     inicializar();
   }
 }, 2000);
+
+// Función de debug para probar manualmente
+window.debugCombinacion = function() {
+  console.log('🧪 DEBUG: Probando evaluación de combinación...');
+  
+  // Llenar inputs con números de prueba
+  const inputs = document.querySelectorAll('.combo-input');
+  const numerosTest = [7, 14, 21, 28, 35, 42];
+  
+  console.log('🔢 Llenando inputs con números de prueba:', numerosTest);
+  
+  inputs.forEach((input, i) => {
+    if (i < numerosTest.length) {
+      input.value = numerosTest[i];
+    }
+  });
+  
+  // Esperar un poco y evaluar
+  setTimeout(() => {
+    console.log('🎯 Ejecutando evaluarCombinacion...');
+    evaluarCombinacion();
+  }, 500);
+};
+
+console.log('🔧 Función debugCombinacion() disponible en window.debugCombinacion()');
