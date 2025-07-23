@@ -229,25 +229,108 @@ export class UIManagerFixed {
   }
 
   generarHtmlNumero(numero, frecuencia, indice) {
+    // Calcular promedio de todos los sorteos
+    const promedioFrecuencia = Math.round((frecuencia.melate.porcentaje + frecuencia.revancha.porcentaje + frecuencia.revanchita.porcentaje) / 3);
+    const promedioIndice = Math.round((indice.melate.porcentaje + indice.revancha.porcentaje + indice.revanchita.porcentaje) / 3);
+    
+    // Clasificar el resultado
+    let clasificacion = '';
+    let colorClass = '';
+    if (promedioFrecuencia >= 15) {
+      clasificacion = '🔥 Excepcional';
+      colorClass = 'text-red-600';
+    } else if (promedioFrecuencia >= 12) {
+      clasificacion = '⭐ Muy Alto';
+      colorClass = 'text-orange-600';
+    } else if (promedioFrecuencia >= 10) {
+      clasificacion = '✨ Alto';
+      colorClass = 'text-yellow-600';
+    } else {
+      clasificacion = '💫 Bueno';
+      colorClass = 'text-green-600';
+    }
+
     return `
       <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-50 shadow-xl">
-        <h3 class="text-2xl font-bold mb-4 text-center text-gray-800">🎯 Número ${numero}</h3>
+        <h3 class="text-2xl font-bold mb-4 text-center text-gray-800">🎯 Análisis del Número ${numero}</h3>
+        
+        <!-- Resultado Principal -->
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-20 rounded-lg p-4 mb-4 text-center">
+          <div class="text-lg font-semibold text-gray-800 mb-2">Resultado General</div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="text-sm text-yellow-600 font-medium">🎯 Índice de Éxito</div>
+              <div class="text-2xl font-bold text-gray-800">${promedioIndice.toFixed(1)}%</div>
+            </div>
+            <div>
+              <div class="text-sm text-green-600 font-medium">⭐ Potencial</div>
+              <div class="text-2xl font-bold text-gray-800">${promedioFrecuencia.toFixed(1)}%</div>
+            </div>
+          </div>
+          <div class="mt-2">
+            <span class="inline-block px-3 py-1 rounded-full bg-white bg-opacity-30 ${colorClass} font-semibold">
+              ${clasificacion}
+            </span>
+          </div>
+        </div>
+
+        <!-- Desglose por Sorteo -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-blue-500 bg-opacity-20 border border-blue-400 rounded-lg p-4">
-            <h4 class="font-bold text-blue-800 mb-2">🔍 MELATE</h4>
-            <p class="text-sm text-gray-700">Frecuencia: ${frecuencia.melate.frecuencia}</p>
-            <p class="text-sm text-gray-700">Porcentaje: ${frecuencia.melate.porcentaje.toFixed(1)}%</p>
+            <h4 class="font-bold text-blue-800 mb-2 text-center">🔍 MELATE</h4>
+            <div class="text-center">
+              <div class="text-xs text-yellow-600">🎯 Índice</div>
+              <div class="text-lg font-bold text-gray-700">${indice.melate.porcentaje.toFixed(1)}%</div>
+              <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
+              <div class="text-xl font-bold text-gray-800">${frecuencia.melate.porcentaje.toFixed(1)}%</div>
+              <div class="text-xs text-gray-600 mt-1">${frecuencia.melate.frecuencia} apariciones</div>
+            </div>
           </div>
           <div class="bg-purple-500 bg-opacity-20 border border-purple-400 rounded-lg p-4">
-            <h4 class="font-bold text-purple-800 mb-2">🔍 REVANCHA</h4>
-            <p class="text-sm text-gray-700">Frecuencia: ${frecuencia.revancha.frecuencia}</p>
-            <p class="text-sm text-gray-700">Porcentaje: ${frecuencia.revancha.porcentaje.toFixed(1)}%</p>
+            <h4 class="font-bold text-purple-800 mb-2 text-center">🔍 REVANCHA</h4>
+            <div class="text-center">
+              <div class="text-xs text-yellow-600">🎯 Índice</div>
+              <div class="text-lg font-bold text-gray-700">${indice.revancha.porcentaje.toFixed(1)}%</div>
+              <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
+              <div class="text-xl font-bold text-gray-800">${frecuencia.revancha.porcentaje.toFixed(1)}%</div>
+              <div class="text-xs text-gray-600 mt-1">${frecuencia.revancha.frecuencia} apariciones</div>
+            </div>
           </div>
           <div class="bg-green-500 bg-opacity-20 border border-green-400 rounded-lg p-4">
-            <h4 class="font-bold text-green-800 mb-2">🔍 REVANCHITA</h4>
-            <p class="text-sm text-gray-700">Frecuencia: ${frecuencia.revanchita.frecuencia}</p>
-            <p class="text-sm text-gray-700">Porcentaje: ${frecuencia.revanchita.porcentaje.toFixed(1)}%</p>
+            <h4 class="font-bold text-green-800 mb-2 text-center">🔍 REVANCHITA</h4>
+            <div class="text-center">
+              <div class="text-xs text-yellow-600">🎯 Índice</div>
+              <div class="text-lg font-bold text-gray-700">${indice.revanchita.porcentaje.toFixed(1)}%</div>
+              <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
+              <div class="text-xl font-bold text-gray-800">${frecuencia.revanchita.porcentaje.toFixed(1)}%</div>
+              <div class="text-xs text-gray-600 mt-1">${frecuencia.revanchita.frecuencia} apariciones</div>
+            </div>
           </div>
+        </div>
+
+        <!-- Mensaje de Recomendación -->
+        <div class="mt-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-opacity-20 rounded-lg p-3 text-center">
+          <p class="text-sm text-gray-700 font-medium">
+            ${this.generarMensajeNumero(promedioFrecuencia, promedioIndice)}
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  generarMensajeNumero(potencial, indice) {
+    if (potencial >= 15) {
+      return '🔥 ¡Número excepcional! Este número tiene un historial muy prometedor en todos los sorteos.';
+    } else if (potencial >= 12) {
+      return '⭐ ¡Excelente elección! Este número muestra un potencial muy alto basado en datos históricos.';
+    } else if (potencial >= 10) {
+      return '✨ ¡Buena opción! Este número tiene un buen desempeño histórico.';
+    } else {
+      return '💫 Número con potencial. Todos los números tienen oportunidades según las estadísticas.';
+    }
+  }
+
+  generarHtmlCombinacion(numeros, analisis) {
         </div>
       </div>
     `;
