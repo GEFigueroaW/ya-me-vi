@@ -134,7 +134,10 @@ export class UIManager {
 
     // Evaluación del número individual - usando delegación de eventos
     document.addEventListener('click', (e) => {
+      console.log('🖱️ Click detectado en:', e.target.id, e.target.tagName, e.target.className);
+      
       if (e.target && e.target.id === 'evaluar-numero-btn') {
+        console.log('🎯 ¡CLICK EN BOTÓN EVALUAR NÚMERO DETECTADO!');
         e.stopPropagation();
         this.evaluarNumeroIndividual();
       }
@@ -143,6 +146,7 @@ export class UIManager {
     // Input de número individual - delegación de eventos para Enter
     document.addEventListener('keydown', (e) => {
       if (e.target && e.target.id === 'numero-individual' && e.key === 'Enter') {
+        console.log('⌨️ Enter detectado en input número individual');
         e.stopPropagation();
         this.evaluarNumeroIndividual();
       }
@@ -150,8 +154,6 @@ export class UIManager {
 
     // Evaluación de la combinación - usando delegación de eventos
     document.addEventListener('click', (e) => {
-      console.log('🖱️ Click detectado en:', e.target.id, e.target.tagName, e.target.className);
-      
       if (e.target && e.target.id === 'evaluar-combinacion-btn') {
         console.log('🎯 ¡CLICK EN BOTÓN EVALUAR COMBINACIÓN DETECTADO!');
         e.stopPropagation();
