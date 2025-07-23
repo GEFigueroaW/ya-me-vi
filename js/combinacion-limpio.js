@@ -914,6 +914,20 @@ function configurarBotones() {
     });
     console.log('✅ Enter en input configurado');
   }
+  
+  // Botón de volver
+  const btnBack = document.getElementById('btn-back');
+  if (btnBack) {
+    btnBack.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('🔙 Volviendo a la página anterior...');
+      window.history.back();
+    });
+    console.log('✅ Botón volver configurado');
+  } else {
+    console.error('❌ No se encontró botón volver');
+  }
 }
 
 /**
