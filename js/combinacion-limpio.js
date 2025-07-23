@@ -479,9 +479,9 @@ function evaluarCombinacion() {
 
     resultado.innerHTML = `
       <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-50 shadow-xl">
-        <!-- 1. ANÁLISIS DE LA COMBINACIÓN COMPLETA POR SORTEO -->
+        <!-- 1. ANÁLISIS DE LA COMBINACIÓN POR SORTEO -->
         <div class="mb-6">
-          <h4 class="text-xl font-bold text-center text-gray-800 mb-4">📊 Análisis de la Combinación Completa</h4>
+          <h4 class="text-xl font-bold text-center text-gray-800 mb-4">📊 Análisis de la Combinación</h4>
           <div class="grid md:grid-cols-3 gap-4">
             <!-- MELATE -->
             <div class="bg-blue-500 bg-opacity-20 border border-blue-400 rounded-lg p-4">
