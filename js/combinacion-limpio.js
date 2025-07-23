@@ -226,18 +226,17 @@ function evaluarNumero() {
     
     // Generar HTML del resultado
     const promedioIndice = (stats.melate.indice + stats.revancha.indice + stats.revanchita.indice) / 3;
-    const promedioPotencial = (stats.melate.potencial + stats.revancha.potencial + stats.revanchita.potencial) / 3;
     
     let clasificacion = '💫 Bueno';
     let colorClass = 'text-green-600';
     
-    if (promedioPotencial >= 3) {
+    if (promedioIndice >= 3) {
       clasificacion = '🔥 Excepcional';
       colorClass = 'text-red-600';
-    } else if (promedioPotencial >= 2) {
+    } else if (promedioIndice >= 2) {
       clasificacion = '⭐ Muy Alto';
       colorClass = 'text-orange-600';
-    } else if (promedioPotencial >= 1) {
+    } else if (promedioIndice >= 1) {
       clasificacion = '✨ Alto';
       colorClass = 'text-yellow-600';
     }
@@ -248,16 +247,11 @@ function evaluarNumero() {
         
         <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-20 rounded-lg p-4 mb-4 text-center">
           <div class="text-lg font-semibold text-gray-800 mb-2">Resultado General (Últimos 30 Meses)</div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 gap-4">
             <div>
               <div class="text-sm text-yellow-600 font-medium">🎯 Índice de Éxito</div>
               <div class="text-2xl font-bold text-gray-800">${promedioIndice.toFixed(2)}%</div>
-              <div class="text-xs text-gray-600">Promedio histórico real</div>
-            </div>
-            <div>
-              <div class="text-sm text-green-600 font-medium">⭐ Potencial</div>
-              <div class="text-2xl font-bold text-gray-800">${promedioPotencial.toFixed(2)}%</div>
-              <div class="text-xs text-gray-600">Probabilidad real</div>
+              <div class="text-xs text-gray-600">Probabilidad real basada en datos históricos</div>
             </div>
           </div>
           <div class="mt-2">
@@ -278,8 +272,7 @@ function evaluarNumero() {
               <div class="text-xs text-yellow-600">🎯 Índice de Éxito</div>
               <div class="text-lg font-bold text-gray-700">${stats.melate.indice}%</div>
               
-              <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-              <div class="text-xl font-bold text-gray-800">${stats.melate.potencial}%</div>
+              <div class="text-xs text-gray-600 mt-2">de ${stats.melate.totalSorteos} sorteos</div>
             </div>
           </div>
           <div class="bg-purple-500 bg-opacity-20 border border-purple-400 rounded-lg p-4">
@@ -287,13 +280,11 @@ function evaluarNumero() {
             <div class="text-center">
               <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
               <div class="text-lg font-bold text-gray-800">${stats.revancha.frecuencia}</div>
-              <div class="text-xs text-gray-500 mb-2">de ${stats.revancha.totalSorteos} sorteos</div>
               
-              <div class="text-xs text-yellow-600">🎯 Índice de Éxito</div>
+              <div class="text-xs text-yellow-600 mt-2">🎯 Índice de Éxito</div>
               <div class="text-lg font-bold text-gray-700">${stats.revancha.indice}%</div>
               
-              <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-              <div class="text-xl font-bold text-gray-800">${stats.revancha.potencial}%</div>
+              <div class="text-xs text-gray-600 mt-2">de ${stats.revancha.totalSorteos} sorteos</div>
             </div>
           </div>
           <div class="bg-green-500 bg-opacity-20 border border-green-400 rounded-lg p-4">
@@ -301,13 +292,11 @@ function evaluarNumero() {
             <div class="text-center">
               <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
               <div class="text-lg font-bold text-gray-800">${stats.revanchita.frecuencia}</div>
-              <div class="text-xs text-gray-500 mb-2">de ${stats.revanchita.totalSorteos} sorteos</div>
               
-              <div class="text-xs text-yellow-600">🎯 Índice de Éxito</div>
+              <div class="text-xs text-yellow-600 mt-2">🎯 Índice de Éxito</div>
               <div class="text-lg font-bold text-gray-700">${stats.revanchita.indice}%</div>
               
-              <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-              <div class="text-xl font-bold text-gray-800">${stats.revanchita.potencial}%</div>
+              <div class="text-xs text-gray-600 mt-2">de ${stats.revanchita.totalSorteos} sorteos</div>
             </div>
           </div>
         </div>
@@ -420,12 +409,12 @@ function evaluarCombinacion() {
       };
     });
     
-    // Calcular promedio general
+    // Calcular promedio general basado solo en índice
     const promedioGeneral = analisis.reduce((sum, item) => {
-      const promedioPotencial = (item.estadisticas.melate.potencial + 
-                               item.estadisticas.revancha.potencial + 
-                               item.estadisticas.revanchita.potencial) / 3;
-      return sum + promedioPotencial;
+      const promedioIndice = (item.estadisticas.melate.indice + 
+                             item.estadisticas.revancha.indice + 
+                             item.estadisticas.revanchita.indice) / 3;
+      return sum + promedioIndice;
     }, 0) / analisis.length;
     
     let clasificacionGeneral = '💫 Bueno';
@@ -449,7 +438,7 @@ function evaluarCombinacion() {
         <!-- Resultado general -->
         <div class="bg-gradient-to-r from-purple-500 to-pink-600 bg-opacity-20 rounded-lg p-4 mb-6 text-center">
           <div class="text-lg font-semibold text-gray-800 mb-2">Combinación: ${numeros.join(' - ')}</div>
-          <div class="text-lg font-semibold text-gray-700 mb-2">Potencial Promedio: ${promedioGeneral.toFixed(1)}%</div>
+          <div class="text-lg font-semibold text-gray-700 mb-2">Índice de Éxito Promedio: ${promedioGeneral.toFixed(2)}%</div>
           <div class="mt-2">
             <span class="inline-block px-3 py-1 rounded-full bg-white bg-opacity-30 ${colorGeneral} font-semibold">
               ${clasificacionGeneral}
@@ -471,9 +460,6 @@ function evaluarCombinacion() {
                 <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
                 <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.melate.indice}%</div>
                 
-                <div class="text-sm text-green-600 mb-1">⭐ Potencial</div>
-                <div class="text-2xl font-bold text-gray-800">${estadisticasCombinacion.melate.potencial}%</div>
-                
                 <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.melate.totalSorteos} sorteos</div>
               </div>
             </div>
@@ -488,9 +474,6 @@ function evaluarCombinacion() {
                 <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
                 <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.revancha.indice}%</div>
                 
-                <div class="text-sm text-green-600 mb-1">⭐ Potencial</div>
-                <div class="text-2xl font-bold text-gray-800">${estadisticasCombinacion.revancha.potencial}%</div>
-                
                 <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.revancha.totalSorteos} sorteos</div>
               </div>
             </div>
@@ -504,9 +487,6 @@ function evaluarCombinacion() {
                 
                 <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
                 <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.revanchita.indice}%</div>
-                
-                <div class="text-sm text-green-600 mb-1">⭐ Potencial</div>
-                <div class="text-2xl font-bold text-gray-800">${estadisticasCombinacion.revanchita.potencial}%</div>
                 
                 <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.revanchita.totalSorteos} sorteos</div>
               </div>
@@ -531,10 +511,7 @@ function evaluarCombinacion() {
                     <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.melate.frecuencia}</div>
                     
                     <div class="text-xs text-yellow-700 mb-1">🎯 Índice de Éxito</div>
-                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.melate.indice}%</div>
-                    
-                    <div class="text-xs text-green-700 mb-1">⭐ Potencial</div>
-                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.melate.potencial}%</div>
+                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.melate.indice}%</div>
                   </div>
                 `).join('')}
               </div>
@@ -554,10 +531,7 @@ function evaluarCombinacion() {
                     <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.revancha.frecuencia}</div>
                     
                     <div class="text-xs text-yellow-700 mb-1">🎯 Índice de Éxito</div>
-                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.revancha.indice}%</div>
-                    
-                    <div class="text-xs text-green-700 mb-1">⭐ Potencial</div>
-                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.revancha.potencial}%</div>
+                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.revancha.indice}%</div>
                   </div>
                 `).join('')}
               </div>
@@ -577,10 +551,7 @@ function evaluarCombinacion() {
                     <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.revanchita.frecuencia}</div>
                     
                     <div class="text-xs text-yellow-700 mb-1">🎯 Índice de Éxito</div>
-                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.revanchita.indice}%</div>
-                    
-                    <div class="text-xs text-green-700 mb-1">⭐ Potencial</div>
-                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.revanchita.potencial}%</div>
+                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.revanchita.indice}%</div>
                   </div>
                 `).join('')}
               </div>
