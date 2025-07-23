@@ -399,6 +399,29 @@ function evaluarCombinacion() {
       estadisticas: calcularEstadisticas(num)
     }));
     
+    // Calcular estadísticas de la COMBINACIÓN COMPLETA por sorteo
+    const estadisticasCombinacion = {};
+    ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+      // Sumar todas las apariciones de todos los números de la combinación en este sorteo
+      const totalAparicionesCombinacion = analisis.reduce((sum, item) => sum + item.estadisticas[sorteo].frecuencia, 0);
+      
+      // Calcular índice promedio de la combinación
+      const indicePromedioCombinacion = analisis.reduce((sum, item) => sum + item.estadisticas[sorteo].indice, 0) / analisis.length;
+      
+      // Calcular potencial promedio de la combinación
+      const potencialPromedioCombinacion = analisis.reduce((sum, item) => sum + item.estadisticas[sorteo].potencial, 0) / analisis.length;
+      
+      // Total de sorteos para este juego
+      const totalSorteosCombinacion = analisis[0].estadisticas[sorteo].totalSorteos;
+      
+      estadisticasCombinacion[sorteo] = {
+        apariciones: totalAparicionesCombinacion,
+        indice: parseFloat(indicePromedioCombinacion.toFixed(2)),
+        potencial: parseFloat(potencialPromedioCombinacion.toFixed(1)),
+        totalSorteos: totalSorteosCombinacion
+      };
+    });
+    
     // Calcular promedio general
     const promedioGeneral = analisis.reduce((sum, item) => {
       const promedioPotencial = (item.estadisticas.melate.potencial + 
@@ -420,15 +443,15 @@ function evaluarCombinacion() {
       clasificacionGeneral = '✨ Alto';
       colorGeneral = 'text-yellow-600';
     }
-    
+
     resultado.innerHTML = `
       <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-50 shadow-xl">
         <h3 class="text-2xl font-bold mb-4 text-center text-gray-800">🎯 Análisis de Combinación</h3>
         
-        <div class="bg-gradient-to-r from-purple-500 to-pink-600 bg-opacity-20 rounded-lg p-4 mb-4 text-center">
+        <!-- Resultado general -->
+        <div class="bg-gradient-to-r from-purple-500 to-pink-600 bg-opacity-20 rounded-lg p-4 mb-6 text-center">
           <div class="text-lg font-semibold text-gray-800 mb-2">Combinación: ${numeros.join(' - ')}</div>
-          <div class="text-lg font-semibold text-gray-700 mb-2">Análisis de Últimos 30 Meses</div>
-          <div class="text-xl font-bold text-gray-800">Potencial Promedio: ${promedioGeneral.toFixed(1)}%</div>
+          <div class="text-lg font-semibold text-gray-700 mb-2">Potencial Promedio: ${promedioGeneral.toFixed(1)}%</div>
           <div class="mt-2">
             <span class="inline-block px-3 py-1 rounded-full bg-white bg-opacity-30 ${colorGeneral} font-semibold">
               ${clasificacionGeneral}
@@ -436,74 +459,131 @@ function evaluarCombinacion() {
           </div>
         </div>
 
-        <!-- Análisis detallado por número separado por sorteo -->
-        <div class="space-y-4">
-          ${analisis.map(item => {
-            return `
-              <div class="bg-gray-500 bg-opacity-10 rounded-lg p-4 border border-gray-300">
-                <h4 class="text-lg font-bold text-center text-gray-800 mb-3">🎲 Número ${item.numero}</h4>
+        <!-- 1. ANÁLISIS DE LA COMBINACIÓN COMPLETA POR SORTEO -->
+        <div class="mb-6">
+          <h4 class="text-xl font-bold text-center text-gray-800 mb-4">📊 Análisis de la Combinación Completa</h4>
+          <div class="grid md:grid-cols-3 gap-4">
+            <!-- MELATE -->
+            <div class="bg-blue-500 bg-opacity-20 border border-blue-400 rounded-lg p-4">
+              <h5 class="font-bold text-blue-800 mb-3 text-center">🔍 MELATE</h5>
+              <div class="text-center">
+                <div class="text-sm text-gray-600 mb-1">📊 Apariciones Totales</div>
+                <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.melate.apariciones}</div>
                 
-                <div class="grid md:grid-cols-3 gap-4">
-                  <!-- MELATE -->
-                  <div class="bg-blue-500 bg-opacity-20 border border-blue-400 rounded-lg p-3">
-                    <h5 class="font-bold text-blue-800 mb-2 text-center">🔍 MELATE</h5>
-                    <div class="text-center">
-                      <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
-                      <div class="text-lg font-bold text-gray-800">${item.estadisticas.melate.frecuencia}</div>
-                      <div class="text-xs text-gray-500 mb-2">de ${item.estadisticas.melate.totalSorteos} sorteos</div>
-                      
-                      <div class="text-xs text-yellow-600">🎯 Índice de Éxito</div>
-                      <div class="text-lg font-bold text-gray-700">${item.estadisticas.melate.indice}%</div>
-                      
-                      <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-                      <div class="text-xl font-bold text-gray-800">${item.estadisticas.melate.potencial}%</div>
-                    </div>
-                  </div>
+                <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
+                <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.melate.indice}%</div>
+                
+                <div class="text-sm text-green-600 mb-1">⭐ Potencial</div>
+                <div class="text-2xl font-bold text-gray-800">${estadisticasCombinacion.melate.potencial}%</div>
+                
+                <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.melate.totalSorteos} sorteos</div>
+              </div>
+            </div>
+            
+            <!-- REVANCHA -->
+            <div class="bg-purple-500 bg-opacity-20 border border-purple-400 rounded-lg p-4">
+              <h5 class="font-bold text-purple-800 mb-3 text-center">🔍 REVANCHA</h5>
+              <div class="text-center">
+                <div class="text-sm text-gray-600 mb-1">📊 Apariciones Totales</div>
+                <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.revancha.apariciones}</div>
+                
+                <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
+                <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.revancha.indice}%</div>
+                
+                <div class="text-sm text-green-600 mb-1">⭐ Potencial</div>
+                <div class="text-2xl font-bold text-gray-800">${estadisticasCombinacion.revancha.potencial}%</div>
+                
+                <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.revancha.totalSorteos} sorteos</div>
+              </div>
+            </div>
+            
+            <!-- REVANCHITA -->
+            <div class="bg-green-500 bg-opacity-20 border border-green-400 rounded-lg p-4">
+              <h5 class="font-bold text-green-800 mb-3 text-center">🔍 REVANCHITA</h5>
+              <div class="text-center">
+                <div class="text-sm text-gray-600 mb-1">📊 Apariciones Totales</div>
+                <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.revanchita.apariciones}</div>
+                
+                <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
+                <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.revanchita.indice}%</div>
+                
+                <div class="text-sm text-green-600 mb-1">⭐ Potencial</div>
+                <div class="text-2xl font-bold text-gray-800">${estadisticasCombinacion.revanchita.potencial}%</div>
+                
+                <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.revanchita.totalSorteos} sorteos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. ANÁLISIS INDIVIDUAL POR NÚMERO -->
+        <div>
+          <h4 class="text-xl font-bold text-center text-gray-800 mb-4">🔢 Análisis Individual por Número</h4>
+          <div class="space-y-4">
+            ${analisis.map(item => {
+              return `
+                <div class="bg-gray-500 bg-opacity-10 rounded-lg p-4 border border-gray-300">
+                  <h5 class="text-lg font-bold text-center text-gray-800 mb-3">🎲 Número ${item.numero}</h5>
                   
-                  <!-- REVANCHA -->
-                  <div class="bg-purple-500 bg-opacity-20 border border-purple-400 rounded-lg p-3">
-                    <h5 class="font-bold text-purple-800 mb-2 text-center">🔍 REVANCHA</h5>
-                    <div class="text-center">
-                      <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
-                      <div class="text-lg font-bold text-gray-800">${item.estadisticas.revancha.frecuencia}</div>
-                      <div class="text-xs text-gray-500 mb-2">de ${item.estadisticas.revancha.totalSorteos} sorteos</div>
-                      
-                      <div class="text-xs text-yellow-600">🎯 Índice de Éxito</div>
-                      <div class="text-lg font-bold text-gray-700">${item.estadisticas.revancha.indice}%</div>
-                      
-                      <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-                      <div class="text-xl font-bold text-gray-800">${item.estadisticas.revancha.potencial}%</div>
+                  <div class="grid md:grid-cols-3 gap-4">
+                    <!-- MELATE -->
+                    <div class="bg-blue-500 bg-opacity-15 border border-blue-300 rounded-lg p-3">
+                      <h6 class="font-bold text-blue-800 mb-2 text-center text-sm">🔍 MELATE</h6>
+                      <div class="text-center">
+                        <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
+                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.melate.frecuencia}</div>
+                        
+                        <div class="text-xs text-yellow-600 mt-1">🎯 Índice de Éxito</div>
+                        <div class="text-sm font-bold text-gray-700">${item.estadisticas.melate.indice}%</div>
+                        
+                        <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
+                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.melate.potencial}%</div>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <!-- REVANCHITA -->
-                  <div class="bg-green-500 bg-opacity-20 border border-green-400 rounded-lg p-3">
-                    <h5 class="font-bold text-green-800 mb-2 text-center">🔍 REVANCHITA</h5>
-                    <div class="text-center">
-                      <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
-                      <div class="text-lg font-bold text-gray-800">${item.estadisticas.revanchita.frecuencia}</div>
-                      <div class="text-xs text-gray-500 mb-2">de ${item.estadisticas.revanchita.totalSorteos} sorteos</div>
-                      
-                      <div class="text-xs text-yellow-600">🎯 Índice de Éxito</div>
-                      <div class="text-lg font-bold text-gray-700">${item.estadisticas.revanchita.indice}%</div>
-                      
-                      <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-                      <div class="text-xl font-bold text-gray-800">${item.estadisticas.revanchita.potencial}%</div>
+                    
+                    <!-- REVANCHA -->
+                    <div class="bg-purple-500 bg-opacity-15 border border-purple-300 rounded-lg p-3">
+                      <h6 class="font-bold text-purple-800 mb-2 text-center text-sm">🔍 REVANCHA</h6>
+                      <div class="text-center">
+                        <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
+                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.revancha.frecuencia}</div>
+                        
+                        <div class="text-xs text-yellow-600 mt-1">🎯 Índice de Éxito</div>
+                        <div class="text-sm font-bold text-gray-700">${item.estadisticas.revancha.indice}%</div>
+                        
+                        <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
+                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.revancha.potencial}%</div>
+                      </div>
+                    </div>
+                    
+                    <!-- REVANCHITA -->
+                    <div class="bg-green-500 bg-opacity-15 border border-green-300 rounded-lg p-3">
+                      <h6 class="font-bold text-green-800 mb-2 text-center text-sm">🔍 REVANCHITA</h6>
+                      <div class="text-center">
+                        <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
+                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.revanchita.frecuencia}</div>
+                        
+                        <div class="text-xs text-yellow-600 mt-1">🎯 Índice de Éxito</div>
+                        <div class="text-sm font-bold text-gray-700">${item.estadisticas.revanchita.indice}%</div>
+                        
+                        <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
+                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.revanchita.potencial}%</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            `;
-          }).join('')}
+              `;
+            }).join('')}
+          </div>
         </div>
         
         <!-- Información del período analizado -->
-        <div class="mt-4 bg-gray-500 bg-opacity-20 rounded-lg p-3 text-center">
+        <div class="mt-6 bg-gray-500 bg-opacity-20 rounded-lg p-3 text-center">
           <div class="text-sm text-gray-700">
             📅 <strong>Período analizado:</strong> Últimos 30 meses de sorteos oficiales
           </div>
           <div class="text-xs text-gray-600 mt-1">
-            Análisis individual por sorteo: MELATE, REVANCHA y REVANCHITA
+            Análisis completo de la combinación y análisis individual por número
           </div>
         </div>
       </div>
