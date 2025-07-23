@@ -36,7 +36,7 @@ foreach ($page in $pages) {
         # Agregar fallback después de las líneas precomposed
         $fallbackLine = '  
   <!-- Fallback para compatibilidad -->
-  <link rel="apple-touch-icon" href="assets/logo-512-adaptativo-circular.png">'
+  <link rel="apple-touch-icon" href="assets/logo-512.png">'
         
         # Buscar la última línea de apple-touch-icon-precomposed y agregar fallback
         $lines = $content -split "`n"

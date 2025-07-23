@@ -4,7 +4,7 @@ export async function verificarLogos() {
     'assets/favicon.ico',
     'assets/logo-192.png',
     'assets/logo-512.png',
-    'assets/logo-512-adaptativo-circular.png'
+    'assets/apple-touch-icon.png'
   ];
 
   const resultados = {
