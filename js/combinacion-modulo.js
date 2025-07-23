@@ -432,6 +432,29 @@ function evaluarCombinacion() {
 }
 
 /**
+ * Mostrar/ocultar sección de explicación
+ */
+function mostrarExplicacion(explicacionId) {
+  console.log(`🔍 Toggling explicación: ${explicacionId}`);
+  
+  const explicacion = document.getElementById(explicacionId);
+  if (!explicacion) {
+    console.error(`❌ No se encontró elemento: ${explicacionId}`);
+    return;
+  }
+  
+  const estaOculto = explicacion.classList.contains('hidden');
+  
+  if (estaOculto) {
+    explicacion.classList.remove('hidden');
+    console.log(`✅ Mostrando explicación: ${explicacionId}`);
+  } else {
+    explicacion.classList.add('hidden');
+    console.log(`❌ Ocultando explicación: ${explicacionId}`);
+  }
+}
+
+/**
  * Configurar la interfaz con verificaciones adicionales
  */
 function configurarUI() {
@@ -441,12 +464,20 @@ function configurarUI() {
   const verificarElementos = () => {
     const btnNumero = document.getElementById('evaluar-numero-btn');
     const btnCombinacion = document.getElementById('evaluar-combinacion-btn');
+    const btnExplicacionNumero = document.getElementById('mostrar-explicacion-btn');
+    const btnExplicacionCombo = document.getElementById('mostrar-explicacion-btn-combo');
     const triggers = document.querySelectorAll('[id^="trigger-"]');
     
-    console.log(`Verificando elementos: btnNumero=${!!btnNumero}, btnCombinacion=${!!btnCombinacion}, triggers=${triggers.length}`);
+    console.log(`Verificando elementos:`);
+    console.log(`- btnNumero: ${!!btnNumero}`);
+    console.log(`- btnCombinacion: ${!!btnCombinacion}`);
+    console.log(`- btnExplicacionNumero: ${!!btnExplicacionNumero}`);
+    console.log(`- btnExplicacionCombo: ${!!btnExplicacionCombo}`);
+    console.log(`- triggers: ${triggers.length}`);
     
+    // Verificar elementos críticos
     if (!btnNumero || !btnCombinacion || triggers.length === 0) {
-      console.log('⏳ Elementos aún no disponibles, reintentando en 100ms...');
+      console.log('⏳ Elementos críticos aún no disponibles, reintentando en 100ms...');
       setTimeout(verificarElementos, 100);
       return;
     }
@@ -522,6 +553,35 @@ function configurarUI() {
       });
     });
     
+    // Configurar botones de explicación
+    console.log('🔗 Configurando botones de explicación...');
+    
+    // Botón explicación para número individual
+    if (btnExplicacionNumero) {
+      btnExplicacionNumero.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('👆 Click en botón explicación número');
+        mostrarExplicacion('explicacion-numero');
+      });
+      console.log('✅ Botón explicación número configurado');
+    } else {
+      console.log('⚠️ No se encontró botón explicación número');
+    }
+    
+    // Botón explicación para combinación
+    if (btnExplicacionCombo) {
+      btnExplicacionCombo.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('👆 Click en botón explicación combinación');
+        mostrarExplicacion('explicacion-combinacion');
+      });
+      console.log('✅ Botón explicación combinación configurado');
+    } else {
+      console.log('⚠️ No se encontró botón explicación combinación');
+    }
+    
     console.log('✅ Interfaz configurada completamente');
   };
   
@@ -567,11 +627,134 @@ setTimeout(() => {
   }
 }, 2000);
 
+// Debug adicional para verificar botones específicos
+setTimeout(() => {
+  console.log('🔍 Debug final de botones:');
+  const elementos = {
+    'evaluar-numero-btn': document.getElementById('evaluar-numero-btn'),
+    'evaluar-combinacion-btn': document.getElementById('evaluar-combinacion-btn'),
+    'mostrar-explicacion-btn': document.getElementById('mostrar-explicacion-btn'),
+    'mostrar-explicacion-btn-combo': document.getElementById('mostrar-explicacion-btn-combo'),
+    'resultado-numero': document.getElementById('resultado-numero'),
+    'resultado-combinacion': document.getElementById('resultado-combinacion')
+  };
+  
+  for (const [id, elemento] of Object.entries(elementos)) {
+    console.log(`${id}: ${elemento ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO'}`);
+    if (elemento && elemento.onclick) {
+      console.log(`  - Tiene onclick: ✅`);
+    } else if (elemento) {
+      console.log(`  - Sin onclick configurado: ⚠️`);
+    }
+  }
+  
+  // Test manual de botones si no están funcionando
+  const btnCombo = document.getElementById('evaluar-combinacion-btn');
+  if (btnCombo && !btnCombo.onclick) {
+    console.log('🔧 Configurando manualmente botón combinación...');
+    btnCombo.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('🎯 MANUAL: Click en botón evaluar combinación');
+      window.yaMeVi.evaluarCombinacion();
+    });
+  }
+  
+  const btnExpNum = document.getElementById('mostrar-explicacion-btn');
+  if (btnExpNum && !btnExpNum.onclick) {
+    console.log('🔧 Configurando manualmente botón explicación número...');
+    btnExpNum.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('🎯 MANUAL: Click en botón explicación número');
+      const explicacion = document.getElementById('explicacion-numero');
+      if (explicacion) {
+        explicacion.classList.toggle('hidden');
+      }
+    });
+  }
+  
+  const btnExpCombo = document.getElementById('mostrar-explicacion-btn-combo');
+  if (btnExpCombo && !btnExpCombo.onclick) {
+    console.log('🔧 Configurando manualmente botón explicación combinación...');
+    btnExpCombo.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('🎯 MANUAL: Click en botón explicación combinación');
+      const explicacion = document.getElementById('explicacion-combinacion');
+      if (explicacion) {
+        explicacion.classList.toggle('hidden');
+      }
+    });
+  }
+  
+}, 3000);
+
 // Exportar funciones para debug global
 window.yaMeVi = {
   evaluarNumeroIndividual,
   evaluarCombinacion,
   calcularEstadisticas,
   datosListos: () => datosListos,
-  numerosPorSorteo: () => numerosPorSorteo
+  numerosPorSorteo: () => numerosPorSorteo,
+  // Test manual de botones
+  testBotones: () => {
+    console.log('🧪 TESTING MANUAL DE BOTONES:');
+    
+    // Test botón evaluar número
+    const btnNum = document.getElementById('evaluar-numero-btn');
+    if (btnNum) {
+      console.log('✅ Botón evaluar número encontrado');
+      // Poner un número de test
+      const inputNum = document.getElementById('numero-individual');
+      if (inputNum) inputNum.value = '7';
+      btnNum.click();
+    } else {
+      console.log('❌ Botón evaluar número NO encontrado');
+    }
+    
+    // Test botón evaluar combinación
+    const btnCombo = document.getElementById('evaluar-combinacion-btn');
+    if (btnCombo) {
+      console.log('✅ Botón evaluar combinación encontrado');
+      // Llenar inputs con números de test
+      const inputs = document.querySelectorAll('.combo-input');
+      const numerosTest = [7, 14, 21, 28, 35, 42];
+      inputs.forEach((input, i) => {
+        if (i < numerosTest.length) {
+          input.value = numerosTest[i];
+        }
+      });
+      btnCombo.click();
+    } else {
+      console.log('❌ Botón evaluar combinación NO encontrado');
+    }
+    
+    // Test botones de explicación
+    setTimeout(() => {
+      const btnExp1 = document.getElementById('mostrar-explicacion-btn');
+      const btnExp2 = document.getElementById('mostrar-explicacion-btn-combo');
+      
+      if (btnExp1) {
+        console.log('✅ Botón explicación número encontrado');
+        btnExp1.click();
+      } else {
+        console.log('❌ Botón explicación número NO encontrado');
+      }
+      
+      if (btnExp2) {
+        console.log('✅ Botón explicación combinación encontrado');
+        btnExp2.click();
+      } else {
+        console.log('❌ Botón explicación combinación NO encontrado');
+      }
+    }, 1000);
+  }
+};
+
+// Función de debug para verificar estado
+window.debugCombinacion = () => {
+  console.log('🔍 ESTADO ACTUAL:');
+  console.log('- Datos listos:', datosListos);
+  console.log('- Datos históricos cargados:', Object.keys(datosHistoricos));
+  console.log('- Total registros Melate:', datosHistoricos.melate?.length || 0);
+  console.log('- Total registros Revancha:', datosHistoricos.revancha?.length || 0);
+  console.log('- Total registros Revanchita:', datosHistoricos.revanchita?.length || 0);
 };
