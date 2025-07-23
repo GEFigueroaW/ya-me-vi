@@ -618,28 +618,54 @@ function evaluarCombinacion() {
 }
 
 /**
- * Mostrar/ocultar explicaciones
+ * Limpiar inputs de número individual
  */
-function toggleExplicacion(explicacionId) {
-  console.log(`🔍 Toggle explicación: ${explicacionId}`);
+function limpiarNumeroIndividual() {
+  console.log('🧹 Limpiando número individual...');
   
-  const explicacion = document.getElementById(explicacionId);
-  if (!explicacion) {
-    console.error(`❌ No se encontró: ${explicacionId}`);
-    return;
+  const input = document.getElementById('numero-individual');
+  const resultado = document.getElementById('resultado-numero');
+  
+  if (input) {
+    input.value = '';
+    input.classList.remove('border-red-500', 'border-green-500', 'border-yellow-500');
+    input.classList.add('border-gray-300');
+    input.title = '';
   }
   
-  if (explicacion.classList.contains('hidden')) {
-    explicacion.classList.remove('hidden');
-    console.log(`✅ Mostrando: ${explicacionId}`);
-  } else {
-    explicacion.classList.add('hidden');
-    console.log(`❌ Ocultando: ${explicacionId}`);
+  if (resultado) {
+    resultado.innerHTML = '';
   }
+  
+  console.log('✅ Número individual limpiado');
 }
 
 /**
- * Configurar acordeón
+ * Limpiar inputs de combinación
+ */
+function limpiarCombinacion() {
+  console.log('🧹 Limpiando combinación...');
+  
+  const inputs = document.querySelectorAll('.combo-input');
+  const resultado = document.getElementById('resultado-combinacion');
+  
+  inputs.forEach(input => {
+    input.value = '';
+    input.classList.remove('border-red-500', 'border-green-500', 'border-yellow-500');
+    input.classList.add('border-gray-300');
+    input.title = '';
+  });
+  
+  if (resultado) {
+    resultado.innerHTML = '';
+  }
+  
+  actualizarEstadoBoton();
+  console.log('✅ Combinación limpiada');
+}
+
+/**
+ * Configurar acordeón con limpieza automática
  */
 function configurarAcordeon() {
   console.log('🔧 Configurando acordeón...');
@@ -661,8 +687,16 @@ function configurarAcordeon() {
       
       const isHidden = content.classList.contains('hidden');
       
-      // Cerrar todas las secciones
+      // Cerrar todas las secciones y limpiar sus datos
       document.querySelectorAll('[id^="content-"]').forEach(c => {
+        if (!c.classList.contains('hidden')) {
+          // Limpiar datos antes de cerrar
+          if (c.id === 'content-numero-individual') {
+            limpiarNumeroIndividual();
+          } else if (c.id === 'content-combinacion') {
+            limpiarCombinacion();
+          }
+        }
         c.classList.add('hidden');
       });
       
@@ -676,11 +710,19 @@ function configurarAcordeon() {
         content.classList.remove('hidden');
         if (icon) icon.style.transform = 'rotate(180deg)';
         console.log(`✅ Abriendo: ${contentId}`);
+      } else {
+        // Si se estaba cerrando esta sección, también limpiar
+        if (contentId === 'content-numero-individual') {
+          limpiarNumeroIndividual();
+        } else if (contentId === 'content-combinacion') {
+          limpiarCombinacion();
+        }
+        console.log(`✅ Cerrando y limpiando: ${contentId}`);
       }
     });
   });
   
-  console.log(`✅ Acordeón configurado: ${triggers.length} triggers`);
+  console.log(`✅ Acordeón configurado: ${triggers.length} triggers con limpieza automática`);
 }
 
 /**
@@ -853,32 +895,6 @@ function configurarBotones() {
     console.error('❌ No se encontró botón combinación');
   }
   
-  // Botón explicación número
-  const btnExpNum = document.getElementById('mostrar-explicacion-btn');
-  if (btnExpNum) {
-    btnExpNum.addEventListener('click', (e) => {
-      e.preventDefault();
-      console.log('👆 Click explicación número');
-      toggleExplicacion('explicacion-numero');
-    });
-    console.log('✅ Botón explicación número configurado');
-  } else {
-    console.error('❌ No se encontró botón explicación número');
-  }
-  
-  // Botón explicación combinación
-  const btnExpCombo = document.getElementById('mostrar-explicacion-btn-combo');
-  if (btnExpCombo) {
-    btnExpCombo.addEventListener('click', (e) => {
-      e.preventDefault();
-      console.log('👆 Click explicación combinación');
-      toggleExplicacion('explicacion-combinacion');
-    });
-    console.log('✅ Botón explicación combinación configurado');
-  } else {
-    console.error('❌ No se encontró botón explicación combinación');
-  }
-  
   // Enter en input de número
   const inputNumero = document.getElementById('numero-individual');
   if (inputNumero) {
@@ -970,11 +986,7 @@ async function inicializar() {
           evaluarCombinacion();
         }, 3000);
         
-        // Test explicaciones después de 6 segundos
-        setTimeout(() => {
-          toggleExplicacion('explicacion-numero');
-          setTimeout(() => toggleExplicacion('explicacion-combinacion'), 1000);
-        }, 6000);
+        console.log('✅ Test completo finalizado');
       }
     };
     
