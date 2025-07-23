@@ -286,12 +286,24 @@ function evaluarNumero() {
         </div>
         
         <!-- Información del período analizado -->
-        <div class="mt-4 bg-gray-500 bg-opacity-20 rounded-lg p-3 text-center">
-          <div class="text-sm text-gray-700">
-            📅 <strong>Período analizado:</strong> Últimos 30 meses de sorteos oficiales
+        <div class="mt-4 bg-gray-500 bg-opacity-20 rounded-lg p-4 text-center">
+          <div class="text-lg font-bold text-gray-800 mb-3">📊 Análisis de Datos del Melate</div>
+          
+          <div class="text-sm text-gray-700 mb-2">
+            Hemos realizado un estudio sobre los sorteos oficiales del Melate.
           </div>
-          <div class="text-xs text-gray-600 mt-1">
-            Total de números analizados: ${stats.melate.totalNumeros + stats.revancha.totalNumeros + stats.revanchita.totalNumeros}
+          
+          <div class="text-sm text-gray-700 mb-2">
+            📅 <strong>Período Analizado:</strong> Últimos 30 meses de sorteos.
+          </div>
+          
+          <div class="text-sm text-gray-700 mb-3">
+            📊 <strong>Total de Números Revisados:</strong> ${stats.melate.totalNumeros + stats.revancha.totalNumeros + stats.revanchita.totalNumeros}.
+          </div>
+          
+          <div class="text-xs text-gray-600 bg-white bg-opacity-30 rounded-lg p-2">
+            La probabilidad de que un número específico salga en Melate es de 1 en 32,468,436, 
+            lo que equivale a un <strong>0.0000030799%</strong>.
           </div>
         </div>
       </div>
@@ -602,12 +614,24 @@ function evaluarCombinacion() {
         </div>
         
         <!-- Información del período analizado -->
-        <div class="mt-6 bg-gray-500 bg-opacity-20 rounded-lg p-3 text-center">
-          <div class="text-sm text-gray-700">
-            📅 <strong>Período analizado:</strong> Últimos 30 meses de sorteos oficiales
+        <div class="mt-6 bg-gray-500 bg-opacity-20 rounded-lg p-4 text-center">
+          <div class="text-lg font-bold text-gray-800 mb-3">📊 Análisis de Datos del Melate</div>
+          
+          <div class="text-sm text-gray-700 mb-2">
+            Hemos realizado un estudio sobre los sorteos oficiales del Melate.
           </div>
-          <div class="text-xs text-gray-600 mt-1">
-            Análisis completo de la combinación y análisis individual por número
+          
+          <div class="text-sm text-gray-700 mb-2">
+            📅 <strong>Período Analizado:</strong> Últimos 30 meses de sorteos.
+          </div>
+          
+          <div class="text-sm text-gray-700 mb-3">
+            📊 <strong>Total de Números Revisados:</strong> Análisis completo de la combinación y análisis individual por número.
+          </div>
+          
+          <div class="text-xs text-gray-600 bg-white bg-opacity-30 rounded-lg p-2">
+            La probabilidad de que un número específico salga en Melate es de 1 en 32,468,436, 
+            lo que equivale a un <strong>0.0000030799%</strong>.
           </div>
         </div>
       </div>
