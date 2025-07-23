@@ -129,7 +129,7 @@ function parsearFecha(fechaStr) {
 }
 
 /**
- * Calcular estadísticas precisas de un número (últimos 30 meses)
+ * Calcular estadísticas precisas de un número (últimos 30 meses) - SIN factor matemático
  */
 function calcularEstadisticas(numero) {
   if (!AppState.datosListos) {
@@ -148,17 +148,15 @@ function calcularEstadisticas(numero) {
     // Cálculo del índice de éxito (porcentaje real histórico)
     const porcentajeBase = totalNumeros > 0 ? (frecuencia / totalNumeros) * 100 : 0;
     
-    // Cálculo del potencial con factor motivacional 12.5x
-    const factorMotivacion = 12.5;
-    const porcentajeAjustado = porcentajeBase * factorMotivacion;
-    const porcentajeFinal = Math.max(porcentajeAjustado, 8.0);
+    // Potencial = Índice de éxito (SIN factor matemático)
+    const potencial = porcentajeBase;
     
     resultado[sorteo] = {
       frecuencia: frecuencia,
       totalNumeros: totalNumeros,
       totalSorteos: totalSorteos,
       indice: parseFloat(porcentajeBase.toFixed(2)),
-      potencial: parseFloat(porcentajeFinal.toFixed(1))
+      potencial: parseFloat(potencial.toFixed(2))
     };
     
     console.log(`📊 ${sorteo.toUpperCase()} - Número ${numero}:`);
@@ -166,7 +164,7 @@ function calcularEstadisticas(numero) {
     console.log(`   Total números analizados: ${totalNumeros}`);
     console.log(`   Total sorteos: ${totalSorteos}`);
     console.log(`   Índice de éxito: ${porcentajeBase.toFixed(2)}%`);
-    console.log(`   Potencial: ${porcentajeFinal.toFixed(1)}%`);
+    console.log(`   Potencial: ${potencial.toFixed(2)}%`);
   });
   
   return resultado;
@@ -233,13 +231,13 @@ function evaluarNumero() {
     let clasificacion = '💫 Bueno';
     let colorClass = 'text-green-600';
     
-    if (promedioPotencial >= 15) {
+    if (promedioPotencial >= 3) {
       clasificacion = '🔥 Excepcional';
       colorClass = 'text-red-600';
-    } else if (promedioPotencial >= 12) {
+    } else if (promedioPotencial >= 2) {
       clasificacion = '⭐ Muy Alto';
       colorClass = 'text-orange-600';
-    } else if (promedioPotencial >= 10) {
+    } else if (promedioPotencial >= 1) {
       clasificacion = '✨ Alto';
       colorClass = 'text-yellow-600';
     }
@@ -258,8 +256,8 @@ function evaluarNumero() {
             </div>
             <div>
               <div class="text-sm text-green-600 font-medium">⭐ Potencial</div>
-              <div class="text-2xl font-bold text-gray-800">${promedioPotencial.toFixed(1)}%</div>
-              <div class="text-xs text-gray-600">Con factor motivacional</div>
+              <div class="text-2xl font-bold text-gray-800">${promedioPotencial.toFixed(2)}%</div>
+              <div class="text-xs text-gray-600">Probabilidad real</div>
             </div>
           </div>
           <div class="mt-2">
@@ -408,7 +406,7 @@ function evaluarCombinacion() {
       // Calcular índice promedio de la combinación
       const indicePromedioCombinacion = analisis.reduce((sum, item) => sum + item.estadisticas[sorteo].indice, 0) / analisis.length;
       
-      // Calcular potencial promedio de la combinación
+      // Calcular potencial promedio de la combinación (SIN factor matemático)
       const potencialPromedioCombinacion = analisis.reduce((sum, item) => sum + item.estadisticas[sorteo].potencial, 0) / analisis.length;
       
       // Total de sorteos para este juego
@@ -417,7 +415,7 @@ function evaluarCombinacion() {
       estadisticasCombinacion[sorteo] = {
         apariciones: totalAparicionesCombinacion,
         indice: parseFloat(indicePromedioCombinacion.toFixed(2)),
-        potencial: parseFloat(potencialPromedioCombinacion.toFixed(1)),
+        potencial: parseFloat(potencialPromedioCombinacion.toFixed(2)),
         totalSorteos: totalSorteosCombinacion
       };
     });
@@ -433,13 +431,13 @@ function evaluarCombinacion() {
     let clasificacionGeneral = '💫 Bueno';
     let colorGeneral = 'text-green-600';
     
-    if (promedioGeneral >= 15) {
+    if (promedioGeneral >= 3) {
       clasificacionGeneral = '🔥 Excepcional';
       colorGeneral = 'text-red-600';
-    } else if (promedioGeneral >= 12) {
+    } else if (promedioGeneral >= 2) {
       clasificacionGeneral = '⭐ Muy Alto';
       colorGeneral = 'text-orange-600';
-    } else if (promedioGeneral >= 10) {
+    } else if (promedioGeneral >= 1) {
       clasificacionGeneral = '✨ Alto';
       colorGeneral = 'text-yellow-600';
     }
@@ -516,64 +514,77 @@ function evaluarCombinacion() {
           </div>
         </div>
 
-        <!-- 2. ANÁLISIS INDIVIDUAL POR NÚMERO -->
+        <!-- 2. ANÁLISIS POR SORTEO - CADA SORTEO CON SUS 6 NÚMEROS -->
         <div>
-          <h4 class="text-xl font-bold text-center text-gray-800 mb-4">🔢 Análisis Individual por Número</h4>
-          <div class="space-y-4">
-            ${analisis.map(item => {
-              return `
-                <div class="bg-gray-500 bg-opacity-10 rounded-lg p-4 border border-gray-300">
-                  <h5 class="text-lg font-bold text-center text-gray-800 mb-3">🎲 Número ${item.numero}</h5>
-                  
-                  <div class="grid md:grid-cols-3 gap-4">
-                    <!-- MELATE -->
-                    <div class="bg-blue-500 bg-opacity-15 border border-blue-300 rounded-lg p-3">
-                      <h6 class="font-bold text-blue-800 mb-2 text-center text-sm">🔍 MELATE</h6>
-                      <div class="text-center">
-                        <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
-                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.melate.frecuencia}</div>
-                        
-                        <div class="text-xs text-yellow-600 mt-1">🎯 Índice de Éxito</div>
-                        <div class="text-sm font-bold text-gray-700">${item.estadisticas.melate.indice}%</div>
-                        
-                        <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.melate.potencial}%</div>
-                      </div>
-                    </div>
+          <h4 class="text-xl font-bold text-center text-gray-800 mb-4">🎲 Análisis por Sorteo</h4>
+          
+          <!-- MELATE -->
+          <div class="mb-6">
+            <div class="bg-blue-500 bg-opacity-20 border border-blue-400 rounded-lg p-4">
+              <h5 class="text-xl font-bold text-blue-800 mb-4 text-center">🔍 MELATE</h5>
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                ${analisis.map(item => `
+                  <div class="bg-blue-500 bg-opacity-30 border border-blue-300 rounded-lg p-3 text-center">
+                    <div class="text-lg font-bold text-blue-900 mb-2">Número ${item.numero}</div>
                     
-                    <!-- REVANCHA -->
-                    <div class="bg-purple-500 bg-opacity-15 border border-purple-300 rounded-lg p-3">
-                      <h6 class="font-bold text-purple-800 mb-2 text-center text-sm">🔍 REVANCHA</h6>
-                      <div class="text-center">
-                        <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
-                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.revancha.frecuencia}</div>
-                        
-                        <div class="text-xs text-yellow-600 mt-1">🎯 Índice de Éxito</div>
-                        <div class="text-sm font-bold text-gray-700">${item.estadisticas.revancha.indice}%</div>
-                        
-                        <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.revancha.potencial}%</div>
-                      </div>
-                    </div>
+                    <div class="text-xs text-gray-700 mb-1">📊 Apariciones</div>
+                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.melate.frecuencia}</div>
                     
-                    <!-- REVANCHITA -->
-                    <div class="bg-green-500 bg-opacity-15 border border-green-300 rounded-lg p-3">
-                      <h6 class="font-bold text-green-800 mb-2 text-center text-sm">🔍 REVANCHITA</h6>
-                      <div class="text-center">
-                        <div class="text-xs text-gray-600 mb-1">📊 Apariciones</div>
-                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.revanchita.frecuencia}</div>
-                        
-                        <div class="text-xs text-yellow-600 mt-1">🎯 Índice de Éxito</div>
-                        <div class="text-sm font-bold text-gray-700">${item.estadisticas.revanchita.indice}%</div>
-                        
-                        <div class="text-xs text-green-600 mt-1">⭐ Potencial</div>
-                        <div class="text-lg font-bold text-gray-800">${item.estadisticas.revanchita.potencial}%</div>
-                      </div>
-                    </div>
+                    <div class="text-xs text-yellow-700 mb-1">🎯 Índice de Éxito</div>
+                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.melate.indice}%</div>
+                    
+                    <div class="text-xs text-green-700 mb-1">⭐ Potencial</div>
+                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.melate.potencial}%</div>
                   </div>
-                </div>
-              `;
-            }).join('')}
+                `).join('')}
+              </div>
+            </div>
+          </div>
+          
+          <!-- REVANCHA -->
+          <div class="mb-6">
+            <div class="bg-purple-500 bg-opacity-20 border border-purple-400 rounded-lg p-4">
+              <h5 class="text-xl font-bold text-purple-800 mb-4 text-center">🔍 REVANCHA</h5>
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                ${analisis.map(item => `
+                  <div class="bg-purple-500 bg-opacity-30 border border-purple-300 rounded-lg p-3 text-center">
+                    <div class="text-lg font-bold text-purple-900 mb-2">Número ${item.numero}</div>
+                    
+                    <div class="text-xs text-gray-700 mb-1">📊 Apariciones</div>
+                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.revancha.frecuencia}</div>
+                    
+                    <div class="text-xs text-yellow-700 mb-1">🎯 Índice de Éxito</div>
+                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.revancha.indice}%</div>
+                    
+                    <div class="text-xs text-green-700 mb-1">⭐ Potencial</div>
+                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.revancha.potencial}%</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+          
+          <!-- REVANCHITA -->
+          <div class="mb-6">
+            <div class="bg-green-500 bg-opacity-20 border border-green-400 rounded-lg p-4">
+              <h5 class="text-xl font-bold text-green-800 mb-4 text-center">🔍 REVANCHITA</h5>
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                ${analisis.map(item => `
+                  <div class="bg-green-500 bg-opacity-30 border border-green-300 rounded-lg p-3 text-center">
+                    <div class="text-lg font-bold text-green-900 mb-2">Número ${item.numero}</div>
+                    
+                    <div class="text-xs text-gray-700 mb-1">📊 Apariciones</div>
+                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.revanchita.frecuencia}</div>
+                    
+                    <div class="text-xs text-yellow-700 mb-1">🎯 Índice de Éxito</div>
+                    <div class="text-sm font-bold text-gray-800 mb-2">${item.estadisticas.revanchita.indice}%</div>
+                    
+                    <div class="text-xs text-green-700 mb-1">⭐ Potencial</div>
+                    <div class="text-lg font-bold text-gray-900">${item.estadisticas.revanchita.potencial}%</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
           </div>
         </div>
         
