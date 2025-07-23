@@ -479,19 +479,6 @@ function evaluarCombinacion() {
 
     resultado.innerHTML = `
       <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-50 shadow-xl">
-        <h3 class="text-2xl font-bold mb-4 text-center text-gray-800">🎯 Análisis de Combinación</h3>
-        
-        <!-- Resultado general -->
-        <div class="bg-gradient-to-r from-purple-500 to-pink-600 bg-opacity-20 rounded-lg p-4 mb-6 text-center">
-          <div class="text-lg font-semibold text-gray-800 mb-2">Combinación: ${numeros.join(' - ')}</div>
-          <div class="text-lg font-semibold text-gray-700 mb-2">Índice de Éxito Promedio: ${promedioGeneral.toFixed(2)}%</div>
-          <div class="mt-2">
-            <span class="inline-block px-3 py-1 rounded-full bg-white bg-opacity-30 ${colorGeneral} font-semibold">
-              ${clasificacionGeneral}
-            </span>
-          </div>
-        </div>
-
         <!-- 1. ANÁLISIS DE LA COMBINACIÓN COMPLETA POR SORTEO -->
         <div class="mb-6">
           <h4 class="text-xl font-bold text-center text-gray-800 mb-4">📊 Análisis de la Combinación Completa</h4>
@@ -501,7 +488,7 @@ function evaluarCombinacion() {
               <h5 class="font-bold text-blue-800 mb-3 text-center">🔍 MELATE</h5>
               <div class="text-center">
                 <div class="text-sm text-gray-600 mb-1">🎯 Veces que salió exacta</div>
-                <div class="text-sm text-gray-600 mb-1">esta combinación completa</div>
+                <div class="text-sm text-gray-600 mb-1">esta combinación</div>
                 <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.melate.apariciones}</div>
                 
                 <div class="text-sm text-yellow-600 mb-1">📊 Índice de Éxito</div>
@@ -516,7 +503,7 @@ function evaluarCombinacion() {
               <h5 class="font-bold text-purple-800 mb-3 text-center">🔍 REVANCHA</h5>
               <div class="text-center">
                 <div class="text-sm text-gray-600 mb-1">🎯 Veces que salió exacta</div>
-                <div class="text-sm text-gray-600 mb-1">esta combinación completa</div>
+                <div class="text-sm text-gray-600 mb-1">esta combinación</div>
                 <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.revancha.apariciones}</div>
                 
                 <div class="text-sm text-yellow-600 mb-1">📊 Índice de Éxito</div>
@@ -531,7 +518,7 @@ function evaluarCombinacion() {
               <h5 class="font-bold text-green-800 mb-3 text-center">🔍 REVANCHITA</h5>
               <div class="text-center">
                 <div class="text-sm text-gray-600 mb-1">🎯 Veces que salió exacta</div>
-                <div class="text-sm text-gray-600 mb-1">esta combinación completa</div>
+                <div class="text-sm text-gray-600 mb-1">esta combinación</div>
                 <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.revanchita.apariciones}</div>
                 
                 <div class="text-sm text-yellow-600 mb-1">📊 Índice de Éxito</div>
