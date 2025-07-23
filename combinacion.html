@@ -340,7 +340,136 @@
   <!-- Scripts -->
   <script type="module" src="js/firebase-init.js"></script>
   <script type="module" src="js/shared.js"></script>
-  <!-- ARCHIVO DEBUG DIRECTO - SIN MÓDULOS -->
-  <script src="js/debug-directo.js"></script>
+  
+  <!-- CÓDIGO DIRECTO EMBEDIDO PARA EVITAR PROBLEMAS DE CARGA -->
+  <script>
+    console.log('🔧 SCRIPT DIRECTO EMBEDIDO EJECUTÁNDOSE...');
+    
+    // Función de debug
+    function debugBotones() {
+      console.log('🔍 DEBUG BOTONES - INICIANDO...');
+      
+      // Verificar elementos
+      const elementos = {
+        'evaluar-numero-btn': document.getElementById('evaluar-numero-btn'),
+        'evaluar-combinacion-btn': document.getElementById('evaluar-combinacion-btn'),
+        'resultado-numero': document.getElementById('resultado-numero'),
+        'resultado-combinacion': document.getElementById('resultado-combinacion'),
+        'numero-individual': document.getElementById('numero-individual')
+      };
+      
+      console.log('📋 ELEMENTOS DOM:');
+      for (const [id, elemento] of Object.entries(elementos)) {
+        console.log(`  - ${id}:`, elemento ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
+      }
+      
+      // Inputs combinación
+      const combInputs = document.querySelectorAll('.combo-input');
+      console.log(`🔢 Inputs combinación: ${combInputs.length}`);
+      
+      // Agregar eventos DIRECTOS
+      const btnNumero = document.getElementById('evaluar-numero-btn');
+      const btnCombo = document.getElementById('evaluar-combinacion-btn');
+      
+      if (btnNumero) {
+        console.log('🔧 Agregando evento al botón número...');
+        btnNumero.onclick = function(e) {
+          console.log('🎯 CLICK NÚMERO DETECTADO!');
+          e.preventDefault();
+          testearNumero();
+        };
+      }
+      
+      if (btnCombo) {
+        console.log('🔧 Agregando evento al botón combinación...');
+        btnCombo.onclick = function(e) {
+          console.log('🎯 CLICK COMBINACIÓN DETECTADO!');
+          e.preventDefault();
+          testearCombinacion();
+        };
+      }
+      
+      console.log('✅ Debug completado');
+    }
+    
+    // Función test número
+    function testearNumero() {
+      console.log('🔍 Testeando número...');
+      const input = document.getElementById('numero-individual');
+      const resultado = document.getElementById('resultado-numero');
+      
+      if (!input || !resultado) {
+        console.error('❌ Elementos no encontrados');
+        return;
+      }
+      
+      const numero = parseInt(input.value);
+      console.log(`📊 Número: ${numero}`);
+      
+      if (isNaN(numero) || numero < 1 || numero > 56) {
+        resultado.innerHTML = '<div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #f87171; border-radius: 8px; padding: 16px; color: #dc2626; font-weight: bold;">⚠️ Número inválido (1-56)</div>';
+        return;
+      }
+      
+      resultado.innerHTML = '<div style="background: rgba(34, 197, 94, 0.2); border: 1px solid #4ade80; border-radius: 8px; padding: 16px; color: #16a34a; font-weight: bold;">✅ ¡FUNCIONÓ! Número: ' + numero + '</div>';
+      console.log('✅ Test número completado');
+    }
+    
+    // Función test combinación
+    function testearCombinacion() {
+      console.log('🎯 Testeando combinación...');
+      const inputs = document.querySelectorAll('.combo-input');
+      const resultado = document.getElementById('resultado-combinacion');
+      
+      if (!resultado) {
+        console.error('❌ Resultado no encontrado');
+        return;
+      }
+      
+      const numeros = Array.from(inputs).map(i => parseInt(i.value)).filter(n => !isNaN(n));
+      console.log(`🔢 Números: ${numeros.join(', ')} (${numeros.length}/6)`);
+      
+      if (numeros.length !== 6) {
+        resultado.innerHTML = '<div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #f87171; border-radius: 8px; padding: 16px; color: #dc2626; font-weight: bold;">⚠️ Faltan números (' + numeros.length + '/6)</div>';
+        return;
+      }
+      
+      if (new Set(numeros).size !== 6) {
+        resultado.innerHTML = '<div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #f87171; border-radius: 8px; padding: 16px; color: #dc2626; font-weight: bold;">⚠️ Números duplicados</div>';
+        return;
+      }
+      
+      if (numeros.some(n => n < 1 || n > 56)) {
+        resultado.innerHTML = '<div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #f87171; border-radius: 8px; padding: 16px; color: #dc2626; font-weight: bold;">⚠️ Números fuera de rango (1-56)</div>';
+        return;
+      }
+      
+      resultado.innerHTML = '<div style="background: rgba(34, 197, 94, 0.2); border: 1px solid #4ade80; border-radius: 8px; padding: 16px; color: #16a34a; font-weight: bold;">✅ ¡FUNCIONÓ! Combinación: ' + numeros.join(' - ') + '</div>';
+      console.log('✅ Test combinación completado');
+    }
+    
+    // EJECUTAR INMEDIATAMENTE
+    console.log('🚀 Ejecutando debug inmediato...');
+    debugBotones();
+    
+    // EJECUTAR CUANDO DOM ESTÉ LISTO
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔄 DOM listo, ejecutando debug...');
+      setTimeout(debugBotones, 100);
+    });
+    
+    // FALLBACK
+    setTimeout(function() {
+      console.log('🔄 Fallback ejecutando...');
+      debugBotones();
+    }, 1000);
+    
+    // HACER FUNCIONES GLOBALES
+    window.debugBotones = debugBotones;
+    window.testearNumero = testearNumero;
+    window.testearCombinacion = testearCombinacion;
+    
+    console.log('✅ Script directo cargado');
+  </script>
 </body>
 </html>
