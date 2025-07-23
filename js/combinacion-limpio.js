@@ -351,11 +351,12 @@ function evaluarCombinacion() {
   console.log('🔢 Números ingresados:', numeros);
   console.log('🔢 Total números válidos:', numeros.length);
   
-  // Validaciones
+  // Validaciones mejoradas
   if (numeros.length !== 6) {
     resultado.innerHTML = `
       <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-4">
         <p class="text-red-700 font-semibold">⚠️ Completa los 6 números (tienes ${numeros.length}/6)</p>
+        <p class="text-red-600 text-sm mt-1">Cada número debe estar entre 1 y 56</p>
       </div>
     `;
     return;
@@ -365,8 +366,19 @@ function evaluarCombinacion() {
     resultado.innerHTML = `
       <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-4">
         <p class="text-red-700 font-semibold">⚠️ No se permiten números duplicados</p>
+        <p class="text-red-600 text-sm mt-1">Cada número debe ser único</p>
       </div>
     `;
+    
+    // Resaltar campos duplicados
+    inputs.forEach(input => {
+      const valor = parseInt(input.value);
+      const duplicados = numeros.filter(n => n === valor);
+      if (duplicados.length > 1) {
+        input.classList.add('border-red-500');
+        setTimeout(() => input.classList.remove('border-red-500'), 3000);
+      }
+    });
     return;
   }
   
@@ -374,8 +386,18 @@ function evaluarCombinacion() {
     resultado.innerHTML = `
       <div class="bg-red-500 bg-opacity-20 border border-red-400 rounded-lg p-4">
         <p class="text-red-700 font-semibold">⚠️ Todos los números deben estar entre 1 y 56</p>
+        <p class="text-red-600 text-sm mt-1">Valores permitidos: 1, 2, 3, ..., 56</p>
       </div>
     `;
+    
+    // Resaltar campos fuera de rango
+    inputs.forEach(input => {
+      const valor = parseInt(input.value);
+      if (valor < 1 || valor > 56) {
+        input.classList.add('border-red-500');
+        setTimeout(() => input.classList.remove('border-red-500'), 3000);
+      }
+    });
     return;
   }
   
@@ -678,6 +700,141 @@ function configurarAcordeon() {
 }
 
 /**
+ * Validar inputs de combinación en tiempo real
+ */
+function configurarValidacionTiempoReal() {
+  console.log('🔧 Configurando validación en tiempo real...');
+  
+  const inputs = document.querySelectorAll('.combo-input');
+  
+  inputs.forEach((input, index) => {
+    // Validación en tiempo real mientras escribe
+    input.addEventListener('input', (e) => {
+      validarInputCombinacion(e.target, index);
+    });
+    
+    // Validación al perder el foco
+    input.addEventListener('blur', (e) => {
+      validarInputCombinacion(e.target, index);
+    });
+    
+    // Prevenir caracteres no numéricos
+    input.addEventListener('keypress', (e) => {
+      // Solo permitir números
+      if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+        e.preventDefault();
+      }
+    });
+  });
+  
+  console.log(`✅ Validación configurada para ${inputs.length} inputs`);
+}
+
+/**
+ * Actualizar estado visual del botón según validez de inputs
+ */
+function actualizarEstadoBoton() {
+  const inputs = document.querySelectorAll('.combo-input');
+  const boton = document.getElementById('evaluar-combinacion-btn');
+  
+  if (!boton) return;
+  
+  const numeros = Array.from(inputs)
+    .map(input => parseInt(input.value))
+    .filter(num => !isNaN(num));
+  
+  const esValido = numeros.length === 6 && 
+                   new Set(numeros).size === 6 && 
+                   numeros.every(n => n >= 1 && n <= 56);
+  
+  if (esValido) {
+    boton.classList.remove('opacity-50', 'cursor-not-allowed');
+    boton.classList.add('hover:scale-105');
+    boton.disabled = false;
+    boton.title = 'Listo para evaluar combinación';
+  } else {
+    boton.classList.add('opacity-50', 'cursor-not-allowed');
+    boton.classList.remove('hover:scale-105');
+    boton.disabled = false; // Mantenemos habilitado para mostrar errores específicos
+    boton.title = 'Completa todos los números válidos (1-56, sin duplicados)';
+  }
+}
+
+/**
+ * Validar un input individual de combinación
+ */
+function validarInputCombinacion(input, index) {
+  const valor = parseInt(input.value);
+  const inputs = document.querySelectorAll('.combo-input');
+  
+  // Limpiar estilos previos
+  input.classList.remove('border-red-500', 'border-green-500', 'border-yellow-500');
+  input.classList.add('border-gray-300');
+  
+  // Si está vacío, no validar
+  if (input.value === '' || isNaN(valor)) {
+    actualizarEstadoBoton();
+    return;
+  }
+  
+  // Validar rango 1-56
+  if (valor < 1 || valor > 56) {
+    input.classList.remove('border-gray-300');
+    input.classList.add('border-red-500');
+    input.title = 'El número debe estar entre 1 y 56';
+    
+    // Limpiar el valor si está fuera de rango
+    setTimeout(() => {
+      input.value = '';
+      input.classList.remove('border-red-500');
+      input.classList.add('border-gray-300');
+      input.title = '';
+      actualizarEstadoBoton();
+    }, 1500);
+    actualizarEstadoBoton();
+    return;
+  }
+  
+  // Verificar duplicados
+  const valoresActuales = Array.from(inputs)
+    .map(inp => parseInt(inp.value))
+    .filter(val => !isNaN(val));
+  
+  const duplicados = valoresActuales.filter(val => val === valor);
+  
+  if (duplicados.length > 1) {
+    input.classList.remove('border-gray-300');
+    input.classList.add('border-yellow-500');
+    input.title = 'Número duplicado - cada número debe ser único';
+    
+    // Limpiar el valor duplicado
+    setTimeout(() => {
+      input.value = '';
+      input.classList.remove('border-yellow-500');
+      input.classList.add('border-gray-300');
+      input.title = '';
+      actualizarEstadoBoton();
+    }, 1500);
+    actualizarEstadoBoton();
+    return;
+  }
+  
+  // Si todo está bien
+  input.classList.remove('border-gray-300');
+  input.classList.add('border-green-500');
+  input.title = 'Número válido ✓';
+  
+  // Quitar el verde después de un tiempo
+  setTimeout(() => {
+    input.classList.remove('border-green-500');
+    input.classList.add('border-gray-300');
+    input.title = '';
+  }, 1000);
+  
+  actualizarEstadoBoton();
+}
+
+/**
  * Configurar todos los botones
  */
 function configurarBotones() {
@@ -762,6 +919,7 @@ async function inicializar() {
     console.log('🔧 Configurando interfaz...');
     configurarAcordeon();
     configurarBotones();
+    configurarValidacionTiempoReal();
     
     // Cargar datos
     console.log('📊 Iniciando carga de datos...');
