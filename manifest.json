@@ -19,7 +19,7 @@
       "src": "assets/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "apple-touch-icon"
     },
     {
       "src": "assets/logo-192.png",
@@ -36,6 +36,12 @@
     {
       "src": "assets/logo-512-adaptativo-circular.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/logo-512-adaptativo-circular.png",
+      "sizes": "180x180",
       "type": "image/png",
       "purpose": "maskable"
     }
