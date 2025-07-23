@@ -389,24 +389,33 @@ function evaluarCombinacion() {
     // Calcular estadísticas de la COMBINACIÓN COMPLETA por sorteo
     const estadisticasCombinacion = {};
     ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-      // Sumar todas las apariciones de todos los números de la combinación en este sorteo
-      const totalAparicionesCombinacion = analisis.reduce((sum, item) => sum + item.estadisticas[sorteo].frecuencia, 0);
+      // Buscar cuántas veces ha salido esta combinación EXACTA usando la función especializada
+      const numerosSorteo = AppState.numerosPorSorteo[sorteo];
+      const totalSorteos = Math.floor(numerosSorteo.length / 6);
       
-      // Calcular índice promedio de la combinación
-      const indicePromedioCombinacion = analisis.reduce((sum, item) => sum + item.estadisticas[sorteo].indice, 0) / analisis.length;
+      // Convertir datos al formato esperado por buscarCombinacionCompleta
+      const datosFormateados = [];
+      for (let i = 0; i < totalSorteos; i++) {
+        const sorteoNumeros = [];
+        for (let j = 0; j < 6; j++) {
+          sorteoNumeros.push(numerosSorteo[i * 6 + j]);
+        }
+        datosFormateados.push({ numeros: sorteoNumeros });
+      }
       
-      // Calcular potencial promedio de la combinación (SIN factor matemático)
-      const potencialPromedioCombinacion = analisis.reduce((sum, item) => sum + item.estadisticas[sorteo].potencial, 0) / analisis.length;
+      const aparicionesCombinacionCompleta = buscarCombinacionCompleta(numeros, datosFormateados);
       
-      // Total de sorteos para este juego
-      const totalSorteosCombinacion = analisis[0].estadisticas[sorteo].totalSorteos;
+      // Calcular índice para la combinación completa (sin factor, son apariciones reales)
+      const indiceCombinacionCompleta = totalSorteos > 0 ? 
+        Math.max((aparicionesCombinacionCompleta / totalSorteos) * 100, 8.0) : 8.0;
       
       estadisticasCombinacion[sorteo] = {
-        apariciones: totalAparicionesCombinacion,
-        indice: parseFloat(indicePromedioCombinacion.toFixed(2)),
-        potencial: parseFloat(potencialPromedioCombinacion.toFixed(2)),
-        totalSorteos: totalSorteosCombinacion
+        apariciones: aparicionesCombinacionCompleta,
+        indice: parseFloat(indiceCombinacionCompleta.toFixed(1)),
+        totalSorteos: totalSorteos
       };
+      
+      console.log(`🎯 ${sorteo.toUpperCase()}: Combinación exacta apareció ${aparicionesCombinacionCompleta} veces de ${totalSorteos} sorteos (${indiceCombinacionCompleta.toFixed(1)}%)`);
     });
     
     // Calcular promedio general basado solo en índice
@@ -454,10 +463,11 @@ function evaluarCombinacion() {
             <div class="bg-blue-500 bg-opacity-20 border border-blue-400 rounded-lg p-4">
               <h5 class="font-bold text-blue-800 mb-3 text-center">🔍 MELATE</h5>
               <div class="text-center">
-                <div class="text-sm text-gray-600 mb-1">📊 Apariciones Totales</div>
+                <div class="text-sm text-gray-600 mb-1">🎯 Combinación Completa</div>
                 <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.melate.apariciones}</div>
+                <div class="text-xs text-gray-500 mb-2">veces que salió exacta</div>
                 
-                <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
+                <div class="text-sm text-yellow-600 mb-1">📊 Índice de Éxito</div>
                 <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.melate.indice}%</div>
                 
                 <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.melate.totalSorteos} sorteos</div>
@@ -468,10 +478,11 @@ function evaluarCombinacion() {
             <div class="bg-purple-500 bg-opacity-20 border border-purple-400 rounded-lg p-4">
               <h5 class="font-bold text-purple-800 mb-3 text-center">🔍 REVANCHA</h5>
               <div class="text-center">
-                <div class="text-sm text-gray-600 mb-1">📊 Apariciones Totales</div>
+                <div class="text-sm text-gray-600 mb-1">🎯 Combinación Completa</div>
                 <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.revancha.apariciones}</div>
+                <div class="text-xs text-gray-500 mb-2">veces que salió exacta</div>
                 
-                <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
+                <div class="text-sm text-yellow-600 mb-1">📊 Índice de Éxito</div>
                 <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.revancha.indice}%</div>
                 
                 <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.revancha.totalSorteos} sorteos</div>
@@ -482,10 +493,11 @@ function evaluarCombinacion() {
             <div class="bg-green-500 bg-opacity-20 border border-green-400 rounded-lg p-4">
               <h5 class="font-bold text-green-800 mb-3 text-center">🔍 REVANCHITA</h5>
               <div class="text-center">
-                <div class="text-sm text-gray-600 mb-1">📊 Apariciones Totales</div>
+                <div class="text-sm text-gray-600 mb-1">🎯 Combinación Completa</div>
                 <div class="text-2xl font-bold text-gray-800 mb-2">${estadisticasCombinacion.revanchita.apariciones}</div>
+                <div class="text-xs text-gray-500 mb-2">veces que salió exacta</div>
                 
-                <div class="text-sm text-yellow-600 mb-1">🎯 Índice de Éxito</div>
+                <div class="text-sm text-yellow-600 mb-1">📊 Índice de Éxito</div>
                 <div class="text-xl font-bold text-gray-700 mb-2">${estadisticasCombinacion.revanchita.indice}%</div>
                 
                 <div class="text-xs text-gray-500 mt-2">de ${estadisticasCombinacion.revanchita.totalSorteos} sorteos</div>
