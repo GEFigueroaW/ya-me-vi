@@ -1058,3 +1058,29 @@ window.debugCombinacion = function() {
 };
 
 console.log('🔧 Función debugCombinacion() disponible en window.debugCombinacion()');
+
+// Función de debug para probar el botón Volver
+window.testBotonVolver = function() {
+  console.log('🧪 Testing botón Volver...');
+  
+  const btnBack = document.getElementById('btn-back');
+  
+  if (btnBack) {
+    console.log('✅ Botón encontrado:', btnBack);
+    console.log('📍 Posición del botón:', btnBack.getBoundingClientRect());
+    console.log('🎨 Estilos aplicados:', window.getComputedStyle(btnBack));
+    console.log('👂 Event listeners:', getEventListeners ? getEventListeners(btnBack) : 'No disponible (usar DevTools)');
+    
+    // Simular click programáticamente
+    console.log('🖱️ Simulando click...');
+    btnBack.click();
+  } else {
+    console.error('❌ Botón NO encontrado');
+    console.log('🔍 Elementos disponibles con ID:');
+    document.querySelectorAll('[id]').forEach(el => {
+      console.log(`  - ${el.id}: ${el.tagName}`);
+    });
+  }
+};
+
+console.log('🔧 Función testBotonVolver() disponible en window.testBotonVolver()');
