@@ -96,6 +96,44 @@ window.yaMeVi = {
 
         this.initialized = true;
         console.log('✅ YA ME VI inicializado correctamente');
+        
+        // Inicializar rotación de imágenes de fondo
+        this.initBackgroundRotation();
+    },
+    
+    /**
+     * Inicializar rotación de imágenes de fondo
+     */
+    initBackgroundRotation: function() {
+        const background = document.getElementById('background');
+        if (!background) {
+            console.warn('⚠️ Elemento background no encontrado para rotación');
+            return;
+        }
+        
+        const images = [
+            'assets/vg1.jpg',
+            'assets/vg2.jpg', 
+            'assets/vg3.jpg',
+            'assets/vg4.jpg',
+            'assets/vg5.jpg'
+        ];
+        
+        let currentIndex = 0;
+        
+        // Función para cambiar imagen
+        const changeBackground = () => {
+            background.style.backgroundImage = `url(${images[currentIndex]})`;
+            currentIndex = (currentIndex + 1) % images.length;
+        };
+        
+        // Establecer imagen inicial
+        changeBackground();
+        
+        // Cambiar imagen cada 5 segundos
+        setInterval(changeBackground, 5000);
+        
+        console.log('🖼️ Rotación de imágenes de fondo iniciada');
     }
 };
 
