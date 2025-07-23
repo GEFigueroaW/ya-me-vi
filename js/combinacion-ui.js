@@ -50,6 +50,20 @@ export class UIManager {
     this.resultadoNumero = document.getElementById('resultado-numero');
     this.resultadoCombinacion = document.getElementById('resultado-combinacion');
     
+    // LOGGING: Verificar elementos críticos
+    console.log('🔍 Verificando elementos DOM:');
+    console.log('- inputNumero:', this.inputNumero ? '✅ Encontrado' : '❌ NO encontrado');
+    console.log('- resultadoNumero:', this.resultadoNumero ? '✅ Encontrado' : '❌ NO encontrado');
+    console.log('- resultadoCombinacion:', this.resultadoCombinacion ? '✅ Encontrado' : '❌ NO encontrado');
+    
+    if (!this.resultadoCombinacion) {
+      console.error('❌ CRÍTICO: No se encontró el elemento resultado-combinacion');
+      console.log('📋 Elementos con ID disponibles:');
+      document.querySelectorAll('[id]').forEach(el => {
+        console.log(`  - ${el.id}: ${el.tagName}`);
+      });
+    }
+    
     // Botones de explicación
     this.btnMostrarExplicacion = document.getElementById('mostrar-explicacion-btn');
     this.btnMostrarExplicacionCombo = document.getElementById('mostrar-explicacion-btn-combo');
@@ -93,6 +107,9 @@ export class UIManager {
   inicializar() {
     console.log('🚀 Inicializando UIManager para combinación...');
     
+    // AGREGAR BOTÓN DE PRUEBA TEMPORAL
+    this.agregarBotonPrueba();
+    
     // Prevenir la propagación del evento click en los botones internos (no en los triggers)
     document.querySelectorAll('button:not([id^="trigger-"]), input').forEach(element => {
       element.addEventListener('click', (e) => e.stopPropagation());
@@ -133,7 +150,10 @@ export class UIManager {
 
     // Evaluación de la combinación - usando delegación de eventos
     document.addEventListener('click', (e) => {
+      console.log('🖱️ Click detectado en:', e.target.id, e.target.tagName, e.target.className);
+      
       if (e.target && e.target.id === 'evaluar-combinacion-btn') {
+        console.log('🎯 ¡CLICK EN BOTÓN EVALUAR COMBINACIÓN DETECTADO!');
         e.stopPropagation();
         this.evaluarCombinacion();
       }
@@ -505,16 +525,30 @@ export class UIManager {
    * Evaluar combinación completa
    */
   evaluarCombinacion() {
+    console.log('🎯 INICIANDO evaluarCombinacion()...');
+    
     // Limpiar mensajes de error en tiempo real
     this.limpiarMensajesError();
     
+    // Verificar que el elemento resultado existe
+    if (!this.resultadoCombinacion) {
+      console.error('❌ ERROR: No se encontró el elemento resultado-combinacion');
+      alert('Error: No se encontró el contenedor de resultados. Verifica que el HTML esté completo.');
+      return;
+    }
+    
     const inputsCombinacion = document.querySelectorAll('.combo-input');
+    console.log(`📋 Inputs encontrados: ${inputsCombinacion.length}`);
+    
     const numeros = Array.from(inputsCombinacion)
       .map(input => parseInt(input.value))
       .filter(num => !isNaN(num));
 
+    console.log(`🔢 Números extraídos: ${numeros.join(', ')} (Total: ${numeros.length})`);
+
     // Validaciones
     if (numeros.length !== 6) {
+      console.log('❌ VALIDACIÓN: No hay 6 números completos');
       this.mostrarError(this.resultadoCombinacion, 'Por favor, completa todos los 6 números.');
       return;
     }
@@ -522,22 +556,31 @@ export class UIManager {
     // Verificar duplicados
     const sinDuplicados = new Set(numeros);
     if (sinDuplicados.size !== 6) {
+      console.log('❌ VALIDACIÓN: Números duplicados encontrados');
       this.mostrarError(this.resultadoCombinacion, 'No se permiten números duplicados. Por favor, ingresa números únicos.');
       return;
     }
 
     // Verificar rango
     if (numeros.some(n => n < 1 || n > 56)) {
+      console.log('❌ VALIDACIÓN: Números fuera de rango');
       this.mostrarError(this.resultadoCombinacion, 'Los números deben estar entre 1 y 56. Por favor, verifica tu combinación.');
       return;
     }
 
-    console.log(`🎯 Analizando combinación: ${numeros.join(', ')}`);
+    console.log(`🎯 VALIDACIONES PASADAS - Analizando combinación: ${numeros.join(', ')}`);
 
     try {
+      console.log('📊 Preparando análisis individual...');
       const analisisIndividual = this.prepararAnalisisIndividual(numeros);
+      console.log('✅ Análisis individual preparado:', analisisIndividual);
+      
+      console.log('🎨 Generando HTML de resultados...');
       const html = this.generarHtmlCombinacion(numeros, analisisIndividual);
+      console.log('✅ HTML generado, longitud:', html.length);
+      
       this.resultadoCombinacion.innerHTML = html;
+      console.log('✅ HTML insertado en el DOM');
       
       console.log('✅ Análisis de combinación completado exitosamente');
       
@@ -564,7 +607,8 @@ export class UIManager {
       }
       
     } catch (error) {
-      console.error('❌ Error al analizar combinación:', error);
+      console.error('❌ ERROR CRÍTICO al analizar combinación:', error);
+      console.error('❌ Stack trace:', error.stack);
       this.mostrarError(this.resultadoCombinacion, `Error al procesar el análisis. Error: ${error.message}`);
     }
   }
@@ -790,6 +834,40 @@ export class UIManager {
         <p class="text-red-300 font-semibold">⚠️ ${mensaje}</p>
       </div>
     `;
+  }
+  
+  /**
+   * MÉTODO TEMPORAL DE PRUEBA - Agregar botón de diagnóstico
+   */
+  agregarBotonPrueba() {
+    const container = document.querySelector('.relative.z-10.min-h-screen');
+    if (container) {
+      const botonPrueba = document.createElement('div');
+      botonPrueba.innerHTML = `
+        <div style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: #ff6b6b; padding: 10px; border-radius: 5px;">
+          <button id="btn-test-combinacion" style="color: white; background: none; border: none; cursor: pointer;">
+            🔧 TEST COMBINACIÓN
+          </button>
+        </div>
+      `;
+      container.appendChild(botonPrueba);
+      
+      document.getElementById('btn-test-combinacion').addEventListener('click', () => {
+        console.log('🔧 EJECUTANDO TEST MANUAL...');
+        
+        // Llenar inputs con valores de prueba
+        const inputs = document.querySelectorAll('.combo-input');
+        const valoresPrueba = [5, 12, 23, 34, 45, 56];
+        inputs.forEach((input, index) => {
+          input.value = valoresPrueba[index];
+        });
+        
+        console.log('📋 Valores de prueba llenados');
+        
+        // Ejecutar evaluación directamente
+        this.evaluarCombinacion();
+      });
+    }
   }
 }
 
