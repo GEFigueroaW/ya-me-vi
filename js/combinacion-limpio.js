@@ -244,22 +244,6 @@ function evaluarNumero() {
     resultado.innerHTML = `
       <div class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-50 shadow-xl">
         <h3 class="text-2xl font-bold mb-4 text-center text-gray-800">🎯 Análisis del Número ${numero}</h3>
-        
-        <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-20 rounded-lg p-4 mb-4 text-center">
-          <div class="text-lg font-semibold text-gray-800 mb-2">Resultado General (Últimos 30 Meses)</div>
-          <div class="grid grid-cols-1 gap-4">
-            <div>
-              <div class="text-sm text-yellow-600 font-medium">🎯 Índice de Éxito</div>
-              <div class="text-2xl font-bold text-gray-800">${promedioIndice.toFixed(2)}%</div>
-              <div class="text-xs text-gray-600">Probabilidad real basada en datos históricos</div>
-            </div>
-          </div>
-          <div class="mt-2">
-            <span class="inline-block px-3 py-1 rounded-full bg-white bg-opacity-30 ${colorClass} font-semibold">
-              ${clasificacion}
-            </span>
-          </div>
-        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-blue-500 bg-opacity-20 border border-blue-400 rounded-lg p-4">
