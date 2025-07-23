@@ -16,7 +16,7 @@
       "type": "image/x-icon"
     },
     {
-      "src": "assets/logo-512.png",
+      "src": "assets/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
