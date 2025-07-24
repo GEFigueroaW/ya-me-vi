@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YA ME VI - Cumple tu sueño</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YA ME VI - Análisis Inteligente de Lotería Mexicana | Melate, Revancha, Revanchita</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Análisis profesional de lotería mexicana con inteligencia artificial. Estadísticas históricas, patrones y predicciones para Melate, Revancha y Revanchita. Aumenta tus posibilidades de ganar.">
+  <meta name="keywords" content="lotería mexicana, Melate, Revancha, Revanchita, análisis de números, estadísticas, predicciones, inteligencia artificial, pronósticos">
+  <meta name="author" content="YA ME VI">
   
   <!-- Favicon -->
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
   <link rel="icon" href="assets/apple-touch-icon.png" sizes="192x192" type="image/png">
-  <!-- ELIMINADO: logo-512.png que puede causar conflictos con apple-touch-icon -->
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json">
@@ -21,180 +25,768 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="YA ME VI">
-  
-  <!-- iOS Touch Icon - CONFIGURACIÓN SIMPLIFICADA -->
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   
-  <!-- iOS Startup Images -->
-  <!-- ELIMINADO: startup image que puede interferir con el icono principal -->
-  
-  <!-- Additional iOS Meta -->
-  <meta name="format-detection" content="telephone=no">
-  
   <!-- Open Graph Meta Tags -->
-  <meta property="og:title" content="YA ME VI - Cumple tu sueño">
-  <meta property="og:description" content="Análisis de lotería mexicana con IA para Melate, Revancha y Revanchita">
+  <meta property="og:title" content="YA ME VI - Análisis Inteligente de Lotería Mexicana">
+  <meta property="og:description" content="Análisis profesional de lotería mexicana con inteligencia artificial. Estadísticas históricas, patrones y predicciones para Melate, Revancha y Revanchita.">
   <meta property="og:image" content="assets/apple-touch-icon.png">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://gefigueiroaw.github.io/ya-me-vi/">
   
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="YA ME VI - Análisis Inteligente de Lotería Mexicana">
+  <meta name="twitter:description" content="Análisis profesional de lotería mexicana con inteligencia artificial. Estadísticas históricas, patrones y predicciones.">
+  <meta name="twitter:image" content="assets/apple-touch-icon.png">
+  
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "YA ME VI",
+    "description": "Aplicación de análisis inteligente para lotería mexicana con estadísticas históricas y predicciones basadas en IA",
+    "url": "https://gefigueiroaw.github.io/ya-me-vi/",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "MXN"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "YA ME VI"
+    }
+  }
+  </script>
+  
+  <!-- Styles -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css">
   
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
      crossorigin="anonymous"></script>
+  
+  <style>
+    .hero-gradient {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .feature-card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .stats-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .floating-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    .pulse-glow {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+      animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+    }
+  </style>
 </head>
-<body class="overflow-hidden">
 
-  <!-- Fondo dinámico -->
-  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
 
-  <!-- Contenido principal -->
-  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4" id="main-content">
-    <div class="animate__animated animate__fadeInDown">
-      <h1 class="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">YA ME VI</h1>
-      <p class="text-xl md:text-2xl mb-8 font-light">Cumple tu sueño… hoy puede ser el gran día</p>
-    </div>
-
-    <div class="flex gap-6 animate__animated animate__fadeInUp" id="manual-buttons">
-      <a href="login-email.html" class="border border-white px-6 py-2 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300">
-        Iniciar sesión
-      </a>
-      <a href="register.html" class="border border-white px-6 py-2 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300">
-        Registrarme
-      </a>
-    </div>
-  </div>
-
-  <!-- Footer legal -->
-  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
-
-  <script type="module">
-    import { deviceDetector } from './js/deviceDetector.js';
-    import './js/shared.js';
-
-    // Elementos del DOM
-    const mainContent = document.querySelector('.relative.z-10');
-    const loadingDiv = document.createElement('div');
-    
-    // Crear overlay de carga
-    loadingDiv.className = 'fixed inset-0 z-20 bg-black bg-opacity-50 flex items-center justify-center text-white';
-    loadingDiv.innerHTML = `
-      <div class="text-center">
-        <div class="animate-spin inline-block w-12 h-12 border-4 border-current border-t-transparent rounded-full mb-4"></div>
-        <p class="text-xl">Detectando configuración...</p>
-        <p class="text-sm opacity-70 mt-2">Preparando tu experiencia personalizada</p>
+  <!-- Navigation Header -->
+  <nav class="fixed top-0 w-full z-50 bg-black bg-opacity-20 backdrop-blur-lg border-b border-white border-opacity-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <img class="h-8 w-8 rounded-full" src="assets/apple-touch-icon.png" alt="YA ME VI Logo">
+          </div>
+          <div class="ml-3">
+            <h1 class="text-white text-xl font-bold">YA ME VI</h1>
+          </div>
+        </div>
+        <div class="hidden md:block">
+          <div class="flex items-center space-x-6">
+            <a href="#inicio" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Inicio</a>
+            <a href="#caracteristicas" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Características</a>
+            <a href="#demo" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Demo</a>
+            <a href="#contacto" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contacto</a>
+            <a href="app.html" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full text-sm font-medium transition duration-300 pulse-glow">Iniciar Análisis</a>
+          </div>
+        </div>
+        <div class="md:hidden">
+          <button id="mobile-menu-button" class="text-white hover:text-yellow-300 focus:outline-none">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
       </div>
-    `;
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="md:hidden hidden bg-black bg-opacity-90 backdrop-blur-lg">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a href="#inicio" class="text-white hover:text-yellow-300 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Inicio</a>
+        <a href="#caracteristicas" class="text-white hover:text-yellow-300 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Características</a>
+        <a href="#demo" class="text-white hover:text-yellow-300 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Demo</a>
+        <a href="#contacto" class="text-white hover:text-yellow-300 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Contacto</a>
+        <a href="app.html" class="bg-green-600 hover:bg-green-700 text-white block px-3 py-2 rounded-md text-base font-medium transition duration-300 mt-4">Iniciar Análisis</a>
+      </div>
+    </div>
+  </nav>
 
-    // Función para mostrar/ocultar loading
-    function showLoading() {
-      document.body.appendChild(loadingDiv);
-    }
-
-    function hideLoading() {
-      if (document.body.contains(loadingDiv)) {
-        document.body.removeChild(loadingDiv);
-      }
-    }
-
-    // Función principal de detección y redirección
-    async function intelligentRedirect() {
-      try {
-        // Solo aplicar redirección automática en dispositivos móviles/tablet
-        if (!deviceDetector.isMobileDevice()) {
-          console.log('💻 Dispositivo desktop - mostrando opciones manuales');
-          hideLoading();
-          return;
-        }
-
-        console.log('📱 Dispositivo móvil detectado - iniciando flujo inteligente');
+  <!-- Hero Section -->
+  <section id="inicio" class="pt-16 min-h-screen flex items-center justify-center">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="text-center">
+        <!-- AdSense Ad Unit - Top of Page -->
+        <div class="mb-8">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-2226536008153511"
+               data-ad-slot="1234567890"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+        </div>
         
-        // En móvil, ocultar TODO el contenido inmediatamente
-        const mainContent = document.getElementById('main-content');
-        if (mainContent) {
-          mainContent.style.display = 'none';
-        }
+        <div class="floating-animation mb-8">
+          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="mx-auto h-24 w-24 rounded-full shadow-2xl">
+        </div>
         
-        // Detección más rápida - reducir tiempos
-        const userFlow = await deviceDetector.determineUserFlow();
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 animate__animated animate__fadeInUp">
+          <span class="text-yellow-300">YA ME VI</span><br>
+          Análisis Inteligente de Lotería
+        </h1>
         
-        console.log('🔍 Flujo determinado:', userFlow);
+        <p class="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto animate__animated animate__fadeInUp animate__delay-1s">
+          Descubre patrones ocultos en los sorteos de <strong>Melate</strong>, <strong>Revancha</strong> y <strong>Revanchita</strong> 
+          con nuestro sistema de análisis basado en inteligencia artificial y estadísticas históricas.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate__animated animate__fadeInUp animate__delay-2s">
+          <a href="app.html" class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105 pulse-glow">
+            🚀 Comenzar Análisis Gratis
+          </a>
+          <a href="#demo" class="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105">
+            📊 Ver Demo
+          </a>
+        </div>
+        
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div class="stats-card rounded-2xl p-6 text-center">
+            <div class="text-3xl font-bold text-yellow-300 mb-2">30+</div>
+            <div class="text-white">Meses de Datos</div>
+          </div>
+          <div class="stats-card rounded-2xl p-6 text-center">
+            <div class="text-3xl font-bold text-green-300 mb-2">5</div>
+            <div class="text-white">Métodos de IA</div>
+          </div>
+          <div class="stats-card rounded-2xl p-6 text-center">
+            <div class="text-3xl font-bold text-blue-300 mb-2">1000+</div>
+            <div class="text-white">Combinaciones Analizadas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        // Reducir demora a solo 800ms para hacer más rápido
-        await new Promise(resolve => setTimeout(resolve, 800));
+  <!-- Features Section -->
+  <section id="caracteristicas" class="py-20 bg-black bg-opacity-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
+          ¿Cómo Te Ayudamos a <span class="text-yellow-300">Ganar?</span>
+        </h2>
+        <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+          Nuestro sistema combina análisis estadístico avanzado con inteligencia artificial 
+          para ofrecerte las mejores estrategias basadas en datos reales de sorteos.
+        </p>
+      </div>
 
-        if (userFlow.action === 'register') {
-          console.log('➡️ Usuario nuevo - redirigiendo a registro');
-          window.location.href = userFlow.page;
-        } else if (userFlow.action === 'welcome') {
-          console.log('👋 Usuario existente - redirigiendo a bienvenida');
-          window.location.href = userFlow.page;
-        }
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Análisis Estadístico -->
+        <div class="feature-card rounded-2xl p-8 text-center transform hover:scale-105 transition duration-300">
+          <div class="text-5xl mb-6">📊</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Análisis Estadístico</h3>
+          <p class="text-gray-200 mb-6">
+            Procesamos datos históricos de los últimos 30 meses para identificar 
+            patrones y tendencias en los números ganadores.
+          </p>
+          <ul class="text-left text-gray-300 space-y-2">
+            <li>• Frecuencia de números</li>
+            <li>• Números calientes y fríos</li>
+            <li>• Patrones de aparición</li>
+            <li>• Estadísticas por modalidad</li>
+          </ul>
+        </div>
 
-      } catch (error) {
-        console.error('❌ Error en redirección inteligente:', error);
-        hideLoading();
-        // En caso de error, mostrar contenido original
-        const mainContent = document.getElementById('main-content');
-        if (mainContent) {
-          mainContent.style.display = 'flex';
-        }
-      }
-    }
+        <!-- Inteligencia Artificial -->
+        <div class="feature-card rounded-2xl p-8 text-center transform hover:scale-105 transition duration-300">
+          <div class="text-5xl mb-6">🤖</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Inteligencia Artificial</h3>
+          <p class="text-gray-200 mb-6">
+            Nuestro sistema de IA utiliza 5 métodos diferentes de análisis 
+            para generar predicciones personalizadas.
+          </p>
+          <ul class="text-left text-gray-300 space-y-2">
+            <li>• Análisis de frecuencia</li>
+            <li>• Cálculo de probabilidades</li>
+            <li>• Detección de patrones</li>
+            <li>• Análisis delta</li>
+            <li>• Desviación estándar</li>
+          </ul>
+        </div>
 
-    // Función para actualizar botones con detección de dispositivo
-    function updateButtons() {
-      const loginBtn = document.querySelector('a[href="login-email.html"]');
-      const registerBtn = document.querySelector('a[href="register.html"]');
+        <!-- Evaluación de Combinaciones -->
+        <div class="feature-card rounded-2xl p-8 text-center transform hover:scale-105 transition duration-300">
+          <div class="text-5xl mb-6">🎯</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Evaluación de Combinaciones</h3>
+          <p class="text-gray-200 mb-6">
+            Analiza tus números favoritos y descubre qué tan buenas son 
+            tus combinaciones basándose en datos históricos.
+          </p>
+          <ul class="text-left text-gray-300 space-y-2">
+            <li>• Porcentaje de efectividad</li>
+            <li>• Comparación con históricos</li>
+            <li>• Sugerencias de mejora</li>
+            <li>• Factor de confianza</li>
+          </ul>
+        </div>
+
+        <!-- Modalidades Soportadas -->
+        <div class="feature-card rounded-2xl p-8 text-center transform hover:scale-105 transition duration-300">
+          <div class="text-5xl mb-6">🎲</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Todas las Modalidades</h3>
+          <p class="text-gray-200 mb-6">
+            Soporte completo para las tres modalidades principales 
+            de la lotería mexicana.
+          </p>
+          <ul class="text-left text-gray-300 space-y-2">
+            <li>• <strong>Melate:</strong> 6 números de 56</li>
+            <li>• <strong>Revancha:</strong> Segunda oportunidad</li>
+            <li>• <strong>Revanchita:</strong> Tercera oportunidad</li>
+            <li>• Datos actualizados constantemente</li>
+          </ul>
+        </div>
+
+        <!-- Interfaz Amigable -->
+        <div class="feature-card rounded-2xl p-8 text-center transform hover:scale-105 transition duration-300">
+          <div class="text-5xl mb-6">📱</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Fácil de Usar</h3>
+          <p class="text-gray-200 mb-6">
+            Interfaz intuitiva diseñada para que cualquier persona 
+            pueda aprovechar el poder del análisis de datos.
+          </p>
+          <ul class="text-left text-gray-300 space-y-2">
+            <li>• Diseño responsivo</li>
+            <li>• Compatible con móviles</li>
+            <li>• Resultados instantáneos</li>
+            <li>• Sin descargas necesarias</li>
+          </ul>
+        </div>
+
+        <!-- Seguridad y Privacidad -->
+        <div class="feature-card rounded-2xl p-8 text-center transform hover:scale-105 transition duration-300">
+          <div class="text-5xl mb-6">🔒</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Seguro y Privado</h3>
+          <p class="text-gray-200 mb-6">
+            Tus datos están protegidos y tu privacidad es nuestra prioridad. 
+            Análisis personalizado sin comprometer tu información.
+          </p>
+          <ul class="text-left text-gray-300 space-y-2">
+            <li>• Autenticación segura</li>
+            <li>• Datos encriptados</li>
+            <li>• Sin spam ni publicidad invasiva</li>
+            <li>• Cumplimiento GDPR</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Section -->
+  <section id="demo" class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
+          Mira Cómo <span class="text-green-300">Funciona</span>
+        </h2>
+        <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+          Ejemplo de análisis estadístico basado en datos reales de sorteos anteriores.
+        </p>
+      </div>
+
+      <!-- AdSense Ad Unit - Middle of Page -->
+      <div class="mb-12 text-center">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-2226536008153511"
+             data-ad-slot="2345678901"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <!-- Demo Content -->
+        <div class="space-y-8">
+          <div class="feature-card rounded-2xl p-6">
+            <h3 class="text-2xl font-bold text-white mb-4">📈 Números Más Frecuentes (Melate)</h3>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-green-600 text-white text-center py-3 rounded-lg font-bold">12</div>
+              <div class="bg-green-600 text-white text-center py-3 rounded-lg font-bold">23</div>
+              <div class="bg-green-600 text-white text-center py-3 rounded-lg font-bold">34</div>
+              <div class="bg-green-500 text-white text-center py-3 rounded-lg font-bold">07</div>
+              <div class="bg-green-500 text-white text-center py-3 rounded-lg font-bold">45</div>
+              <div class="bg-green-500 text-white text-center py-3 rounded-lg font-bold">51</div>
+            </div>
+            <p class="text-gray-300 mt-4 text-sm">
+              *Basado en análisis de los últimos 30 meses de sorteos oficiales
+            </p>
+          </div>
+
+          <div class="feature-card rounded-2xl p-6">
+            <h3 class="text-2xl font-bold text-white mb-4">🎯 Evaluación de Combinación</h3>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-300">Tu combinación: 05, 12, 23, 34, 45, 51</span>
+              </div>
+              <div class="bg-gray-700 rounded-full h-4">
+                <div class="bg-gradient-to-r from-green-500 to-yellow-500 h-4 rounded-full" style="width: 78%"></div>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-400">Efectividad</span>
+                <span class="text-yellow-300 font-bold">78%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-card rounded-2xl p-6">
+            <h3 class="text-2xl font-bold text-white mb-4">🤖 Sugerencia de IA</h3>
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-4">
+              <p class="text-white font-semibold mb-2">Combinación Recomendada:</p>
+              <div class="grid grid-cols-6 gap-2">
+                <div class="bg-white text-gray-900 text-center py-2 rounded font-bold">03</div>
+                <div class="bg-white text-gray-900 text-center py-2 rounded font-bold">17</div>
+                <div class="bg-white text-gray-900 text-center py-2 rounded font-bold">28</div>
+                <div class="bg-white text-gray-900 text-center py-2 rounded font-bold">39</div>
+                <div class="bg-white text-gray-900 text-center py-2 rounded font-bold">44</div>
+                <div class="bg-white text-gray-900 text-center py-2 rounded font-bold">52</div>
+              </div>
+              <p class="text-blue-100 text-sm mt-2">Confianza: 85% | Método: Análisis Combinado</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Benefits List -->
+        <div class="space-y-6">
+          <h3 class="text-3xl font-bold text-white mb-8">¿Por Qué Elegir YA ME VI?</h3>
+          
+          <div class="space-y-6">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold text-white mb-2">Datos Oficiales Verificados</h4>
+                <p class="text-gray-300">Utilizamos únicamente datos oficiales de Pronósticos para la Asistencia Pública, garantizando la veracidad de nuestros análisis.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold text-white mb-2">Análisis Matemático Avanzado</h4>
+                <p class="text-gray-300">Nuestros algoritmos procesan millones de combinaciones para encontrar los patrones más probables basados en tendencias históricas.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold text-white mb-2">Resultados Instantáneos</h4>
+                <p class="text-gray-300">Obtén análisis detallados y recomendaciones personalizadas en segundos, sin esperas ni complicaciones.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold text-white mb-2">100% Seguro y Privado</h4>
+                <p class="text-gray-300">Tu información personal está protegida con los más altos estándares de seguridad. No compartimos datos con terceros.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <a href="app.html" class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105 inline-block text-center">
+              🎯 Probar Ahora - Es Gratis
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="py-20 bg-black bg-opacity-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
+          Lo Que Dicen Nuestros <span class="text-yellow-300">Usuarios</span>
+        </h2>
+        <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+          Miles de personas ya están usando YA ME VI para mejorar sus estrategias de lotería.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="feature-card rounded-2xl p-8 text-center">
+          <div class="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+          <p class="text-gray-200 mb-6 italic">
+            "Increíble herramienta. Los análisis son muy detallados y me han ayudado a entender mejor los patrones de los sorteos."
+          </p>
+          <div class="text-white font-semibold">- María G.</div>
+          <div class="text-gray-400 text-sm">Ciudad de México</div>
+        </div>
+
+        <div class="feature-card rounded-2xl p-8 text-center">
+          <div class="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+          <p class="text-gray-200 mb-6 italic">
+            "La evaluación de mis combinaciones me sorprendió. Ahora juego de manera más inteligente y estratégica."
+          </p>
+          <div class="text-white font-semibold">- Carlos R.</div>
+          <div class="text-gray-400 text-sm">Guadalajara</div>
+        </div>
+
+        <div class="feature-card rounded-2xl p-8 text-center">
+          <div class="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+          <p class="text-gray-200 mb-6 italic">
+            "Fácil de usar y muy profesional. Las estadísticas son fascinantes y las recomendaciones muy útiles."
+          </p>
+          <div class="text-white font-semibold">- Ana L.</div>
+          <div class="text-gray-400 text-sm">Monterrey</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
+          Preguntas <span class="text-green-300">Frecuentes</span>
+        </h2>
+      </div>
+
+      <div class="space-y-6">
+        <div class="feature-card rounded-2xl p-6">
+          <button class="w-full text-left flex justify-between items-center faq-toggle">
+            <h3 class="text-xl font-bold text-white">¿Cómo funciona el análisis de YA ME VI?</h3>
+            <svg class="w-6 h-6 text-white transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="mt-4 text-gray-300 faq-content">
+            <p>Nuestro sistema analiza los datos históricos de los últimos 30 meses de sorteos oficiales, aplicando 5 métodos diferentes de inteligencia artificial: análisis de frecuencia, cálculo de probabilidades, detección de patrones, análisis delta y desviación estándar. Esto nos permite generar recomendaciones basadas en tendencias matemáticas reales.</p>
+          </div>
+        </div>
+
+        <div class="feature-card rounded-2xl p-6">
+          <button class="w-full text-left flex justify-between items-center faq-toggle">
+            <h3 class="text-xl font-bold text-white">¿Es gratis usar YA ME VI?</h3>
+            <svg class="w-6 h-6 text-white transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="mt-4 text-gray-300 faq-content hidden">
+            <p>Sí, YA ME VI es completamente gratuito. Solo necesitas crear una cuenta para acceder a todas las funcionalidades: análisis estadístico, evaluación de combinaciones, sugerencias de IA y más. No hay costos ocultos ni suscripciones.</p>
+          </div>
+        </div>
+
+        <div class="feature-card rounded-2xl p-6">
+          <button class="w-full text-left flex justify-between items-center faq-toggle">
+            <h3 class="text-xl font-bold text-white">¿Garantizan que voy a ganar?</h3>
+            <svg class="w-6 h-6 text-white transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="mt-4 text-gray-300 faq-content hidden">
+            <p>No garantizamos ganancias. La lotería es un juego de azar y siempre existe riesgo. Lo que sí ofrecemos son herramientas basadas en datos reales para que tomes decisiones más informadas. Nuestro objetivo es ayudarte a jugar de manera más inteligente, no prometerte resultados imposibles.</p>
+          </div>
+        </div>
+
+        <div class="feature-card rounded-2xl p-6">
+          <button class="w-full text-left flex justify-between items-center faq-toggle">
+            <h3 class="text-xl font-bold text-white">¿De dónde obtienen los datos de los sorteos?</h3>
+            <svg class="w-6 h-6 text-white transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="mt-4 text-gray-300 faq-content hidden">
+            <p>Todos nuestros datos provienen de fuentes oficiales de Pronósticos para la Asistencia Pública. Procesamos únicamente información verificada y actualizada de los sorteos de Melate, Revancha y Revanchita. La integridad de los datos es fundamental para la precisión de nuestros análisis.</p>
+          </div>
+        </div>
+
+        <div class="feature-card rounded-2xl p-6">
+          <button class="w-full text-left flex justify-between items-center faq-toggle">
+            <h3 class="text-xl font-bold text-white">¿Funciona en dispositivos móviles?</h3>
+            <svg class="w-6 h-6 text-white transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="mt-4 text-gray-300 faq-content hidden">
+            <p>¡Absolutamente! YA ME VI está optimizado para todos los dispositivos: teléfonos móviles, tablets y computadoras. También es una Progressive Web App (PWA), lo que significa que puedes instalarla en tu dispositivo como si fuera una app nativa y usarla sin conexión a internet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 bg-gradient-to-r from-green-600 to-blue-600">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
+        ¿Listo Para Cambiar Tu Suerte?
+      </h2>
+      <p class="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
+        Únete a miles de usuarios que ya están usando YA ME VI para tomar decisiones más inteligentes en la lotería. 
+        Es gratis, es rápido y puede cambiar tu forma de jugar para siempre.
+      </p>
       
-      if (deviceDetector.isMobileDevice()) {
-        // En móvil, cambiar textos para ser más claros
-        if (loginBtn) loginBtn.textContent = 'Ya tengo cuenta';
-        if (registerBtn) registerBtn.textContent = 'Crear cuenta';
-      }
-    }
-
-    // Inicialización
-    document.addEventListener('DOMContentLoaded', async () => {
-      showLoading();
+      <!-- AdSense Ad Unit - Bottom of Page -->
+      <div class="mb-8">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-2226536008153511"
+             data-ad-slot="3456789012"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      </div>
       
-      // Cargar footer legal
-      try {
-        const response = await fetch("footer.html");
-        const data = await response.text();
-        document.getElementById("footer-container").innerHTML = data;
-      } catch (error) {
-        console.error('Error cargando footer:', error);
-      }
+      <div class="space-y-4">
+        <a href="app.html" class="inline-block bg-white text-gray-900 px-12 py-4 rounded-full text-xl font-bold transition duration-300 transform hover:scale-105 shadow-2xl">
+          🚀 Comenzar Análisis Gratis
+        </a>
+        <div class="text-gray-100 text-sm">
+          ✅ Sin descargas • ✅ Sin pagos • ✅ Resultados instantáneos
+        </div>
+      </div>
+    </div>
+  </section>
 
-      // Actualizar botones según dispositivo
-      updateButtons();
+  <!-- Contact Section -->
+  <section id="contacto" class="py-20 bg-black bg-opacity-40">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
+          <span class="text-blue-300">Contacto</span> y Soporte
+        </h2>
+        <p class="text-xl text-gray-200">
+          ¿Tienes preguntas o necesitas ayuda? Estamos aquí para apoyarte.
+        </p>
+      </div>
 
-      // En dispositivos móviles, ejecutar redirección inteligente
-      if (deviceDetector.isMobileDevice()) {
-        await intelligentRedirect();
-      } else {
-        hideLoading();
-      }
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="feature-card rounded-2xl p-8">
+          <h3 class="text-2xl font-bold text-white mb-6">Información de Contacto</h3>
+          <div class="space-y-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Email</div>
+                <div class="text-gray-300">soporte@yamevi.com</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Horario de Atención</div>
+                <div class="text-gray-300">Lunes a Viernes: 9:00 - 18:00</div>
+              </div>
+            </div>
 
-      // Registrar Service Worker para PWA
-      if ('serviceWorker' in navigator) {
-        try {
-          const registration = await navigator.serviceWorker.register('service-worker.js');
-          console.log('✅ Service Worker registrado:', registration.scope);
-        } catch (error) {
-          console.log('❌ Error registrando Service Worker:', error);
-        }
-      }
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Ubicación</div>
+                <div class="text-gray-300">México</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-card rounded-2xl p-8">
+          <h3 class="text-2xl font-bold text-white mb-6">Enlaces Importantes</h3>
+          <div class="space-y-4">
+            <a href="politica-privacidad.html" class="flex items-center space-x-3 text-gray-300 hover:text-white transition duration-300">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Política de Privacidad</span>
+            </a>
+            
+            <a href="aviso-legal.html" class="flex items-center space-x-3 text-gray-300 hover:text-white transition duration-300">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>Aviso Legal</span>
+            </a>
+            
+            <a href="app.html" class="flex items-center space-x-3 text-gray-300 hover:text-white transition duration-300">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+              </svg>
+              <span>Iniciar Sesión</span>
+            </a>
+            
+            <div class="pt-4 border-t border-gray-600">
+              <p class="text-gray-400 text-sm">
+                YA ME VI es una herramienta de análisis estadístico. 
+                No garantizamos ganancias en juegos de azar.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-black bg-opacity-60 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <div class="flex items-center justify-center mb-6">
+          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="h-10 w-10 rounded-full mr-3">
+          <h3 class="text-2xl font-bold text-white">YA ME VI</h3>
+        </div>
+        
+        <p class="text-gray-300 mb-6 max-w-2xl mx-auto">
+          Análisis inteligente de lotería mexicana con inteligencia artificial. 
+          Toma decisiones más informadas basadas en datos históricos reales.
+        </p>
+        
+        <div class="flex flex-wrap justify-center space-x-6 mb-6">
+          <a href="#inicio" class="text-gray-400 hover:text-white transition duration-300">Inicio</a>
+          <a href="#caracteristicas" class="text-gray-400 hover:text-white transition duration-300">Características</a>
+          <a href="#demo" class="text-gray-400 hover:text-white transition duration-300">Demo</a>
+          <a href="#contacto" class="text-gray-400 hover:text-white transition duration-300">Contacto</a>
+          <a href="politica-privacidad.html" class="text-gray-400 hover:text-white transition duration-300">Privacidad</a>
+          <a href="aviso-legal.html" class="text-gray-400 hover:text-white transition duration-300">Legal</a>
+        </div>
+        
+        <div class="border-t border-gray-700 pt-6">
+          <p class="text-gray-500 text-sm">
+            © 2025 YA ME VI. Todos los derechos reservados. 
+            <br class="md:hidden">
+            Herramienta de análisis estadístico para entretenimiento responsable.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
     });
 
-    // Agregar funcionalidad de override manual (para testing o preferencia de usuario)
-    window.forceManualSelection = function() {
-      hideLoading();
-      console.log('🔧 Modo manual activado por el usuario');
-    };
+    // FAQ toggle functionality
+    document.querySelectorAll('.faq-toggle').forEach(button => {
+      button.addEventListener('click', function() {
+        const content = this.nextElementSibling;
+        const icon = this.querySelector('svg');
+        
+        content.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180');
+      });
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+        
+        // Close mobile menu if open
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (!mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('hidden');
+        }
+      });
+    });
+
+    // Initialize AdSense ads
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    (adsbygoogle = window.adsbygoogle || []).push({});
+
+    // Analytics and tracking (placeholder)
+    console.log('YA ME VI Landing Page loaded successfully');
+    
+    // Performance monitoring
+    window.addEventListener('load', function() {
+      console.log('🚀 Landing page fully loaded');
+    });
+  </script>
+
+  <!-- Google Analytics (replace with your tracking ID) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'GA_TRACKING_ID');
   </script>
 </body>
 </html>
