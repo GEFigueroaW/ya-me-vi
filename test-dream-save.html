@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Guardado de Sueños - YA ME VI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6 text-center">🧪 Test Guardado de Sueños</h1>
+        
+        <!-- Estado del usuario -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">👤 Estado del Usuario</h2>
+            <div id="user-status" class="space-y-2">
+                <div id="auth-status">⏳ Verificando autenticación...</div>
+                <div id="user-info" class="text-sm bg-gray-50 p-3 rounded"></div>
+            </div>
+        </div>
+        
+        <!-- Test de guardado -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">💾 Test de Guardado</h2>
+            <div class="space-y-4">
+                <button id="test-casa" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                    🏠 Probar guardar "Casa"
+                </button>
+                <button id="test-auto" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                    🚗 Probar guardar "Auto"
+                </button>
+                <button id="test-verification" class="w-full bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600">
+                    🔍 Verificar sueño guardado
+                </button>
+                <button id="test-delete" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                    🗑️ Eliminar sueño de prueba
+                </button>
+            </div>
+            <div id="test-results" class="mt-4 p-4 bg-gray-50 rounded text-sm"></div>
+        </div>
+        
+        <!-- Log de actividad -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">📋 Log de Actividad</h2>
+            <div id="activity-log" class="bg-gray-50 p-4 rounded max-h-64 overflow-y-auto text-sm font-mono"></div>
+            <button id="clear-log" class="mt-2 bg-gray-500 text-white px-4 py-2 rounded text-sm">
+                Limpiar Log
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Configuración Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+            authDomain: "ya-me-vi.firebaseapp.com",
+            projectId: "ya-me-vi",
+            storageBucket: "ya-me-vi.firebasestorage.app",
+            messagingSenderId: "748876890843",
+            appId: "1:748876890843:web:070d1eb476d38594d002fe",
+            measurementId: "G-D7R797S5BC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUser = null;
+        
+        function log(message, type = 'info') {
+            const now = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('activity-log');
+            const color = type === 'error' ? 'text-red-600' : type === 'success' ? 'text-green-600' : 'text-blue-600';
+            logDiv.innerHTML += `<div class="${color}">[${now}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function updateTestResult(message, type = 'info') {
+            const resultDiv = document.getElementById('test-results');
+            const color = type === 'error' ? 'text-red-600' : type === 'success' ? 'text-green-600' : 'text-blue-600';
+            resultDiv.innerHTML = `<div class="${color}">${message}</div>`;
+        }
+
+        // Monitor de usuario
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            
+            if (user) {
+                document.getElementById('auth-status').innerHTML = '<span class="text-green-600">✅ Usuario autenticado</span>';
+                document.getElementById('user-info').innerHTML = `
+                    <div><strong>UID:</strong> ${user.uid}</div>
+                    <div><strong>Email:</strong> ${user.email || 'No disponible'}</div>
+                    <div><strong>Nombre:</strong> ${user.displayName || 'Sin nombre'}</div>
+                    <div><strong>Proveedor:</strong> ${user.providerData[0]?.providerId || 'Desconocido'}</div>
+                    <div><strong>Path Firestore:</strong> users/${user.uid}/dream/info</div>
+                `;
+                log(`👤 Usuario autenticado: ${user.email || user.uid}`, 'success');
+            } else {
+                document.getElementById('auth-status').innerHTML = '<span class="text-red-600">❌ No autenticado</span>';
+                document.getElementById('user-info').innerHTML = '<div class="text-gray-500">Necesitas estar autenticado para probar</div>';
+                log('👤 No hay usuario autenticado', 'error');
+            }
+        });
+
+        // Test guardar Casa
+        document.getElementById('test-casa').addEventListener('click', async () => {
+            if (!currentUser) {
+                updateTestResult('❌ Necesitas estar autenticado', 'error');
+                return;
+            }
+            
+            await testSaveDream('Casa');
+        });
+
+        // Test guardar Auto
+        document.getElementById('test-auto').addEventListener('click', async () => {
+            if (!currentUser) {
+                updateTestResult('❌ Necesitas estar autenticado', 'error');
+                return;
+            }
+            
+            await testSaveDream('Auto');
+        });
+
+        // Función para probar guardado
+        async function testSaveDream(dreamName) {
+            log(`🧪 Probando guardar sueño: ${dreamName}`, 'info');
+            updateTestResult('⏳ Guardando...', 'info');
+            
+            try {
+                log(`📝 UID del usuario: ${currentUser.uid}`, 'info');
+                log(`📝 Email del usuario: ${currentUser.email}`, 'info');
+                
+                const dreamDocRef = doc(db, 'users', currentUser.uid, 'dream', 'info');
+                log(`📝 Path del documento: ${dreamDocRef.path}`, 'info');
+                
+                const dreamData = {
+                    sueño: dreamName,
+                    savedAt: new Date().toISOString(),
+                    userId: currentUser.uid,
+                    userEmail: currentUser.email || 'Sin email',
+                    testMode: true
+                };
+                
+                log(`💾 Datos a guardar: ${JSON.stringify(dreamData)}`, 'info');
+                
+                await setDoc(dreamDocRef, dreamData);
+                log(`✅ Sueño "${dreamName}" guardado exitosamente`, 'success');
+                updateTestResult(`✅ Sueño "${dreamName}" guardado exitosamente`, 'success');
+                
+                // Verificar inmediatamente
+                const verification = await getDoc(dreamDocRef);
+                if (verification.exists()) {
+                    log(`✅ Verificación exitosa: ${JSON.stringify(verification.data())}`, 'success');
+                } else {
+                    log(`⚠️ Advertencia: documento no encontrado después de guardar`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error guardando sueño: ${error.code} - ${error.message}`, 'error');
+                updateTestResult(`❌ Error: ${error.message}`, 'error');
+                
+                if (error.code === 'permission-denied') {
+                    log(`🔒 Error de permisos - revisar reglas de Firestore`, 'error');
+                }
+            }
+        }
+
+        // Test verificar sueño
+        document.getElementById('test-verification').addEventListener('click', async () => {
+            if (!currentUser) {
+                updateTestResult('❌ Necesitas estar autenticado', 'error');
+                return;
+            }
+            
+            log('🔍 Verificando sueño guardado...', 'info');
+            updateTestResult('⏳ Verificando...', 'info');
+            
+            try {
+                const dreamDocRef = doc(db, 'users', currentUser.uid, 'dream', 'info');
+                const dreamDoc = await getDoc(dreamDocRef);
+                
+                if (dreamDoc.exists()) {
+                    const data = dreamDoc.data();
+                    log(`✅ Sueño encontrado: ${JSON.stringify(data)}`, 'success');
+                    updateTestResult(`✅ Sueño encontrado: "${data.sueño}" (guardado: ${data.savedAt})`, 'success');
+                } else {
+                    log('📝 No hay sueño guardado', 'info');
+                    updateTestResult('📝 No hay sueño guardado', 'info');
+                }
+            } catch (error) {
+                log(`❌ Error verificando sueño: ${error.code} - ${error.message}`, 'error');
+                updateTestResult(`❌ Error: ${error.message}`, 'error');
+            }
+        });
+
+        // Test eliminar sueño
+        document.getElementById('test-delete').addEventListener('click', async () => {
+            if (!currentUser) {
+                updateTestResult('❌ Necesitas estar autenticado', 'error');
+                return;
+            }
+            
+            log('🗑️ Eliminando sueño de prueba...', 'info');
+            updateTestResult('⏳ Eliminando...', 'info');
+            
+            try {
+                const dreamDocRef = doc(db, 'users', currentUser.uid, 'dream', 'info');
+                await deleteDoc(dreamDocRef);
+                log('✅ Sueño eliminado exitosamente', 'success');
+                updateTestResult('✅ Sueño eliminado exitosamente', 'success');
+            } catch (error) {
+                log(`❌ Error eliminando sueño: ${error.code} - ${error.message}`, 'error');
+                updateTestResult(`❌ Error: ${error.message}`, 'error');
+            }
+        });
+
+        // Limpiar log
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('activity-log').innerHTML = '';
+        });
+    </script>
+</body>
+</html>

@@ -2,9 +2,27 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Reglas para usuarios - ACCESO TEMPORAL AMPLIO
+    // Reglas para usuarios - ACCESO COMPLETO
     match /users/{userId} {
-      allow read, write: if request.auth != null; // Temporal: cualquier usuario autenticado
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Subcolecciones del usuario (profile, dream, etc.)
+      match /{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Reglas adicionales para admin - pueden ver todo
+    match /users/{userId} {
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+        
+      match /{document=**} {
+        allow read: if request.auth != null && 
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      }
     }
     
     // Reglas para actividad de usuarios
