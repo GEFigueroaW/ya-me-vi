@@ -276,6 +276,9 @@
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
     import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, limit, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
+    // Import AuthGuard
+    import { authGuard } from './js/authGuard.js';
+
     // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDn3WCVaGl3lXPUIKJR0JrVi9nMbIkE0WM",
@@ -321,7 +324,12 @@
     }
 
     // Auth listener
+    let authChecked = false;
     onAuthStateChanged(auth, async (user) => {
+      // Evitar múltiples verificaciones
+      if (authChecked) return;
+      
+      console.log('🔍 Verificando autenticación en admin.html');
       const statusElement = document.getElementById('admin-status');
       
       if (user) {
@@ -356,6 +364,10 @@
         }
         
         if (isUserAdmin) {
+          authChecked = true; // Marcar como verificado solo si es admin válido
+          // Limpiar contador de redirecciones cuando la auth es exitosa
+          authGuard.clearRedirectCount();
+          
           statusElement.textContent = `✅ Admin: ${user.email}`;
           statusElement.className = 'text-green-400 font-medium';
           updateIndicator('connection-indicator', 'online');
@@ -372,8 +384,8 @@
           console.log('❌ Usuario sin permisos:', user.email);
           setTimeout(() => {
             alert(`❌ Acceso denegado\n\nUsuario: ${user.email}\n\nAdmins autorizados:\n• eugenfw@gmail.com\n• gfigueroa.w@gmail.com\n• admin@yamevi.com.mx`);
-            window.location.href = 'index.html';
-          }, 2000);
+            authGuard.safeRedirect('home.html', 'no_admin_permissions'); // Usar redirección segura
+          }, 3000); // Aumentar tiempo de espera
         }
         
       } else {
@@ -382,10 +394,10 @@
         statusElement.className = 'text-yellow-400 font-medium';
         updateIndicator('connection-indicator', 'warning');
         
-        // Redirigir inmediatamente a login con parámetro de admin
+        // Redirigir a login con parámetro de admin usando redirección segura
         setTimeout(() => {
-          window.location.href = 'login.html?redirect=admin';
-        }, 1000);
+          authGuard.safeRedirect('login.html?redirect=admin', 'no_auth_admin');
+        }, 2000);
       }
     });
 

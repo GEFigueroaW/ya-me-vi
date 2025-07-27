@@ -75,11 +75,23 @@ export async function registerUserInFirestore(user) {
 }
 
 // Listener global para registrar usuarios automáticamente
+let globalAuthChecked = false;
 onAuthStateChanged(auth, async (user) => {
+  // Evitar múltiples ejecuciones del listener global
+  if (globalAuthChecked) return;
+  
   if (user) {
-    console.log('👤 Usuario autenticado:', user.email);
+    console.log('👤 Usuario autenticado globalmente:', user.email);
     // Registrar automáticamente en Firestore con actualización inmediata
     await registerUserInFirestore(user);
+    
+    // Marcar como verificado para evitar re-ejecuciones
+    globalAuthChecked = true;
+    
+    // Limpiar indicadores de redirección si la auth es exitosa
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem('authRedirectCount');
+    }
     
     // Forzar actualización del estado online
     try {
@@ -97,7 +109,9 @@ onAuthStateChanged(auth, async (user) => {
     }
     
   } else {
-    console.log('👤 Usuario desconectado');
+    console.log('👤 Usuario desconectado globalmente');
+    // Resetear el flag cuando el usuario se desconecta
+    globalAuthChecked = false;
     // Aquí podrías marcar como offline si tuvieras el UID
   }
 });

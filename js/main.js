@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { app } from './firebase-init.js';
 import { isUserAdmin, toggleAdminElements } from './adminCheck.js';
+import { authGuard } from './authGuard.js';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -81,8 +82,19 @@ async function mostrarBienvenidaConSueño(user) {
 }
 
 // === Manejo de sesión activa y bienvenida ===
+let authChecked = false;
 onAuthStateChanged(auth, async (user) => {
+  // Evitar múltiples verificaciones de autenticación
+  if (authChecked) return;
+  authChecked = true;
+  
+  console.log('🔍 Verificando estado de autenticación en home.html');
+  
   if (user) {
+    console.log('✅ Usuario autenticado en home.html:', user.email);
+    // Limpiar contador de redirecciones cuando la auth es exitosa
+    authGuard.clearRedirectCount();
+    
     mostrarBienvenidaConSueño(user);
     
     // Verificar si el usuario es administrador y mostrar/ocultar elementos
@@ -93,7 +105,9 @@ onAuthStateChanged(auth, async (user) => {
       console.log('✅ Usuario identificado como administrador');
     }
   } else {
-    window.location.href = "index.html";
+    console.log('❌ Usuario no autenticado, redirigiendo a index.html');
+    // Usar redirección segura para prevenir loops
+    authGuard.safeRedirect('index.html', 'no_auth_home');
   }
 });
 

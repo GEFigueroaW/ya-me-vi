@@ -59,6 +59,43 @@ export class SmartRedirector {
       
       console.log('🔍 Iniciando detección de cuenta...');
       
+      // NUEVO: Verificar si ya hay una sesión activa de Firebase
+      try {
+        const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+        const auth = getAuth();
+        
+        // Promesa para verificar estado de autenticación actual
+        const checkAuthState = new Promise((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe(); // Desuscribirse inmediatamente
+            resolve(user);
+          });
+          
+          // Timeout después de 2 segundos
+          setTimeout(() => {
+            unsubscribe();
+            resolve(null);
+          }, 2000);
+        });
+        
+        const currentUser = await checkAuthState;
+        
+        if (currentUser) {
+          console.log('✅ Usuario ya autenticado encontrado:', currentUser.email);
+          console.log('➡️ Redirigiendo directamente a home.html');
+          
+          return {
+            destination: 'home.html',
+            reason: 'already_authenticated',
+            userInfo: { email: currentUser.email }
+          };
+        }
+        
+      } catch (authError) {
+        console.warn('⚠️ Error verificando autenticación existente:', authError);
+        // Continuar con el flujo normal si hay error
+      }
+      
       // Determinar el flujo según el tipo de dispositivo
       let userFlow;
       

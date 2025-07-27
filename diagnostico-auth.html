@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Autenticación - YA ME VI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">🔍 Diagnóstico de Autenticación</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Estado Firebase -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">🔥 Firebase</h2>
+                <div id="firebase-status" class="space-y-2">
+                    <p>📡 Conectando...</p>
+                </div>
+            </div>
+            
+            <!-- Estado de Autenticación -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">🔐 Autenticación</h2>
+                <div id="auth-status" class="space-y-2">
+                    <p>⏳ Verificando...</p>
+                </div>
+            </div>
+            
+            <!-- Session Storage -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">💾 Session Storage</h2>
+                <div id="session-status" class="space-y-2">
+                    <p>📋 Leyendo datos...</p>
+                </div>
+            </div>
+            
+            <!-- Local Storage -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">🏠 Local Storage</h2>
+                <div id="local-status" class="space-y-2">
+                    <p>📋 Leyendo datos...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logs en tiempo real -->
+        <div class="bg-gray-800 p-6 rounded-lg mt-6">
+            <h2 class="text-xl font-semibold mb-4">📝 Logs en Tiempo Real</h2>
+            <div id="logs" class="bg-black p-4 rounded h-64 overflow-y-auto font-mono text-sm">
+                <p class="text-green-400">Sistema iniciado...</p>
+            </div>
+        </div>
+        
+        <!-- Acciones -->
+        <div class="flex flex-wrap gap-4 mt-6 justify-center">
+            <button id="clear-session" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+                🗑️ Limpiar Session Storage
+            </button>
+            <button id="clear-local" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+                🗑️ Limpiar Local Storage
+            </button>
+            <button id="test-auth" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                🔐 Probar Autenticación
+            </button>
+            <button id="go-home" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                🏠 Ir a Inicio
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+        // Configuración Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDn3WCVaGl3lXPUIKJR0JrVi9nMbIkE0WM",
+            authDomain: "yamevi-com-mx.firebaseapp.com",
+            projectId: "yamevi-com-mx",
+            storageBucket: "yamevi-com-mx.appspot.com",
+            messagingSenderId: "461992870458",
+            appId: "1:461992870458:web:5fb2b5c3e6b9b4a6d06b9c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Referencias DOM
+        const firebaseStatus = document.getElementById('firebase-status');
+        const authStatus = document.getElementById('auth-status');
+        const sessionStatus = document.getElementById('session-status');
+        const localStatus = document.getElementById('local-status');
+        const logsContainer = document.getElementById('logs');
+
+        // Función para agregar logs
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colorClass = {
+                'info': 'text-blue-400',
+                'success': 'text-green-400',
+                'warning': 'text-yellow-400',
+                'error': 'text-red-400'
+            }[type] || 'text-white';
+            
+            const logEntry = document.createElement('p');
+            logEntry.className = colorClass;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        // Verificar Firebase
+        try {
+            firebaseStatus.innerHTML = `
+                <p class="text-green-400">✅ Firebase conectado</p>
+                <p class="text-sm">📍 Proyecto: ${firebaseConfig.projectId}</p>
+                <p class="text-sm">🌐 Dominio: ${firebaseConfig.authDomain}</p>
+            `;
+            addLog('Firebase inicializado correctamente', 'success');
+        } catch (error) {
+            firebaseStatus.innerHTML = `<p class="text-red-400">❌ Error: ${error.message}</p>`;
+            addLog(`Error Firebase: ${error.message}`, 'error');
+        }
+
+        // Verificar autenticación
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                authStatus.innerHTML = `
+                    <p class="text-green-400">✅ Usuario autenticado</p>
+                    <p class="text-sm">👤 Email: ${user.email}</p>
+                    <p class="text-sm">🆔 UID: ${user.uid.substring(0, 8)}...</p>
+                    <p class="text-sm">📧 Verificado: ${user.emailVerified ? 'Sí' : 'No'}</p>
+                `;
+                addLog(`Usuario autenticado: ${user.email}`, 'success');
+            } else {
+                authStatus.innerHTML = `
+                    <p class="text-red-400">❌ No autenticado</p>
+                    <p class="text-sm">👤 No hay usuario activo</p>
+                `;
+                addLog('Usuario no autenticado', 'warning');
+            }
+        });
+
+        // Verificar Session Storage
+        function checkSessionStorage() {
+            const items = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                const value = sessionStorage.getItem(key);
+                items.push(`<p class="text-sm">🔑 ${key}: ${value.substring(0, 50)}${value.length > 50 ? '...' : ''}</p>`);
+            }
+            
+            sessionStatus.innerHTML = items.length > 0 ? 
+                `<p class="text-blue-400">📊 ${items.length} elementos</p>${items.join('')}` :
+                `<p class="text-gray-400">📭 Vacío</p>`;
+        }
+
+        // Verificar Local Storage
+        function checkLocalStorage() {
+            const items = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                items.push(`<p class="text-sm">🔑 ${key}: ${value.substring(0, 50)}${value.length > 50 ? '...' : ''}</p>`);
+            }
+            
+            localStatus.innerHTML = items.length > 0 ? 
+                `<p class="text-blue-400">📊 ${items.length} elementos</p>${items.join('')}` :
+                `<p class="text-gray-400">📭 Vacío</p>`;
+        }
+
+        // Inicializar verificaciones
+        checkSessionStorage();
+        checkLocalStorage();
+
+        // Event listeners para botones
+        document.getElementById('clear-session').addEventListener('click', () => {
+            sessionStorage.clear();
+            checkSessionStorage();
+            addLog('Session Storage limpiado', 'warning');
+        });
+
+        document.getElementById('clear-local').addEventListener('click', () => {
+            localStorage.clear();
+            checkLocalStorage();
+            addLog('Local Storage limpiado', 'warning');
+        });
+
+        document.getElementById('test-auth').addEventListener('click', () => {
+            addLog('Probando estado de autenticación...', 'info');
+            const user = auth.currentUser;
+            if (user) {
+                addLog(`Usuario actual: ${user.email}`, 'success');
+            } else {
+                addLog('No hay usuario autenticado', 'warning');
+            }
+        });
+
+        document.getElementById('go-home').addEventListener('click', () => {
+            addLog('Redirigiendo a home.html...', 'info');
+            window.location.href = 'home.html';
+        });
+
+        // Actualizar storages periódicamente
+        setInterval(() => {
+            checkSessionStorage();
+            checkLocalStorage();
+        }, 5000);
+
+        addLog('Diagnóstico iniciado correctamente', 'success');
+    </script>
+</body>
+</html>
