@@ -7,7 +7,7 @@ Este documento describe los cambios realizados para implementar un flujo directo
 ### 1. Eliminación de Páginas Innecesarias
 
 - **app.html**: Esta página intermediaria ha sido eliminada. Ahora el flujo es directo desde la página principal.
-- **login-email.html**: Esta página ha sido eliminada. Se utiliza directamente welcome.html para iniciar sesión.
+- **login-email.html**: Esta página se mantiene específicamente para cuando un usuario en la página welcome.html decide iniciar sesión con contraseña en lugar de biométricos.
 
 ### 2. Implementación de Redirección Inteligente
 
@@ -27,8 +27,11 @@ Este documento describe los cambios realizados para implementar un flujo directo
   - Se actualizaron los enlaces a aplicación para usar la función `detectAndRedirect()`
   - Se añadió el código necesario para implementar la redirección inteligente
 
+- **welcome.html**:
+  - Se corrigió el botón de "Iniciar con contraseña" para que redirija a `login-email.html` en lugar de redirigirse a sí mismo
+
 - **register.html, recover.html, etc.**:
-  - Se actualizaron todas las referencias a `login-email.html` para que apunten a `welcome.html`
+  - Se actualizaron algunas referencias a `login-email.html` para garantizar el flujo correcto
 
 ### 4. Mejoras en la Experiencia de Usuario
 
