@@ -145,7 +145,7 @@
             <a href="#caracteristicas" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Características</a>
             <a href="#demo" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Demo</a>
             <a href="#contacto" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contacto</a>
-            <a href="app.html" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full text-sm font-medium transition duration-300 pulse-glow">Iniciar Análisis</a>
+            <a href="#" class="start-analysis-btn bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full text-sm font-medium transition duration-300 pulse-glow">Iniciar Análisis</a>
           </div>
         </div>
         <div class="md:hidden">
@@ -165,7 +165,7 @@
         <a href="#caracteristicas" class="text-white hover:text-yellow-300 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Características</a>
         <a href="#demo" class="text-white hover:text-yellow-300 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Demo</a>
         <a href="#contacto" class="text-white hover:text-yellow-300 block px-3 py-2 rounded-md text-base font-medium transition duration-300">Contacto</a>
-        <a href="app.html" class="bg-green-600 hover:bg-green-700 text-white block px-3 py-2 rounded-md text-base font-medium transition duration-300 mt-4">Iniciar Análisis</a>
+        <a href="#" class="start-analysis-btn bg-green-600 hover:bg-green-700 text-white block px-3 py-2 rounded-md text-base font-medium transition duration-300 mt-4">Iniciar Análisis</a>
       </div>
     </div>
   </nav>
@@ -199,7 +199,7 @@
         </p>
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate__animated animate__fadeInUp animate__delay-2s">
-          <a href="app.html" class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105 pulse-glow">
+          <a href="#" class="start-analysis-btn bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105 pulse-glow">
             🚀 Comenzar Análisis Gratis
           </a>
           <a href="#demo" class="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105">
@@ -467,7 +467,7 @@
           </div>
 
           <div class="mt-12">
-            <a href="app.html" class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105 inline-block text-center">
+            <a href="#" class="start-analysis-btn w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105 inline-block text-center">
               🎯 Probar Ahora - Es Gratis
             </a>
           </div>
@@ -614,7 +614,7 @@
       </div>
       
       <div class="space-y-4">
-        <a href="app.html" class="inline-block bg-white text-gray-900 px-12 py-4 rounded-full text-xl font-bold transition duration-300 transform hover:scale-105 shadow-2xl">
+        <a href="#" class="start-analysis-btn inline-block bg-white text-gray-900 px-12 py-4 rounded-full text-xl font-bold transition duration-300 transform hover:scale-105 shadow-2xl">
           🚀 Comenzar Análisis Gratis
         </a>
         <div class="text-gray-100 text-sm">
@@ -696,7 +696,7 @@
               <span>Aviso Legal</span>
             </a>
             
-            <a href="app.html" class="flex items-center space-x-3 text-gray-300 hover:text-white transition duration-300">
+            <a href="#" class="start-analysis-btn flex items-center space-x-3 text-gray-300 hover:text-white transition duration-300">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
               </svg>
@@ -848,11 +848,11 @@
     
     // Redirigir al destino apropiado cuando se hace clic en los botones de inicio/registro
     document.addEventListener('DOMContentLoaded', () => {
-      // Obtener todos los botones que antes apuntaban a app.html
-      const appButtons = document.querySelectorAll('a[href="app.html"]');
+      // Obtener todos los botones con la clase start-analysis-btn
+      const analysisButtons = document.querySelectorAll('.start-analysis-btn');
       
       // Cambiar comportamiento para usar la redirección inteligente
-      appButtons.forEach(button => {
+      analysisButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
           e.preventDefault();
           
@@ -860,7 +860,7 @@
           showLoading();
           
           try {
-            // Redirigir al destino apropiado
+            // Redirigir al destino apropiado según el tipo de dispositivo
             await smartRedirector.redirectToAppropriateDestination(showLoading, hideLoading);
           } catch (error) {
             console.error('Error en redirección:', error);

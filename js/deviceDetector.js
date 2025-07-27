@@ -7,6 +7,7 @@ export class DeviceDetector {
     this.userAgent = navigator.userAgent;
     this.isMobile = this.detectMobile();
     this.isTablet = this.detectTablet();
+    this.isDesktop = !this.isMobile && !this.isTablet;
     this.biometricType = null;
     this.biometricIcon = null;
     this.initialized = false;
@@ -184,6 +185,31 @@ export class DeviceDetector {
         page: 'welcome.html',
         userInfo: userInfo,
         reason: 'returning_user'
+      };
+    }
+  }
+  
+  // Determinar flujo para escritorio
+  async determineDesktopFlow() {
+    // Para computadoras (desktop)
+    const userInfo = await this.getStoredUserInfo();
+    
+    if (!userInfo) {
+      // En escritorio, primera vez o caché borrado - ir a registro
+      console.log('🖥️ Desktop: Usuario nuevo o caché borrado - redirigiendo a registro');
+      return {
+        action: 'register',
+        page: 'register.html',
+        reason: 'new_desktop_user'
+      };
+    } else {
+      // Usuario existente en escritorio - ir directo a ingresar contraseña
+      console.log('🖥️ Desktop: Usuario existente - redirigiendo a login con contraseña');
+      return {
+        action: 'login',
+        page: 'login-email.html',
+        userInfo: userInfo,
+        reason: 'returning_desktop_user'
       };
     }
   }

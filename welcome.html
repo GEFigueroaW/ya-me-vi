@@ -207,6 +207,15 @@
           return;
         }
         
+        // Verificar si estamos en un escritorio - en ese caso debería ir directo a login-email.html
+        // Este es un failsafe para usuarios que lleguen a esta página desde un escritorio
+        await deviceDetector.waitForInit();
+        if (deviceDetector.isDesktop) {
+          console.log('🖥️ Detectado escritorio en welcome.html - redirigiendo a login-email.html');
+          window.location.href = 'login-email.html';
+          return;
+        }
+        
         // Esperar a que deviceDetector se inicialice completamente
         await deviceDetector.waitForInit();
         

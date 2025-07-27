@@ -84,6 +84,23 @@ document.addEventListener("DOMContentLoaded", function () {
   // Mostrar loading inicial
   showLoadingOverlay('Verificando cuenta...');
   
+  // Verificar si estamos en desktop para ajustar la experiencia
+  import('./deviceDetector.js').then(({ deviceDetector }) => {
+    deviceDetector.waitForInit().then(() => {
+      if (deviceDetector.isDesktop) {
+        console.log('🖥️ Detectado escritorio - ajustando experiencia para desktop');
+        // En desktop, queremos que el botón de "Usar otra cuenta" sea más visible
+        const useAnotherAccountBtn = document.getElementById("use-another-account-btn");
+        if (useAnotherAccountBtn) {
+          useAnotherAccountBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+          useAnotherAccountBtn.classList.remove('bg-transparent', 'hover:bg-white', 'hover:bg-opacity-10');
+        }
+      }
+    });
+  }).catch(error => {
+    console.error('Error detectando tipo de dispositivo:', error);
+  });
+  
   // Intentar cargar Firebase y deviceDetector de forma asíncrona
   initializeWithFirebase();
   
@@ -156,6 +173,16 @@ function setupBasicEventListeners() {
     });
   }
   
+  // Botón para usar otra cuenta (nueva funcionalidad para desktop)
+  const useAnotherAccountBtn = document.getElementById("use-another-account-btn");
+  if (useAnotherAccountBtn) {
+    useAnotherAccountBtn.addEventListener("click", function () {
+      console.log('🔄 Mostrando opciones para nueva cuenta...');
+      // Mostrar interfaz de usuario nuevo para permitir cambiar de cuenta
+      showNewUserInterface();
+    });
+  }
+  
   // Botones de Google (sin funcionalidad real si no hay Firebase)
   const googleBtn = document.getElementById("google-login");
   const googleBtnNew = document.getElementById("google-login-new");
@@ -188,6 +215,20 @@ function setupBasicEventListeners() {
 // Event listeners avanzados (con Firebase)
 function setupFirebaseEventListeners(detectedUserEmail, auth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider) {
   // Reemplazar event listeners básicos con los de Firebase
+  
+  // Botón para usar otra cuenta (nueva funcionalidad para desktop)
+  const useAnotherAccountBtn = document.getElementById("use-another-account-btn");
+  if (useAnotherAccountBtn) {
+    // Remover event listener anterior
+    const newBtn = useAnotherAccountBtn.cloneNode(true);
+    useAnotherAccountBtn.parentNode.replaceChild(newBtn, useAnotherAccountBtn);
+    
+    newBtn.addEventListener("click", function () {
+      console.log('🔄 Mostrando opciones para nueva cuenta...');
+      // Mostrar interfaz de usuario nuevo para permitir cambiar de cuenta
+      showNewUserInterface();
+    });
+  }
   
   // Formulario de login
   const loginForm = document.getElementById("login-form");

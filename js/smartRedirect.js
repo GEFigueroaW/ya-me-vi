@@ -41,8 +41,18 @@ export class SmartRedirector {
       
       console.log('🔍 Iniciando detección de cuenta...');
       
-      // Detectar si el usuario tiene cuenta
-      const userFlow = await deviceDetector.determineUserFlow();
+      // Determinar el flujo según el tipo de dispositivo
+      let userFlow;
+      
+      if (deviceDetector.isDesktop) {
+        // Flujo para escritorio (directo a login con contraseña o registro)
+        userFlow = await deviceDetector.determineDesktopFlow();
+        console.log('🖥️ Dispositivo de escritorio detectado - usando flujo para desktop');
+      } else {
+        // Flujo para móviles/tablets (welcome o registro)
+        userFlow = await deviceDetector.determineUserFlow();
+        console.log('📱 Dispositivo móvil detectado - usando flujo estándar');
+      }
       
       console.log('🔍 Flujo determinado:', userFlow);
 
@@ -56,10 +66,17 @@ export class SmartRedirector {
           reason: 'new_user'
         };
       } else if (userFlow.action === 'welcome') {
-        console.log('👋 Usuario existente - redirigiendo a login');
+        console.log('👋 Usuario existente - redirigiendo a welcome');
         return {
           destination: 'welcome.html',
           reason: 'returning_user',
+          userInfo: userFlow.userInfo
+        };
+      } else if (userFlow.action === 'login') {
+        console.log('🔑 Usuario desktop existente - redirigiendo directo a login');
+        return {
+          destination: 'login-email.html',
+          reason: 'desktop_login',
           userInfo: userFlow.userInfo
         };
       }
