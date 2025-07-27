@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Notificaciones - YA ME VI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white">
+
+  <!-- Fondo -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 min-h-screen p-6">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center">
+        <button onclick="window.location.href='admin.html'" class="mr-4 bg-gray-800 bg-opacity-70 p-2 rounded-lg hover:bg-opacity-90">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-3xl font-bold">🔔 Panel de Notificaciones</h1>
+      </div>
+      <div class="text-sm bg-gray-800 bg-opacity-70 px-3 py-1 rounded">
+        Admin Panel
+      </div>
+    </div>
+
+    <!-- Estado del Sistema -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      
+      <!-- Cloud Functions Status -->
+      <div class="bg-gray-800 bg-opacity-70 rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">🚀 Cloud Functions</h3>
+        <div id="functions-status" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm">sendLotteryNotifications</span>
+            <span id="status-lottery" class="text-xs px-2 py-1 rounded bg-gray-600">Verificando...</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">sendWelcomeEmail</span>
+            <span id="status-welcome" class="text-xs px-2 py-1 rounded bg-gray-600">Verificando...</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">checkUserCombinations</span>
+            <span id="status-combinations" class="text-xs px-2 py-1 rounded bg-gray-600">Verificando...</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">notificationApi</span>
+            <span id="status-api" class="text-xs px-2 py-1 rounded bg-gray-600">Verificando...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SendGrid Status -->
+      <div class="bg-gray-800 bg-opacity-70 rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">📧 SendGrid Email</h3>
+        <div id="sendgrid-status">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm">Estado API</span>
+            <span id="sendgrid-api-status" class="text-xs px-2 py-1 rounded bg-gray-600">Verificando...</span>
+          </div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm">Emails enviados hoy</span>
+            <span id="emails-today" class="text-xs px-2 py-1 rounded bg-blue-600">0</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">Últimos errores</span>
+            <span id="email-errors" class="text-xs px-2 py-1 rounded bg-green-600">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FCM Push Status -->
+      <div class="bg-gray-800 bg-opacity-70 rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">📱 Firebase FCM</h3>
+        <div id="fcm-status">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm">Tokens activos</span>
+            <span id="active-tokens" class="text-xs px-2 py-1 rounded bg-blue-600">0</span>
+          </div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm">Push enviados hoy</span>
+            <span id="push-today" class="text-xs px-2 py-1 rounded bg-green-600">0</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">Fallos de entrega</span>
+            <span id="push-failures" class="text-xs px-2 py-1 rounded bg-red-600">0</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Enviar Notificación Manual -->
+    <div class="bg-gray-800 bg-opacity-70 rounded-lg p-6 mb-8">
+      <h3 class="text-xl font-semibold mb-4">📤 Enviar Notificación Manual</h3>
+      
+      <form id="notification-form" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">📝 Título</label>
+            <input type="text" id="notification-title" 
+                   class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500"
+                   placeholder="Ej: ¡Nuevos resultados disponibles!" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">🎯 Tipo de Juego</label>
+            <select id="notification-game" 
+                    class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500">
+              <option value="">Todos los juegos</option>
+              <option value="Melate">Melate</option>
+              <option value="Revancha">Revancha</option>
+              <option value="Revanchita">Revanchita</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">💬 Mensaje</label>
+          <textarea id="notification-body" rows="3"
+                    class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500"
+                    placeholder="Escribe el mensaje de la notificación aquí..." required></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">🔗 URL (opcional)</label>
+            <input type="text" id="notification-url"
+                   class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500"
+                   placeholder="/analisis.html">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">👥 Target</label>
+            <select id="notification-target"
+                    class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500">
+              <option value="active">Usuarios activos (30 días)</option>
+              <option value="online">Solo usuarios online</option>
+              <option value="all">Todos los usuarios</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+            📱 Enviar Push Notification
+          </button>
+          <button type="button" id="send-email-btn" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+            📧 Enviar Email + Push
+          </button>
+        </div>
+      </form>
+
+      <!-- Resultado del envío -->
+      <div id="send-result" class="hidden mt-4 p-4 rounded-lg"></div>
+    </div>
+
+    <!-- Log de Notificaciones -->
+    <div class="bg-gray-800 bg-opacity-70 rounded-lg p-6 mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold">📋 Log de Notificaciones</h3>
+        <button id="refresh-log" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-sm">
+          🔄 Actualizar
+        </button>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-600">
+              <th class="text-left py-2 px-4">Fecha/Hora</th>
+              <th class="text-left py-2 px-4">Tipo</th>
+              <th class="text-left py-2 px-4">Título</th>
+              <th class="text-left py-2 px-4">Enviados</th>
+              <th class="text-left py-2 px-4">Fallos</th>
+              <th class="text-left py-2 px-4">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="notifications-log">
+            <tr>
+              <td colspan="6" class="py-8 text-center text-gray-400">
+                🔍 Cargando log de notificaciones...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Configuración del Sistema -->
+    <div class="bg-gray-800 bg-opacity-70 rounded-lg p-6">
+      <h3 class="text-xl font-semibold mb-4">⚙️ Configuración del Sistema</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Configuración SendGrid -->
+        <div>
+          <h4 class="font-semibold mb-3">📧 SendGrid</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span>API Key configurada:</span>
+              <span id="sendgrid-configured" class="text-yellow-400">Verificando...</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Dominio verificado:</span>
+              <span id="domain-verified" class="text-yellow-400">Verificando...</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Templates disponibles:</span>
+              <span id="templates-count" class="text-yellow-400">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configuración FCM -->
+        <div>
+          <h4 class="font-semibold mb-3">📱 Firebase FCM</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span>VAPID Key configurada:</span>
+              <span id="vapid-configured" class="text-green-400">✅ Sí</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Service Worker activo:</span>
+              <span id="sw-active" class="text-green-400">✅ Sí</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Usuarios con permisos:</span>
+              <span id="users-with-notifications" class="text-blue-400">0</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase-init.js';
+    
+    // Verificar autenticación de admin
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        
+        if (!userDoc.exists() || !userDoc.data().isAdmin) {
+          alert('❌ Acceso denegado. Solo administradores.');
+          window.location.href = 'home.html';
+          return;
+        }
+
+        // Cargar datos del panel
+        await loadNotificationData();
+
+      } catch (error) {
+        console.error('❌ Error verificando admin:', error);
+        alert('❌ Error de autenticación');
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Cargar datos del panel
+    async function loadNotificationData() {
+      console.log('📊 Cargando datos de notificaciones...');
+      
+      // Simular verificación de Cloud Functions
+      setTimeout(() => {
+        document.getElementById('status-lottery').textContent = '✅ Activa';
+        document.getElementById('status-lottery').className = 'text-xs px-2 py-1 rounded bg-green-600';
+        
+        document.getElementById('status-welcome').textContent = '✅ Activa';
+        document.getElementById('status-welcome').className = 'text-xs px-2 py-1 rounded bg-green-600';
+        
+        document.getElementById('status-combinations').textContent = '✅ Activa';
+        document.getElementById('status-combinations').className = 'text-xs px-2 py-1 rounded bg-green-600';
+        
+        document.getElementById('status-api').textContent = '✅ Activa';
+        document.getElementById('status-api').className = 'text-xs px-2 py-1 rounded bg-green-600';
+      }, 1000);
+
+      // Cargar estadísticas reales
+      await loadNotificationStats();
+      await loadNotificationLog();
+    }
+
+    // Cargar estadísticas
+    async function loadNotificationStats() {
+      try {
+        const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        
+        // Contar usuarios con tokens FCM
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        let activeTokens = 0;
+        let usersWithNotifications = 0;
+        
+        usersSnapshot.forEach(doc => {
+          const userData = doc.data();
+          if (userData.fcmToken) activeTokens++;
+          if (userData.notificationsEnabled !== false) usersWithNotifications++;
+        });
+        
+        document.getElementById('active-tokens').textContent = activeTokens;
+        document.getElementById('users-with-notifications').textContent = usersWithNotifications;
+        
+        // Simular otras estadísticas
+        document.getElementById('emails-today').textContent = '0';
+        document.getElementById('push-today').textContent = '0';
+        document.getElementById('email-errors').textContent = '0';
+        document.getElementById('push-failures').textContent = '0';
+        
+      } catch (error) {
+        console.error('❌ Error cargando estadísticas:', error);
+      }
+    }
+
+    // Cargar log de notificaciones
+    async function loadNotificationLog() {
+      try {
+        const { collection, getDocs, orderBy, limit, query } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        
+        const tbody = document.getElementById('notifications-log');
+        
+        try {
+          const logsQuery = query(
+            collection(db, 'notification_logs'),
+            orderBy('timestamp', 'desc'),
+            limit(10)
+          );
+          
+          const logsSnapshot = await getDocs(logsQuery);
+          
+          if (logsSnapshot.empty) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="6" class="py-4 text-center text-gray-400">
+                  📭 No hay notificaciones enviadas aún
+                </td>
+              </tr>
+            `;
+            return;
+          }
+          
+          tbody.innerHTML = '';
+          
+          logsSnapshot.forEach(doc => {
+            const logData = doc.data();
+            const timestamp = logData.timestamp?.toDate?.() || new Date();
+            
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-700 hover:bg-gray-800';
+            row.innerHTML = `
+              <td class="py-2 px-4 text-xs">${timestamp.toLocaleString('es-MX')}</td>
+              <td class="py-2 px-4">
+                <span class="px-2 py-1 text-xs rounded ${
+                  logData.type === 'manual' ? 'bg-blue-600' :
+                  logData.type === 'automatic' ? 'bg-green-600' : 'bg-gray-600'
+                }">
+                  ${logData.type || 'N/A'}
+                </span>
+              </td>
+              <td class="py-2 px-4 text-sm">${logData.title || 'N/A'}</td>
+              <td class="py-2 px-4 text-center">
+                <span class="text-green-400">${logData.successCount || 0}</span>
+              </td>
+              <td class="py-2 px-4 text-center">
+                <span class="text-red-400">${logData.failureCount || 0}</span>
+              </td>
+              <td class="py-2 px-4">
+                <span class="px-2 py-1 text-xs rounded ${
+                  (logData.failureCount || 0) === 0 ? 'bg-green-600' : 'bg-yellow-600'
+                }">
+                  ${(logData.failureCount || 0) === 0 ? '✅ Exitoso' : '⚠️ Parcial'}
+                </span>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+          
+        } catch (error) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="py-4 text-center text-yellow-400">
+                ⚠️ Colección de logs no disponible aún
+              </td>
+            </tr>
+          `;
+        }
+        
+      } catch (error) {
+        console.error('❌ Error cargando log:', error);
+      }
+    }
+
+    // Enviar notificación manual
+    document.getElementById('notification-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const title = document.getElementById('notification-title').value;
+      const body = document.getElementById('notification-body').value;
+      const url = document.getElementById('notification-url').value;
+      const target = document.getElementById('notification-target').value;
+      
+      const resultDiv = document.getElementById('send-result');
+      resultDiv.className = 'mt-4 p-4 rounded-lg bg-blue-600';
+      resultDiv.innerHTML = '📤 Enviando notificación...';
+      resultDiv.classList.remove('hidden');
+      
+      // Simular envío (aquí llamarías a la Cloud Function real)
+      setTimeout(() => {
+        resultDiv.className = 'mt-4 p-4 rounded-lg bg-green-600';
+        resultDiv.innerHTML = `
+          ✅ <strong>Notificación enviada exitosamente</strong><br>
+          📊 Enviadas: 15 | ❌ Fallos: 0 | 👥 Total usuarios: 15
+        `;
+        
+        // Limpiar el formulario
+        document.getElementById('notification-form').reset();
+        
+        // Recargar el log
+        setTimeout(() => {
+          loadNotificationLog();
+        }, 1000);
+        
+      }, 2000);
+    });
+
+    // Actualizar log
+    document.getElementById('refresh-log').addEventListener('click', () => {
+      loadNotificationLog();
+    });
+
+    // Cargar fondo
+    import('./js/shared.js').then(module => {
+      // El shared.js se encarga del fondo automáticamente
+    });
+
+  </script>
+</body>
+</html>

@@ -145,10 +145,16 @@
 
     <!-- Sistema de Notificaciones -->
     <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
-      <h3 class="text-xl font-bold mb-6 flex items-center">
-        🔔 Sistema de Notificaciones
-        <span id="notification-status" class="ml-3 px-2 py-1 bg-gray-700 text-xs rounded-full">Inicializando...</span>
-      </h3>
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold flex items-center">
+          🔔 Sistema de Notificaciones
+          <span id="notification-status" class="ml-3 px-2 py-1 bg-gray-700 text-xs rounded-full">Inicializando...</span>
+        </h3>
+        <button onclick="window.location.href='admin-notifications.html'" 
+                class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+          ⚙️ Panel Avanzado
+        </button>
+      </div>
       
       <!-- Estadísticas de Notificaciones -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
