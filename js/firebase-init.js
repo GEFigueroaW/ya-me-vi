@@ -79,8 +79,24 @@ export async function registerUserInFirestore(user) {
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     console.log('👤 Usuario autenticado:', user.email);
-    // Registrar automáticamente en Firestore
+    // Registrar automáticamente en Firestore con actualización inmediata
     await registerUserInFirestore(user);
+    
+    // Forzar actualización del estado online
+    try {
+      const { doc, updateDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        isOnline: true,
+        lastAccess: serverTimestamp(),
+        lastLoginDevice: navigator.userAgent.includes('Mobile') ? 'Mobile' : 
+                        navigator.userAgent.includes('Tablet') ? 'Tablet' : 'Desktop'
+      });
+      console.log('✅ Estado online actualizado inmediatamente');
+    } catch (error) {
+      console.log('⚠️ Error actualizando estado online:', error);
+    }
+    
   } else {
     console.log('👤 Usuario desconectado');
     // Aquí podrías marcar como offline si tuvieras el UID

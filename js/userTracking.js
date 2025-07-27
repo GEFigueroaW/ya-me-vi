@@ -121,6 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Registrar login
       trackUserActivity('login', 'Usuario autenticado');
+      
+      // Actualizar estado online cada 30 segundos
+      setInterval(() => {
+        updateUserOnlineStatus(true);
+        console.log('🔄 Estado online renovado automáticamente');
+      }, 30000);
     }
   });
   
@@ -128,6 +134,20 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('beforeunload', () => {
     if (auth.currentUser) {
       updateUserOnlineStatus(false);
+    }
+  });
+  
+  // Marcar como offline si la página se oculta (cambio de pestaña)
+  document.addEventListener('visibilitychange', () => {
+    if (auth.currentUser) {
+      if (document.hidden) {
+        // No marcar como offline inmediatamente, solo reducir la frecuencia
+        console.log('📱 Página oculta, reduciendo frecuencia de updates');
+      } else {
+        // Volver a marcar como online al regresar
+        updateUserOnlineStatus(true);
+        console.log('📱 Página visible, actualizando estado online');
+      }
     }
   });
 });

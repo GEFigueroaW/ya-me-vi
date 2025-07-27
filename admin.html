@@ -873,12 +873,28 @@
           try {
             // Listener para usuarios en tiempo real
             const usersCollection = collection(db, 'users');
-            onSnapshot(usersCollection, (snapshot) => {
+            onSnapshot(usersCollection, async (snapshot) => {
+              // Actualizar contador total
               document.getElementById('total-users').textContent = snapshot.size;
               console.log('🔄 Usuarios actualizados en tiempo real:', snapshot.size);
+              
+              // Recargar la tabla de usuarios automáticamente
+              await loadRecentUsers();
             });
             
-            console.log('👂 Listeners en tiempo real configurados');
+            // Actualizar métricas cada 30 segundos
+            setInterval(async () => {
+              console.log('🔄 Actualizando métricas automáticamente...');
+              await loadRealTimeMetrics();
+            }, 30000);
+            
+            // Actualizar tabla de usuarios cada 15 segundos
+            setInterval(async () => {
+              console.log('👥 Actualizando usuarios automáticamente...');
+              await loadRecentUsers();
+            }, 15000);
+            
+            console.log('👂 Listeners en tiempo real configurados (actualización cada 15s)');
           } catch (error) {
             console.error('❌ Error configurando listeners:', error);
           }

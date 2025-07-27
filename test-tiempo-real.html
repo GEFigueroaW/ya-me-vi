@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Tiempo Real - YA ME VI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white p-6">
+  
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">🔄 Test de Actualizaciones en Tiempo Real</h1>
+    
+    <!-- Estado de conexión -->
+    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-3">📡 Estado de Conexión</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-gray-700 p-3 rounded">
+          <div class="text-sm text-gray-400">Firebase Auth</div>
+          <div id="auth-status" class="text-lg font-mono">🔍 Verificando...</div>
+        </div>
+        <div class="bg-gray-700 p-3 rounded">
+          <div class="text-sm text-gray-400">Firestore DB</div>
+          <div id="db-status" class="text-lg font-mono">🔍 Verificando...</div>
+        </div>
+        <div class="bg-gray-700 p-3 rounded">
+          <div class="text-sm text-gray-400">Última Actualización</div>
+          <div id="last-update" class="text-lg font-mono">--:--:--</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Métricas en tiempo real -->
+    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-3">📊 Métricas en Tiempo Real</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-blue-600 p-3 rounded text-center">
+          <div class="text-2xl font-bold" id="users-count">--</div>
+          <div class="text-sm">Usuarios Totales</div>
+        </div>
+        <div class="bg-green-600 p-3 rounded text-center">
+          <div class="text-2xl font-bold" id="online-count">--</div>
+          <div class="text-sm">Usuarios Online</div>
+        </div>
+        <div class="bg-yellow-600 p-3 rounded text-center">
+          <div class="text-2xl font-bold" id="analysis-count">--</div>
+          <div class="text-sm">Análisis Hoy</div>
+        </div>
+        <div class="bg-purple-600 p-3 rounded text-center">
+          <div class="text-2xl font-bold" id="db-size">--</div>
+          <div class="text-sm">Docs en DB</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Log de actividades -->
+    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-3">📋 Log de Actividades (Últimas 10)</h2>
+      <div id="activity-log" class="space-y-2 max-h-64 overflow-y-auto">
+        <div class="text-gray-400 text-center py-4">🔍 Cargando actividades...</div>
+      </div>
+    </div>
+    
+    <!-- Controles de prueba -->
+    <div class="bg-gray-800 rounded-lg p-4">
+      <h2 class="text-xl font-semibold mb-3">🎮 Controles de Prueba</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button id="btn-force-update" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+          🔄 Forzar Actualización
+        </button>
+        <button id="btn-register-activity" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+          📊 Registrar Actividad
+        </button>
+        <button id="btn-toggle-online" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded">
+          🟢 Toggle Online
+        </button>
+        <button id="btn-clear-log" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+          🗑️ Limpiar Log
+        </button>
+      </div>
+    </div>
+    
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase-init.js';
+    import { trackUserActivity, updateUserOnlineStatus } from './js/userTracking.js';
+    
+    let updateInterval;
+    let activityLog = [];
+    
+    // Función para agregar mensaje al log
+    function addToLog(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString('es-MX');
+      const logEntry = {
+        time: timestamp,
+        message: message,
+        type: type
+      };
+      
+      activityLog.unshift(logEntry);
+      if (activityLog.length > 10) {
+        activityLog = activityLog.slice(0, 10);
+      }
+      
+      updateLogDisplay();
+    }
+    
+    // Actualizar display del log
+    function updateLogDisplay() {
+      const logContainer = document.getElementById('activity-log');
+      logContainer.innerHTML = '';
+      
+      activityLog.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = `text-sm p-2 rounded ${
+          entry.type === 'error' ? 'bg-red-800' :
+          entry.type === 'success' ? 'bg-green-800' :
+          entry.type === 'warning' ? 'bg-yellow-800' :
+          'bg-gray-700'
+        }`;
+        div.innerHTML = `<span class="text-gray-400">[${entry.time}]</span> ${entry.message}`;
+        logContainer.appendChild(div);
+      });
+    }
+    
+    // Actualizar métricas
+    async function updateMetrics() {
+      try {
+        const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        
+        // Contar usuarios totales
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        document.getElementById('users-count').textContent = usersSnapshot.size;
+        
+        // Contar usuarios online
+        const onlineQuery = query(collection(db, 'users'), where('isOnline', '==', true));
+        const onlineSnapshot = await getDocs(onlineQuery);
+        document.getElementById('online-count').textContent = onlineSnapshot.size;
+        
+        // Análisis de hoy (aproximado)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        try {
+          const analysisSnapshot = await getDocs(collection(db, 'individual_analysis'));
+          document.getElementById('analysis-count').textContent = analysisSnapshot.size;
+        } catch (e) {
+          document.getElementById('analysis-count').textContent = '0';
+        }
+        
+        // Tamaño total de la DB (estimado)
+        const totalDocs = usersSnapshot.size;
+        document.getElementById('db-size').textContent = totalDocs;
+        
+        // Actualizar timestamp
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString('es-MX');
+        
+        addToLog(`✅ Métricas actualizadas: ${usersSnapshot.size} usuarios, ${onlineSnapshot.size} online`, 'success');
+        
+      } catch (error) {
+        console.error('❌ Error actualizando métricas:', error);
+        addToLog(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+    
+    // Verificar estado de conexión
+    function checkConnectionStatus() {
+      // Auth status
+      if (auth.currentUser) {
+        document.getElementById('auth-status').innerHTML = '✅ Conectado';
+        document.getElementById('auth-status').className = 'text-lg font-mono text-green-400';
+      } else {
+        document.getElementById('auth-status').innerHTML = '❌ Desconectado';
+        document.getElementById('auth-status').className = 'text-lg font-mono text-red-400';
+      }
+      
+      // DB status (siempre disponible si auth funciona)
+      if (db) {
+        document.getElementById('db-status').innerHTML = '✅ Conectado';
+        document.getElementById('db-status').className = 'text-lg font-mono text-green-400';
+      } else {
+        document.getElementById('db-status').innerHTML = '❌ Error';
+        document.getElementById('db-status').className = 'text-lg font-mono text-red-400';
+      }
+    }
+    
+    // Inicialización
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        addToLog(`👤 Usuario conectado: ${user.email}`, 'success');
+        checkConnectionStatus();
+        
+        // Actualizar métricas cada 10 segundos
+        updateMetrics();
+        updateInterval = setInterval(updateMetrics, 10000);
+        
+      } else {
+        addToLog('❌ Usuario no autenticado', 'error');
+        checkConnectionStatus();
+        
+        if (updateInterval) {
+          clearInterval(updateInterval);
+        }
+      }
+    });
+    
+    // Event listeners para botones
+    document.getElementById('btn-force-update').addEventListener('click', () => {
+      addToLog('🔄 Forzando actualización manual...', 'info');
+      updateMetrics();
+    });
+    
+    document.getElementById('btn-register-activity').addEventListener('click', () => {
+      if (auth.currentUser) {
+        trackUserActivity('test_action', 'Actividad de prueba desde test-tiempo-real');
+        addToLog('📊 Actividad de prueba registrada', 'success');
+      } else {
+        addToLog('❌ No hay usuario autenticado', 'error');
+      }
+    });
+    
+    document.getElementById('btn-toggle-online').addEventListener('click', () => {
+      if (auth.currentUser) {
+        updateUserOnlineStatus(true);
+        addToLog('🟢 Estado online actualizado', 'success');
+      } else {
+        addToLog('❌ No hay usuario autenticado', 'error');
+      }
+    });
+    
+    document.getElementById('btn-clear-log').addEventListener('click', () => {
+      activityLog = [];
+      updateLogDisplay();
+      addToLog('🗑️ Log limpiado', 'info');
+    });
+    
+    // Verificar estado inicial
+    checkConnectionStatus();
+    addToLog('🚀 Sistema de pruebas inicializado', 'info');
+    
+  </script>
+</body>
+</html>
