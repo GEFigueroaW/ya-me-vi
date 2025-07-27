@@ -13,7 +13,207 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   
   <!-- iOS Startup Images -->
-  <link rel="apple-touch-startup-image" href="assets/logo-512.png">
+  <link rel="apple-touch-st        }
+      });
+      
+      // =====================================================
+      // SISTEMA DE NOTIFICACIONES - CONFIGURACIÓN
+      // =====================================================
+
+      // Inicializar sistema de notificaciones cuando el admin esté autenticado
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          const isAdmin = await adminNotificationSystem.checkAdminStatus();
+          
+          if (isAdmin) {
+            console.log('👑 Admin autenticado, configurando panel de notificaciones...');
+            
+            // Actualizar estado del sistema
+            document.getElementById('notification-status').textContent = '✅ Activo';
+            document.getElementById('notification-status').className = 'ml-3 px-2 py-1 bg-green-600 text-xs rounded-full';
+            
+            // Cargar estadísticas
+            await loadNotificationStats();
+            
+            // Configurar manejadores de eventos
+            setupNotificationHandlers();
+          } else {
+            document.getElementById('notification-status').textContent = '❌ No autorizado';
+            document.getElementById('notification-status').className = 'ml-3 px-2 py-1 bg-red-600 text-xs rounded-full';
+          }
+        }
+      });
+
+      // Cargar estadísticas de notificaciones
+      async function loadNotificationStats() {
+        try {
+          const stats = await adminNotificationSystem.getNotificationStats();
+          if (stats) {
+            document.getElementById('push-stats').textContent = stats.push.sent || 0;
+            document.getElementById('inapp-stats').textContent = stats.inApp.active || 0;
+            document.getElementById('email-stats').textContent = stats.email.sent || 0;
+          }
+        } catch (error) {
+          console.error('❌ Error cargando estadísticas:', error);
+        }
+      }
+
+      // Configurar manejadores de eventos para notificaciones
+      function setupNotificationHandlers() {
+        // Enviar notificación push
+        document.getElementById('btn-send-push').addEventListener('click', async () => {
+          const data = getNotificationFormData();
+          if (!data.title || !data.body) {
+            alert('❌ Por favor completa al menos el título y mensaje');
+            return;
+          }
+
+          try {
+            await adminNotificationSystem.sendPushNotificationToAll(data);
+            clearNotificationForm();
+            await loadNotificationStats();
+          } catch (error) {
+            console.error('❌ Error enviando push:', error);
+          }
+        });
+
+        // Crear notificación in-app
+        document.getElementById('btn-send-inapp').addEventListener('click', async () => {
+          const data = getNotificationFormData();
+          if (!data.title || !data.body) {
+            alert('❌ Por favor completa al menos el título y mensaje');
+            return;
+          }
+
+          try {
+            await adminNotificationSystem.createInAppNotificationForAll(data);
+            clearNotificationForm();
+            await loadNotificationStats();
+          } catch (error) {
+            console.error('❌ Error creando in-app:', error);
+          }
+        });
+
+        // Programar email
+        document.getElementById('btn-send-email').addEventListener('click', async () => {
+          const data = getNotificationFormData();
+          if (!data.title || !data.body) {
+            alert('❌ Por favor completa al menos el título y mensaje');
+            return;
+          }
+
+          try {
+            const emailData = {
+              subject: data.title,
+              body: data.body,
+              htmlContent: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <div style="background: linear-gradient(135deg, #00B44F, #007bff); padding: 20px; text-align: center;">
+                    <img src="https://yamevi.com.mx/assets/logo-192.png" alt="YA ME VI" style="width: 60px; height: 60px;">
+                    <h1 style="color: white; margin: 10px 0;">${data.title}</h1>
+                  </div>
+                  <div style="padding: 20px; background: #f8f9fa;">
+                    <p style="font-size: 16px; line-height: 1.6; color: #333;">${data.body}</p>
+                    ${data.url ? `<div style="text-align: center; margin: 20px 0;">
+                      <a href="https://yamevi.com.mx${data.url}" style="background: #00B44F; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver en YA ME VI</a>
+                    </div>` : ''}
+                  </div>
+                  <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
+                    <p>© ${new Date().getFullYear()} YA ME VI - Análisis Inteligente de Lotería</p>
+                    <p><a href="https://yamevi.com.mx/unsubscribe" style="color: #ccc;">Cancelar suscripción</a></p>
+                  </div>
+                </div>
+              `
+            };
+
+            await adminNotificationSystem.scheduleEmailToAll(emailData);
+            clearNotificationForm();
+            await loadNotificationStats();
+          } catch (error) {
+            console.error('❌ Error programando email:', error);
+          }
+        });
+
+        // Enviar todo (push + in-app + email)
+        document.getElementById('btn-send-all').addEventListener('click', async () => {
+          const data = getNotificationFormData();
+          if (!data.title || !data.body) {
+            alert('❌ Por favor completa al menos el título y mensaje');
+            return;
+          }
+
+          if (!confirm('⚠️ ¿Estás seguro de enviar TODAS las notificaciones (Push + In-App + Email)?\n\nEsto llegará a todos los usuarios registrados.')) {
+            return;
+          }
+
+          try {
+            // Enviar todo en paralelo
+            const results = await Promise.allSettled([
+              adminNotificationSystem.sendPushNotificationToAll(data),
+              adminNotificationSystem.createInAppNotificationForAll(data),
+              adminNotificationSystem.scheduleEmailToAll({
+                subject: data.title,
+                body: data.body,
+                htmlContent: `
+                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #00B44F, #007bff); padding: 20px; text-align: center;">
+                      <img src="https://yamevi.com.mx/assets/logo-192.png" alt="YA ME VI" style="width: 60px; height: 60px;">
+                      <h1 style="color: white; margin: 10px 0;">${data.title}</h1>
+                    </div>
+                    <div style="padding: 20px; background: #f8f9fa;">
+                      <p style="font-size: 16px; line-height: 1.6; color: #333;">${data.body}</p>
+                      ${data.url ? `<div style="text-align: center; margin: 20px 0;">
+                        <a href="https://yamevi.com.mx${data.url}" style="background: #00B44F; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver en YA ME VI</a>
+                      </div>` : ''}
+                    </div>
+                    <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
+                      <p>© ${new Date().getFullYear()} YA ME VI - Análisis Inteligente de Lotería</p>
+                      <p><a href="https://yamevi.com.mx/unsubscribe" style="color: #ccc;">Cancelar suscripción</a></p>
+                    </div>
+                  </div>
+                `
+              })
+            ]);
+
+            const successful = results.filter(result => result.status === 'fulfilled').length;
+            adminNotificationSystem.showAdminFeedback('success', `✅ ${successful}/3 tipos de notificaciones enviadas correctamente`);
+
+            clearNotificationForm();
+            await loadNotificationStats();
+          } catch (error) {
+            console.error('❌ Error enviando todas las notificaciones:', error);
+          }
+        });
+      }
+
+      // Obtener datos del formulario de notificación
+      function getNotificationFormData() {
+        const gameSelect = document.getElementById('notification-game');
+        const gameText = gameSelect.value ? ` para ${gameSelect.value}` : '';
+        
+        return {
+          title: document.getElementById('notification-title').value,
+          body: document.getElementById('notification-body').value + gameText,
+          type: document.getElementById('notification-type').value,
+          url: document.getElementById('notification-url').value || '/home.html',
+          game: gameSelect.value
+        };
+      }
+
+      // Limpiar formulario de notificación
+      function clearNotificationForm() {
+        document.getElementById('notification-title').value = '';
+        document.getElementById('notification-body').value = '';
+        document.getElementById('notification-url').value = '';
+        document.getElementById('notification-type').selectedIndex = 0;
+        document.getElementById('notification-game').selectedIndex = 0;
+      }
+
+      // =====================================================
+      // FIN SISTEMA DE NOTIFICACIONES
+      // =====================================================
+      
+    });p-image" href="assets/logo-512.png">
   
   <!-- Additional iOS Meta -->
   <meta name="format-detection" content="telephone=no">
@@ -169,6 +369,136 @@
       </div>
     </div>
 
+    <!-- Sistema de Notificaciones -->
+    <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+      <h3 class="text-xl font-bold mb-6 flex items-center">
+        🔔 Sistema de Notificaciones
+        <span id="notification-status" class="ml-3 px-2 py-1 bg-gray-700 text-xs rounded-full">Inicializando...</span>
+      </h3>
+      
+      <!-- Estadísticas de Notificaciones -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm">Push Enviadas</p>
+              <p id="push-stats" class="text-xl font-bold text-blue-400">0</p>
+            </div>
+            <div class="text-2xl">📱</div>
+          </div>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm">In-App Activas</p>
+              <p id="inapp-stats" class="text-xl font-bold text-green-400">0</p>
+            </div>
+            <div class="text-2xl">💬</div>
+          </div>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm">Emails Enviados</p>
+              <p id="email-stats" class="text-xl font-bold text-purple-400">0</p>
+            </div>
+            <div class="text-2xl">📧</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Notificación -->
+      <div class="bg-gray-800 p-6 rounded-lg mb-6">
+        <h4 class="text-lg font-bold mb-4">✏️ Crear Nueva Notificación</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Título</label>
+            <input id="notification-title" type="text" 
+                   class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500" 
+                   placeholder="Ej: 🎯 Nuevas Predicciones Disponibles">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Tipo</label>
+            <select id="notification-type" 
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500">
+              <option value="general">📢 General</option>
+              <option value="prediction">🎯 Predicciones</option>
+              <option value="analysis">📊 Análisis</option>
+              <option value="maintenance">🔧 Mantenimiento</option>
+              <option value="success">✅ Éxito</option>
+              <option value="warning">⚠️ Advertencia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-300 mb-2">Mensaje</label>
+          <textarea id="notification-body" rows="3" 
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500" 
+                    placeholder="Escribe el mensaje de la notificación..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">URL de Destino (opcional)</label>
+            <input id="notification-url" type="text" 
+                   class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500" 
+                   placeholder="/home.html">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Juego (para análisis)</label>
+            <select id="notification-game" 
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500">
+              <option value="">Seleccionar juego</option>
+              <option value="Melate">Melate</option>
+              <option value="Revancha">Revancha</option>
+              <option value="Revanchita">Revanchita</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Botones de Envío -->
+        <div class="flex flex-wrap gap-3">
+          <button id="btn-send-push" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+            📱 Enviar Push
+          </button>
+          <button id="btn-send-inapp" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+            💬 Crear In-App
+          </button>
+          <button id="btn-send-email" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+            📧 Programar Email
+          </button>
+          <button id="btn-send-all" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg transition-all">
+            🚀 Enviar Todo
+          </button>
+        </div>
+      </div>
+
+      <!-- Notificaciones Rápidas para Análisis -->
+      <div class="bg-gray-800 p-6 rounded-lg">
+        <h4 class="text-lg font-bold mb-4">⚡ Notificaciones Rápidas</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <button onclick="adminNotificationSystem.sendAnalysisNotification('new-predictions', 'Melate')" 
+                  class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
+            🎯 Predicciones Melate
+          </button>
+          <button onclick="adminNotificationSystem.sendAnalysisNotification('frequency-update', 'Revancha')" 
+                  class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
+            📊 Análisis Revancha
+          </button>
+          <button onclick="adminNotificationSystem.sendAnalysisNotification('lucky-numbers', 'Revanchita')" 
+                  class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
+            🍀 Suerte Revanchita
+          </button>
+          <button onclick="adminNotificationSystem.sendAnalysisNotification('system-maintenance', 'General')" 
+                  class="bg-yellow-600 hover:bg-yellow-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
+            🔧 Mantenimiento
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Botones de acción -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <button id="btn-export-data" class="btn-rainbow text-white font-bold py-3 px-6 rounded-lg transition-all duration-300">
@@ -190,6 +520,10 @@
     import { AdminDataManager } from './js/adminDataManager.js';
     import { auth, db, onAuthStateChanged } from './js/firebase-init.js';
     import { redirectIfNotAdmin } from './js/adminCheck.js';
+    import { adminNotificationSystem } from './js/adminNotifications.js';
+
+    // Hacer adminNotificationSystem global para botones rápidos
+    window.adminNotificationSystem = adminNotificationSystem;
 
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('🚀 Inicializando panel de administración...');

@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
@@ -17,4 +18,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export { app, onAuthStateChanged };
+export const messaging = getMessaging(app);
+
+// VAPID Key para Web Push (necesitarás generarla en la consola de Firebase)
+export const VAPID_KEY = 'TU_VAPID_KEY_AQUI'; // Te ayudo a obtenerla después
+
+export { app, onAuthStateChanged, getToken, onMessage };

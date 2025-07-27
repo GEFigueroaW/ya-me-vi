@@ -9,6 +9,7 @@
   "orientation": "portrait",
   "scope": ".",
   "lang": "es",
+  "gcm_sender_id": "748876890843",
   "icons": [
     {
       "src": "assets/favicon.ico",

@@ -1,5 +1,5 @@
 // service-worker.js - Service Worker para YA ME VI PWA
-const CACHE_NAME = 'ya-me-vi-v1.0.4';
+const CACHE_NAME = 'ya-me-vi-v1.0.5';
 const urlsToCache = [
   '.',
   'index.html',
@@ -12,11 +12,14 @@ const urlsToCache = [
   'js/dataParser.js',
   'js/mlPredictor.js',
   'js/firebase-init.js',
+  'js/notificationManager.js',
+  'js/adminNotifications.js',
   'assets/logo-192.png',
   'assets/logo-512.png',
   'assets/Melate.csv',
   'assets/Revancha.csv',
   'assets/Revanchita.csv',
+  'firebase-messaging-sw.js',
   'manifest.json'
 ];
 
