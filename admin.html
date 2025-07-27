@@ -134,10 +134,10 @@
         <div class="text-blue-400 mr-3">ℹ️</div>
         <div class="text-blue-100">
           <strong>Estado del Sistema:</strong> 
-          <span id="system-status">Inicializando bases de datos...</span>
+          <span id="system-status">Inicializando conexión con Firebase...</span>
           <br>
           <small class="text-blue-200">
-            Si ves "0" o "Error" en las métricas, es normal en el primer uso. El sistema creará automáticamente las colecciones necesarias.
+            Solo se muestran datos reales de Firebase. "Sin registro" o "Sin datos" indica que las colecciones no existen aún o están vacías.
           </small>
         </div>
       </div>
@@ -511,8 +511,8 @@
             document.getElementById('push-stats').textContent = pushSnapshot.size;
             console.log('📱 Push notifications enviadas:', pushSnapshot.size);
           } catch (error) {
-            console.log('⚠️ Colección push_notifications no existe');
-            document.getElementById('push-stats').textContent = '0';
+            console.log('⚠️ Colección push_notifications no disponible:', error.code);
+            document.getElementById('push-stats').textContent = 'Sin registro';
           }
           
           // Cargar estadísticas de in-app notifications
@@ -523,8 +523,8 @@
             document.getElementById('inapp-stats').textContent = inappSnapshot.size;
             console.log('💬 In-app notifications activas:', inappSnapshot.size);
           } catch (error) {
-            console.log('⚠️ Colección inapp_notifications no existe');
-            document.getElementById('inapp-stats').textContent = '0';
+            console.log('⚠️ Colección inapp_notifications no disponible:', error.code);
+            document.getElementById('inapp-stats').textContent = 'Sin registro';
           }
           
           // Cargar estadísticas de emails
@@ -534,15 +534,15 @@
             document.getElementById('email-stats').textContent = emailSnapshot.size;
             console.log('📧 Emails enviados:', emailSnapshot.size);
           } catch (error) {
-            console.log('⚠️ Colección email_notifications no existe');
-            document.getElementById('email-stats').textContent = '0';
+            console.log('⚠️ Colección email_notifications no disponible:', error.code);
+            document.getElementById('email-stats').textContent = 'Sin registro';
           }
           
         } catch (error) {
           console.error('❌ Error cargando estadísticas de notificaciones:', error);
-          document.getElementById('push-stats').textContent = 'Error';
-          document.getElementById('inapp-stats').textContent = 'Error';
-          document.getElementById('email-stats').textContent = 'Error';
+          document.getElementById('push-stats').textContent = 'Sin datos';
+          document.getElementById('inapp-stats').textContent = 'Sin datos';
+          document.getElementById('email-stats').textContent = 'Sin datos';
         }
       }
 
@@ -584,7 +584,7 @@
           // Actualizar estado del sistema
           const systemStatus = document.getElementById('system-status');
           if (systemStatus) {
-            systemStatus.textContent = 'Datos cargados correctamente desde Firebase';
+            systemStatus.textContent = 'Conectado - Solo datos reales de Firebase';
           }
           
         } catch (error) {
@@ -608,14 +608,8 @@
             const usersSnapshot = await getDocs(usersCollection);
             const totalUsers = usersSnapshot.size;
             
-            if (totalUsers === 0) {
-              // Si no hay usuarios, mostrar 0 pero no error
-              document.getElementById('total-users').textContent = '0';
-              console.log('👥 No hay usuarios registrados aún');
-            } else {
-              document.getElementById('total-users').textContent = totalUsers;
-              console.log('👥 Total usuarios:', totalUsers);
-            }
+            document.getElementById('total-users').textContent = totalUsers;
+            console.log('👥 Total usuarios:', totalUsers);
             
           } catch (error) {
             console.error('❌ Error cargando usuarios:', error);
@@ -626,12 +620,10 @@
               document.getElementById('total-users').textContent = 'Sin permisos';
             } else if (error.code === 'not-found') {
               console.log('⚠️ La colección users no existe aún');
-              document.getElementById('total-users').textContent = '0';
+              document.getElementById('total-users').textContent = 'Sin datos';
             } else {
-              console.log('⚠️ Usando datos simulados para usuarios');
-              // Usar datos simulados como fallback
-              const simulatedUsers = Math.floor(Math.random() * 50) + 10; // Entre 10 y 60 usuarios
-              document.getElementById('total-users').textContent = simulatedUsers;
+              console.log('⚠️ Error de conexión o colección no disponible');
+              document.getElementById('total-users').textContent = 'Sin registro';
             }
           }
         }
@@ -669,19 +661,17 @@
             }
             
             if (collectionsFound === 0) {
-              // Si no encontramos ninguna colección, usar datos simulados
-              totalQueries = Math.floor(Math.random() * 20) + 5; // Entre 5 y 25 consultas
-              console.log('⚠️ Usando datos simulados para consultas diarias:', totalQueries);
+              // Si no encontramos ninguna colección, mostrar sin registro
+              document.getElementById('daily-queries').textContent = 'Sin registro';
+              console.log('⚠️ No se encontraron colecciones de consultas');
+            } else {
+              document.getElementById('daily-queries').textContent = totalQueries;
+              console.log('📊 Total consultas del día:', totalQueries);
             }
-            
-            document.getElementById('daily-queries').textContent = totalQueries;
-            console.log('📊 Total consultas del día:', totalQueries);
             
           } catch (error) {
             console.error('❌ Error cargando consultas diarias:', error);
-            // Datos simulados como fallback
-            const simulatedQueries = Math.floor(Math.random() * 15) + 3;
-            document.getElementById('daily-queries').textContent = simulatedQueries;
+            document.getElementById('daily-queries').textContent = 'Sin datos';
           }
         }
         
@@ -707,19 +697,17 @@
             }
             
             if (collectionsFound === 0) {
-              // Si no encontramos ninguna colección, usar datos simulados
-              totalAnalysis = Math.floor(Math.random() * 100) + 25; // Entre 25 y 125 análisis
-              console.log('⚠️ Usando datos simulados para análisis totales:', totalAnalysis);
+              // Si no encontramos ninguna colección, mostrar sin registro
+              document.getElementById('total-analysis').textContent = 'Sin registro';
+              console.log('⚠️ No se encontraron colecciones de análisis');
+            } else {
+              document.getElementById('total-analysis').textContent = totalAnalysis;
+              console.log('🔮 Total análisis:', totalAnalysis);
             }
-            
-            document.getElementById('total-analysis').textContent = totalAnalysis;
-            console.log('🔮 Total análisis:', totalAnalysis);
             
           } catch (error) {
             console.error('❌ Error cargando análisis totales:', error);
-            // Datos simulados como fallback
-            const simulatedAnalysis = Math.floor(Math.random() * 80) + 20;
-            document.getElementById('total-analysis').textContent = simulatedAnalysis;
+            document.getElementById('total-analysis').textContent = 'Sin datos';
           }
         }
         
@@ -746,19 +734,17 @@
             }
             
             if (collectionsFound === 0) {
-              // Si no encontramos ninguna colección, usar datos simulados
-              totalRecords = Math.floor(Math.random() * 500) + 100; // Entre 100 y 600 registros
-              console.log('⚠️ Usando datos simulados para tamaño de DB:', totalRecords);
+              // Si no encontramos ninguna colección, mostrar sin registro
+              document.getElementById('database-size').textContent = 'Sin registro';
+              console.log('⚠️ No se encontraron colecciones en la base de datos');
+            } else {
+              document.getElementById('database-size').textContent = totalRecords.toLocaleString();
+              console.log('💾 Total registros DB:', totalRecords);
             }
-            
-            document.getElementById('database-size').textContent = totalRecords.toLocaleString();
-            console.log('💾 Total registros DB:', totalRecords);
             
           } catch (error) {
             console.error('❌ Error cargando tamaño de DB:', error);
-            // Datos simulados como fallback
-            const simulatedSize = Math.floor(Math.random() * 400) + 150;
-            document.getElementById('database-size').textContent = simulatedSize.toLocaleString();
+            document.getElementById('database-size').textContent = 'Sin datos';
           }
         }
         
@@ -812,30 +798,27 @@
             } catch (collectionError) {
               console.log('⚠️ Error accediendo a colección users:', collectionError.code);
               
-              // Mostrar datos simulados si no podemos acceder a la colección
+              // Mostrar mensaje de sin datos en lugar de datos simulados
               tbody.innerHTML = '';
-              const simulatedUsers = [
-                { email: 'usuario1@gmail.com', lastAccess: 'Hace 5 minutos', device: 'Chrome Desktop' },
-                { email: 'usuario2@yahoo.com', lastAccess: 'Hace 15 minutos', device: 'Safari Mobile' },
-                { email: 'usuario3@hotmail.com', lastAccess: 'Hace 1 hora', device: 'Edge Desktop' }
-              ];
-              
-              simulatedUsers.forEach((user, index) => {
-                const row = document.createElement('tr');
-                row.className = 'border-b border-gray-700 hover:bg-gray-800';
-                row.innerHTML = `
-                  <td class="py-2 px-4">${user.email} <span class="text-xs text-gray-500">(simulado)</span></td>
-                  <td class="py-2 px-4 text-sm text-gray-300">${user.lastAccess}</td>
-                  <td class="py-2 px-4 text-sm text-gray-300">${user.device}</td>
-                  <td class="py-2 px-4">
-                    <button onclick="viewUserDetails('sim_${index}')" class="text-blue-400 hover:text-blue-300 text-sm mr-2">Ver</button>
-                    <button onclick="toggleUserStatus('sim_${index}')" class="text-yellow-400 hover:text-yellow-300 text-sm">Estado</button>
-                  </td>
+              if (collectionError.code === 'permission-denied') {
+                tbody.innerHTML = `
+                  <tr>
+                    <td colspan="4" class="py-4 text-center text-yellow-400">
+                      🔒 Sin permisos para acceder a la información de usuarios
+                    </td>
+                  </tr>
                 `;
-                tbody.appendChild(row);
-              });
+              } else {
+                tbody.innerHTML = `
+                  <tr>
+                    <td colspan="4" class="py-4 text-center text-gray-400">
+                      📂 La colección de usuarios no está disponible aún
+                    </td>
+                  </tr>
+                `;
+              }
               
-              console.log('👥 Mostrando usuarios simulados debido a:', collectionError.code);
+              console.log('👥 No se pudieron cargar usuarios reales debido a:', collectionError.code);
             }
             
           } catch (error) {
@@ -845,7 +828,7 @@
               tbody.innerHTML = `
                 <tr>
                   <td colspan="4" class="py-4 text-center text-red-400">
-                    ❌ Error cargando usuarios: ${error.message}
+                    ❌ Error de conexión: ${error.message}
                   </td>
                 </tr>
               `;
@@ -869,17 +852,17 @@
         }
         
         function showErrorMetrics() {
-          document.getElementById('total-users').textContent = 'Error';
-          document.getElementById('daily-queries').textContent = 'Error';
-          document.getElementById('total-analysis').textContent = 'Error';
-          document.getElementById('database-size').textContent = 'Error';
+          document.getElementById('total-users').textContent = 'Sin datos';
+          document.getElementById('daily-queries').textContent = 'Sin datos';
+          document.getElementById('total-analysis').textContent = 'Sin datos';
+          document.getElementById('database-size').textContent = 'Sin datos';
           
           const tbody = document.getElementById('users-table');
           if (tbody) {
             tbody.innerHTML = `
               <tr>
                 <td colspan="4" class="py-8 text-center text-red-400">
-                  ❌ Error cargando datos del administrador
+                  ❌ Error de conexión con la base de datos
                 </td>
               </tr>
             `;
