@@ -57,10 +57,9 @@
 
         window.createTestUsers = async function() {
             try {
-                log('🔐 Iniciando autenticación...');
-                await signInAnonymously(auth);
-                log('✅ Autenticado correctamente');
-
+                log('🔐 Conectando directamente a Firestore...');
+                // Usar conexión directa sin autenticación anónima
+                
                 const testUsers = [
                     {
                         email: 'usuario1@prueba.com',
