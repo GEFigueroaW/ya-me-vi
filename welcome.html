@@ -163,7 +163,7 @@
   <script type="module">
     import { deviceDetector } from './js/deviceDetector.js';
     import { auth } from './js/firebase-init.js';
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     // Elementos del DOM
     const welcomeMessage = document.getElementById('welcome-message');
@@ -449,8 +449,48 @@
       window.location.href = 'login-email.html';
     });
     
-    googleBtn.addEventListener('click', () => {
-      window.location.href = 'login.html';
+    googleBtn.addEventListener('click', async () => {
+      try {
+        showLoading('Conectando con Google...');
+        
+        // Usar la autenticación de Google directamente aquí
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        
+        console.log("✅ Autenticación con Google exitosa:", result.user.email);
+        
+        // Verificar si es un usuario nuevo o existente
+        const isNewUser = result._tokenResponse?.isNewUser || 
+                         result.user.metadata?.creationTime === result.user.metadata?.lastSignInTime;
+        
+        if (isNewUser) {
+          console.log("🎉 Usuario nuevo detectado, redirigiendo a dream-input");
+          showLoading('¡Cuenta creada! Configurando tu experiencia...');
+          
+          setTimeout(() => {
+            window.location.href = "dream-input.html";
+          }, 1500);
+        } else {
+          console.log("👋 Usuario existente, redirigiendo a home");
+          showLoading('¡Bienvenido de vuelta! Redirigiendo...');
+          
+          setTimeout(() => {
+            window.location.href = "home.html";
+          }, 1500);
+        }
+      } catch (error) {
+        console.error("❌ Error en autenticación con Google:", error);
+        hideLoading();
+        
+        let errorMessage = "Error al conectar con Google. ";
+        if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage += "Ventana cerrada. Inténtalo de nuevo.";
+        } else {
+          errorMessage += error.message || "Inténtalo más tarde.";
+        }
+        
+        alert(errorMessage);
+      }
     });
     
     newAccountBtn.addEventListener('click', () => {
