@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Config</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6">Prueba de Configuración Firebase</h1>
+        
+        <div id="results" class="space-y-4">
+            <div id="config-test" class="p-4 border rounded-lg">
+                <h2 class="font-semibold mb-2">🔧 Configuración Firebase</h2>
+                <div id="config-result" class="text-gray-600">Verificando...</div>
+            </div>
+            
+            <div id="auth-test" class="p-4 border rounded-lg">
+                <h2 class="font-semibold mb-2">🔐 Autenticación</h2>
+                <div id="auth-result" class="text-gray-600">Verificando...</div>
+            </div>
+            
+            <div id="firestore-test" class="p-4 border rounded-lg">
+                <h2 class="font-semibold mb-2">🗄️ Firestore</h2>
+                <div id="firestore-result" class="text-gray-600">Verificando...</div>
+            </div>
+        </div>
+        
+        <div class="mt-6 space-y-3">
+            <button id="test-email-register" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                Probar Registro con Email
+            </button>
+            
+            <button id="test-google-auth" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                Probar Google Auth
+            </button>
+        </div>
+        
+        <div id="test-results" class="mt-6 p-4 bg-gray-50 rounded-lg" style="display: none;">
+            <h3 class="font-semibold mb-2">Resultados de Prueba:</h3>
+            <pre id="test-output" class="text-sm text-gray-700 whitespace-pre-wrap"></pre>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Configuración Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+            authDomain: "ya-me-vi.firebaseapp.com",
+            projectId: "ya-me-vi",
+            storageBucket: "ya-me-vi.firebasestorage.app",
+            messagingSenderId: "748876890843",
+            appId: "1:748876890843:web:070d1eb476d38594d002fe",
+            measurementId: "G-D7R797S5BC"
+        };
+
+        let app, auth, db;
+        let testOutput = '';
+
+        function log(message) {
+            console.log(message);
+            testOutput += message + '\n';
+            document.getElementById('test-output').textContent = testOutput;
+            document.getElementById('test-results').style.display = 'block';
+        }
+
+        function updateResult(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<span class="${status === 'success' ? 'text-green-600' : status === 'error' ? 'text-red-600' : 'text-yellow-600'}">${message}</span>`;
+        }
+
+        // Test Firebase initialization
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            updateResult('config-result', 'success', '✅ Firebase inicializado correctamente');
+            
+            // Test Auth
+            if (auth) {
+                updateResult('auth-result', 'success', '✅ Authentication disponible');
+            } else {
+                updateResult('auth-result', 'error', '❌ Authentication no disponible');
+            }
+            
+            // Test Firestore
+            if (db) {
+                updateResult('firestore-result', 'success', '✅ Firestore disponible');
+            } else {
+                updateResult('firestore-result', 'error', '❌ Firestore no disponible');
+            }
+            
+        } catch (error) {
+            updateResult('config-result', 'error', `❌ Error: ${error.message}`);
+            log(`Error inicializando Firebase: ${error.message}`);
+        }
+
+        // Test email registration
+        document.getElementById('test-email-register').addEventListener('click', async () => {
+            const testEmail = `test${Date.now()}@test.com`;
+            const testPassword = 'test123456';
+            
+            log(`🧪 Probando registro con email: ${testEmail}`);
+            
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, testEmail, testPassword);
+                log(`✅ Registro exitoso: ${userCredential.user.email}`);
+                
+                // Test Firestore write
+                try {
+                    await setDoc(doc(db, 'users', userCredential.user.uid), {
+                        email: testEmail,
+                        testUser: true,
+                        createdAt: new Date()
+                    });
+                    log('✅ Escritura en Firestore exitosa');
+                } catch (firestoreError) {
+                    log(`❌ Error escribiendo en Firestore: ${firestoreError.message}`);
+                }
+                
+                // Clean up test user
+                await userCredential.user.delete();
+                log('✅ Usuario de prueba eliminado');
+                
+            } catch (error) {
+                log(`❌ Error en registro: ${error.code} - ${error.message}`);
+            }
+        });
+
+        // Test Google auth
+        document.getElementById('test-google-auth').addEventListener('click', async () => {
+            log('🧪 Probando autenticación con Google...');
+            
+            try {
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(auth, provider);
+                log(`✅ Google Auth exitoso: ${result.user.email}`);
+                
+                // Sign out immediately
+                await auth.signOut();
+                log('✅ Sesión cerrada');
+                
+            } catch (error) {
+                log(`❌ Error en Google Auth: ${error.code} - ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>

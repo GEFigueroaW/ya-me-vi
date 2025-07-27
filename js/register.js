@@ -22,26 +22,67 @@ document.addEventListener("DOMContentLoaded", function () {
 
       createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
-          console.log("Usuario registrado:", userCredential.user);
+          console.log("✅ Usuario registrado:", userCredential.user);
+          
+          // Mostrar mensaje de éxito
+          showMessage("✅ Cuenta creada exitosamente", "success");
           
           // Actualizar el perfil del usuario con el nombre
-          await updateProfile(userCredential.user, {
-            displayName: name
-          });
+          try {
+            await updateProfile(userCredential.user, {
+              displayName: name
+            });
+            console.log("✅ Perfil actualizado con nombre:", name);
+          } catch (profileError) {
+            console.error("⚠️ Error actualizando perfil:", profileError);
+          }
           
           // Guardar el nombre en Firestore también
-          await setDoc(doc(db, `users/${userCredential.user.uid}/profile`, 'info'), {
-            name: name,
-            email: email,
-            registeredAt: new Date().toISOString()
-          });
+          try {
+            await setDoc(doc(db, `users/${userCredential.user.uid}/profile`, 'info'), {
+              name: name,
+              email: email,
+              registeredAt: new Date().toISOString()
+            });
+            console.log("✅ Datos guardados en Firestore");
+          } catch (firestoreError) {
+            console.error("⚠️ Error guardando en Firestore:", firestoreError);
+          }
           
-          console.log("Perfil actualizado con nombre:", name);
-          window.location.href = "dream-input.html";
+          // Redirigir después de un breve delay
+          setTimeout(() => {
+            window.location.href = "dream-input.html";
+          }, 1500);
         })
         .catch((error) => {
-          console.error("Error al registrarse:", error);
-          alert("Error al registrarse: " + error.message);
+          console.error("❌ Error al registrarse:", error);
+          
+          let errorMessage = "Error al crear cuenta: ";
+          switch (error.code) {
+            case 'auth/email-already-in-use':
+              errorMessage = "Este email ya está registrado. Intenta iniciar sesión.";
+              break;
+            case 'auth/invalid-email':
+              errorMessage = "Email inválido. Verifica el formato.";
+              break;
+            case 'auth/operation-not-allowed':
+              errorMessage = "Registro con email no habilitado. Contacta al administrador.";
+              break;
+            case 'auth/weak-password':
+              errorMessage = "Contraseña muy débil. Debe tener al menos 6 caracteres.";
+              break;
+            case 'auth/network-request-failed':
+              errorMessage = "Error de conexión. Verifica tu internet.";
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = "Demasiados intentos. Espera unos minutos.";
+              break;
+            default:
+              errorMessage += error.message;
+              break;
+          }
+          
+          showMessage(errorMessage, "error");
         });
     });
   }
@@ -162,3 +203,38 @@ window.addEventListener('pageshow', function(event) {
     clearFormFields();
   }
 });
+
+// Función para mostrar mensajes de error/éxito
+function showMessage(message, type = 'info') {
+  // Remover mensaje anterior si existe
+  const existingMessage = document.querySelector('.message-overlay');
+  if (existingMessage) {
+    existingMessage.remove();
+  }
+  
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message-overlay fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown';
+  
+  // Estilos según el tipo
+  if (type === 'success') {
+    messageDiv.classList.add('bg-green-500', 'bg-opacity-90', 'backdrop-blur-lg', 'text-white');
+  } else if (type === 'error') {
+    messageDiv.classList.add('bg-red-500', 'bg-opacity-90', 'backdrop-blur-lg', 'text-white');
+  } else {
+    messageDiv.classList.add('bg-blue-500', 'bg-opacity-90', 'backdrop-blur-lg', 'text-white');
+  }
+  
+  messageDiv.textContent = message;
+  document.body.appendChild(messageDiv);
+  
+  // Auto-ocultar después de 5 segundos
+  setTimeout(() => {
+    if (messageDiv.parentNode) {
+      messageDiv.classList.remove('animate__fadeInDown');
+      messageDiv.classList.add('animate__fadeOutUp');
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 500);
+    }
+  }, 5000);
+}
