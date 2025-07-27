@@ -822,8 +822,15 @@
   <script type="module">
     import { smartRedirector } from './js/smartRedirect.js';
     
-    // Inicializar smart redirector
-    await smartRedirector.init();
+    // Inicializar smart redirector (dentro de una función asíncrona)
+    (async function initializePage() {
+      try {
+        await smartRedirector.init();
+        console.log('✅ SmartRedirector inicializado correctamente');
+      } catch (error) {
+        console.error('❌ Error inicializando SmartRedirector:', error);
+      }
+    })();
     
     // Funciones para el overlay de carga
     function showLoading(message = 'Verificando cuenta...') {
@@ -847,29 +854,57 @@
     }
     
     // Redirigir al destino apropiado cuando se hace clic en los botones de inicio/registro
-    document.addEventListener('DOMContentLoaded', () => {
-      // Obtener todos los botones con la clase start-analysis-btn
-      const analysisButtons = document.querySelectorAll('.start-analysis-btn');
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🔄 Configurando botones de inicio...');
       
-      // Cambiar comportamiento para usar la redirección inteligente
-      analysisButtons.forEach(button => {
-        button.addEventListener('click', async (e) => {
-          e.preventDefault();
-          
-          // Mostrar overlay de carga
-          showLoading();
-          
-          try {
-            // Redirigir al destino apropiado según el tipo de dispositivo
-            await smartRedirector.redirectToAppropriateDestination(showLoading, hideLoading);
-          } catch (error) {
-            console.error('Error en redirección:', error);
-            hideLoading();
-            // En caso de error, redirigir a registro por defecto
-            window.location.href = 'register.html';
+      try {
+        // Esperar a que SmartRedirector esté listo
+        await smartRedirector.waitForInit();
+        console.log('✅ SmartRedirector listo para usar');
+        
+        // Obtener todos los botones con la clase start-analysis-btn
+        const analysisButtons = document.querySelectorAll('.start-analysis-btn');
+        console.log(`🔍 Encontrados ${analysisButtons.length} botones de inicio`);
+        
+        if (analysisButtons.length === 0) {
+          console.error('⚠️ No se encontraron botones con la clase start-analysis-btn');
+          // Buscar botones antiguos como fallback
+          const oldButtons = document.querySelectorAll('a[href="app.html"]');
+          if (oldButtons.length > 0) {
+            console.log(`🔄 Actualizando ${oldButtons.length} botones antiguos encontrados`);
+            oldButtons.forEach(btn => {
+              btn.href = "#";
+              btn.classList.add('start-analysis-btn');
+            });
           }
+        }
+        
+        // Intentar de nuevo con los botones actualizados
+        const allButtons = document.querySelectorAll('.start-analysis-btn');
+        
+        // Cambiar comportamiento para usar la redirección inteligente
+        allButtons.forEach(button => {
+          button.addEventListener('click', async (e) => {
+            e.preventDefault();
+            console.log('👆 Botón de inicio pulsado');
+            
+            // Mostrar overlay de carga
+            showLoading();
+            
+            try {
+              // Redirigir al destino apropiado según el tipo de dispositivo
+              await smartRedirector.redirectToAppropriateDestination(showLoading, hideLoading);
+            } catch (error) {
+              console.error('❌ Error en redirección:', error);
+              hideLoading();
+              // En caso de error, redirigir a registro por defecto
+              window.location.href = 'register.html';
+            }
+          });
         });
-      });
+      } catch (error) {
+        console.error('❌ Error inicializando botones:', error);
+      }
     });
   </script>
 </body>

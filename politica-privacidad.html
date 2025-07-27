@@ -116,8 +116,15 @@
   <script type="module">
     import { smartRedirector } from './js/smartRedirect.js';
     
-    // Inicializar smart redirector
-    await smartRedirector.init();
+    // Inicializar smart redirector (dentro de función asíncrona)
+    (async function initializePage() {
+      try {
+        await smartRedirector.init();
+        console.log('✅ SmartRedirector inicializado correctamente en politica-privacidad.html');
+      } catch (error) {
+        console.error('❌ Error inicializando SmartRedirector:', error);
+      }
+    })();
     
     // Exponer función para su uso en los enlaces HTML
     window.detectAndRedirect = async function(event) {

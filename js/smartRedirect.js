@@ -8,22 +8,40 @@ export class SmartRedirector {
 
   // Inicializar el detector
   async init() {
-    await deviceDetector.waitForInit();
-    this.initialized = true;
+    try {
+      await deviceDetector.waitForInit();
+      this.initialized = true;
+      console.log('✅ SmartRedirector inicializado exitosamente');
+    } catch (error) {
+      console.error('❌ Error inicializando SmartRedirector:', error);
+      // Establecer inicializado a true de todos modos para permitir operaciones básicas
+      this.initialized = true;
+      throw error;
+    }
   }
 
   // Esperar a que esté listo
   async waitForInit() {
     if (this.initialized) return;
     
-    // Esperar con timeout máximo de 300ms para ser más rápido
-    const timeout = new Promise(resolve => setTimeout(resolve, 300));
+    console.log('⏳ Esperando inicialización de SmartRedirector...');
+    
+    // Esperar con timeout máximo de 1000ms (más tiempo para asegurar carga)
+    const timeout = new Promise((resolve) => {
+      setTimeout(() => {
+        console.warn('⚠️ Timeout en espera de SmartRedirector, continuando de todos modos');
+        this.initialized = true; // Forzar inicialización para continuar
+        resolve();
+      }, 1000);
+    });
+    
     const initPromise = new Promise(resolve => {
       const checkInit = () => {
         if (this.initialized) {
+          console.log('✅ SmartRedirector ya está inicializado');
           resolve();
         } else {
-          setTimeout(checkInit, 50);
+          setTimeout(checkInit, 100);
         }
       };
       checkInit();
@@ -96,9 +114,36 @@ export class SmartRedirector {
 
   // Redirección directa
   async redirectToAppropriateDestination(showLoadingFn, hideLoadingFn) {
-    const destination = await this.determineDestination(showLoadingFn, hideLoadingFn);
-    window.location.href = destination.destination;
-    return destination;
+    try {
+      console.log('🚀 Iniciando redirección inteligente...');
+      
+      // Si no está inicializado, intentar inicializar
+      if (!this.initialized) {
+        console.log('⚠️ SmartRedirector no inicializado, intentando inicializar ahora...');
+        try {
+          await this.init();
+        } catch (error) {
+          console.warn('No se pudo inicializar, pero continuaremos con la redirección básica');
+        }
+      }
+      
+      const destination = await this.determineDestination(showLoadingFn, hideLoadingFn);
+      console.log(`✅ Destino determinado: ${destination.destination} (${destination.reason})`);
+      
+      // Redireccionar con pequeño retraso para que se vea el mensaje de carga
+      await new Promise(resolve => setTimeout(resolve, 300));
+      window.location.href = destination.destination;
+      return destination;
+    } catch (error) {
+      console.error('❌ Error en redirección inteligente:', error);
+      
+      // Fallback seguro - redirigir a register.html que sabe manejar todos los casos
+      if (hideLoadingFn) hideLoadingFn();
+      alert('Hubo un problema al iniciar la aplicación. Redirigiendo a la página de registro...');
+      window.location.href = 'register.html';
+      
+      return { destination: 'register.html', reason: 'error_fallback' };
+    }
   }
 }
 
