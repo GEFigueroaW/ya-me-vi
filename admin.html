@@ -13,207 +13,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   
   <!-- iOS Startup Images -->
-  <link rel="apple-touch-st        }
-      });
-      
-      // =====================================================
-      // SISTEMA DE NOTIFICACIONES - CONFIGURACIÓN
-      // =====================================================
-
-      // Inicializar sistema de notificaciones cuando el admin esté autenticado
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          const isAdmin = await adminNotificationSystem.checkAdminStatus();
-          
-          if (isAdmin) {
-            console.log('👑 Admin autenticado, configurando panel de notificaciones...');
-            
-            // Actualizar estado del sistema
-            document.getElementById('notification-status').textContent = '✅ Activo';
-            document.getElementById('notification-status').className = 'ml-3 px-2 py-1 bg-green-600 text-xs rounded-full';
-            
-            // Cargar estadísticas
-            await loadNotificationStats();
-            
-            // Configurar manejadores de eventos
-            setupNotificationHandlers();
-          } else {
-            document.getElementById('notification-status').textContent = '❌ No autorizado';
-            document.getElementById('notification-status').className = 'ml-3 px-2 py-1 bg-red-600 text-xs rounded-full';
-          }
-        }
-      });
-
-      // Cargar estadísticas de notificaciones
-      async function loadNotificationStats() {
-        try {
-          const stats = await adminNotificationSystem.getNotificationStats();
-          if (stats) {
-            document.getElementById('push-stats').textContent = stats.push.sent || 0;
-            document.getElementById('inapp-stats').textContent = stats.inApp.active || 0;
-            document.getElementById('email-stats').textContent = stats.email.sent || 0;
-          }
-        } catch (error) {
-          console.error('❌ Error cargando estadísticas:', error);
-        }
-      }
-
-      // Configurar manejadores de eventos para notificaciones
-      function setupNotificationHandlers() {
-        // Enviar notificación push
-        document.getElementById('btn-send-push').addEventListener('click', async () => {
-          const data = getNotificationFormData();
-          if (!data.title || !data.body) {
-            alert('❌ Por favor completa al menos el título y mensaje');
-            return;
-          }
-
-          try {
-            await adminNotificationSystem.sendPushNotificationToAll(data);
-            clearNotificationForm();
-            await loadNotificationStats();
-          } catch (error) {
-            console.error('❌ Error enviando push:', error);
-          }
-        });
-
-        // Crear notificación in-app
-        document.getElementById('btn-send-inapp').addEventListener('click', async () => {
-          const data = getNotificationFormData();
-          if (!data.title || !data.body) {
-            alert('❌ Por favor completa al menos el título y mensaje');
-            return;
-          }
-
-          try {
-            await adminNotificationSystem.createInAppNotificationForAll(data);
-            clearNotificationForm();
-            await loadNotificationStats();
-          } catch (error) {
-            console.error('❌ Error creando in-app:', error);
-          }
-        });
-
-        // Programar email
-        document.getElementById('btn-send-email').addEventListener('click', async () => {
-          const data = getNotificationFormData();
-          if (!data.title || !data.body) {
-            alert('❌ Por favor completa al menos el título y mensaje');
-            return;
-          }
-
-          try {
-            const emailData = {
-              subject: data.title,
-              body: data.body,
-              htmlContent: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                  <div style="background: linear-gradient(135deg, #00B44F, #007bff); padding: 20px; text-align: center;">
-                    <img src="https://yamevi.com.mx/assets/logo-192.png" alt="YA ME VI" style="width: 60px; height: 60px;">
-                    <h1 style="color: white; margin: 10px 0;">${data.title}</h1>
-                  </div>
-                  <div style="padding: 20px; background: #f8f9fa;">
-                    <p style="font-size: 16px; line-height: 1.6; color: #333;">${data.body}</p>
-                    ${data.url ? `<div style="text-align: center; margin: 20px 0;">
-                      <a href="https://yamevi.com.mx${data.url}" style="background: #00B44F; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver en YA ME VI</a>
-                    </div>` : ''}
-                  </div>
-                  <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
-                    <p>© ${new Date().getFullYear()} YA ME VI - Análisis Inteligente de Lotería</p>
-                    <p><a href="https://yamevi.com.mx/unsubscribe" style="color: #ccc;">Cancelar suscripción</a></p>
-                  </div>
-                </div>
-              `
-            };
-
-            await adminNotificationSystem.scheduleEmailToAll(emailData);
-            clearNotificationForm();
-            await loadNotificationStats();
-          } catch (error) {
-            console.error('❌ Error programando email:', error);
-          }
-        });
-
-        // Enviar todo (push + in-app + email)
-        document.getElementById('btn-send-all').addEventListener('click', async () => {
-          const data = getNotificationFormData();
-          if (!data.title || !data.body) {
-            alert('❌ Por favor completa al menos el título y mensaje');
-            return;
-          }
-
-          if (!confirm('⚠️ ¿Estás seguro de enviar TODAS las notificaciones (Push + In-App + Email)?\n\nEsto llegará a todos los usuarios registrados.')) {
-            return;
-          }
-
-          try {
-            // Enviar todo en paralelo
-            const results = await Promise.allSettled([
-              adminNotificationSystem.sendPushNotificationToAll(data),
-              adminNotificationSystem.createInAppNotificationForAll(data),
-              adminNotificationSystem.scheduleEmailToAll({
-                subject: data.title,
-                body: data.body,
-                htmlContent: `
-                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <div style="background: linear-gradient(135deg, #00B44F, #007bff); padding: 20px; text-align: center;">
-                      <img src="https://yamevi.com.mx/assets/logo-192.png" alt="YA ME VI" style="width: 60px; height: 60px;">
-                      <h1 style="color: white; margin: 10px 0;">${data.title}</h1>
-                    </div>
-                    <div style="padding: 20px; background: #f8f9fa;">
-                      <p style="font-size: 16px; line-height: 1.6; color: #333;">${data.body}</p>
-                      ${data.url ? `<div style="text-align: center; margin: 20px 0;">
-                        <a href="https://yamevi.com.mx${data.url}" style="background: #00B44F; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver en YA ME VI</a>
-                      </div>` : ''}
-                    </div>
-                    <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
-                      <p>© ${new Date().getFullYear()} YA ME VI - Análisis Inteligente de Lotería</p>
-                      <p><a href="https://yamevi.com.mx/unsubscribe" style="color: #ccc;">Cancelar suscripción</a></p>
-                    </div>
-                  </div>
-                `
-              })
-            ]);
-
-            const successful = results.filter(result => result.status === 'fulfilled').length;
-            adminNotificationSystem.showAdminFeedback('success', `✅ ${successful}/3 tipos de notificaciones enviadas correctamente`);
-
-            clearNotificationForm();
-            await loadNotificationStats();
-          } catch (error) {
-            console.error('❌ Error enviando todas las notificaciones:', error);
-          }
-        });
-      }
-
-      // Obtener datos del formulario de notificación
-      function getNotificationFormData() {
-        const gameSelect = document.getElementById('notification-game');
-        const gameText = gameSelect.value ? ` para ${gameSelect.value}` : '';
-        
-        return {
-          title: document.getElementById('notification-title').value,
-          body: document.getElementById('notification-body').value + gameText,
-          type: document.getElementById('notification-type').value,
-          url: document.getElementById('notification-url').value || '/home.html',
-          game: gameSelect.value
-        };
-      }
-
-      // Limpiar formulario de notificación
-      function clearNotificationForm() {
-        document.getElementById('notification-title').value = '';
-        document.getElementById('notification-body').value = '';
-        document.getElementById('notification-url').value = '';
-        document.getElementById('notification-type').selectedIndex = 0;
-        document.getElementById('notification-game').selectedIndex = 0;
-      }
-
-      // =====================================================
-      // FIN SISTEMA DE NOTIFICACIONES
-      // =====================================================
-      
-    });p-image" href="assets/logo-512.png">
+  <link rel="apple-touch-startup-image" href="assets/logo-512.png">
   
   <!-- Additional iOS Meta -->
   <meta name="format-detection" content="telephone=no">
@@ -248,25 +48,31 @@
   <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
 
     <!-- Encabezado -->
-    <div class="flex justify-between items-center mb-8">
-      <button id="btn-back" class="btn-back-improved">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        <span class="btn-text">Volver</span>
-      </button>
-      <h1 class="text-3xl font-bold animate__animated animate__fadeInDown">🔐 Panel de Control Admin</h1>
-      <div class="w-20"></div> <!-- Espaciador para equilibrar el layout -->
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center">
+        <button id="btn-back" class="mr-4 bg-gray-800 bg-opacity-70 p-2 rounded-lg hover:bg-opacity-90 transition-all">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+          👑 Panel de Administración
+        </h1>
+      </div>
+      <div class="text-sm text-gray-300">
+        <div id="admin-status">Verificando permisos...</div>
+        <div id="current-time" class="text-xs"></div>
+      </div>
     </div>
 
-    <!-- Estadísticas de usuarios -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <!-- Usuarios Activos -->
+    <!-- Métricas principales -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- Total de usuarios -->
       <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-400 text-sm">Usuarios Activos</p>
-            <p id="active-users" class="text-2xl font-bold text-green-400">0</p>
+            <p id="total-users" class="text-2xl font-bold text-green-400">0</p>
           </div>
           <div class="bg-green-500 p-3 rounded-full">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -276,27 +82,27 @@
         </div>
       </div>
 
-      <!-- Total de Consultas -->
+      <!-- Consultas del día -->
       <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm">Total Consultas</p>
-            <p id="total-queries" class="text-2xl font-bold text-blue-400">0</p>
+            <p class="text-gray-400 text-sm">Consultas Hoy</p>
+            <p id="daily-queries" class="text-2xl font-bold text-blue-400">0</p>
           </div>
           <div class="bg-blue-500 p-3 rounded-full">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
         </div>
       </div>
 
-      <!-- Dispositivos -->
+      <!-- Análisis realizados -->
       <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm">Móvil / Escritorio</p>
-            <p id="device-ratio" class="text-2xl font-bold text-yellow-400">-- / --</p>
+            <p class="text-gray-400 text-sm">Análisis Total</p>
+            <p id="total-analysis" class="text-2xl font-bold text-yellow-400">0</p>
           </div>
           <div class="bg-yellow-500 p-3 rounded-full">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -321,51 +127,6 @@
             </svg>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Gráficas -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
-        <h3 class="text-xl font-bold mb-4">📊 Usuarios</h3>
-        <div id="users-chart" class="h-48 bg-gray-800 rounded flex items-center justify-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-        </div>
-      </div>
-
-      <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
-        <h3 class="text-xl font-bold mb-4">🔮 Análisis</h3>
-        <div id="dreams-chart" class="h-48 bg-gray-800 rounded flex items-center justify-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabla de usuarios -->
-    <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
-      <h3 class="text-xl font-bold mb-4">👥 Usuarios Recientes</h3>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left">
-          <thead>
-            <tr class="border-b border-gray-700">
-              <th class="py-2 px-4 text-gray-400">Email</th>
-              <th class="py-2 px-4 text-gray-400">Último Acceso</th>
-              <th class="py-2 px-4 text-gray-400">Dispositivo</th>
-              <th class="py-2 px-4 text-gray-400">Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="users-table">
-            <!-- Los datos se cargarán dinámicamente aquí -->
-            <tr>
-              <td colspan="4" class="py-8 text-center text-gray-400">
-                <div class="flex justify-center items-center">
-                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                  Cargando datos reales de Firebase...
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
@@ -479,23 +240,68 @@
       <div class="bg-gray-800 p-6 rounded-lg">
         <h4 class="text-lg font-bold mb-4">⚡ Notificaciones Rápidas</h4>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <button onclick="adminNotificationSystem.sendAnalysisNotification('new-predictions', 'Melate')" 
+          <button onclick="sendQuickNotification('new-predictions', 'Melate')" 
                   class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
             🎯 Predicciones Melate
           </button>
-          <button onclick="adminNotificationSystem.sendAnalysisNotification('frequency-update', 'Revancha')" 
+          <button onclick="sendQuickNotification('frequency-update', 'Revancha')" 
                   class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
             📊 Análisis Revancha
           </button>
-          <button onclick="adminNotificationSystem.sendAnalysisNotification('lucky-numbers', 'Revanchita')" 
+          <button onclick="sendQuickNotification('lucky-numbers', 'Revanchita')" 
                   class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
             🍀 Suerte Revanchita
           </button>
-          <button onclick="adminNotificationSystem.sendAnalysisNotification('system-maintenance', 'General')" 
+          <button onclick="sendQuickNotification('system-maintenance', 'General')" 
                   class="bg-yellow-600 hover:bg-yellow-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
             🔧 Mantenimiento
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Gráficas -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
+        <h3 class="text-xl font-bold mb-4">📊 Usuarios</h3>
+        <div id="users-chart" class="h-48 bg-gray-800 rounded flex items-center justify-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        </div>
+      </div>
+
+      <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
+        <h3 class="text-xl font-bold mb-4">🔮 Análisis</h3>
+        <div id="dreams-chart" class="h-48 bg-gray-800 rounded flex items-center justify-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+      <h3 class="text-xl font-bold mb-4">👥 Usuarios Recientes</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-gray-700">
+              <th class="py-2 px-4 text-gray-400">Email</th>
+              <th class="py-2 px-4 text-gray-400">Último Acceso</th>
+              <th class="py-2 px-4 text-gray-400">Dispositivo</th>
+              <th class="py-2 px-4 text-gray-400">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="users-table">
+            <!-- Los datos se cargarán dinámicamente aquí -->
+            <tr>
+              <td colspan="4" class="py-8 text-center text-gray-400">
+                <div class="flex justify-center items-center">
+                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                  Cargando datos reales de Firebase...
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -533,211 +339,86 @@
       console.log('🔍 Buscando botón btn-back:', btnBack);
       
       if (btnBack) {
-        console.log('✅ Botón btn-back encontrado, configurando event listener...');
-        btnBack.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('🔙 Botón volver presionado, navegando a home.html');
+        btnBack.addEventListener('click', () => {
+          console.log('🔙 Botón de volver clickeado');
           
-          try {
-            window.location.href = 'home.html';
-          } catch (error) {
-            console.error('❌ Error al navegar:', error);
-            // Fallback con history
-            window.history.back();
+          // Verificar si hay un referrer válido
+          if (document.referrer && document.referrer.includes('yamevi.com.mx')) {
+            console.log('📍 Volviendo a:', document.referrer);
+            window.location.href = document.referrer;
+          } else {
+            console.log('🏠 Sin referrer válido, redirigiendo a home');
+            window.location.href = '/home.html';
           }
         });
-        
-        // Verificar que el evento se registró
         console.log('✅ Event listener configurado para btn-back');
       } else {
-        console.error('❌ Botón btn-back no encontrado en el DOM');
-        console.log('🔍 Elementos disponibles con ID:', 
-          Array.from(document.querySelectorAll('[id]')).map(el => el.id)
-        );
+        console.error('❌ No se encontró el botón btn-back');
       }
 
-      // Verificar autenticación y permisos de admin
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-          console.log('❌ Usuario no autenticado, redirigiendo...');
-          alert('Debes iniciar sesión para acceder al panel de administración.');
-          window.location.href = 'login.html';
-          return;
+      // Mostrar hora actual
+      function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleString('es-MX', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        const timeElement = document.getElementById('current-time');
+        if (timeElement) {
+          timeElement.textContent = timeString;
         }
+      }
+      
+      updateTime();
+      setInterval(updateTime, 1000);
 
-        try {
-          console.log('🔐 Verificando permisos de administrador...');
+      // Verificar autenticación y permisos
+      onAuthStateChanged(auth, async (user) => {
+        const statusElement = document.getElementById('admin-status');
+        
+        if (user) {
+          console.log('👤 Usuario autenticado:', user.email);
           
-          // Verificar que el usuario es administrador
-          const isAdmin = await redirectIfNotAdmin();
+          // Verificar si es admin
+          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx'];
+          const isAdmin = adminEmails.includes(user.email);
           
-          if (!isAdmin) {
-            console.log('❌ Usuario sin permisos de administrador');
-            return; // redirectIfNotAdmin maneja la redirección
+          if (isAdmin) {
+            statusElement.textContent = `✅ Admin: ${user.email}`;
+            statusElement.className = 'text-green-400';
+            
+            // Inicializar datos del admin
+            try {
+              const adminManager = new AdminDataManager();
+              await adminManager.loadRealData();
+              console.log('📊 Datos de administración cargados');
+            } catch (error) {
+              console.error('❌ Error cargando datos admin:', error);
+            }
+          } else {
+            statusElement.textContent = `❌ Sin permisos: ${user.email}`;
+            statusElement.className = 'text-red-400';
+            
+            // Redirigir a home después de 3 segundos
+            setTimeout(() => {
+              window.location.href = '/home.html';
+            }, 3000);
           }
-
-          console.log('✅ Usuario autenticado como administrador');
-          console.log('🔐 Iniciando panel de administración con datos reales...');
+        } else {
+          console.log('❌ Usuario no autenticado');
+          statusElement.textContent = '🔒 No autenticado';
+          statusElement.className = 'text-yellow-400';
           
-          // Mostrar loading mientras se cargan los datos
-          showLoadingState();
-          
-          // Obtener datos reales de Firebase
-          console.log('📊 Cargando estadísticas reales...');
-          const [adminData, recentUsers] = await Promise.all([
-            AdminDataManager.getAllStats(),
-            AdminDataManager.getRecentUsers(50)
-          ]);
-          
-          console.log('✅ Datos administrativos reales cargados:', adminData);
-          console.log('👥 Usuarios recientes cargados:', recentUsers.length);
-          
-          // Actualizar datos principales con datos reales
-          updateMainStats(adminData);
-          
-          // Actualizar tabla de usuarios con datos reales
-          updateUsersTable(recentUsers);
-          
-          // Actualizar indicadores de estado
-          updateSystemStatus(adminData);
-          
-          // Ocultar loading
-          hideLoadingState();
-          
-        } catch (error) {
-          console.error('❌ Error cargando datos de administración:', error);
-          hideLoadingState();
-          showErrorState();
+          // Redirigir a login después de 2 segundos
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 2000);
         }
       });
-
-      // Función para mostrar estado de carga
-      function showLoadingState() {
-        const loadingHtml = `
-          <tr>
-            <td colspan="4" class="py-8 text-center">
-              <div class="flex justify-center items-center">
-                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                <span>Cargando datos reales de Firebase...</span>
-              </div>
-            </td>
-          </tr>
-        `;
-        
-        document.getElementById('active-users').innerHTML = '<div class="animate-pulse">...</div>';
-        document.getElementById('total-queries').innerHTML = '<div class="animate-pulse">...</div>';
-        document.getElementById('device-ratio').innerHTML = '<div class="animate-pulse">...</div>';
-        document.getElementById('database-size').innerHTML = '<div class="animate-pulse">...</div>';
-        document.getElementById('users-table').innerHTML = loadingHtml;
-      }
-
-      // Función para ocultar estado de carga
-      function hideLoadingState() {
-        // Se actualiza automáticamente con los datos reales
-      }
-
-      // Función para mostrar estado de error
-      function showErrorState() {
-        const errorHtml = `
-          <tr>
-            <td colspan="4" class="py-8 text-center text-red-400">
-              ❌ Error cargando datos reales. 
-              <button onclick="window.location.reload()" class="underline ml-2 hover:text-red-300">Intentar de nuevo</button>
-            </td>
-          </tr>
-        `;
-        
-        document.getElementById('active-users').textContent = 'Error';
-        document.getElementById('total-queries').textContent = 'Error';
-        document.getElementById('device-ratio').textContent = 'Error';
-        document.getElementById('database-size').textContent = 'Error';
-        document.getElementById('users-table').innerHTML = errorHtml;
-      }
-
-      // Función para actualizar estadísticas principales
-      function updateMainStats(adminData) {
-        document.getElementById('active-users').textContent = adminData.activeUsers.toLocaleString();
-        document.getElementById('total-queries').textContent = adminData.totalQueries.toLocaleString();
-        document.getElementById('device-ratio').textContent = adminData.deviceRatio;
-        document.getElementById('database-size').textContent = adminData.dbSize.toLocaleString();
-      }
-
-      // Función para actualizar tabla de usuarios
-      function updateUsersTable(users) {
-        const usersTable = document.getElementById('users-table');
-        let tableHtml = '';
-        
-        if (users.length === 0) {
-          tableHtml = `
-            <tr>
-              <td colspan="4" class="py-8 text-center text-gray-400">
-                📭 No hay usuarios registrados en el sistema
-              </td>
-            </tr>
-          `;
-        } else {
-          users.forEach(user => {
-            const adminBadge = user.isAdmin ? 
-              '<span class="text-yellow-400 text-xs ml-2">👑 Admin</span>' : '';
-            
-            tableHtml += `
-              <tr class="hover:bg-gray-800 transition-colors">
-                <td class="py-3 px-4 border-b border-gray-700">
-                  <div class="flex items-center">
-                    <span>${user.email}</span>
-                    ${adminBadge}
-                  </div>
-                </td>
-                <td class="py-3 px-4 border-b border-gray-700">${user.lastAccess}</td>
-                <td class="py-3 px-4 border-b border-gray-700">${user.device}</td>
-                <td class="py-3 px-4 border-b border-gray-700">
-                  <button onclick="viewUserDetails('${user.id}')" class="text-blue-400 hover:text-blue-300 mr-2 transition-colors">👁️ Ver</button>
-                  <button onclick="toggleUserStatus('${user.id}')" class="text-yellow-400 hover:text-yellow-300 transition-colors">⚙️ Estado</button>
-                </td>
-              </tr>
-            `;
-          });
-        }
-        
-        usersTable.innerHTML = tableHtml;
-      }
-
-      // Función para actualizar estado del sistema
-      function updateSystemStatus(adminData) {
-        const breakdown = adminData.breakdown;
-        console.log('📈 Estadísticas detalladas:', breakdown);
-        
-        // Crear indicadores simples con datos reales
-        const usersChart = document.getElementById('users-chart');
-        const dreamsChart = document.getElementById('dreams-chart');
-        
-        usersChart.innerHTML = `
-          <div class="bg-gray-800 p-4 rounded h-full flex flex-col justify-center">
-            <h4 class="text-lg font-bold mb-3 text-green-400">👥 Usuarios</h4>
-            <div class="text-3xl text-green-400 mb-1">${breakdown.users.totalUsers}</div>
-            <div class="text-sm text-gray-400 mb-3">Total registrados</div>
-            <div class="text-xl text-blue-400 mb-1">${breakdown.users.activeUsers}</div>
-            <div class="text-xs text-gray-400">Activos (30 días)</div>
-            <div class="mt-3 text-xs text-gray-500">
-              📱 ${breakdown.users.mobileUsers} móvil | 💻 ${breakdown.users.desktopUsers} escritorio
-            </div>
-          </div>
-        `;
-        
-        dreamsChart.innerHTML = `
-          <div class="bg-gray-800 p-4 rounded h-full flex flex-col justify-center">
-            <h4 class="text-lg font-bold mb-3 text-purple-400">🔮 Análisis</h4>
-            <div class="text-3xl text-purple-400 mb-1">${breakdown.queries.totalQueries}</div>
-            <div class="text-sm text-gray-400 mb-3">Total realizados</div>
-            <div class="space-y-1 text-sm">
-              <div class="text-orange-400">🔢 ${breakdown.queries.individualAnalysis} individuales</div>
-              <div class="text-pink-400">🎯 ${breakdown.queries.combinationAnalysis} combinaciones</div>
-              <div class="text-cyan-400">💡 ${breakdown.queries.suggestions} sugerencias</div>
-            </div>
-          </div>
-        `;
-      }
 
       // Configurar botones de acción con funcionalidad real
       document.getElementById('btn-export-data').addEventListener('click', async () => {
@@ -769,6 +450,187 @@
         alert('📋 Consultando logs del sistema...\n\n🔍 Funcionalidad en desarrollo.\n\n📄 Mostrará:\n• Errores del sistema\n• Actividad de usuarios\n• Métricas de rendimiento\n• Eventos de seguridad\n• Consultas de base de datos');
       });
 
+      // =====================================================
+      // SISTEMA DE NOTIFICACIONES - CONFIGURACIÓN
+      // =====================================================
+
+      // Inicializar sistema de notificaciones cuando el admin esté autenticado
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          const isAdmin = await adminNotificationSystem.checkAdminStatus();
+          
+          if (isAdmin) {
+            console.log('👑 Admin autenticado, configurando panel de notificaciones...');
+            
+            // Actualizar estado del sistema
+            document.getElementById('notification-status').textContent = '✅ Activo';
+            document.getElementById('notification-status').className = 'ml-3 px-2 py-1 bg-green-600 text-xs rounded-full';
+            
+            // Cargar estadísticas
+            await loadNotificationStats();
+            
+            // Configurar manejadores de eventos
+            setupNotificationHandlers();
+          } else {
+            document.getElementById('notification-status').textContent = '❌ No autorizado';
+            document.getElementById('notification-status').className = 'ml-3 px-2 py-1 bg-red-600 text-xs rounded-full';
+          }
+        }
+      });
+
+      // Cargar estadísticas de notificaciones
+      async function loadNotificationStats() {
+        try {
+          const stats = await adminNotificationSystem.getNotificationStats();
+          if (stats) {
+            document.getElementById('push-stats').textContent = stats.push.sent || 0;
+            document.getElementById('inapp-stats').textContent = stats.inApp.active || 0;
+            document.getElementById('email-stats').textContent = stats.email.sent || 0;
+          }
+        } catch (error) {
+          console.error('❌ Error cargando estadísticas:', error);
+        }
+      }
+
+      // Configurar manejadores de eventos para notificaciones
+      function setupNotificationHandlers() {
+        // Enviar notificación push
+        document.getElementById('btn-send-push').addEventListener('click', async () => {
+          const data = getNotificationFormData();
+          if (!data.title || !data.body) {
+            alert('❌ Por favor completa al menos el título y mensaje');
+            return;
+          }
+
+          try {
+            await adminNotificationSystem.sendPushNotificationToAll(data);
+            clearNotificationForm();
+            await loadNotificationStats();
+          } catch (error) {
+            console.error('❌ Error enviando push:', error);
+          }
+        });
+
+        // Crear notificación in-app
+        document.getElementById('btn-send-inapp').addEventListener('click', async () => {
+          const data = getNotificationFormData();
+          if (!data.title || !data.body) {
+            alert('❌ Por favor completa al menos el título y mensaje');
+            return;
+          }
+
+          try {
+            await adminNotificationSystem.createInAppNotificationForAll(data);
+            clearNotificationForm();
+            await loadNotificationStats();
+          } catch (error) {
+            console.error('❌ Error creando in-app:', error);
+          }
+        });
+
+        // Programar email
+        document.getElementById('btn-send-email').addEventListener('click', async () => {
+          const data = getNotificationFormData();
+          if (!data.title || !data.body) {
+            alert('❌ Por favor completa al menos el título y mensaje');
+            return;
+          }
+
+          try {
+            const emailData = {
+              subject: data.title,
+              body: data.body,
+              htmlContent: createEmailTemplate(data)
+            };
+
+            await adminNotificationSystem.scheduleEmailToAll(emailData);
+            clearNotificationForm();
+            await loadNotificationStats();
+          } catch (error) {
+            console.error('❌ Error programando email:', error);
+          }
+        });
+
+        // Enviar todo (push + in-app + email)
+        document.getElementById('btn-send-all').addEventListener('click', async () => {
+          const data = getNotificationFormData();
+          if (!data.title || !data.body) {
+            alert('❌ Por favor completa al menos el título y mensaje');
+            return;
+          }
+
+          if (!confirm('⚠️ ¿Estás seguro de enviar TODAS las notificaciones (Push + In-App + Email)?\n\nEsto llegará a todos los usuarios registrados.')) {
+            return;
+          }
+
+          try {
+            // Enviar todo en paralelo
+            const results = await Promise.allSettled([
+              adminNotificationSystem.sendPushNotificationToAll(data),
+              adminNotificationSystem.createInAppNotificationForAll(data),
+              adminNotificationSystem.scheduleEmailToAll({
+                subject: data.title,
+                body: data.body,
+                htmlContent: createEmailTemplate(data)
+              })
+            ]);
+
+            const successful = results.filter(result => result.status === 'fulfilled').length;
+            adminNotificationSystem.showAdminFeedback('success', `✅ ${successful}/3 tipos de notificaciones enviadas correctamente`);
+
+            clearNotificationForm();
+            await loadNotificationStats();
+          } catch (error) {
+            console.error('❌ Error enviando todas las notificaciones:', error);
+          }
+        });
+      }
+
+      // Obtener datos del formulario de notificación
+      function getNotificationFormData() {
+        const gameSelect = document.getElementById('notification-game');
+        const gameText = gameSelect.value ? ` para ${gameSelect.value}` : '';
+        
+        return {
+          title: document.getElementById('notification-title').value,
+          body: document.getElementById('notification-body').value + gameText,
+          type: document.getElementById('notification-type').value,
+          url: document.getElementById('notification-url').value || '/home.html',
+          game: gameSelect.value
+        };
+      }
+
+      // Crear plantilla de email
+      function createEmailTemplate(data) {
+        return `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #00B44F, #007bff); padding: 20px; text-align: center;">
+              <img src="https://yamevi.com.mx/assets/logo-192.png" alt="YA ME VI" style="width: 60px; height: 60px;">
+              <h1 style="color: white; margin: 10px 0;">${data.title}</h1>
+            </div>
+            <div style="padding: 20px; background: #f8f9fa;">
+              <p style="font-size: 16px; line-height: 1.6; color: #333;">${data.body}</p>
+              ${data.url ? `<div style="text-align: center; margin: 20px 0;">
+                <a href="https://yamevi.com.mx${data.url}" style="background: #00B44F; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver en YA ME VI</a>
+              </div>` : ''}
+            </div>
+            <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
+              <p>© ${new Date().getFullYear()} YA ME VI - Análisis Inteligente de Lotería</p>
+              <p><a href="https://yamevi.com.mx/unsubscribe" style="color: #ccc;">Cancelar suscripción</a></p>
+            </div>
+          </div>
+        `;
+      }
+
+      // Limpiar formulario de notificación
+      function clearNotificationForm() {
+        document.getElementById('notification-title').value = '';
+        document.getElementById('notification-body').value = '';
+        document.getElementById('notification-url').value = '';
+        document.getElementById('notification-type').selectedIndex = 0;
+        document.getElementById('notification-game').selectedIndex = 0;
+      }
+
       // Funciones globales para interacciones de usuario
       window.viewUserDetails = function(userId) {
         alert(`👤 Ver detalles del usuario: ${userId}\n\n🔍 Funcionalidad en desarrollo.\n\n📋 Mostrará:\n• Información completa del usuario\n• Historial de actividad\n• Análisis realizados\n• Configuración de cuenta\n• Estadísticas personales`);
@@ -777,6 +639,16 @@
       window.toggleUserStatus = function(userId) {
         if (confirm(`⚠️ ¿Cambiar estado del usuario ${userId}?\n\nEsto afectará el acceso del usuario al sistema.\n\n🔧 Opciones disponibles:\n• Activar/Desactivar cuenta\n• Modificar permisos\n• Revisar configuración`)) {
           alert(`🔄 Estado del usuario actualizado.\n\n📝 Funcionalidad en desarrollo.\n\n✅ Los cambios se aplicarán inmediatamente.`);
+        }
+      };
+
+      // Función global para notificaciones rápidas
+      window.sendQuickNotification = async function(type, game) {
+        try {
+          await adminNotificationSystem.sendAnalysisNotification(type, game);
+          await loadNotificationStats();
+        } catch (error) {
+          console.error('❌ Error enviando notificación rápida:', error);
         }
       };
       
