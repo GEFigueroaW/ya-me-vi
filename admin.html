@@ -487,6 +487,9 @@
             // Inicializar sistema de notificaciones
             await initializeNotificationSystem();
             
+            // Cargar datos iniciales adicionales
+            await loadInitialData();
+            
             // Iniciar actualización automática
             startAutoRefresh();
             
@@ -767,7 +770,7 @@
         });
       }
         
-      function setupRealTimeListeners() {
+      async function loadInitialData() {
           try {
             console.log('👥 Intentando cargar usuarios...');
             
