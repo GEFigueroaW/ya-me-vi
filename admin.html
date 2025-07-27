@@ -58,6 +58,8 @@
       <div class="text-sm text-gray-300">
         <div id="admin-status">Verificando permisos...</div>
         <div id="current-time" class="text-xs"></div>
+        <div id="last-update" class="text-xs text-gray-400">Última actualización: --</div>
+        <div id="connection-status" class="text-xs text-green-400">🟢 Conectado</div>
       </div>
     </div>
 
@@ -398,17 +400,24 @@
               errorModal.style.display = 'none';
             }
             
-            // Inicializar datos del admin
+            // Inicializar datos del admin con métricas reales
             try {
               const adminManager = new AdminDataManager();
               await adminManager.loadRealData();
               console.log('📊 Datos de administración cargados');
+              
+              // Cargar métricas reales en tiempo real
+              await loadRealTimeMetrics();
+              
             } catch (error) {
               console.error('❌ Error cargando datos admin:', error);
             }
 
             // Inicializar sistema de notificaciones
             await initializeNotificationSystem();
+            
+            // Iniciar actualización automática
+            startAutoRefresh();
             
           } else {
             statusElement.textContent = `❌ Sin permisos: ${user.email}`;
@@ -461,10 +470,336 @@
           // Configurar manejadores de eventos para notificaciones
           setupNotificationHandlers();
           
+          // Cargar estadísticas de notificaciones
+          await loadNotificationStats();
+          
           console.log('✅ Sistema de notificaciones inicializado');
         } catch (error) {
           console.error('❌ Error inicializando notificaciones:', error);
         }
+      }
+
+      // Función para cargar estadísticas de notificaciones
+      async function loadNotificationStats() {
+        console.log('🔔 Cargando estadísticas de notificaciones...');
+        
+        try {
+          const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          
+          // Cargar estadísticas de push notifications
+          try {
+            const pushCollection = collection(db, 'push_notifications');
+            const pushSnapshot = await getDocs(pushCollection);
+            document.getElementById('push-stats').textContent = pushSnapshot.size;
+            console.log('📱 Push notifications enviadas:', pushSnapshot.size);
+          } catch (error) {
+            console.log('⚠️ Colección push_notifications no existe');
+            document.getElementById('push-stats').textContent = '0';
+          }
+          
+          // Cargar estadísticas de in-app notifications
+          try {
+            const inappCollection = collection(db, 'inapp_notifications');
+            const q = query(inappCollection, where('active', '==', true));
+            const inappSnapshot = await getDocs(q);
+            document.getElementById('inapp-stats').textContent = inappSnapshot.size;
+            console.log('💬 In-app notifications activas:', inappSnapshot.size);
+          } catch (error) {
+            console.log('⚠️ Colección inapp_notifications no existe');
+            document.getElementById('inapp-stats').textContent = '0';
+          }
+          
+          // Cargar estadísticas de emails
+          try {
+            const emailCollection = collection(db, 'email_notifications');
+            const emailSnapshot = await getDocs(emailCollection);
+            document.getElementById('email-stats').textContent = emailSnapshot.size;
+            console.log('📧 Emails enviados:', emailSnapshot.size);
+          } catch (error) {
+            console.log('⚠️ Colección email_notifications no existe');
+            document.getElementById('email-stats').textContent = '0';
+          }
+          
+        } catch (error) {
+          console.error('❌ Error cargando estadísticas de notificaciones:', error);
+          document.getElementById('push-stats').textContent = 'Error';
+          document.getElementById('inapp-stats').textContent = 'Error';
+          document.getElementById('email-stats').textContent = 'Error';
+        }
+      }
+
+      // Función para cargar métricas en tiempo real desde Firebase
+      async function loadRealTimeMetrics() {
+        console.log('📊 Cargando métricas en tiempo real...');
+        
+        try {
+          // Importar funciones necesarias de Firestore
+          const { collection, getDocs, query, where, orderBy, limit, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          
+          // 1. Cargar total de usuarios
+          await loadTotalUsers();
+          
+          // 2. Cargar consultas del día
+          await loadDailyQueries();
+          
+          // 3. Cargar análisis totales
+          await loadTotalAnalysis();
+          
+          // 4. Cargar tamaño de base de datos
+          await loadDatabaseSize();
+          
+          // 5. Cargar usuarios recientes en la tabla
+          await loadRecentUsers();
+          
+          // 6. Configurar listeners en tiempo real
+          setupRealTimeListeners();
+          
+          console.log('✅ Métricas en tiempo real cargadas');
+          
+          // Actualizar indicador de última actualización
+          const lastUpdate = document.getElementById('last-update');
+          if (lastUpdate) {
+            const now = new Date().toLocaleString('es-MX');
+            lastUpdate.textContent = `Última actualización: ${now}`;
+          }
+          
+        } catch (error) {
+          console.error('❌ Error cargando métricas:', error);
+          showErrorMetrics();
+          
+          // Actualizar estado de conexión
+          const connectionStatus = document.getElementById('connection-status');
+          if (connectionStatus) {
+            connectionStatus.textContent = '🔴 Error de conexión';
+            connectionStatus.className = 'text-xs text-red-400';
+          }
+        }
+        
+        async function loadTotalUsers() {
+          try {
+            const usersCollection = collection(db, 'users');
+            const usersSnapshot = await getDocs(usersCollection);
+            const totalUsers = usersSnapshot.size;
+            
+            document.getElementById('total-users').textContent = totalUsers;
+            console.log('👥 Total usuarios:', totalUsers);
+          } catch (error) {
+            console.error('❌ Error cargando usuarios:', error);
+            document.getElementById('total-users').textContent = 'Error';
+          }
+        }
+        
+        async function loadDailyQueries() {
+          try {
+            // Obtener fecha de hoy
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // Buscar consultas de hoy en diferentes colecciones
+            const collections = ['user_activity', 'analysis_logs', 'queries'];
+            let totalQueries = 0;
+            
+            for (const collectionName of collections) {
+              try {
+                const collRef = collection(db, collectionName);
+                const q = query(
+                  collRef,
+                  where('timestamp', '>=', today),
+                  where('timestamp', '<', tomorrow)
+                );
+                const snapshot = await getDocs(q);
+                totalQueries += snapshot.size;
+              } catch (error) {
+                console.log(`⚠️ Colección ${collectionName} no existe o sin permisos`);
+              }
+            }
+            
+            document.getElementById('daily-queries').textContent = totalQueries;
+            console.log('📊 Consultas del día:', totalQueries);
+          } catch (error) {
+            console.error('❌ Error cargando consultas diarias:', error);
+            document.getElementById('daily-queries').textContent = 'Error';
+          }
+        }
+        
+        async function loadTotalAnalysis() {
+          try {
+            // Buscar análisis en diferentes colecciones
+            const collections = ['individual_analysis', 'combination_analysis', 'ml_predictions'];
+            let totalAnalysis = 0;
+            
+            for (const collectionName of collections) {
+              try {
+                const collRef = collection(db, collectionName);
+                const snapshot = await getDocs(collRef);
+                totalAnalysis += snapshot.size;
+              } catch (error) {
+                console.log(`⚠️ Colección ${collectionName} no existe o sin permisos`);
+              }
+            }
+            
+            document.getElementById('total-analysis').textContent = totalAnalysis;
+            console.log('🔮 Total análisis:', totalAnalysis);
+          } catch (error) {
+            console.error('❌ Error cargando análisis totales:', error);
+            document.getElementById('total-analysis').textContent = 'Error';
+          }
+        }
+        
+        async function loadDatabaseSize() {
+          try {
+            // Contar documentos en todas las colecciones principales
+            const collections = ['users', 'individual_analysis', 'combination_analysis', 'ml_predictions', 'user_activity', 'notifications'];
+            let totalRecords = 0;
+            
+            for (const collectionName of collections) {
+              try {
+                const collRef = collection(db, collectionName);
+                const snapshot = await getDocs(collRef);
+                totalRecords += snapshot.size;
+              } catch (error) {
+                console.log(`⚠️ Colección ${collectionName} no existe o sin permisos`);
+              }
+            }
+            
+            document.getElementById('database-size').textContent = totalRecords.toLocaleString();
+            console.log('💾 Total registros DB:', totalRecords);
+          } catch (error) {
+            console.error('❌ Error cargando tamaño de DB:', error);
+            document.getElementById('database-size').textContent = 'Error';
+          }
+        }
+        
+        async function loadRecentUsers() {
+          try {
+            const usersCollection = collection(db, 'users');
+            const q = query(usersCollection, orderBy('lastAccess', 'desc'), limit(10));
+            const snapshot = await getDocs(q);
+            
+            const tbody = document.getElementById('users-table');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (snapshot.empty) {
+              tbody.innerHTML = `
+                <tr>
+                  <td colspan="4" class="py-4 text-center text-gray-400">
+                    No hay usuarios recientes para mostrar
+                  </td>
+                </tr>
+              `;
+              return;
+            }
+            
+            snapshot.forEach((doc) => {
+              const userData = doc.data();
+              const lastAccess = userData.lastAccess ? new Date(userData.lastAccess.seconds * 1000).toLocaleString('es-MX') : 'Nunca';
+              const device = userData.device || 'No especificado';
+              
+              const row = document.createElement('tr');
+              row.className = 'border-b border-gray-700 hover:bg-gray-800';
+              row.innerHTML = `
+                <td class="py-2 px-4">${userData.email || 'Email no disponible'}</td>
+                <td class="py-2 px-4 text-sm text-gray-300">${lastAccess}</td>
+                <td class="py-2 px-4 text-sm text-gray-300">${device}</td>
+                <td class="py-2 px-4">
+                  <button onclick="viewUserDetails('${doc.id}')" class="text-blue-400 hover:text-blue-300 text-sm mr-2">Ver</button>
+                  <button onclick="toggleUserStatus('${doc.id}')" class="text-yellow-400 hover:text-yellow-300 text-sm">Estado</button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+            
+            console.log('👥 Usuarios recientes cargados:', snapshot.size);
+          } catch (error) {
+            console.error('❌ Error cargando usuarios recientes:', error);
+            const tbody = document.getElementById('users-table');
+            if (tbody) {
+              tbody.innerHTML = `
+                <tr>
+                  <td colspan="4" class="py-4 text-center text-red-400">
+                    Error cargando usuarios: ${error.message}
+                  </td>
+                </tr>
+              `;
+            }
+          }
+        }
+        
+        function setupRealTimeListeners() {
+          try {
+            // Listener para usuarios en tiempo real
+            const usersCollection = collection(db, 'users');
+            onSnapshot(usersCollection, (snapshot) => {
+              document.getElementById('total-users').textContent = snapshot.size;
+              console.log('🔄 Usuarios actualizados en tiempo real:', snapshot.size);
+            });
+            
+            console.log('👂 Listeners en tiempo real configurados');
+          } catch (error) {
+            console.error('❌ Error configurando listeners:', error);
+          }
+        }
+        
+        function showErrorMetrics() {
+          document.getElementById('total-users').textContent = 'Error';
+          document.getElementById('daily-queries').textContent = 'Error';
+          document.getElementById('total-analysis').textContent = 'Error';
+          document.getElementById('database-size').textContent = 'Error';
+          
+          const tbody = document.getElementById('users-table');
+          if (tbody) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="4" class="py-8 text-center text-red-400">
+                  ❌ Error cargando datos del administrador
+                </td>
+              </tr>
+            `;
+          }
+        }
+      }
+
+      // Sistema de actualización automática cada 30 segundos
+      function startAutoRefresh() {
+        console.log('🔄 Iniciando actualización automática cada 30 segundos...');
+        
+        setInterval(async () => {
+          if (isUserAdmin) {
+            console.log('🔄 Actualizando métricas automáticamente...');
+            try {
+              // Mostrar estado de actualización
+              const connectionStatus = document.getElementById('connection-status');
+              if (connectionStatus) {
+                connectionStatus.textContent = '🟡 Actualizando...';
+                connectionStatus.className = 'text-xs text-yellow-400';
+              }
+              
+              await loadRealTimeMetrics();
+              await loadNotificationStats();
+              
+              // Restaurar estado de conexión
+              if (connectionStatus) {
+                connectionStatus.textContent = '🟢 Conectado';
+                connectionStatus.className = 'text-xs text-green-400';
+              }
+              
+              console.log('✅ Métricas actualizadas automáticamente');
+            } catch (error) {
+              console.error('❌ Error en actualización automática:', error);
+              
+              // Mostrar error de conexión
+              const connectionStatus = document.getElementById('connection-status');
+              if (connectionStatus) {
+                connectionStatus.textContent = '🔴 Error';
+                connectionStatus.className = 'text-xs text-red-400';
+              }
+            }
+          }
+        }, 30000); // 30 segundos
       }
 
       // Configurar manejadores de eventos para notificaciones
