@@ -1,0 +1,107 @@
+{"users": [
+{
+  "localId": "A0MnggEJhthUpGoShifl4c4HKNe2",
+  "email": "guillermo.figueroaw@totalplay.com.mx",
+  "emailVerified": true,
+  "displayName": "GUILLERMO EUGENIO FIGUEROA WOLF",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKtgqyF5KzUpaFVZITpds3gFg5S021xlo11u7v91_dvw63hKA=s96-c",
+  "lastSignedInAt": "1753580549711",
+  "createdAt": "1753580302125",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "103144784173443993057",
+      "email": "guillermo.figueroaw@totalplay.com.mx",
+      "displayName": "GUILLERMO EUGENIO FIGUEROA WOLF",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKtgqyF5KzUpaFVZITpds3gFg5S021xlo11u7v91_dvw63hKA=s96-c"
+    }
+  ]
+},
+{
+  "localId": "DiWeYIHwD4ddvgAEPs41kR13m6w1",
+  "email": "ptrtx25@gmail.com",
+  "emailVerified": true,
+  "displayName": "Ptr Tx",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKD_vvLg8YjOT8-VA-69aQhEVw39QCQW1CI3eGQM05AxukL9w=s96-c",
+  "lastSignedInAt": "1753581319165",
+  "createdAt": "1753556601453",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "101556375541698311482",
+      "email": "ptrtx25@gmail.com",
+      "displayName": "Ptr Tx",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKD_vvLg8YjOT8-VA-69aQhEVw39QCQW1CI3eGQM05AxukL9w=s96-c"
+    }
+  ]
+},
+{
+  "localId": "JPLf5ElNpbPVehRFZkJmZX4Pg793",
+  "email": "eugenfw@outlook.com",
+  "emailVerified": false,
+  "passwordHash": "nBJwEchctRMHkWH+pZFVU3tcIuEOe8UEnitoEtelL2P9z1b/0jdSvgxDGSD3H8bkn/hXoNIVxCv17rkTJoH+4w==",
+  "salt": "DycrxTBvLPmzMw==",
+  "displayName": "Willy",
+  "lastSignedInAt": "1753588958221",
+  "createdAt": "1753588958221",
+  "providerUserInfo": []
+},
+{
+  "localId": "Ozjx79uFP8SWUeZUA79x9eYa1rY2",
+  "email": "eugenfw@gmail.com",
+  "emailVerified": true,
+  "displayName": "Guillermo Figueroa W",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOLu_qr7iuJc4NmE0eB1nLYavyBwq-W-4y4EJkn3-LReMuWJAF=s96-c",
+  "lastSignedInAt": "1753650851873",
+  "createdAt": "1753579936608",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "105193257119823155259",
+      "email": "eugenfw@gmail.com",
+      "displayName": "Guillermo Figueroa W",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOLu_qr7iuJc4NmE0eB1nLYavyBwq-W-4y4EJkn3-LReMuWJAF=s96-c"
+    }
+  ]
+},
+{
+  "localId": "bTg38UbWiiO2KUy9IetfjOMyxaN2",
+  "email": "aidafw79@gmail.com",
+  "emailVerified": true,
+  "displayName": "aida figueroa",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocI08pxNEP8J0e6BQ9aNkH4Z_h6fxgHgvWG84j0r2ziy3qtxSFY=s96-c",
+  "lastSignedInAt": "1753376190265",
+  "createdAt": "1753376190264",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "100004474026586453676",
+      "email": "aidafw79@gmail.com",
+      "displayName": "aida figueroa",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocI08pxNEP8J0e6BQ9aNkH4Z_h6fxgHgvWG84j0r2ziy3qtxSFY=s96-c"
+    }
+  ]
+},
+{
+  "localId": "frhqdzGCIFVnPOz42DVkPnz1XRY2",
+  "lastSignedInAt": "1753642314363",
+  "createdAt": "1753642314363"
+},
+{
+  "localId": "gJInQXnRDNOLl11wGfA2TxO9xZ23",
+  "email": "di.daniela.bazan@gmail.com",
+  "emailVerified": true,
+  "displayName": "Daniela Bazan",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJGelvXlzoFWUXAiECQpoggy26Y5DwHSo6fiyg1V3p3isK2dA=s96-c",
+  "lastSignedInAt": "1753585285828",
+  "createdAt": "1753199066640",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "105534932655364121625",
+      "email": "di.daniela.bazan@gmail.com",
+      "displayName": "Daniela Bazan",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJGelvXlzoFWUXAiECQpoggy26Y5DwHSo6fiyg1V3p3isK2dA=s96-c"
+    }
+  ]
+}]}
