@@ -460,43 +460,48 @@
       try {
         showLoading('Conectando con Google...');
         
+        // Guardar un indicador ANTES de iniciar el proceso de Google para asegurar que se complete el registro
+        localStorage.setItem('force_dream_input', 'true');
+        
         // Usar la autenticación de Google directamente aquí
         const provider = new GoogleAuthProvider();
+        // Forzar selección de cuenta para evitar login automático con cuenta guardada
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
         const result = await signInWithPopup(auth, provider);
         
         console.log("✅ Autenticación con Google exitosa:", result.user.email);
-        
-        // Verificar si es un usuario nuevo de manera más robusta
         console.log("📊 Token response:", result._tokenResponse);
         console.log("⏱️ Metadata:", result.user.metadata);
         
-        // Usamos múltiples métodos para detectar un usuario nuevo
-        // 1. Verificar propiedad isNewUser del token response
-        // 2. Comparar creationTime con lastSignInTime
-        // 3. Verificar si el usuario viene del flujo de welcome (asumimos que es un usuario nuevo que aún no ha elegido sueño)
-        const isNewUser = result._tokenResponse?.isNewUser === true || 
-                          result.user.metadata?.creationTime === result.user.metadata?.lastSignInTime ||
-                          true; // Forzamos a que sea considerado como nuevo para asegurar que vaya a dream-input.html
-        
-        // En el contexto de welcome.html, siempre dirigimos al usuario a dream-input.html
-        // cuando se usa Google, ya que este escenario siempre representa un usuario
-        // que no ha completado el registro de su sueño
-        console.log("🎉 Redirigiendo a dream-input para completar el registro");
+        // NO verificamos si es nuevo o no - desde welcome.html SIEMPRE redirigimos a dream-input.html
+        console.log("🎉 Redirigiendo a dream-input para completar el registro (desde welcome.html)");
         showLoading('¡Cuenta verificada! Completando tu registro...');
         
-        // Guardar en localStorage que estamos en proceso de registro para mantener el flujo correcto
+        // Guardar información necesaria en localStorage
         localStorage.setItem('registration_in_progress', 'true');
+        localStorage.setItem('from_welcome_google', 'true');
+        localStorage.setItem('user_email', result.user.email || '');
         
-        setTimeout(() => {
-          window.location.href = "dream-input.html";
-        }, 1500);
+        // Redirección inmediata a dream-input.html
+        window.location.href = "dream-input.html";
       } catch (error) {
         console.error("❌ Error en autenticación con Google:", error);
+        
+        // Limpiar todas las banderas en caso de error
+        localStorage.removeItem('force_dream_input');
+        localStorage.removeItem('from_welcome_google');
+        localStorage.removeItem('registration_in_progress');
+        
         hideLoading();
         
         let errorMessage = "Error al conectar con Google. ";
         if (error.code === 'auth/popup-closed-by-user') {
           errorMessage += "Ventana cerrada. Inténtalo de nuevo.";
+        } else if (error.code === 'auth/cancelled-popup-request') {
+          errorMessage += "Múltiples ventanas abiertas. Inténtalo de nuevo.";
         } else {
           errorMessage += error.message || "Inténtalo más tarde.";
         }

@@ -49,9 +49,37 @@
 
     const buttons = document.querySelectorAll('.dream-btn');
 
+    // Verificar si el usuario llegó aquí desde welcome.html usando Google
+    const fromWelcomeGoogle = localStorage.getItem('from_welcome_google') === 'true';
+    const forceRegistration = localStorage.getItem('force_dream_input') === 'true';
+    
+    console.log('🔍 ¿Viene de welcome.html con Google?', fromWelcomeGoogle);
+    console.log('🔍 ¿Forzar registro?', forceRegistration);
+    
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
+        console.log('❌ No hay usuario autenticado, redirigiendo a index.html');
         window.location.href = 'index.html';
+        return;
+      }
+      
+      console.log('✅ Usuario autenticado:', user.email);
+      console.log('📊 Metadata:', user.metadata);
+      
+      // Verificar si el usuario ya tiene un sueño registrado
+      try {
+        const dreamDoc = await db.collection(`users/${user.uid}/dream`).doc('info').get();
+        
+        // Si el usuario ya tiene un sueño registrado y NO viene del flujo de welcome+Google,
+        // redirigir directamente a home.html
+        if (dreamDoc.exists && !fromWelcomeGoogle && !forceRegistration) {
+          console.log('🎯 Usuario ya tiene sueño registrado, redirigiendo a home.html');
+          window.location.href = 'home.html';
+          return;
+        }
+      } catch (error) {
+        console.log('📝 Usuario no tiene sueño registrado o error al verificar:', error);
+        // Continuamos con el proceso de selección de sueño
       }
 
       buttons.forEach(btn => {
@@ -60,15 +88,19 @@
           try {
             await setDoc(doc(db, `users/${user.uid}/dream`, 'info'), { sueño });
             
-            // Limpiar la bandera de registro en progreso
+            // Limpiar todas las banderas de registro
             localStorage.removeItem('registration_in_progress');
+            localStorage.removeItem('from_welcome_google');
+            localStorage.removeItem('force_dream_input');
+            localStorage.removeItem('user_email');
             
             // Registrar que el usuario completó el proceso de registro
             localStorage.setItem('registration_completed', 'true');
+            console.log('✅ Registro completado exitosamente');
             
             window.location.href = 'home.html';
           } catch (error) {
-            console.error('Error al guardar el sueño:', error);
+            console.error('❌ Error al guardar el sueño:', error);
             alert('Ocurrió un error al guardar tu sueño. Intenta nuevamente.');
           }
         });
