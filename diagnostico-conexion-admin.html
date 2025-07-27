@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Conexión Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .step { background: #333; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .success { background: #0f5132; }
+        .error { background: #842029; }
+        .warning { background: #664d03; }
+        .info { background: #1f2937; }
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .actions { margin: 10px 0; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .logout-btn { background: #dc3545; }
+        .logout-btn:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico: ¿Por qué no verifica mi correo como admin?</h1>
+    
+    <div class="step info">
+        <h3>📧 Emails Admin Autorizados</h3>
+        <ul>
+            <li>gfigueroa.w@gmail.com</li>
+            <li>admin@yamevi.com.mx</li>
+            <li>eugenfw@gmail.com</li>
+        </ul>
+    </div>
+    
+    <div id="step1" class="step info">
+        <h3>1️⃣ Estado de Firebase</h3>
+        <div id="firebase-status">🔄 Verificando...</div>
+    </div>
+    
+    <div id="step2" class="step info">
+        <h3>2️⃣ Usuario Actual</h3>
+        <div id="user-status">🔄 Verificando...</div>
+        <div class="actions">
+            <button onclick="checkCurrentUser()">🔍 Verificar Usuario</button>
+            <button onclick="showLoginForm()" id="login-btn">🔑 Login</button>
+            <button onclick="forceLogout()" class="logout-btn">🚪 Logout</button>
+        </div>
+    </div>
+    
+    <div id="step3" class="step info">
+        <h3>3️⃣ Verificación Admin</h3>
+        <div id="admin-check">⏳ Esperando usuario...</div>
+    </div>
+    
+    <div id="step4" class="step info">
+        <h3>4️⃣ Datos de Firestore</h3>
+        <div id="firestore-check">⏳ Esperando verificación admin...</div>
+    </div>
+    
+    <div id="step5" class="step info">
+        <h3>5️⃣ Test AdminDataManager</h3>
+        <div id="manager-test">⏳ Esperando verificación admin...</div>
+    </div>
+
+    <!-- Login Form (hidden) -->
+    <div id="login-form" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #333; padding: 20px; border-radius: 8px; z-index: 1000;">
+        <h3>🔑 Login Manual</h3>
+        <div style="margin: 10px 0;">
+            <label>Email:</label><br>
+            <input type="email" id="login-email" style="width: 300px; padding: 8px; margin: 5px 0; color: black;">
+        </div>
+        <div style="margin: 10px 0;">
+            <label>Password:</label><br>
+            <input type="password" id="login-password" style="width: 300px; padding: 8px; margin: 5px 0; color: black;">
+        </div>
+        <div style="margin: 10px 0;">
+            <button onclick="performLogin()">🔑 Entrar</button>
+            <button onclick="hideLoginForm()" class="logout-btn">❌ Cancelar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        let auth, db, currentUser, AdminDataManager;
+        
+        console.log('🚀 Iniciando diagnóstico de conexión admin...');
+        
+        // Hacer funciones globales
+        window.checkCurrentUser = checkCurrentUser;
+        window.showLoginForm = showLoginForm;
+        window.hideLoginForm = hideLoginForm;
+        window.performLogin = performLogin;
+        window.forceLogout = forceLogout;
+        
+        async function init() {
+            try {
+                // Paso 1: Cargar Firebase
+                updateStatus('firebase-status', '📦 Cargando Firebase...', 'info');
+                
+                const firebase = await import('./js/firebase-init.js');
+                const { AdminDataManager: ADM } = await import('./js/adminDataManager.js');
+                
+                auth = firebase.auth;
+                db = firebase.db;
+                AdminDataManager = ADM;
+                
+                updateStatus('firebase-status', '✅ Firebase cargado correctamente', 'success');
+                document.getElementById('step1').className = 'step success';
+                
+                // Configurar listener de autenticación
+                firebase.onAuthStateChanged(auth, handleAuthChange);
+                
+            } catch (error) {
+                console.error('❌ Error inicializando:', error);
+                updateStatus('firebase-status', `❌ Error: ${error.message}`, 'error');
+                document.getElementById('step1').className = 'step error';
+            }
+        }
+        
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            
+            // Actualizar clase del step parent
+            const step = element.closest('.step');
+            if (step) {
+                step.className = `step ${type}`;
+            }
+        }
+        
+        async function handleAuthChange(user) {
+            currentUser = user;
+            
+            if (user) {
+                // Paso 2: Usuario encontrado
+                updateStatus('user-status', `
+                    ✅ <strong>Usuario autenticado</strong><br>
+                    📧 Email: <strong>${user.email}</strong><br>
+                    🆔 UID: ${user.uid}<br>
+                    ✉️ Email verificado: ${user.emailVerified ? '✅ Sí' : '❌ No'}<br>
+                    🕐 Último login: ${user.metadata.lastSignInTime || 'N/A'}
+                `, 'success');
+                document.getElementById('step2').className = 'step success';
+                
+                // Paso 3: Verificar admin
+                await checkAdminStatus(user);
+                
+            } else {
+                updateStatus('user-status', '❌ <strong>No hay usuario autenticado</strong>', 'error');
+                document.getElementById('step2').className = 'step error';
+                
+                updateStatus('admin-check', '⏹️ Cancelado - No hay usuario', 'warning');
+                document.getElementById('step3').className = 'step warning';
+                
+                updateStatus('firestore-check', '⏹️ Cancelado - No hay usuario', 'warning');
+                document.getElementById('step4').className = 'step warning';
+                
+                updateStatus('manager-test', '⏹️ Cancelado - No hay usuario', 'warning');
+                document.getElementById('step5').className = 'step warning';
+            }
+        }
+        
+        async function checkAdminStatus(user) {
+            updateStatus('admin-check', '🔍 Verificando permisos admin...', 'info');
+            
+            const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+            const isAdminByEmail = adminEmails.includes(user.email);
+            
+            console.log('🔍 Verificando admin:', user.email, 'en', adminEmails, '→', isAdminByEmail);
+            
+            let isAdminByFirestore = false;
+            let firestoreData = null;
+            
+            // Verificar en Firestore
+            try {
+                updateStatus('firestore-check', '🔍 Consultando Firestore...', 'info');
+                
+                const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    firestoreData = userDoc.data();
+                    isAdminByFirestore = firestoreData.isAdmin === true;
+                    
+                    updateStatus('firestore-check', `
+                        ✅ <strong>Documento encontrado en Firestore</strong><br>
+                        📄 isAdmin: ${firestoreData.isAdmin ? '✅ true' : '❌ false'}<br>
+                        📧 Email en DB: ${firestoreData.email || 'N/A'}<br>
+                        <pre>${JSON.stringify(firestoreData, null, 2)}</pre>
+                    `, firestoreData.isAdmin ? 'success' : 'warning');
+                    
+                } else {
+                    updateStatus('firestore-check', '⚠️ No existe documento para este usuario en Firestore', 'warning');
+                }
+                
+            } catch (firestoreError) {
+                console.error('❌ Error Firestore:', firestoreError);
+                updateStatus('firestore-check', `❌ Error consultando Firestore: ${firestoreError.message}`, 'error');
+            }
+            
+            // Resultado final de verificación admin
+            const isAdmin = isAdminByEmail || isAdminByFirestore;
+            
+            if (isAdmin) {
+                updateStatus('admin-check', `
+                    ✅ <strong>USUARIO ES ADMIN</strong><br>
+                    📧 Por email: ${isAdminByEmail ? '✅ SÍ' : '❌ NO'}<br>
+                    🔥 Por Firestore: ${isAdminByFirestore ? '✅ SÍ' : '❌ NO'}<br>
+                    👤 Usuario: ${user.email}
+                `, 'success');
+                document.getElementById('step3').className = 'step success';
+                
+                // Paso 5: Test AdminDataManager
+                await testAdminDataManager();
+                
+            } else {
+                updateStatus('admin-check', `
+                    ❌ <strong>USUARIO NO ES ADMIN</strong><br>
+                    📧 Email actual: ${user.email}<br>
+                    📋 Emails admin: ${adminEmails.join(', ')}<br>
+                    🔥 Firestore isAdmin: ${firestoreData?.isAdmin || 'false'}
+                `, 'error');
+                document.getElementById('step3').className = 'step error';
+                
+                updateStatus('manager-test', '⏹️ Cancelado - Usuario no es admin', 'warning');
+                document.getElementById('step5').className = 'step warning';
+            }
+        }
+        
+        async function testAdminDataManager() {
+            updateStatus('manager-test', '🧪 Probando AdminDataManager...', 'info');
+            
+            try {
+                const startTime = Date.now();
+                const stats = await AdminDataManager.getAllStats();
+                const loadTime = Date.now() - startTime;
+                
+                updateStatus('manager-test', `
+                    ✅ <strong>AdminDataManager funcionando</strong><br>
+                    ⏱️ Tiempo: ${loadTime}ms<br>
+                    📊 Datos obtenidos:<br>
+                    <pre>${JSON.stringify(stats, null, 2)}</pre>
+                `, 'success');
+                document.getElementById('step5').className = 'step success';
+                
+            } catch (error) {
+                console.error('❌ Error AdminDataManager:', error);
+                updateStatus('manager-test', `
+                    ❌ <strong>Error en AdminDataManager</strong><br>
+                    💥 Error: ${error.message}<br>
+                    📚 Stack: <pre>${error.stack}</pre>
+                `, 'error');
+                document.getElementById('step5').className = 'step error';
+            }
+        }
+        
+        function checkCurrentUser() {
+            if (currentUser) {
+                alert(`Usuario actual: ${currentUser.email}\nUID: ${currentUser.uid}`);
+            } else {
+                alert('No hay usuario autenticado');
+            }
+        }
+        
+        function showLoginForm() {
+            document.getElementById('login-form').style.display = 'block';
+        }
+        
+        function hideLoginForm() {
+            document.getElementById('login-form').style.display = 'none';
+        }
+        
+        async function performLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                alert('Por favor ingresa email y password');
+                return;
+            }
+            
+            try {
+                const { signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+                await signInWithEmailAndPassword(auth, email, password);
+                hideLoginForm();
+                alert('✅ Login exitoso');
+            } catch (error) {
+                alert(`❌ Error login: ${error.message}`);
+            }
+        }
+        
+        async function forceLogout() {
+            try {
+                await auth.signOut();
+                alert('✅ Sesión cerrada');
+            } catch (error) {
+                alert(`❌ Error logout: ${error.message}`);
+            }
+        }
+        
+        // Inicializar
+        init();
+    </script>
+</body>
+</html>
