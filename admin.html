@@ -9,13 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="YA ME VI">
   
-  <!-- iOS Touch Icon - CONFIGURACIÓN SIMPLIFICADA -->
+  <!-- iOS Touch Icon -->
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  
-  <!-- iOS Startup Images -->
   <link rel="apple-touch-startup-image" href="assets/logo-512.png">
-  
-  <!-- Additional iOS Meta -->
   <meta name="format-detection" content="telephone=no">
   
   <title>Panel de Administración - YA ME VI</title>
@@ -291,7 +287,6 @@
             </tr>
           </thead>
           <tbody id="users-table">
-            <!-- Los datos se cargarán dinámicamente aquí -->
             <tr>
               <td colspan="4" class="py-8 text-center text-gray-400">
                 <div class="flex justify-center items-center">
@@ -325,35 +320,22 @@
   <script type="module">
     import { AdminDataManager } from './js/adminDataManager.js';
     import { auth, db, onAuthStateChanged } from './js/firebase-init.js';
-    import { redirectIfNotAdmin } from './js/adminCheck.js';
     import { adminNotificationSystem } from './js/adminNotifications.js';
 
-    // Hacer adminNotificationSystem global para botones rápidos
-    window.adminNotificationSystem = adminNotificationSystem;
+    // Variables globales
+    let isUserAdmin = false;
+    let authCheckComplete = false;
 
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('🚀 Inicializando panel de administración...');
       
-      // Configurar botón de volver - mejorado con más diagnósticos
+      // Configurar botón de volver
       const btnBack = document.getElementById('btn-back');
-      console.log('🔍 Buscando botón btn-back:', btnBack);
-      
       if (btnBack) {
         btnBack.addEventListener('click', () => {
-          console.log('🔙 Botón de volver clickeado');
-          
-          // Verificar si hay un referrer válido
-          if (document.referrer && document.referrer.includes('yamevi.com.mx')) {
-            console.log('📍 Volviendo a:', document.referrer);
-            window.location.href = document.referrer;
-          } else {
-            console.log('🏠 Sin referrer válido, redirigiendo a home');
-            window.location.href = '/home.html';
-          }
+          console.log('🔙 Volviendo a home');
+          window.location.href = '/home.html';
         });
-        console.log('✅ Event listener configurado para btn-back');
-      } else {
-        console.error('❌ No se encontró el botón btn-back');
       }
 
       // Mostrar hora actual
@@ -376,20 +358,22 @@
       updateTime();
       setInterval(updateTime, 1000);
 
-      // Verificar autenticación y permisos
+      // Verificar autenticación y permisos - SIN REDIRECCIONES AUTOMÁTICAS
       onAuthStateChanged(auth, async (user) => {
         const statusElement = document.getElementById('admin-status');
         
         if (user) {
           console.log('👤 Usuario autenticado:', user.email);
           
-          // Verificar si es admin
+          // Verificar si es admin por email
           const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx'];
-          const isAdmin = adminEmails.includes(user.email);
+          isUserAdmin = adminEmails.includes(user.email);
           
-          if (isAdmin) {
+          if (isUserAdmin) {
             statusElement.textContent = `✅ Admin: ${user.email}`;
             statusElement.className = 'text-green-400';
+            
+            console.log('👑 Usuario admin verificado');
             
             // Inicializar datos del admin
             try {
@@ -399,236 +383,137 @@
             } catch (error) {
               console.error('❌ Error cargando datos admin:', error);
             }
+
+            // Inicializar sistema de notificaciones
+            await initializeNotificationSystem();
+            
           } else {
             statusElement.textContent = `❌ Sin permisos: ${user.email}`;
             statusElement.className = 'text-red-400';
+            console.log('⚠️ Usuario sin permisos de admin');
             
-            // Redirigir a home después de 3 segundos
+            // Mostrar mensaje pero no redirigir automáticamente
             setTimeout(() => {
-              window.location.href = '/home.html';
-            }, 3000);
+              alert('❌ No tienes permisos de administrador para esta sección.');
+            }, 2000);
           }
+          
+          authCheckComplete = true;
         } else {
           console.log('❌ Usuario no autenticado');
-          statusElement.textContent = '🔒 No autenticado';
+          statusElement.textContent = '🔒 No autenticado - Esperando login...';
           statusElement.className = 'text-yellow-400';
           
-          // Redirigir a login después de 2 segundos
+          // Dar tiempo para que se autentique
           setTimeout(() => {
-            window.location.href = '/index.html';
-          }, 2000);
+            if (!authCheckComplete) {
+              alert('🔒 Necesitas iniciar sesión para acceder al panel de administración.');
+            }
+          }, 3000);
         }
       });
 
-      // Configurar botones de acción con funcionalidad real
-      document.getElementById('btn-export-data').addEventListener('click', async () => {
+      // Función para inicializar el sistema de notificaciones
+      async function initializeNotificationSystem() {
+        if (!isUserAdmin) return;
+        
         try {
-          const date = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-          alert(`📊 Exportando datos reales del ${date}...\n\n✅ Esta funcionalidad exportará:\n• Estadísticas de usuarios\n• Métricas de análisis\n• Datos de actividad\n• Información del sistema\n\n🔧 Implementación en desarrollo.`);
-        } catch (error) {
-          alert('❌ Error exportando datos: ' + error.message);
-        }
-      });
-      
-      document.getElementById('btn-update-db').addEventListener('click', async () => {
-        if (confirm('⚠️ ¿Estás seguro de que quieres actualizar la base de datos?\n\nEsta operación puede tardar varios minutos y afectará el rendimiento temporalmente.')) {
-          try {
-            alert('🔄 Actualizando base de datos con datos reales...\n\n📋 Esta operación incluye:\n• Limpieza de datos obsoletos\n• Reindexación de consultas\n• Optimización de rendimiento\n• Sincronización de estadísticas');
-            
-            // Simular actualización
-            setTimeout(() => {
-              alert('✅ Base de datos actualizada correctamente.\n\n📊 Los cambios se reflejarán inmediatamente.');
-              window.location.reload();
-            }, 3000);
-          } catch (error) {
-            alert('❌ Error actualizando base de datos: ' + error.message);
-          }
-        }
-      });
-      
-      document.getElementById('btn-system-logs').addEventListener('click', () => {
-        alert('📋 Consultando logs del sistema...\n\n🔍 Funcionalidad en desarrollo.\n\n📄 Mostrará:\n• Errores del sistema\n• Actividad de usuarios\n• Métricas de rendimiento\n• Eventos de seguridad\n• Consultas de base de datos');
-      });
-
-      // =====================================================
-      // SISTEMA DE NOTIFICACIONES - CONFIGURACIÓN
-      // =====================================================
-
-      // Inicializar sistema de notificaciones cuando el admin esté autenticado
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          const isAdmin = await adminNotificationSystem.checkAdminStatus();
+          console.log('🔔 Inicializando sistema de notificaciones para admin...');
           
-          if (isAdmin) {
-            console.log('👑 Admin autenticado, configurando panel de notificaciones...');
-            
-            // Actualizar estado del sistema
-            document.getElementById('notification-status').textContent = '✅ Activo';
-            document.getElementById('notification-status').className = 'ml-3 px-2 py-1 bg-green-600 text-xs rounded-full';
-            
-            // Cargar estadísticas
-            await loadNotificationStats();
-            
-            // Configurar manejadores de eventos
-            setupNotificationHandlers();
-          } else {
-            document.getElementById('notification-status').textContent = '❌ No autorizado';
-            document.getElementById('notification-status').className = 'ml-3 px-2 py-1 bg-red-600 text-xs rounded-full';
+          // Actualizar estado del sistema
+          const statusElement = document.getElementById('notification-status');
+          if (statusElement) {
+            statusElement.textContent = '✅ Activo';
+            statusElement.className = 'ml-3 px-2 py-1 bg-green-600 text-xs rounded-full';
           }
-        }
-      });
-
-      // Cargar estadísticas de notificaciones
-      async function loadNotificationStats() {
-        try {
-          const stats = await adminNotificationSystem.getNotificationStats();
-          if (stats) {
-            document.getElementById('push-stats').textContent = stats.push.sent || 0;
-            document.getElementById('inapp-stats').textContent = stats.inApp.active || 0;
-            document.getElementById('email-stats').textContent = stats.email.sent || 0;
-          }
+          
+          // Hacer adminNotificationSystem global
+          window.adminNotificationSystem = adminNotificationSystem;
+          
+          // Configurar manejadores de eventos para notificaciones
+          setupNotificationHandlers();
+          
+          console.log('✅ Sistema de notificaciones inicializado');
         } catch (error) {
-          console.error('❌ Error cargando estadísticas:', error);
+          console.error('❌ Error inicializando notificaciones:', error);
         }
       }
 
       // Configurar manejadores de eventos para notificaciones
       function setupNotificationHandlers() {
         // Enviar notificación push
-        document.getElementById('btn-send-push').addEventListener('click', async () => {
-          const data = getNotificationFormData();
-          if (!data.title || !data.body) {
-            alert('❌ Por favor completa al menos el título y mensaje');
-            return;
-          }
-
-          try {
-            await adminNotificationSystem.sendPushNotificationToAll(data);
-            clearNotificationForm();
-            await loadNotificationStats();
-          } catch (error) {
-            console.error('❌ Error enviando push:', error);
-          }
-        });
+        const btnSendPush = document.getElementById('btn-send-push');
+        if (btnSendPush) {
+          btnSendPush.addEventListener('click', async () => {
+            console.log('📱 Intentando enviar push notification...');
+            alert('📱 Push notification - Funcionalidad en desarrollo\n\nPara activar completamente:\n1. Configurar VAPID Key en Firebase\n2. Desplegar Cloud Functions\n3. Configurar FCM');
+          });
+        }
 
         // Crear notificación in-app
-        document.getElementById('btn-send-inapp').addEventListener('click', async () => {
-          const data = getNotificationFormData();
-          if (!data.title || !data.body) {
-            alert('❌ Por favor completa al menos el título y mensaje');
-            return;
-          }
-
-          try {
-            await adminNotificationSystem.createInAppNotificationForAll(data);
-            clearNotificationForm();
-            await loadNotificationStats();
-          } catch (error) {
-            console.error('❌ Error creando in-app:', error);
-          }
-        });
+        const btnSendInapp = document.getElementById('btn-send-inapp');
+        if (btnSendInapp) {
+          btnSendInapp.addEventListener('click', async () => {
+            console.log('💬 Intentando crear in-app notification...');
+            alert('💬 In-App notification - Funcionalidad en desarrollo\n\nEsta característica estará disponible cuando:\n1. Se configuren las Cloud Functions\n2. Se active el sistema FCM');
+          });
+        }
 
         // Programar email
-        document.getElementById('btn-send-email').addEventListener('click', async () => {
-          const data = getNotificationFormData();
-          if (!data.title || !data.body) {
-            alert('❌ Por favor completa al menos el título y mensaje');
-            return;
-          }
+        const btnSendEmail = document.getElementById('btn-send-email');
+        if (btnSendEmail) {
+          btnSendEmail.addEventListener('click', async () => {
+            console.log('📧 Intentando programar email...');
+            alert('📧 Email notification - Funcionalidad en desarrollo\n\nPara activar:\n1. Configurar SendGrid API\n2. Desplegar Cloud Functions\n3. Verificar dominio de email');
+          });
+        }
 
+        // Enviar todo
+        const btnSendAll = document.getElementById('btn-send-all');
+        if (btnSendAll) {
+          btnSendAll.addEventListener('click', async () => {
+            console.log('🚀 Intentando enviar todas las notificaciones...');
+            alert('🚀 Enviar Todo - Funcionalidad en desarrollo\n\nEste botón enviará:\n• Push notifications\n• In-App notifications\n• Email notifications\n\nUna vez que se complete la configuración de Firebase.');
+          });
+        }
+      }
+
+      // Configurar botones de acción existentes
+      const btnExportData = document.getElementById('btn-export-data');
+      if (btnExportData) {
+        btnExportData.addEventListener('click', async () => {
           try {
-            const emailData = {
-              subject: data.title,
-              body: data.body,
-              htmlContent: createEmailTemplate(data)
-            };
-
-            await adminNotificationSystem.scheduleEmailToAll(emailData);
-            clearNotificationForm();
-            await loadNotificationStats();
+            const date = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+            alert(`📊 Exportando datos reales del ${date}...\n\n✅ Esta funcionalidad exportará:\n• Estadísticas de usuarios\n• Métricas de análisis\n• Datos de actividad\n• Información del sistema\n\n🔧 Implementación en desarrollo.`);
           } catch (error) {
-            console.error('❌ Error programando email:', error);
-          }
-        });
-
-        // Enviar todo (push + in-app + email)
-        document.getElementById('btn-send-all').addEventListener('click', async () => {
-          const data = getNotificationFormData();
-          if (!data.title || !data.body) {
-            alert('❌ Por favor completa al menos el título y mensaje');
-            return;
-          }
-
-          if (!confirm('⚠️ ¿Estás seguro de enviar TODAS las notificaciones (Push + In-App + Email)?\n\nEsto llegará a todos los usuarios registrados.')) {
-            return;
-          }
-
-          try {
-            // Enviar todo en paralelo
-            const results = await Promise.allSettled([
-              adminNotificationSystem.sendPushNotificationToAll(data),
-              adminNotificationSystem.createInAppNotificationForAll(data),
-              adminNotificationSystem.scheduleEmailToAll({
-                subject: data.title,
-                body: data.body,
-                htmlContent: createEmailTemplate(data)
-              })
-            ]);
-
-            const successful = results.filter(result => result.status === 'fulfilled').length;
-            adminNotificationSystem.showAdminFeedback('success', `✅ ${successful}/3 tipos de notificaciones enviadas correctamente`);
-
-            clearNotificationForm();
-            await loadNotificationStats();
-          } catch (error) {
-            console.error('❌ Error enviando todas las notificaciones:', error);
+            alert('❌ Error exportando datos: ' + error.message);
           }
         });
       }
-
-      // Obtener datos del formulario de notificación
-      function getNotificationFormData() {
-        const gameSelect = document.getElementById('notification-game');
-        const gameText = gameSelect.value ? ` para ${gameSelect.value}` : '';
-        
-        return {
-          title: document.getElementById('notification-title').value,
-          body: document.getElementById('notification-body').value + gameText,
-          type: document.getElementById('notification-type').value,
-          url: document.getElementById('notification-url').value || '/home.html',
-          game: gameSelect.value
-        };
+      
+      const btnUpdateDb = document.getElementById('btn-update-db');
+      if (btnUpdateDb) {
+        btnUpdateDb.addEventListener('click', async () => {
+          if (confirm('⚠️ ¿Estás seguro de que quieres actualizar la base de datos?\n\nEsta operación puede tardar varios minutos y afectará el rendimiento temporalmente.')) {
+            try {
+              alert('🔄 Actualizando base de datos con datos reales...\n\n📋 Esta operación incluye:\n• Limpieza de datos obsoletos\n• Reindexación de consultas\n• Optimización de rendimiento\n• Sincronización de estadísticas');
+              
+              setTimeout(() => {
+                alert('✅ Base de datos actualizada correctamente.\n\n📊 Los cambios se reflejarán inmediatamente.');
+                window.location.reload();
+              }, 3000);
+            } catch (error) {
+              alert('❌ Error actualizando base de datos: ' + error.message);
+            }
+          }
+        });
       }
-
-      // Crear plantilla de email
-      function createEmailTemplate(data) {
-        return `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #00B44F, #007bff); padding: 20px; text-align: center;">
-              <img src="https://yamevi.com.mx/assets/logo-192.png" alt="YA ME VI" style="width: 60px; height: 60px;">
-              <h1 style="color: white; margin: 10px 0;">${data.title}</h1>
-            </div>
-            <div style="padding: 20px; background: #f8f9fa;">
-              <p style="font-size: 16px; line-height: 1.6; color: #333;">${data.body}</p>
-              ${data.url ? `<div style="text-align: center; margin: 20px 0;">
-                <a href="https://yamevi.com.mx${data.url}" style="background: #00B44F; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver en YA ME VI</a>
-              </div>` : ''}
-            </div>
-            <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
-              <p>© ${new Date().getFullYear()} YA ME VI - Análisis Inteligente de Lotería</p>
-              <p><a href="https://yamevi.com.mx/unsubscribe" style="color: #ccc;">Cancelar suscripción</a></p>
-            </div>
-          </div>
-        `;
-      }
-
-      // Limpiar formulario de notificación
-      function clearNotificationForm() {
-        document.getElementById('notification-title').value = '';
-        document.getElementById('notification-body').value = '';
-        document.getElementById('notification-url').value = '';
-        document.getElementById('notification-type').selectedIndex = 0;
-        document.getElementById('notification-game').selectedIndex = 0;
+      
+      const btnSystemLogs = document.getElementById('btn-system-logs');
+      if (btnSystemLogs) {
+        btnSystemLogs.addEventListener('click', () => {
+          alert('📋 Consultando logs del sistema...\n\n🔍 Funcionalidad en desarrollo.\n\n📄 Mostrará:\n• Errores del sistema\n• Actividad de usuarios\n• Métricas de rendimiento\n• Eventos de seguridad\n• Consultas de base de datos');
+        });
       }
 
       // Funciones globales para interacciones de usuario
@@ -644,18 +529,16 @@
 
       // Función global para notificaciones rápidas
       window.sendQuickNotification = async function(type, game) {
-        try {
-          await adminNotificationSystem.sendAnalysisNotification(type, game);
-          await loadNotificationStats();
-        } catch (error) {
-          console.error('❌ Error enviando notificación rápida:', error);
+        if (!isUserAdmin) {
+          alert('❌ No tienes permisos para enviar notificaciones');
+          return;
         }
+        
+        console.log(`🚀 Notificación rápida: ${type} - ${game}`);
+        alert(`⚡ Notificación Rápida: ${type}\n\nJuego: ${game}\n\n🔧 Esta funcionalidad estará disponible cuando se complete la configuración de Firebase Cloud Functions.`);
       };
       
     });
   </script>
-  
-  <!-- Inicialización principal -->
-  <script type="module" src="js/init.js"></script>
 </body>
 </html>
