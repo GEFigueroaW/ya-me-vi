@@ -395,12 +395,12 @@ export class AdminDataManager {
   }
   
   /**
-   * Combina todas las estadísticas principales
-   * @returns {Promise<Object>} Objeto con todas las estadísticas
+   * Obtiene todas las estadísticas necesarias para el panel de administración
+   * @returns {Promise<Object>} Todas las estadísticas
    */
   static async getAllStats() {
     try {
-      console.log('🚀 Obteniendo todas las estadísticas del admin...');
+      console.log('� Obteniendo todas las estadísticas...');
       
       const [userStats, queryStats, dbStats] = await Promise.all([
         this.getUserStats(),
@@ -408,21 +408,25 @@ export class AdminDataManager {
         this.getDatabaseStats()
       ]);
       
-      return {
-        activeUsers: userStats.activeUsers,
-        totalUsers: userStats.totalUsers,
-        totalQueries: queryStats.totalQueries,
-        deviceRatio: userStats.deviceRatio,
-        dbSize: dbStats.totalRecords,
-        breakdown: {
-          users: userStats,
-          queries: queryStats,
-          database: dbStats
-        }
+      const allStats = {
+        users: userStats,
+        queries: queryStats,
+        database: dbStats,
+        summary: {
+          totalUsers: userStats.totalUsers,
+          activeUsers: userStats.activeUsers,
+          dailyQueries: queryStats.dailyQueries,
+          totalAnalysis: queryStats.totalAnalysis,
+          databaseSize: dbStats.totalSize || dbStats.totalRecords
+        },
+        loadedAt: new Date()
       };
       
+      console.log('✅ Todas las estadísticas obtenidas:', allStats);
+      return allStats;
+      
     } catch (error) {
-      console.error('❌ Error obteniendo estadísticas completas:', error);
+      console.error('❌ Error obteniendo todas las estadísticas:', error);
       throw error;
     }
   }

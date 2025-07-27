@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Admin Auth</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .step { background: #333; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .success { background: #0f5132; }
+        .error { background: #842029; }
+        .warning { background: #664d03; }
+        .loading { background: #1f2937; }
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico Completo - Panel Admin</h1>
+    
+    <div id="step1" class="step loading">
+        <h3>1️⃣ Carga de Firebase</h3>
+        <div id="firebase-status">Verificando...</div>
+    </div>
+    
+    <div id="step2" class="step loading">
+        <h3>2️⃣ Estado de Autenticación</h3>
+        <div id="auth-status">Verificando...</div>
+    </div>
+    
+    <div id="step3" class="step loading">
+        <h3>3️⃣ Verificación de Admin</h3>
+        <div id="admin-status">Esperando autenticación...</div>
+    </div>
+    
+    <div id="step4" class="step loading">
+        <h3>4️⃣ Test AdminDataManager</h3>
+        <div id="data-status">Esperando verificación admin...</div>
+    </div>
+
+    <script type="module">
+        console.log('🚀 Iniciando diagnóstico completo...');
+        
+        // Paso 1: Verificar carga de Firebase
+        try {
+            const { auth, db, onAuthStateChanged } = await import('./js/firebase-init.js');
+            const { AdminDataManager } = await import('./js/adminDataManager.js');
+            
+            document.getElementById('firebase-status').innerHTML = '✅ Firebase cargado correctamente';
+            document.getElementById('step1').className = 'step success';
+            
+            console.log('✅ Firebase importado:', { auth, db });
+            
+            // Paso 2: Verificar autenticación
+            onAuthStateChanged(auth, async (user) => {
+                const authStatusDiv = document.getElementById('auth-status');
+                const adminStatusDiv = document.getElementById('admin-status');
+                const dataStatusDiv = document.getElementById('data-status');
+                
+                if (user) {
+                    authStatusDiv.innerHTML = `
+                        ✅ <strong>Usuario autenticado</strong><br>
+                        Email: ${user.email}<br>
+                        UID: ${user.uid}<br>
+                        Email verificado: ${user.emailVerified ? 'Sí' : 'No'}
+                    `;
+                    document.getElementById('step2').className = 'step success';
+                    
+                    console.log('👤 Usuario autenticado:', user);
+                    
+                    // Paso 3: Verificar admin
+                    const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+                    let isAdmin = adminEmails.includes(user.email);
+                    
+                    console.log('🔍 Verificando admin:', user.email, 'en', adminEmails);
+                    
+                    // Verificación adicional por Firestore
+                    if (!isAdmin) {
+                        try {
+                            const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                            const userDocRef = doc(db, 'users', user.uid);
+                            const userDoc = await getDoc(userDocRef);
+                            if (userDoc.exists()) {
+                                const userData = userDoc.data();
+                                isAdmin = userData.isAdmin === true;
+                                console.log('📄 Datos Firestore:', userData);
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ Error verificando Firestore:', error);
+                        }
+                    }
+                    
+                    if (isAdmin) {
+                        adminStatusDiv.innerHTML = `
+                            ✅ <strong>Usuario es ADMIN</strong><br>
+                            Verificado por: ${adminEmails.includes(user.email) ? 'Email' : 'Firestore'}<br>
+                            Email: ${user.email}
+                        `;
+                        document.getElementById('step3').className = 'step success';
+                        
+                        // Paso 4: Test AdminDataManager
+                        try {
+                            dataStatusDiv.innerHTML = '🔄 Probando AdminDataManager...';
+                            
+                            const startTime = Date.now();
+                            const allStats = await AdminDataManager.getAllStats();
+                            const loadTime = Date.now() - startTime;
+                            
+                            dataStatusDiv.innerHTML = `
+                                ✅ <strong>AdminDataManager funcionando</strong><br>
+                                Tiempo de carga: ${loadTime}ms<br>
+                                Datos obtenidos:<br>
+                                <pre>${JSON.stringify(allStats, null, 2)}</pre>
+                            `;
+                            document.getElementById('step4').className = 'step success';
+                            
+                        } catch (dataError) {
+                            console.error('❌ Error AdminDataManager:', dataError);
+                            dataStatusDiv.innerHTML = `
+                                ❌ <strong>Error en AdminDataManager</strong><br>
+                                Error: ${dataError.message}<br>
+                                Stack: <pre>${dataError.stack}</pre>
+                            `;
+                            document.getElementById('step4').className = 'step error';
+                        }
+                        
+                    } else {
+                        adminStatusDiv.innerHTML = `
+                            ❌ <strong>Usuario NO es admin</strong><br>
+                            Email: ${user.email}<br>
+                            Emails admin: ${adminEmails.join(', ')}
+                        `;
+                        document.getElementById('step3').className = 'step error';
+                        
+                        dataStatusDiv.innerHTML = 'Cancelado - Usuario no es admin';
+                        document.getElementById('step4').className = 'step warning';
+                    }
+                    
+                } else {
+                    authStatusDiv.innerHTML = '❌ <strong>Usuario NO autenticado</strong>';
+                    document.getElementById('step2').className = 'step error';
+                    
+                    adminStatusDiv.innerHTML = 'Cancelado - Usuario no autenticado';
+                    document.getElementById('step3').className = 'step warning';
+                    
+                    dataStatusDiv.innerHTML = 'Cancelado - Usuario no autenticado';
+                    document.getElementById('step4').className = 'step warning';
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ Error cargando Firebase:', error);
+            document.getElementById('firebase-status').innerHTML = `❌ Error: ${error.message}`;
+            document.getElementById('step1').className = 'step error';
+        }
+    </script>
+</body>
+</html>

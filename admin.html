@@ -398,8 +398,10 @@
           // Verificación adicional por Firestore
           if (!isUserAdmin) {
             try {
-              const userDoc = await db.collection('users').doc(user.uid).get();
-              if (userDoc.exists) {
+              const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+              const userDocRef = doc(db, 'users', user.uid);
+              const userDoc = await getDoc(userDocRef);
+              if (userDoc.exists()) {
                 const userData = userDoc.data();
                 isUserAdmin = userData.isAdmin === true;
                 console.log('✅ Es admin por Firestore?', isUserAdmin, userData);
@@ -425,11 +427,20 @@
             try {
               console.log('📊 Cargando datos reales de administración...');
               
+              // Mostrar estado de carga
+              const loadingElements = document.querySelectorAll('#total-users, #daily-queries, #total-analysis, #database-size');
+              loadingElements.forEach(el => {
+                el.textContent = '...';
+                el.classList.add('animate-pulse');
+              });
+              
               // Usar getAllStats si existe, sino usar loadRealData como fallback
               let realData;
               if (typeof AdminDataManager.getAllStats === 'function') {
+                console.log('📈 Usando getAllStats...');
                 realData = await AdminDataManager.getAllStats();
               } else {
+                console.log('📈 Usando loadRealData como fallback...');
                 realData = await AdminDataManager.loadRealData();
               }
               
@@ -437,11 +448,35 @@
               
               // Actualizar UI con datos reales
               if (realData && realData.summary) {
+                console.log('🎯 Actualizando UI con summary:', realData.summary);
                 updateMainStats(realData.summary);
+              } else if (realData) {
+                console.log('🎯 Actualizando UI con datos directos:', realData);
+                // Crear summary desde los datos directos si no existe
+                const directSummary = {
+                  totalUsers: realData.users?.totalUsers || realData.totalUsers || 0,
+                  activeUsers: realData.users?.activeUsers || realData.activeUsers || 0,
+                  dailyQueries: realData.queries?.dailyQueries || realData.dailyQueries || 0,
+                  totalAnalysis: realData.queries?.totalAnalysis || realData.totalAnalysis || 0,
+                  databaseSize: realData.database?.totalSize || realData.database?.totalRecords || realData.databaseSize || 0
+                };
+                updateMainStats(directSummary);
               }
+              
+              // Quitar estado de carga
+              loadingElements.forEach(el => {
+                el.classList.remove('animate-pulse');
+              });
               
             } catch (error) {
               console.error('❌ Error cargando datos admin:', error);
+              
+              // Quitar estado de carga en caso de error
+              const loadingElements = document.querySelectorAll('#total-users, #daily-queries, #total-analysis, #database-size');
+              loadingElements.forEach(el => {
+                el.classList.remove('animate-pulse');
+              });
+              
               // Mostrar error al usuario pero continuar con el panel
               showErrorMessage('Error cargando datos de administración: ' + error.message);
               
@@ -1229,10 +1264,10 @@
       function updateMainStats(stats) {
         console.log('📊 Actualizando estadísticas principales:', stats);
         
-        // Actualizar usuarios activos
-        const activeUsersElement = document.getElementById('active-users');
-        if (activeUsersElement) {
-          activeUsersElement.textContent = stats.activeUsers || 0;
+        // Actualizar total de usuarios (no active-users)
+        const totalUsersElement = document.getElementById('total-users');
+        if (totalUsersElement) {
+          totalUsersElement.textContent = stats.totalUsers || stats.activeUsers || 0;
         }
         
         // Actualizar total de consultas
@@ -1252,6 +1287,13 @@
         if (dbSizeElement) {
           dbSizeElement.textContent = stats.databaseSize || 0;
         }
+        
+        // Ocultar cualquier loading spinner que pueda estar visible
+        document.querySelectorAll('.animate-spin').forEach(spinner => {
+          spinner.style.display = 'none';
+        });
+        
+        console.log('✅ UI actualizada con estadísticas');
       }
 
       // Función para mostrar estadísticas de fallback cuando hay error
@@ -1259,6 +1301,7 @@
         console.log('⚠️ Mostrando estadísticas de fallback');
         
         const fallbackStats = {
+          totalUsers: 0,
           activeUsers: 0,
           dailyQueries: 0,
           totalAnalysis: 0,
