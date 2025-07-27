@@ -130,4 +130,12 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn('No se pudo cargar el footer:', err);
       });
   }
+
+  // === SISTEMA DE TRACKING DE USUARIOS ===
+  // Importar y inicializar el sistema de tracking
+  import('./userTracking.js').then(module => {
+    console.log('📊 Sistema de tracking de usuarios cargado');
+  }).catch(error => {
+    console.warn('⚠️ No se pudo cargar el tracking:', error);
+  });
 });

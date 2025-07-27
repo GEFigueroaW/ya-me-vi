@@ -757,7 +757,16 @@
             
             try {
               const usersCollection = collection(db, 'users');
-              const q = query(usersCollection, orderBy('lastAccess', 'desc'), limit(10));
+              
+              // Intentar ordenar por lastAccess, si no existe usar createdAt
+              let q;
+              try {
+                q = query(usersCollection, orderBy('lastAccess', 'desc'), limit(10));
+              } catch (orderError) {
+                console.log('⚠️ No se puede ordenar por lastAccess, usando orden por defecto');
+                q = query(usersCollection, limit(10));
+              }
+              
               const snapshot = await getDocs(q);
               
               tbody.innerHTML = '';
@@ -774,17 +783,41 @@
                 return;
               }
               
+              console.log(`👥 Se encontraron ${snapshot.size} usuarios`);
+              
               snapshot.forEach((doc) => {
                 const userData = doc.data();
-                const lastAccess = userData.lastAccess ? new Date(userData.lastAccess.seconds * 1000).toLocaleString('es-MX') : 'Nunca';
+                console.log('👤 Usuario encontrado:', userData.email, userData);
+                
+                let lastAccess = 'Nunca';
+                if (userData.lastAccess) {
+                  if (userData.lastAccess.seconds) {
+                    // Timestamp de Firestore
+                    lastAccess = new Date(userData.lastAccess.seconds * 1000).toLocaleString('es-MX');
+                  } else if (userData.lastAccess instanceof Date) {
+                    // Fecha normal
+                    lastAccess = userData.lastAccess.toLocaleString('es-MX');
+                  } else {
+                    lastAccess = 'Fecha inválida';
+                  }
+                }
+                
                 const device = userData.device || 'No especificado';
+                const isOnline = userData.isOnline || false;
+                const onlineStatus = isOnline ? '🟢 Online' : '🔴 Offline';
                 
                 const row = document.createElement('tr');
                 row.className = 'border-b border-gray-700 hover:bg-gray-800';
                 row.innerHTML = `
-                  <td class="py-2 px-4">${userData.email || 'Email no disponible'}</td>
+                  <td class="py-2 px-4">
+                    ${userData.email || 'Email no disponible'}
+                    ${userData.isAdmin ? '<span class="ml-2 px-1 py-0.5 bg-yellow-600 text-xs rounded">ADMIN</span>' : ''}
+                  </td>
                   <td class="py-2 px-4 text-sm text-gray-300">${lastAccess}</td>
-                  <td class="py-2 px-4 text-sm text-gray-300">${device}</td>
+                  <td class="py-2 px-4 text-sm text-gray-300">
+                    ${device}<br>
+                    <small>${onlineStatus}</small>
+                  </td>
                   <td class="py-2 px-4">
                     <button onclick="viewUserDetails('${doc.id}')" class="text-blue-400 hover:text-blue-300 text-sm mr-2">Ver</button>
                     <button onclick="toggleUserStatus('${doc.id}')" class="text-yellow-400 hover:text-yellow-300 text-sm">Estado</button>
@@ -875,40 +908,27 @@
         console.log('🔧 Inicializando colecciones básicas...');
         
         try {
-          const { collection, addDoc, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          const { collection, addDoc, doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
           
-          // Crear documento de ejemplo en users si no existe tu usuario
-          try {
-            const currentUser = auth.currentUser;
-            if (currentUser) {
-              const userRef = doc(db, 'users', currentUser.uid);
-              await setDoc(userRef, {
-                email: currentUser.email,
-                isAdmin: true,
-                lastAccess: new Date(),
-                device: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop',
-                createdAt: new Date(),
-                totalAnalysis: 0,
-                totalQueries: 0
-              }, { merge: true }); // merge: true para no sobrescribir datos existentes
-              
-              console.log('✅ Usuario admin registrado en Firestore');
-            }
-          } catch (error) {
-            console.log('⚠️ No se pudo crear usuario en Firestore:', error.code);
+          // El usuario actual ya debería estar registrado por firebase-init.js
+          const currentUser = auth.currentUser;
+          if (currentUser) {
+            console.log('✅ Usuario admin ya registrado por firebase-init.js');
           }
           
-          // Crear algunos documentos de ejemplo en otras colecciones
+          // Crear algunos documentos de ejemplo en otras colecciones si no existen
           try {
-            // Ejemplo de actividad de usuario
+            // Ejemplo de actividad de usuario admin
             await addDoc(collection(db, 'user_activity'), {
-              userId: auth.currentUser?.uid || 'admin',
+              userId: currentUser?.uid || 'admin',
+              userEmail: currentUser?.email || 'admin',
               action: 'admin_panel_access',
-              timestamp: new Date(),
-              details: 'Acceso al panel de administración'
+              timestamp: serverTimestamp(),
+              details: 'Acceso al panel de administración',
+              device: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
             });
             
-            console.log('✅ Actividad de ejemplo creada');
+            console.log('✅ Actividad de administrador registrada');
           } catch (error) {
             console.log('⚠️ No se pudo crear actividad de ejemplo:', error.code);
           }
