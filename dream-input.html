@@ -41,7 +41,7 @@
   <script src="js/firebase-init.js" type="module"></script>
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { app } from './js/firebase-init.js';
 
     const auth = getAuth(app);
@@ -63,16 +63,18 @@
         return;
       }
       
-      console.log('✅ Usuario autenticado:', user.email);
+      console.log('✅ Usuario autenticado:', user.email || 'Email no disponible');
       console.log('📊 Metadata:', user.metadata);
+      console.log('🔍 UID:', user.uid);
       
-      // Verificar si el usuario ya tiene un sueño registrado
+      // Verificar si el usuario ya tiene un sueño registrado - SINTAXIS CORREGIDA v10
       try {
-        const dreamDoc = await db.collection(`users/${user.uid}/dream`).doc('info').get();
+        const dreamDocRef = doc(db, 'users', user.uid, 'dream', 'info');
+        const dreamDoc = await getDoc(dreamDocRef);
         
         // Si el usuario ya tiene un sueño registrado y NO viene del flujo de welcome+Google,
         // redirigir directamente a home.html
-        if (dreamDoc.exists && !fromWelcomeGoogle && !forceRegistration) {
+        if (dreamDoc.exists() && !fromWelcomeGoogle && !forceRegistration) {
           console.log('🎯 Usuario ya tiene sueño registrado, redirigiendo a home.html');
           window.location.href = 'home.html';
           return;
@@ -85,8 +87,18 @@
       buttons.forEach(btn => {
         btn.addEventListener('click', async () => {
           const sueño = btn.textContent;
+          console.log('💭 Guardando sueño:', sueño, 'para usuario:', user.uid);
+          
           try {
-            await setDoc(doc(db, `users/${user.uid}/dream`, 'info'), { sueño });
+            // SINTAXIS CORREGIDA v10
+            const dreamDocRef = doc(db, 'users', user.uid, 'dream', 'info');
+            await setDoc(dreamDocRef, { 
+              sueño: sueño,
+              savedAt: new Date().toISOString(),
+              userId: user.uid
+            });
+            
+            console.log('✅ Sueño guardado exitosamente:', sueño);
             
             // Limpiar todas las banderas de registro
             localStorage.removeItem('registration_in_progress');
@@ -101,6 +113,7 @@
             window.location.href = 'home.html';
           } catch (error) {
             console.error('❌ Error al guardar el sueño:', error);
+            console.error('❌ Error details:', error.code, error.message);
             alert('Ocurrió un error al guardar tu sueño. Intenta nuevamente.');
           }
         });

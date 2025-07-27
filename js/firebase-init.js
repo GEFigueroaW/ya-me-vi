@@ -28,9 +28,13 @@ export { app, onAuthStateChanged, getToken, onMessage };
 // Función para registrar usuario en Firestore automáticamente
 export async function registerUserInFirestore(user) {
   try {
+    console.log('🔄 Iniciando registro en Firestore para:', user.email);
     const { doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     
-    if (!user) return;
+    if (!user) {
+      console.error('❌ No se proporcionó usuario para registrar');
+      return;
+    }
     
     const userRef = doc(db, 'users', user.uid);
     
@@ -50,8 +54,12 @@ export async function registerUserInFirestore(user) {
     else if (userAgent.includes('Safari')) browser = 'Safari';
     else if (userAgent.includes('Edge')) browser = 'Edge';
     
+    // Verificar si el email existe antes de determinar isAdmin
+    const userEmail = user.email;
+    console.log('📧 Email del usuario para verificar admin:', userEmail);
+    
     const userData = {
-      email: user.email,
+      email: userEmail,
       displayName: user.displayName || null,
       photoURL: user.photoURL || null,
       lastAccess: serverTimestamp(),
@@ -59,35 +67,38 @@ export async function registerUserInFirestore(user) {
       isOnline: true,
       loginCount: 1,
       createdAt: serverTimestamp(),
-      // Campos específicos para admin
-      isAdmin: ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'].includes(user.email),
+      // Campos específicos para admin - VALIDACIÓN MEJORADA
+      isAdmin: userEmail ? ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com', 'guillermo.figueroaw@totalplay.com.mx'].includes(userEmail.toLowerCase()) : false,
       totalAnalysis: 0,
-      totalQueries: 0
+      totalQueries: 0,
+      uid: user.uid // Agregar UID para referencia
     };
     
-    // Usar merge para no sobrescribir datos existentes, solo actualizar lastAccess y isOnline
+    console.log('👤 Datos del usuario a guardar:', {
+      email: userData.email,
+      isAdmin: userData.isAdmin,
+      displayName: userData.displayName
+    });
+    
+    // Usar merge para no sobrescribir datos existentes, solo actualizar campos importantes
     await setDoc(userRef, userData, { merge: true });
     
-    console.log('✅ Usuario registrado/actualizado en Firestore:', user.email);
+    console.log('✅ Usuario registrado/actualizado en Firestore:', userEmail, '- Admin:', userData.isAdmin);
     
   } catch (error) {
     console.error('❌ Error registrando usuario en Firestore:', error);
+    console.error('❌ Stack trace:', error.stack);
   }
 }
 
-// Listener global para registrar usuarios automáticamente
-let globalAuthChecked = false;
+// Listener global para registrar usuarios automáticamente - MEJORADO
 onAuthStateChanged(auth, async (user) => {
-  // Evitar múltiples ejecuciones del listener global
-  if (globalAuthChecked) return;
-  
   if (user) {
-    console.log('👤 Usuario autenticado globalmente:', user.email);
-    // Registrar automáticamente en Firestore con actualización inmediata
-    await registerUserInFirestore(user);
+    console.log('👤 Usuario autenticado globalmente:', user.email || 'Email no disponible');
+    console.log('� Proveedor de autenticación:', user.providerData);
     
-    // Marcar como verificado para evitar re-ejecuciones
-    globalAuthChecked = true;
+    // Registrar automáticamente en Firestore siempre que haya cambios de estado
+    await registerUserInFirestore(user);
     
     // Limpiar indicadores de redirección si la auth es exitosa
     if (typeof sessionStorage !== 'undefined') {
@@ -104,15 +115,12 @@ onAuthStateChanged(auth, async (user) => {
         lastLoginDevice: navigator.userAgent.includes('Mobile') ? 'Mobile' : 
                         navigator.userAgent.includes('Tablet') ? 'Tablet' : 'Desktop'
       });
-      console.log('✅ Estado online actualizado inmediatamente');
+      console.log('✅ Estado online actualizado para:', user.email || user.uid);
     } catch (error) {
       console.log('⚠️ Error actualizando estado online:', error);
     }
     
   } else {
     console.log('👤 Usuario desconectado globalmente');
-    // Resetear el flag cuando el usuario se desconecta
-    globalAuthChecked = false;
-    // Aquí podrías marcar como offline si tuvieras el UID
   }
 });

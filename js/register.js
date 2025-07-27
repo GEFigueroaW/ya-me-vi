@@ -37,17 +37,8 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("⚠️ Error actualizando perfil:", profileError);
           }
           
-          // Guardar el nombre en Firestore también
-          try {
-            await setDoc(doc(db, `users/${userCredential.user.uid}/profile`, 'info'), {
-              name: name,
-              email: email,
-              registeredAt: new Date().toISOString()
-            });
-            console.log("✅ Datos guardados en Firestore");
-          } catch (firestoreError) {
-            console.error("⚠️ Error guardando en Firestore:", firestoreError);
-          }
+          // No necesitamos guardar aquí porque firebase-init.js ya lo hace automáticamente
+          console.log("✅ Registro completado - el listener global guardará en Firestore");
           
           // Redirigir después de un breve delay
           setTimeout(() => {
@@ -102,26 +93,26 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.appendChild(loadingOverlay);
       
       const provider = new GoogleAuthProvider();
+      // Configurar el proveedor para forzar selección de cuenta
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
       signInWithPopup(auth, provider)
         .then(async (result) => {
           console.log("✅ Usuario registrado con Google:", result.user);
+          console.log("📧 Email:", result.user.email);
+          console.log("👤 Display Name:", result.user.displayName);
+          console.log("📊 Provider Data:", result.user.providerData);
           
           // Verificar si es usuario nuevo
           const isNewUser = result._tokenResponse?.isNewUser || 
                            result.user.metadata?.creationTime === result.user.metadata?.lastSignInTime;
           
-          // Guardar información del usuario en Firestore
-          try {
-            await setDoc(doc(db, `users/${result.user.uid}/profile`, 'info'), {
-              name: result.user.displayName || result.user.email.split('@')[0],
-              email: result.user.email,
-              registeredAt: new Date().toISOString(),
-              registeredWith: 'google'
-            });
-          } catch (firestoreError) {
-            console.error("Error guardando en Firestore:", firestoreError);
-            // Continuar aunque falle Firestore
-          }
+          console.log("🆕 ¿Es usuario nuevo?", isNewUser);
+          
+          // No necesitamos guardar aquí porque firebase-init.js ya lo hace automáticamente
+          console.log("✅ Registro con Google completado - el listener global guardará en Firestore");
           
           // Actualizar loading
           const loadingMessage = loadingOverlay.querySelector('p');
