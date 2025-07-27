@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poblar Usuarios de Prueba - YA ME VI</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #2a2a2a; border-radius: 10px; }
+        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #45a049; }
+        .log { background: #333; padding: 10px; border-radius: 5px; margin: 10px 0; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Poblar Base de Datos con Usuarios de Prueba</h1>
+        <p>Este script creará usuarios de prueba para poder ver datos en el panel de administración.</p>
+        
+        <button onclick="createTestUsers()">🚀 Crear 5 Usuarios de Prueba</button>
+        <button onclick="clearLog()">🧹 Limpiar Log</button>
+        
+        <div id="status" class="log">
+            📋 Presiona "Crear Usuarios de Prueba" para comenzar...<br>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBcaHcOdKccyxLXEcOhGQr8Eb-8RShKOdY",
+            authDomain: "ya-me-vi.firebaseapp.com",
+            projectId: "ya-me-vi",
+            storageBucket: "ya-me-vi.appspot.com",
+            messagingSenderId: "87918155207",
+            appId: "1:87918155207:web:a6f20e498e06e9a5b35f08",
+            measurementId: "G-3WGVBDV74V"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        window.log = function(message) {
+            const status = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            status.innerHTML += `[${timestamp}] ${message}<br>`;
+            status.scrollTop = status.scrollHeight;
+        }
+
+        window.clearLog = function() {
+            document.getElementById('status').innerHTML = '📋 Log limpiado...<br>';
+        }
+
+        window.createTestUsers = async function() {
+            try {
+                log('🔐 Iniciando autenticación...');
+                await signInAnonymously(auth);
+                log('✅ Autenticado correctamente');
+
+                const testUsers = [
+                    {
+                        email: 'usuario1@prueba.com',
+                        device: 'iPhone 14',
+                        isOnline: true,
+                        isAdmin: false,
+                        lastAccess: new Date(),
+                        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // hace 2 horas
+                        totalAnalysis: 15,
+                        favoriteNumbers: [5, 12, 23, 34, 45, 56]
+                    },
+                    {
+                        email: 'usuario2@prueba.com',
+                        device: 'Samsung Galaxy S23',
+                        isOnline: false,
+                        isAdmin: false,
+                        lastAccess: new Date(Date.now() - 5 * 60 * 60 * 1000), // hace 5 horas
+                        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // hace 1 día
+                        totalAnalysis: 8,
+                        favoriteNumbers: [1, 7, 14, 21, 28, 35]
+                    },
+                    {
+                        email: 'usuario3@prueba.com',
+                        device: 'Desktop Chrome',
+                        isOnline: true,
+                        isAdmin: false,
+                        lastAccess: new Date(Date.now() - 30 * 60 * 1000), // hace 30 min
+                        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // hace 3 días
+                        totalAnalysis: 22,
+                        favoriteNumbers: [3, 9, 16, 27, 38, 49]
+                    },
+                    {
+                        email: 'admin@yamevi.com',
+                        device: 'MacBook Pro',
+                        isOnline: true,
+                        isAdmin: true,
+                        lastAccess: new Date(),
+                        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // hace 1 semana
+                        totalAnalysis: 150,
+                        favoriteNumbers: [11, 22, 33, 44, 55, 6]
+                    },
+                    {
+                        email: 'usuario5@prueba.com',
+                        device: 'iPad Air',
+                        isOnline: false,
+                        isAdmin: false,
+                        lastAccess: new Date(Date.now() - 12 * 60 * 60 * 1000), // hace 12 horas
+                        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // hace 5 días
+                        totalAnalysis: 5,
+                        favoriteNumbers: [2, 8, 15, 26, 37, 48]
+                    }
+                ];
+
+                log('👥 Creando usuarios de prueba...');
+                
+                for (let i = 0; i < testUsers.length; i++) {
+                    const user = testUsers[i];
+                    const userId = `test-user-${i + 1}`;
+                    
+                    log(`📝 Creando usuario: ${user.email}`);
+                    
+                    await setDoc(doc(db, 'users', userId), {
+                        ...user,
+                        serverTimestamp: serverTimestamp()
+                    });
+                    
+                    log(`✅ Usuario creado: ${user.email}`);
+                }
+
+                log('🎉 ¡Todos los usuarios de prueba creados exitosamente!');
+                log('🔄 Ahora actualiza tu panel de administración para ver los datos');
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+                console.error('Error completo:', error);
+            }
+        }
+    </script>
+</body>
+</html>
