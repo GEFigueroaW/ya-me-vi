@@ -10,7 +10,7 @@ document.getElementById('recover-form').addEventListener('submit', async (e) => 
   try {
     await sendPasswordResetEmail(auth, email);
     alert("Enlace de recuperación enviado. Revisa tu correo.");
-    window.location.href = "login-email.html";
+    window.location.href = "welcome.html";
   } catch (error) {
     console.error(error);
     alert("Error al enviar el enlace. Verifica el correo e intenta nuevamente.");

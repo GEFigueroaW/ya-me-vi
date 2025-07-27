@@ -100,6 +100,28 @@
       0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
       50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
     }
+    
+    /* Overlay de carga */
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    #loading-overlay.hidden {
+      display: none;
+    }
+  </style>
+      50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+    }
   </style>
 </head>
 
@@ -780,6 +802,14 @@
     });
   </script>
 
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
+      <div class="animate-spin inline-block w-10 h-10 border-4 border-current border-t-transparent text-green-600 rounded-full mb-4"></div>
+      <p id="loading-message" class="text-lg">Verificando cuenta...</p>
+    </div>
+  </div>
+
   <!-- Google Analytics (replace with your tracking ID) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
   <script>
@@ -787,6 +817,60 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'GA_TRACKING_ID');
+  </script>
+  
+  <script type="module">
+    import { smartRedirector } from './js/smartRedirect.js';
+    
+    // Inicializar smart redirector
+    await smartRedirector.init();
+    
+    // Funciones para el overlay de carga
+    function showLoading(message = 'Verificando cuenta...') {
+      const overlay = document.getElementById('loading-overlay');
+      const loadingMessage = document.getElementById('loading-message');
+      
+      if (loadingMessage) {
+        loadingMessage.textContent = message;
+      }
+      
+      if (overlay) {
+        overlay.classList.remove('hidden');
+      }
+    }
+    
+    function hideLoading() {
+      const overlay = document.getElementById('loading-overlay');
+      if (overlay) {
+        overlay.classList.add('hidden');
+      }
+    }
+    
+    // Redirigir al destino apropiado cuando se hace clic en los botones de inicio/registro
+    document.addEventListener('DOMContentLoaded', () => {
+      // Obtener todos los botones que antes apuntaban a app.html
+      const appButtons = document.querySelectorAll('a[href="app.html"]');
+      
+      // Cambiar comportamiento para usar la redirección inteligente
+      appButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+          e.preventDefault();
+          
+          // Mostrar overlay de carga
+          showLoading();
+          
+          try {
+            // Redirigir al destino apropiado
+            await smartRedirector.redirectToAppropriateDestination(showLoading, hideLoading);
+          } catch (error) {
+            console.error('Error en redirección:', error);
+            hideLoading();
+            // En caso de error, redirigir a registro por defecto
+            window.location.href = 'register.html';
+          }
+        });
+      });
+    });
   </script>
 </body>
 </html>

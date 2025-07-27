@@ -19,7 +19,7 @@
         </div>
         <div class="flex space-x-4">
           <a href="index.html" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Inicio</a>
-          <a href="app.html" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Aplicación</a>
+          <a href="javascript:void(0)" onclick="detectAndRedirect(event)" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Aplicación</a>
           <a href="analisis.html" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Análisis</a>
           <a href="combinacion.html" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Mi Combinación</a>
           <a href="sugeridas.html" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Sugerencias</a>
@@ -105,5 +105,48 @@
     </div>
   </footer>
 
+  <!-- Loading overlay for smart redirect -->
+  <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
+      <div class="animate-spin inline-block w-10 h-10 border-4 border-current border-t-transparent text-green-600 rounded-full mb-4"></div>
+      <p id="loading-message" class="text-lg">Verificando cuenta...</p>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { smartRedirector } from './js/smartRedirect.js';
+    
+    // Inicializar smart redirector
+    await smartRedirector.init();
+    
+    // Exponer función para su uso en los enlaces HTML
+    window.detectAndRedirect = async function(event) {
+      event.preventDefault();
+      
+      // Mostrar overlay de carga
+      const overlay = document.getElementById('loading-overlay');
+      overlay.classList.remove('hidden');
+      
+      try {
+        // Redirigir al destino apropiado
+        await smartRedirector.redirectToAppropriateDestination(
+          (msg) => {
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.textContent = msg;
+          },
+          () => {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.add('hidden');
+          }
+        );
+      } catch (error) {
+        console.error('Error en redirección:', error);
+        const overlay = document.getElementById('loading-overlay');
+        overlay.classList.add('hidden');
+        // En caso de error, redirigir a registro por defecto
+        window.location.href = 'register.html';
+      }
+    };
+  </script>
 </body>
 </html>
