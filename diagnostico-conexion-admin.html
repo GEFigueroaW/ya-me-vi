@@ -96,11 +96,14 @@
                 updateStatus('firebase-status', '📦 Cargando Firebase...', 'info');
                 
                 const firebase = await import('./js/firebase-init.js');
-                const { AdminDataManager: ADM } = await import('./js/adminDataManager.js');
+                const adminModule = await import('./js/adminDataManager.js');
+                AdminDataManager = adminModule.AdminDataManager;
                 
                 auth = firebase.auth;
                 db = firebase.db;
-                AdminDataManager = ADM;
+                console.log('✅ Firebase auth:', !!auth);
+                console.log('✅ Firebase db:', !!db);
+                console.log('✅ AdminDataManager:', !!AdminDataManager);
                 
                 updateStatus('firebase-status', '✅ Firebase cargado correctamente', 'success');
                 document.getElementById('step1').className = 'step success';
