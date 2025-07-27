@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Load</title>
+</head>
+<body>
+    <h1>🔥 Test de Carga de Firebase</h1>
+    <div id="status">Cargando...</div>
+    <div id="details"></div>
+
+    <script type="module">
+        console.log('🚀 Iniciando test de Firebase...');
+        
+        try {
+            // Test de carga directa de Firebase
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+            console.log('✅ Firebase App cargado correctamente');
+            document.getElementById('status').innerHTML = '✅ Firebase CDN funcionando';
+            
+            // Test de carga del archivo local
+            try {
+                const firebaseInit = await import('./js/firebase-init.js');
+                console.log('✅ firebase-init.js cargado:', firebaseInit);
+                document.getElementById('details').innerHTML = '✅ Archivo firebase-init.js cargado correctamente';
+            } catch (localError) {
+                console.error('❌ Error cargando firebase-init.js:', localError);
+                document.getElementById('details').innerHTML = `❌ Error cargando firebase-init.js: ${localError.message}`;
+            }
+            
+        } catch (cdnError) {
+            console.error('❌ Error cargando Firebase CDN:', cdnError);
+            document.getElementById('status').innerHTML = `❌ Error Firebase CDN: ${cdnError.message}`;
+        }
+    </script>
+</body>
+</html>

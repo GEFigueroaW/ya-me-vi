@@ -340,6 +340,114 @@ export class AdminDataManager {
   }
   
   /**
+   * Obtiene todas las estadísticas necesarias para el panel de administración
+   * @returns {Promise<Object>} Todas las estadísticas
+   */
+  static async getAllStats() {
+    try {
+      console.log('📊 Obteniendo todas las estadísticas...');
+      
+      const [userStats, queryStats, dbStats] = await Promise.all([
+        this.getUserStats(),
+        this.getQueryStats(),
+        this.getDatabaseStats()
+      ]);
+      
+      const allStats = {
+        users: userStats,
+        queries: queryStats,
+        database: dbStats,
+        summary: {
+          totalUsers: userStats.totalUsers,
+          activeUsers: userStats.activeUsers,
+          dailyQueries: queryStats.dailyQueries,
+          totalAnalysis: queryStats.totalAnalysis,
+          databaseSize: dbStats.totalSize
+        },
+        loadedAt: new Date()
+      };
+      
+      console.log('✅ Todas las estadísticas obtenidas:', allStats);
+      return allStats;
+      
+    } catch (error) {
+      console.error('❌ Error obteniendo todas las estadísticas:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene los usuarios más recientes
+   * @param {number} limitCount - Número de usuarios a obtener
+   * @returns {Promise<Array>} Lista de usuarios recientes
+   */
+  static async getRecentUsers(limitCount = 10) {
+    try {
+      console.log(`👥 Obteniendo ${limitCount} usuarios más recientes...`);
+      
+      const usersRef = collection(db, "users");
+      const recentQuery = query(
+        usersRef,
+        orderBy("lastLogin", "desc"),
+        limit(limitCount)
+      );
+      
+      const snapshot = await getDocs(recentQuery);
+      const recentUsers = [];
+      
+      snapshot.forEach((doc) => {
+        const userData = doc.data();
+        recentUsers.push({
+          id: doc.id,
+          email: userData.email,
+          lastLogin: userData.lastLogin?.toDate() || null,
+          lastDeviceType: userData.lastDeviceType || 'desktop',
+          lastDeviceInfo: userData.lastDeviceInfo || 'Desconocido',
+          createdAt: userData.createdAt?.toDate() || null
+        });
+      });
+      
+      console.log(`✅ ${recentUsers.length} usuarios recientes obtenidos`);
+      return recentUsers;
+      
+    } catch (error) {
+      console.error('❌ Error obteniendo usuarios recientes:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Carga todos los datos reales necesarios para el panel de administración
+   * @returns {Promise<Object>} Todos los datos cargados
+   */
+  static async loadRealData() {
+    try {
+      console.log('🔄 Cargando datos reales de administración...');
+      
+      // Cargar todas las estadísticas en paralelo
+      const [userStats, queryStats, dbStats] = await Promise.all([
+        this.getUserStats(),
+        this.getQueryStats(), 
+        this.getDatabaseStats()
+      ]);
+      
+      const completeStats = {
+        users: userStats,
+        queries: queryStats,
+        database: dbStats,
+        loadedAt: new Date()
+      };
+      
+      console.log('✅ Datos reales cargados exitosamente:', completeStats);
+      return completeStats;
+      
+    } catch (error) {
+      console.error('❌ Error cargando datos reales:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene string del dispositivo
    * @param {string} deviceType - Tipo de dispositivo
    * @param {string} deviceInfo - Información adicional del dispositivo
