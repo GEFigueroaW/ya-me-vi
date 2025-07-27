@@ -326,23 +326,32 @@
       
       if (user) {
         currentUser = user;
-        console.log('👤 Usuario:', user.email);
+        console.log('👤 Usuario conectado:', user.email);
         
-        // Check admin
-        const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
-        isUserAdmin = adminEmails.includes(user.email);
+        // Check admin - Lista expandida de emails autorizados
+        const adminEmails = [
+          'gfigueroa.w@gmail.com', 
+          'admin@yamevi.com.mx', 
+          'eugenfw@gmail.com'
+        ];
         
+        isUserAdmin = adminEmails.includes(user.email.toLowerCase());
+        
+        console.log('🔍 Verificando permisos admin para:', user.email);
         console.log('🔍 Es admin?', isUserAdmin);
         
-        // Additional Firestore check
+        // Additional Firestore check if not in direct list
         if (!isUserAdmin) {
           try {
+            console.log('🔍 Verificando en Firestore...');
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
-              isUserAdmin = userDoc.data().isAdmin === true;
+              const userData = userDoc.data();
+              isUserAdmin = userData.isAdmin === true;
+              console.log('🔍 Admin desde Firestore:', isUserAdmin);
             }
           } catch (error) {
-            console.log('⚠️ Error Firestore:', error);
+            console.warn('⚠️ Error verificando Firestore:', error.message);
           }
         }
         
@@ -351,7 +360,7 @@
           statusElement.className = 'text-green-400 font-medium';
           updateIndicator('connection-indicator', 'online');
           
-          console.log('👑 Admin verificado');
+          console.log('👑 Admin verificado, cargando panel...');
           await loadAdminData();
           startAutoRefresh();
           
@@ -360,21 +369,23 @@
           statusElement.className = 'text-red-400 font-medium';
           updateIndicator('connection-indicator', 'offline');
           
+          console.log('❌ Usuario sin permisos:', user.email);
           setTimeout(() => {
-            alert(`❌ Sin permisos de administrador\n\nUsuario: ${user.email}\nAdmins: eugenfw@gmail.com, gfigueroa.w@gmail.com`);
+            alert(`❌ Acceso denegado\n\nUsuario: ${user.email}\n\nAdmins autorizados:\n• eugenfw@gmail.com\n• gfigueroa.w@gmail.com\n• admin@yamevi.com.mx`);
             window.location.href = 'index.html';
           }, 2000);
         }
         
       } else {
         console.log('❌ No autenticado');
-        statusElement.textContent = '🔒 No autenticado';
+        statusElement.textContent = '🔒 No autenticado - Redirigiendo...';
         statusElement.className = 'text-yellow-400 font-medium';
         updateIndicator('connection-indicator', 'warning');
         
+        // Redirigir inmediatamente a login con parámetro de admin
         setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 3000);
+          window.location.href = 'login.html?redirect=admin';
+        }, 1000);
       }
     });
 

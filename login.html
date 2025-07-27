@@ -65,24 +65,67 @@
   <script src="js/shared.js"></script> 
   <script type="module">
     import { auth } from './js/firebase-init.js';
-    import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Check if redirecting from admin panel
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdminRedirect = urlParams.get('redirect') === 'admin';
 
     const openBtn = document.getElementById("openAuthModal");
     const modal = document.getElementById("authModal");
     const closeBtn = document.getElementById("closeAuthModal");
 
+    // Auto-open modal if redirected from admin
+    if (isAdminRedirect) {
+      modal.classList.remove("hidden");
+      document.querySelector('h2').textContent = 'Autenticación requerida para Panel Admin';
+    }
+
     openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
     closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+
+    // Check if user is already authenticated
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('✅ Usuario ya autenticado:', user.email);
+        // Check if user is admin
+        const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+        const isAdmin = adminEmails.includes(user.email);
+        
+        if (isAdminRedirect && isAdmin) {
+          console.log('🔄 Redirigiendo a admin panel...');
+          window.location.href = "admin.html";
+        } else if (isAdminRedirect && !isAdmin) {
+          alert(`❌ Sin permisos de administrador\n\nUsuario: ${user.email}\nContacta al administrador.`);
+          window.location.href = "index.html";
+        } else {
+          // Normal redirect
+          window.location.href = "home.html";
+        }
+      }
+    });
 
     document.getElementById("loginWithGoogle").addEventListener("click", () => {
       const provider = new GoogleAuthProvider();
       signInWithPopup(auth, provider)
         .then((result) => {
-          console.log("Usuario logueado con Google:", result.user);
-          window.location.href = "menu.html";
+          console.log("✅ Usuario logueado con Google:", result.user.email);
+          
+          // Check admin permissions
+          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+          const isAdmin = adminEmails.includes(result.user.email);
+          
+          if (isAdminRedirect && isAdmin) {
+            window.location.href = "admin.html";
+          } else if (isAdminRedirect && !isAdmin) {
+            alert(`❌ Sin permisos de administrador\n\nUsuario: ${result.user.email}\nContacta al administrador.`);
+            window.location.href = "index.html";
+          } else {
+            window.location.href = "home.html";
+          }
         })
         .catch((error) => {
-          console.error("Error al iniciar sesión con Google:", error);
+          console.error("❌ Error al iniciar sesión con Google:", error);
           alert("Error al iniciar sesión con Google: " + error.message);
         });
     });
@@ -98,11 +141,23 @@
       
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          console.log("Usuario logueado:", userCredential.user);
-          window.location.href = "menu.html";
+          console.log("✅ Usuario logueado con email:", userCredential.user.email);
+          
+          // Check admin permissions
+          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+          const isAdmin = adminEmails.includes(userCredential.user.email);
+          
+          if (isAdminRedirect && isAdmin) {
+            window.location.href = "admin.html";
+          } else if (isAdminRedirect && !isAdmin) {
+            alert(`❌ Sin permisos de administrador\n\nUsuario: ${userCredential.user.email}\nContacta al administrador.`);
+            window.location.href = "index.html";
+          } else {
+            window.location.href = "home.html";
+          }
         })
         .catch((error) => {
-          console.error("Error al iniciar sesión:", error);
+          console.error("❌ Error al iniciar sesión:", error);
           alert("Error al iniciar sesión: " + error.message);
         });
     });
@@ -112,8 +167,7 @@
       const password = document.getElementById("passwordInput").value.trim();
       if (!email || !password) return alert("Ingresa ambos campos.");
       firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(() => window.location.href = "menu.html")
-        .catch(error => alert(error.message));
+        });
     });
   </script>
 </body>
