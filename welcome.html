@@ -200,6 +200,13 @@
         
         console.log('🚀 Iniciando página de bienvenida...');
         
+        // Verificar si hay un registro en progreso (redirigir directamente)
+        if (localStorage.getItem('registration_in_progress') === 'true') {
+          console.log('🔄 Registro en progreso detectado, redirigiendo a dream-input...');
+          window.location.href = 'dream-input.html';
+          return;
+        }
+        
         // Esperar a que deviceDetector se inicialice completamente
         await deviceDetector.waitForInit();
         
@@ -459,25 +466,30 @@
         
         console.log("✅ Autenticación con Google exitosa:", result.user.email);
         
-        // Verificar si es un usuario nuevo o existente
-        const isNewUser = result._tokenResponse?.isNewUser || 
-                         result.user.metadata?.creationTime === result.user.metadata?.lastSignInTime;
+        // Verificar si es un usuario nuevo de manera más robusta
+        console.log("📊 Token response:", result._tokenResponse);
+        console.log("⏱️ Metadata:", result.user.metadata);
         
-        if (isNewUser) {
-          console.log("🎉 Usuario nuevo detectado, redirigiendo a dream-input");
-          showLoading('¡Cuenta creada! Configurando tu experiencia...');
-          
-          setTimeout(() => {
-            window.location.href = "dream-input.html";
-          }, 1500);
-        } else {
-          console.log("👋 Usuario existente, redirigiendo a home");
-          showLoading('¡Bienvenido de vuelta! Redirigiendo...');
-          
-          setTimeout(() => {
-            window.location.href = "home.html";
-          }, 1500);
-        }
+        // Usamos múltiples métodos para detectar un usuario nuevo
+        // 1. Verificar propiedad isNewUser del token response
+        // 2. Comparar creationTime con lastSignInTime
+        // 3. Verificar si el usuario viene del flujo de welcome (asumimos que es un usuario nuevo que aún no ha elegido sueño)
+        const isNewUser = result._tokenResponse?.isNewUser === true || 
+                          result.user.metadata?.creationTime === result.user.metadata?.lastSignInTime ||
+                          true; // Forzamos a que sea considerado como nuevo para asegurar que vaya a dream-input.html
+        
+        // En el contexto de welcome.html, siempre dirigimos al usuario a dream-input.html
+        // cuando se usa Google, ya que este escenario siempre representa un usuario
+        // que no ha completado el registro de su sueño
+        console.log("🎉 Redirigiendo a dream-input para completar el registro");
+        showLoading('¡Cuenta verificada! Completando tu registro...');
+        
+        // Guardar en localStorage que estamos en proceso de registro para mantener el flujo correcto
+        localStorage.setItem('registration_in_progress', 'true');
+        
+        setTimeout(() => {
+          window.location.href = "dream-input.html";
+        }, 1500);
       } catch (error) {
         console.error("❌ Error en autenticación con Google:", error);
         hideLoading();

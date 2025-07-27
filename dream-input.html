@@ -59,6 +59,13 @@
           const sueño = btn.textContent;
           try {
             await setDoc(doc(db, `users/${user.uid}/dream`, 'info'), { sueño });
+            
+            // Limpiar la bandera de registro en progreso
+            localStorage.removeItem('registration_in_progress');
+            
+            // Registrar que el usuario completó el proceso de registro
+            localStorage.setItem('registration_completed', 'true');
+            
             window.location.href = 'home.html';
           } catch (error) {
             console.error('Error al guardar el sueño:', error);
