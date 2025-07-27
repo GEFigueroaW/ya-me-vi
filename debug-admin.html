@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Admin YA ME VI</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: white; 
+        }
+        .info { 
+            background: #333; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 8px; 
+        }
+        .success { background: #0f5132; }
+        .warning { background: #664d03; }
+        .error { background: #842029; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug - Verificación de Admin</h1>
+    
+    <div class="info">
+        <h3>Estado de Autenticación:</h3>
+        <div id="auth-status">Verificando...</div>
+    </div>
+    
+    <div class="info">
+        <h3>Información del Usuario:</h3>
+        <div id="user-info">Cargando...</div>
+    </div>
+    
+    <div class="info">
+        <h3>Verificación de Admin:</h3>
+        <div id="admin-check">Verificando permisos...</div>
+    </div>
+    
+    <div class="info">
+        <h3>Datos de Firestore:</h3>
+        <div id="firestore-data">Consultando base de datos...</div>
+    </div>
+
+    <script type="module">
+        import { auth, db, onAuthStateChanged } from './js/firebase-init.js';
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        console.log('🚀 Iniciando debug de admin...');
+
+        onAuthStateChanged(auth, async (user) => {
+            const authStatus = document.getElementById('auth-status');
+            const userInfo = document.getElementById('user-info');
+            const adminCheck = document.getElementById('admin-check');
+            const firestoreData = document.getElementById('firestore-data');
+
+            if (user) {
+                authStatus.innerHTML = `✅ <strong>Autenticado</strong>`;
+                authStatus.parentElement.className = 'info success';
+                
+                userInfo.innerHTML = `
+                    <strong>Email:</strong> ${user.email}<br>
+                    <strong>UID:</strong> ${user.uid}<br>
+                    <strong>Display Name:</strong> ${user.displayName || 'No configurado'}<br>
+                    <strong>Email Verificado:</strong> ${user.emailVerified ? '✅' : '❌'}
+                `;
+
+                // Verificar admin por email
+                const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+                const isAdminByEmail = adminEmails.includes(user.email);
+                
+                adminCheck.innerHTML = `
+                    <strong>Verificación por Email:</strong> ${isAdminByEmail ? '✅ SÍ' : '❌ NO'}<br>
+                    <strong>Emails Admin:</strong> ${adminEmails.join(', ')}<br>
+                    <strong>Tu Email:</strong> ${user.email}
+                `;
+                adminCheck.parentElement.className = isAdminByEmail ? 'info success' : 'info error';
+
+                // Verificar datos en Firestore
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        firestoreData.innerHTML = `
+                            <strong>Documento existe:</strong> ✅ SÍ<br>
+                            <strong>isAdmin:</strong> ${userData.isAdmin ? '✅ TRUE' : '❌ FALSE'}<br>
+                            <strong>Email en DB:</strong> ${userData.email || 'No configurado'}<br>
+                            <strong>Datos completos:</strong><br>
+                            <pre>${JSON.stringify(userData, null, 2)}</pre>
+                        `;
+                        firestoreData.parentElement.className = userData.isAdmin ? 'info success' : 'info warning';
+                    } else {
+                        firestoreData.innerHTML = `❌ <strong>No existe documento para este usuario en Firestore</strong>`;
+                        firestoreData.parentElement.className = 'info error';
+                    }
+                } catch (error) {
+                    firestoreData.innerHTML = `❌ <strong>Error consultando Firestore:</strong> ${error.message}`;
+                    firestoreData.parentElement.className = 'info error';
+                }
+
+            } else {
+                authStatus.innerHTML = `❌ <strong>No autenticado</strong>`;
+                authStatus.parentElement.className = 'info error';
+                userInfo.innerHTML = 'Usuario no autenticado';
+                adminCheck.innerHTML = 'No se puede verificar - usuario no autenticado';
+                firestoreData.innerHTML = 'No se puede consultar - usuario no autenticado';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -366,14 +366,37 @@
           console.log('👤 Usuario autenticado:', user.email);
           
           // Verificar si es admin por email
-          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx'];
+          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
           isUserAdmin = adminEmails.includes(user.email);
+          
+          console.log('🔍 Verificando admin:', user.email, 'en', adminEmails);
+          console.log('✅ Es admin por email?', isUserAdmin);
+          
+          // Verificación adicional por Firestore
+          if (!isUserAdmin) {
+            try {
+              const userDoc = await db.collection('users').doc(user.uid).get();
+              if (userDoc.exists) {
+                const userData = userDoc.data();
+                isUserAdmin = userData.isAdmin === true;
+                console.log('✅ Es admin por Firestore?', isUserAdmin, userData);
+              }
+            } catch (error) {
+              console.log('⚠️ Error verificando admin en Firestore:', error);
+            }
+          }
           
           if (isUserAdmin) {
             statusElement.textContent = `✅ Admin: ${user.email}`;
             statusElement.className = 'text-green-400';
             
-            console.log('👑 Usuario admin verificado');
+            console.log('👑 Usuario admin verificado:', user.email);
+            
+            // Ocultar cualquier modal de error que pueda estar visible
+            const errorModal = document.querySelector('[role="dialog"]');
+            if (errorModal) {
+              errorModal.style.display = 'none';
+            }
             
             // Inicializar datos del admin
             try {
@@ -390,11 +413,16 @@
           } else {
             statusElement.textContent = `❌ Sin permisos: ${user.email}`;
             statusElement.className = 'text-red-400';
-            console.log('⚠️ Usuario sin permisos de admin');
+            console.log('⚠️ Usuario sin permisos de admin:', {
+              email: user.email,
+              uid: user.uid,
+              adminEmails: ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com']
+            });
             
-            // Mostrar mensaje pero no redirigir automáticamente
+            // Mostrar mensaje informativo pero no redirigir automáticamente
             setTimeout(() => {
-              alert('❌ No tienes permisos de administrador para esta sección.');
+              console.log('🚨 Mostrando alerta de permisos para:', user.email);
+              alert(`❌ No tienes permisos de administrador para esta sección.\n\nUsuario actual: ${user.email}\nUsuarios admin autorizados:\n• gfigueroa.w@gmail.com\n• eugenfw@gmail.com\n• admin@yamevi.com.mx\n\nSi deberías tener acceso, contacta al administrador del sistema.`);
             }, 2000);
           }
           

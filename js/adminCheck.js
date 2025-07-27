@@ -16,12 +16,24 @@ export async function isUserAdmin() {
       }
       
       try {
-        // Comprobar si el usuario es administrador en Firestore
+        // Lista de emails de administradores autorizados
+        const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+        
+        // Verificación primaria por email
+        if (adminEmails.includes(user.email)) {
+          console.log('✅ Admin verificado por email:', user.email);
+          resolve(true);
+          return;
+        }
+        
+        // Verificación secundaria por Firestore
         const userRef = collection(db, "users");
         const q = query(userRef, where("email", "==", user.email), where("isAdmin", "==", true));
         const querySnapshot = await getDocs(q);
         
-        resolve(!querySnapshot.empty);
+        const isAdmin = !querySnapshot.empty;
+        console.log('✅ Admin verificado por Firestore:', isAdmin, 'para', user.email);
+        resolve(isAdmin);
       } catch (error) {
         console.error('Error verificando permisos de administrador:', error);
         resolve(false);
