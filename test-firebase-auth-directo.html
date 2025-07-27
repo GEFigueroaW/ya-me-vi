@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Auth Simple</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .result { background: #333; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🔥 Test Firebase Auth Directo</h1>
+    
+    <div class="result">
+        <h3>1. Importación Firebase</h3>
+        <div id="import-status">Probando...</div>
+    </div>
+    
+    <div class="result">
+        <h3>2. Configuración Auth</h3>
+        <div id="config-status">Esperando...</div>
+    </div>
+    
+    <div class="result">
+        <h3>3. Estado Usuario</h3>
+        <div id="user-status">Esperando...</div>
+    </div>
+    
+    <div class="result">
+        <h3>4. Acciones</h3>
+        <button id="btn-login" style="padding: 10px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px;">Login</button>
+        <button id="btn-logout" style="padding: 10px; margin: 5px; background: #dc3545; color: white; border: none; border-radius: 4px;">Logout</button>
+    </div>
+
+    <script type="module">
+        console.log('🔥 Iniciando test Firebase Auth directo...');
+        
+        try {
+            // Test 1: Importar Firebase
+            document.getElementById('import-status').textContent = 'Importando...';
+            
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+            const { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+            
+            document.getElementById('import-status').innerHTML = '✅ Firebase importado correctamente';
+            
+            // Test 2: Configurar Auth
+            document.getElementById('config-status').textContent = 'Configurando...';
+            
+            const firebaseConfig = {
+              apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+              authDomain: "ya-me-vi.firebaseapp.com",
+              projectId: "ya-me-vi",
+              storageBucket: "ya-me-vi.firebasestorage.app",
+              messagingSenderId: "748876890843",
+              appId: "1:748876890843:web:070d1eb476d38594d002fe",
+              measurementId: "G-D7R797S5BC"
+            };
+            
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            
+            document.getElementById('config-status').innerHTML = '✅ Auth configurado correctamente';
+            
+            // Test 3: Verificar usuario
+            onAuthStateChanged(auth, (user) => {
+                const userStatusDiv = document.getElementById('user-status');
+                
+                if (user) {
+                    const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+                    const isAdmin = adminEmails.includes(user.email);
+                    
+                    userStatusDiv.innerHTML = `
+                        ✅ <strong>Usuario autenticado</strong><br>
+                        Email: ${user.email}<br>
+                        UID: ${user.uid}<br>
+                        Es Admin: ${isAdmin ? '✅ SÍ' : '❌ NO'}<br>
+                        Verificado: ${user.emailVerified ? 'Sí' : 'No'}
+                    `;
+                    
+                    console.log('👤 Usuario autenticado:', user);
+                } else {
+                    userStatusDiv.innerHTML = '❌ <strong>No hay usuario autenticado</strong>';
+                    console.log('❌ No hay usuario');
+                }
+            });
+            
+            // Configurar botones
+            document.getElementById('btn-login').addEventListener('click', () => {
+                const email = prompt('Email:');
+                const password = prompt('Password:');
+                
+                if (email && password) {
+                    signInWithEmailAndPassword(auth, email, password)
+                        .then((userCredential) => {
+                            console.log('✅ Login exitoso:', userCredential.user);
+                            alert('✅ Login exitoso');
+                        })
+                        .catch((error) => {
+                            console.error('❌ Error login:', error);
+                            alert('❌ Error: ' + error.message);
+                        });
+                }
+            });
+            
+            document.getElementById('btn-logout').addEventListener('click', () => {
+                signOut(auth)
+                    .then(() => {
+                        console.log('✅ Logout exitoso');
+                        alert('✅ Sesión cerrada');
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error logout:', error);
+                        alert('❌ Error: ' + error.message);
+                    });
+            });
+            
+        } catch (error) {
+            console.error('💥 Error fatal:', error);
+            document.getElementById('import-status').innerHTML = `❌ Error: ${error.message}`;
+        }
+    </script>
+</body>
+</html>
