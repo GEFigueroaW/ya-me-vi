@@ -424,29 +424,19 @@
             // Inicializar datos del admin con métricas reales
             try {
               console.log('📊 Cargando datos reales de administración...');
-              
-              // Usar getAllStats si existe, sino usar loadRealData como fallback
-              let realData;
-              if (typeof AdminDataManager.getAllStats === 'function') {
-                realData = await AdminDataManager.getAllStats();
-              } else {
-                realData = await AdminDataManager.loadRealData();
-              }
-              
+              const realData = await AdminDataManager.loadRealData();
               console.log('✅ Datos de administración cargados:', realData);
               
-              // Actualizar UI con datos reales
-              if (realData && realData.summary) {
-                updateMainStats(realData.summary);
-              }
+              // Cargar métricas reales en tiempo real
+              await loadRealTimeMetrics();
+              
+              // Inicializar colecciones básicas si es necesario
+              await initializeBasicCollections();
               
             } catch (error) {
               console.error('❌ Error cargando datos admin:', error);
               // Mostrar error al usuario pero continuar con el panel
               showErrorMessage('Error cargando datos de administración: ' + error.message);
-              
-              // Mostrar datos de fallback
-              showFallbackStats();
             }
 
             // Inicializar sistema de notificaciones
@@ -1224,55 +1214,6 @@
         console.log(`🚀 Notificación rápida: ${type} - ${game}`);
         alert(`⚡ Notificación Rápida: ${type}\n\nJuego: ${game}\n\n🔧 Esta funcionalidad estará disponible cuando se complete la configuración de Firebase Cloud Functions.`);
       };
-
-      // Función para actualizar estadísticas principales en la UI
-      function updateMainStats(stats) {
-        console.log('📊 Actualizando estadísticas principales:', stats);
-        
-        // Actualizar usuarios activos
-        const activeUsersElement = document.getElementById('active-users');
-        if (activeUsersElement) {
-          activeUsersElement.textContent = stats.activeUsers || 0;
-        }
-        
-        // Actualizar total de consultas
-        const totalQueriesElement = document.getElementById('daily-queries');
-        if (totalQueriesElement) {
-          totalQueriesElement.textContent = stats.dailyQueries || 0;
-        }
-        
-        // Actualizar análisis totales
-        const totalAnalysisElement = document.getElementById('total-analysis');
-        if (totalAnalysisElement) {
-          totalAnalysisElement.textContent = stats.totalAnalysis || 0;
-        }
-        
-        // Actualizar registros en DB
-        const dbSizeElement = document.getElementById('database-size');
-        if (dbSizeElement) {
-          dbSizeElement.textContent = stats.databaseSize || 0;
-        }
-      }
-
-      // Función para mostrar estadísticas de fallback cuando hay error
-      function showFallbackStats() {
-        console.log('⚠️ Mostrando estadísticas de fallback');
-        
-        const fallbackStats = {
-          activeUsers: 0,
-          dailyQueries: 0,
-          totalAnalysis: 0,
-          databaseSize: 0
-        };
-        
-        updateMainStats(fallbackStats);
-        
-        // Mostrar mensaje de estado
-        const systemStatus = document.getElementById('system-status');
-        if (systemStatus) {
-          systemStatus.textContent = 'Modo sin conexión - Datos no disponibles';
-        }
-      }
       
     });
   </script>

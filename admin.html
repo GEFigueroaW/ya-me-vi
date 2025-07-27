@@ -9,20 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="YA ME VI">
   
-  <!-- iOS Touch Icons - Solución definitiva para eliminar marco blanco -->
-  <!-- iOS Touch Icon - CONFIGURACIÓN SIMPLIFICADA -->
+  <!-- iOS Touch Icon -->
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  
-  <!-- iOS Startup Images -->
   <link rel="apple-touch-startup-image" href="assets/logo-512.png">
-  
-  <!-- Configuración adicional para PWA sin marco -->
-  <meta name="apple-mobile-web-app-style" content="fullscreen">
-  
-  <!-- iOS Startup Images -->
-  <link rel="apple-touch-startup-image" href="assets/logo-512.png">
-  
-  <!-- Additional iOS Meta -->
   <meta name="format-detection" content="telephone=no">
   
   <title>Panel de Administración - YA ME VI</title>
@@ -55,25 +44,33 @@
   <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
 
     <!-- Encabezado -->
-    <div class="flex justify-between items-center mb-8">
-      <button id="btn-back" class="btn-back-improved">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        <span class="btn-text">Volver</span>
-      </button>
-      <h1 class="text-3xl font-bold animate__animated animate__fadeInDown">🔐 Panel de Control Admin</h1>
-      <div class="w-20"></div> <!-- Espaciador para equilibrar el layout -->
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center">
+        <button id="btn-back" class="mr-4 bg-gray-800 bg-opacity-70 p-2 rounded-lg hover:bg-opacity-90 transition-all">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+          👑 Panel de Administración
+        </h1>
+      </div>
+      <div class="text-sm text-gray-300">
+        <div id="admin-status">Verificando permisos...</div>
+        <div id="current-time" class="text-xs"></div>
+        <div id="last-update" class="text-xs text-gray-400">Última actualización: --</div>
+        <div id="connection-status" class="text-xs text-green-400">🟢 Conectado</div>
+      </div>
     </div>
 
-    <!-- Estadísticas de usuarios -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <!-- Usuarios Activos -->
+    <!-- Métricas principales -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- Total de usuarios -->
       <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-400 text-sm">Usuarios Activos</p>
-            <p id="active-users" class="text-2xl font-bold text-green-400">0</p>
+            <p id="total-users" class="text-2xl font-bold text-green-400">0</p>
           </div>
           <div class="bg-green-500 p-3 rounded-full">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -83,27 +80,27 @@
         </div>
       </div>
 
-      <!-- Total de Consultas -->
+      <!-- Consultas del día -->
       <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm">Total Consultas</p>
-            <p id="total-queries" class="text-2xl font-bold text-blue-400">0</p>
+            <p class="text-gray-400 text-sm">Consultas Hoy</p>
+            <p id="daily-queries" class="text-2xl font-bold text-blue-400">0</p>
           </div>
           <div class="bg-blue-500 p-3 rounded-full">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
         </div>
       </div>
 
-      <!-- Dispositivos -->
+      <!-- Análisis realizados -->
       <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm">Móvil / Escritorio</p>
-            <p id="device-ratio" class="text-2xl font-bold text-yellow-400">-- / --</p>
+            <p class="text-gray-400 text-sm">Análisis Total</p>
+            <p id="total-analysis" class="text-2xl font-bold text-yellow-400">0</p>
           </div>
           <div class="bg-yellow-500 p-3 rounded-full">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -127,6 +124,157 @@
               <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z"></path>
             </svg>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje informativo -->
+    <div class="bg-blue-900 bg-opacity-50 border border-blue-600 p-4 rounded-lg mb-8">
+      <div class="flex items-center">
+        <div class="text-blue-400 mr-3">ℹ️</div>
+        <div class="text-blue-100">
+          <strong>Estado del Sistema:</strong> 
+          <span id="system-status">Inicializando conexión con Firebase...</span>
+          <br>
+          <small class="text-blue-200">
+            Solo se muestran datos reales de Firebase. "Sin registro" o "Sin datos" indica que las colecciones no existen aún o están vacías.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sistema de Notificaciones -->
+    <div class="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold flex items-center">
+          🔔 Sistema de Notificaciones
+          <span id="notification-status" class="ml-3 px-2 py-1 bg-gray-700 text-xs rounded-full">Inicializando...</span>
+        </h3>
+        <button onclick="window.location.href='admin-notifications.html'" 
+                class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+          ⚙️ Panel Avanzado
+        </button>
+      </div>
+      
+      <!-- Estadísticas de Notificaciones -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm">Push Enviadas</p>
+              <p id="push-stats" class="text-xl font-bold text-blue-400">0</p>
+            </div>
+            <div class="text-2xl">📱</div>
+          </div>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm">In-App Activas</p>
+              <p id="inapp-stats" class="text-xl font-bold text-green-400">0</p>
+            </div>
+            <div class="text-2xl">💬</div>
+          </div>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm">Emails Enviados</p>
+              <p id="email-stats" class="text-xl font-bold text-purple-400">0</p>
+            </div>
+            <div class="text-2xl">📧</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Notificación -->
+      <div class="bg-gray-800 p-6 rounded-lg mb-6">
+        <h4 class="text-lg font-bold mb-4">✏️ Crear Nueva Notificación</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Título</label>
+            <input id="notification-title" type="text" 
+                   class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500" 
+                   placeholder="Ej: 🎯 Nuevas Predicciones Disponibles">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Tipo</label>
+            <select id="notification-type" 
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500">
+              <option value="general">📢 General</option>
+              <option value="prediction">🎯 Predicciones</option>
+              <option value="analysis">📊 Análisis</option>
+              <option value="maintenance">🔧 Mantenimiento</option>
+              <option value="success">✅ Éxito</option>
+              <option value="warning">⚠️ Advertencia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-300 mb-2">Mensaje</label>
+          <textarea id="notification-body" rows="3" 
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500" 
+                    placeholder="Escribe el mensaje de la notificación..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">URL de Destino (opcional)</label>
+            <input id="notification-url" type="text" 
+                   class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500" 
+                   placeholder="/home.html">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Juego (para análisis)</label>
+            <select id="notification-game" 
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500">
+              <option value="">Seleccionar juego</option>
+              <option value="Melate">Melate</option>
+              <option value="Revancha">Revancha</option>
+              <option value="Revanchita">Revanchita</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Botones de Envío -->
+        <div class="flex flex-wrap gap-3">
+          <button id="btn-send-push" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+            📱 Enviar Push
+          </button>
+          <button id="btn-send-inapp" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+            💬 Crear In-App
+          </button>
+          <button id="btn-send-email" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+            📧 Programar Email
+          </button>
+          <button id="btn-send-all" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg transition-all">
+            🚀 Enviar Todo
+          </button>
+        </div>
+      </div>
+
+      <!-- Notificaciones Rápidas para Análisis -->
+      <div class="bg-gray-800 p-6 rounded-lg">
+        <h4 class="text-lg font-bold mb-4">⚡ Notificaciones Rápidas</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <button onclick="sendQuickNotification('new-predictions', 'Melate')" 
+                  class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
+            🎯 Predicciones Melate
+          </button>
+          <button onclick="sendQuickNotification('frequency-update', 'Revancha')" 
+                  class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
+            📊 Análisis Revancha
+          </button>
+          <button onclick="sendQuickNotification('lucky-numbers', 'Revanchita')" 
+                  class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
+            🍀 Suerte Revanchita
+          </button>
+          <button onclick="sendQuickNotification('system-maintenance', 'General')" 
+                  class="bg-yellow-600 hover:bg-yellow-700 text-white text-sm px-3 py-2 rounded-lg transition-colors">
+            🔧 Mantenimiento
+          </button>
         </div>
       </div>
     </div>
@@ -162,7 +310,6 @@
             </tr>
           </thead>
           <tbody id="users-table">
-            <!-- Los datos se cargarán dinámicamente aquí -->
             <tr>
               <td colspan="4" class="py-8 text-center text-gray-400">
                 <div class="flex justify-center items-center">
@@ -195,226 +342,866 @@
   <script type="module" src="js/init.js"></script>
   <script type="module">
     import { AdminDataManager } from './js/adminDataManager.js';
-    import { auth, onAuthStateChanged } from './js/firebase-init.js';
-    import { redirectIfNotAdmin } from './js/adminCheck.js';
+    import { auth, db, onAuthStateChanged } from './js/firebase-init.js';
+    import { adminNotificationSystem } from './js/adminNotifications.js';
+
+    // Variables globales
+    let isUserAdmin = false;
+    let authCheckComplete = false;
 
     document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 Inicializando panel de administración...');
+      
       // Configurar botón de volver
-      document.getElementById('btn-back').addEventListener('click', () => {
-        window.location.href = 'home.html';
-      });
+      const btnBack = document.getElementById('btn-back');
+      if (btnBack) {
+        btnBack.addEventListener('click', () => {
+          console.log('🔙 Volviendo a home');
+          window.location.href = '/home.html';
+        });
+      }
 
-      // Verificar autenticación y permisos de admin
+      // Mostrar hora actual
+      function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleString('es-MX', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        const timeElement = document.getElementById('current-time');
+        if (timeElement) {
+          timeElement.textContent = timeString;
+        }
+      }
+      
+      updateTime();
+      setInterval(updateTime, 1000);
+
+      // Verificar autenticación y permisos - SIN REDIRECCIONES AUTOMÁTICAS
       onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-          console.log('❌ Usuario no autenticado, redirigiendo...');
-          alert('Debes iniciar sesión para acceder al panel de administración.');
-          window.location.href = 'login.html';
-          return;
-        }
-
-        try {
-          console.log('🔐 Verificando permisos de administrador...');
+        const statusElement = document.getElementById('admin-status');
+        
+        if (user) {
+          console.log('👤 Usuario autenticado:', user.email);
           
-          // Verificar que el usuario es administrador
-          const isAdmin = await redirectIfNotAdmin();
+          // Verificar si es admin por email
+          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+          isUserAdmin = adminEmails.includes(user.email);
           
-          if (!isAdmin) {
-            console.log('❌ Usuario sin permisos de administrador');
-            return; // redirectIfNotAdmin maneja la redirección
+          console.log('🔍 Verificando admin:', user.email, 'en', adminEmails);
+          console.log('✅ Es admin por email?', isUserAdmin);
+          
+          // Verificación adicional por Firestore
+          if (!isUserAdmin) {
+            try {
+              const userDoc = await db.collection('users').doc(user.uid).get();
+              if (userDoc.exists) {
+                const userData = userDoc.data();
+                isUserAdmin = userData.isAdmin === true;
+                console.log('✅ Es admin por Firestore?', isUserAdmin, userData);
+              }
+            } catch (error) {
+              console.log('⚠️ Error verificando admin en Firestore:', error);
+            }
           }
+          
+          if (isUserAdmin) {
+            statusElement.textContent = `✅ Admin: ${user.email}`;
+            statusElement.className = 'text-green-400';
+            
+            console.log('👑 Usuario admin verificado:', user.email);
+            
+            // Ocultar cualquier modal de error que pueda estar visible
+            const errorModal = document.querySelector('[role="dialog"]');
+            if (errorModal) {
+              errorModal.style.display = 'none';
+            }
+            
+            // Inicializar datos del admin con métricas reales
+            try {
+              console.log('📊 Cargando datos reales de administración...');
+              
+              // Usar getAllStats si existe, sino usar loadRealData como fallback
+              let realData;
+              if (typeof AdminDataManager.getAllStats === 'function') {
+                realData = await AdminDataManager.getAllStats();
+              } else {
+                realData = await AdminDataManager.loadRealData();
+              }
+              
+              console.log('✅ Datos de administración cargados:', realData);
+              
+              // Actualizar UI con datos reales
+              if (realData && realData.summary) {
+                updateMainStats(realData.summary);
+              }
+              
+            } catch (error) {
+              console.error('❌ Error cargando datos admin:', error);
+              // Mostrar error al usuario pero continuar con el panel
+              showErrorMessage('Error cargando datos de administración: ' + error.message);
+              
+              // Mostrar datos de fallback
+              showFallbackStats();
+            }
 
-          console.log('✅ Usuario autenticado como administrador');
-          console.log('🔐 Iniciando panel de administración con datos reales...');
+            // Inicializar sistema de notificaciones
+            await initializeNotificationSystem();
+            
+            // Iniciar actualización automática
+            startAutoRefresh();
+            
+          } else {
+            statusElement.textContent = `❌ Sin permisos: ${user.email}`;
+            statusElement.className = 'text-red-400';
+            console.log('⚠️ Usuario sin permisos de admin:', {
+              email: user.email,
+              uid: user.uid,
+              adminEmails: ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com']
+            });
+            
+            // Mostrar mensaje informativo pero no redirigir automáticamente
+            setTimeout(() => {
+              console.log('🚨 Mostrando alerta de permisos para:', user.email);
+              alert(`❌ No tienes permisos de administrador para esta sección.\n\nUsuario actual: ${user.email}\nUsuarios admin autorizados:\n• gfigueroa.w@gmail.com\n• eugenfw@gmail.com\n• admin@yamevi.com.mx\n\nSi deberías tener acceso, contacta al administrador del sistema.`);
+            }, 2000);
+          }
           
-          // Mostrar loading mientras se cargan los datos
-          showLoadingState();
+          authCheckComplete = true;
+        } else {
+          console.log('❌ Usuario no autenticado');
+          statusElement.textContent = '🔒 No autenticado - Esperando login...';
+          statusElement.className = 'text-yellow-400';
           
-          // Obtener datos reales de Firebase
-          console.log('📊 Cargando estadísticas reales...');
-          const [adminData, recentUsers] = await Promise.all([
-            AdminDataManager.getAllStats(),
-            AdminDataManager.getRecentUsers(50)
-          ]);
-          
-          console.log('✅ Datos administrativos reales cargados:', adminData);
-          console.log('👥 Usuarios recientes cargados:', recentUsers.length);
-          
-          // Actualizar datos principales con datos reales
-          updateMainStats(adminData);
-          
-          // Actualizar tabla de usuarios con datos reales
-          updateUsersTable(recentUsers);
-          
-          // Actualizar indicadores de estado
-          updateSystemStatus(adminData);
-          
-          // Ocultar loading
-          hideLoadingState();
-          
-        } catch (error) {
-          console.error('❌ Error cargando datos de administración:', error);
-          hideLoadingState();
-          showErrorState();
+          // Dar tiempo para que se autentique
+          setTimeout(() => {
+            if (!authCheckComplete) {
+              alert('🔒 Necesitas iniciar sesión para acceder al panel de administración.');
+            }
+          }, 3000);
         }
       });
 
-      // Función para mostrar estado de carga
-      function showLoadingState() {
-        const loadingHtml = `
-          <tr>
-            <td colspan="4" class="py-8 text-center">
-              <div class="flex justify-center items-center">
-                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                <span>Cargando datos reales de Firebase...</span>
+      // Función para inicializar el sistema de notificaciones
+      async function initializeNotificationSystem() {
+        if (!isUserAdmin) return;
+        
+        try {
+          console.log('🔔 Inicializando sistema de notificaciones para admin...');
+          
+          // Actualizar estado del sistema
+          const statusElement = document.getElementById('notification-status');
+          if (statusElement) {
+            statusElement.textContent = '✅ Activo';
+            statusElement.className = 'ml-3 px-2 py-1 bg-green-600 text-xs rounded-full';
+          }
+          
+          // Hacer adminNotificationSystem global
+          window.adminNotificationSystem = adminNotificationSystem;
+          
+          // Configurar manejadores de eventos para notificaciones
+          setupNotificationHandlers();
+          
+          // Cargar estadísticas de notificaciones
+          await loadNotificationStats();
+          
+          console.log('✅ Sistema de notificaciones inicializado');
+        } catch (error) {
+          console.error('❌ Error inicializando notificaciones:', error);
+        }
+      }
+
+      // Función para mostrar mensajes de error al usuario
+      function showErrorMessage(message) {
+        console.error('🚨 Error mostrado al usuario:', message);
+        
+        // Crear un modal de error si no existe
+        let errorModal = document.getElementById('error-modal');
+        if (!errorModal) {
+          errorModal = document.createElement('div');
+          errorModal.id = 'error-modal';
+          errorModal.innerHTML = `
+            <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div class="bg-red-600 text-white p-6 rounded-lg max-w-md w-full">
+                <div class="flex items-center mb-4">
+                  <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  </svg>
+                  <h3 class="text-lg font-semibold">Error del Sistema</h3>
+                </div>
+                <p id="error-message-text" class="mb-4"></p>
+                <button id="error-modal-close" class="bg-red-800 hover:bg-red-900 px-4 py-2 rounded transition-colors">
+                  Cerrar
+                </button>
               </div>
-            </td>
-          </tr>
-        `;
-        
-        document.getElementById('active-users').innerHTML = '<div class="animate-pulse">...</div>';
-        document.getElementById('total-queries').innerHTML = '<div class="animate-pulse">...</div>';
-        document.getElementById('device-ratio').innerHTML = '<div class="animate-pulse">...</div>';
-        document.getElementById('database-size').innerHTML = '<div class="animate-pulse">...</div>';
-        document.getElementById('users-table').innerHTML = loadingHtml;
-      }
-
-      // Función para ocultar estado de carga
-      function hideLoadingState() {
-        // Se actualiza automáticamente con los datos reales
-      }
-
-      // Función para mostrar estado de error
-      function showErrorState() {
-        const errorHtml = `
-          <tr>
-            <td colspan="4" class="py-8 text-center text-red-400">
-              ❌ Error cargando datos reales. 
-              <button onclick="window.location.reload()" class="underline ml-2 hover:text-red-300">Intentar de nuevo</button>
-            </td>
-          </tr>
-        `;
-        
-        document.getElementById('active-users').textContent = 'Error';
-        document.getElementById('total-queries').textContent = 'Error';
-        document.getElementById('device-ratio').textContent = 'Error';
-        document.getElementById('database-size').textContent = 'Error';
-        document.getElementById('users-table').innerHTML = errorHtml;
-      }
-
-      // Función para actualizar estadísticas principales
-      function updateMainStats(adminData) {
-        document.getElementById('active-users').textContent = adminData.activeUsers.toLocaleString();
-        document.getElementById('total-queries').textContent = adminData.totalQueries.toLocaleString();
-        document.getElementById('device-ratio').textContent = adminData.deviceRatio;
-        document.getElementById('database-size').textContent = adminData.dbSize.toLocaleString();
-      }
-
-      // Función para actualizar tabla de usuarios
-      function updateUsersTable(users) {
-        const usersTable = document.getElementById('users-table');
-        let tableHtml = '';
-        
-        if (users.length === 0) {
-          tableHtml = `
-            <tr>
-              <td colspan="4" class="py-8 text-center text-gray-400">
-                📭 No hay usuarios registrados en el sistema
-              </td>
-            </tr>
+            </div>
           `;
-        } else {
-          users.forEach(user => {
-            const adminBadge = user.isAdmin ? 
-              '<span class="text-yellow-400 text-xs ml-2">👑 Admin</span>' : '';
-            
-            tableHtml += `
-              <tr class="hover:bg-gray-800 transition-colors">
-                <td class="py-3 px-4 border-b border-gray-700">
-                  <div class="flex items-center">
-                    <span>${user.email}</span>
-                    ${adminBadge}
-                  </div>
-                </td>
-                <td class="py-3 px-4 border-b border-gray-700">${user.lastAccess}</td>
-                <td class="py-3 px-4 border-b border-gray-700">${user.device}</td>
-                <td class="py-3 px-4 border-b border-gray-700">
-                  <button onclick="viewUserDetails('${user.id}')" class="text-blue-400 hover:text-blue-300 mr-2 transition-colors">👁️ Ver</button>
-                  <button onclick="toggleUserStatus('${user.id}')" class="text-yellow-400 hover:text-yellow-300 transition-colors">⚙️ Estado</button>
-                </td>
-              </tr>
-            `;
+          document.body.appendChild(errorModal);
+          
+          // Configurar botón de cierre
+          document.getElementById('error-modal-close').addEventListener('click', () => {
+            errorModal.remove();
           });
         }
         
-        usersTable.innerHTML = tableHtml;
+        // Actualizar mensaje y mostrar
+        document.getElementById('error-message-text').textContent = message;
+        errorModal.classList.remove('hidden');
       }
 
-      // Función para actualizar estado del sistema
-      function updateSystemStatus(adminData) {
-        const breakdown = adminData.breakdown;
-        console.log('📈 Estadísticas detalladas:', breakdown);
+      // Función para cargar estadísticas de notificaciones
+      async function loadNotificationStats() {
+        console.log('🔔 Cargando estadísticas de notificaciones...');
         
-        // Crear indicadores simples con datos reales
-        const usersChart = document.getElementById('users-chart');
-        const dreamsChart = document.getElementById('dreams-chart');
-        
-        usersChart.innerHTML = `
-          <div class="bg-gray-800 p-4 rounded h-full flex flex-col justify-center">
-            <h4 class="text-lg font-bold mb-3 text-green-400">👥 Usuarios</h4>
-            <div class="text-3xl text-green-400 mb-1">${breakdown.users.totalUsers}</div>
-            <div class="text-sm text-gray-400 mb-3">Total registrados</div>
-            <div class="text-xl text-blue-400 mb-1">${breakdown.users.activeUsers}</div>
-            <div class="text-xs text-gray-400">Activos (30 días)</div>
-            <div class="mt-3 text-xs text-gray-500">
-              📱 ${breakdown.users.mobileUsers} móvil | 💻 ${breakdown.users.desktopUsers} escritorio
-            </div>
-          </div>
-        `;
-        
-        dreamsChart.innerHTML = `
-          <div class="bg-gray-800 p-4 rounded h-full flex flex-col justify-center">
-            <h4 class="text-lg font-bold mb-3 text-purple-400">🔮 Análisis</h4>
-            <div class="text-3xl text-purple-400 mb-1">${breakdown.queries.totalQueries}</div>
-            <div class="text-sm text-gray-400 mb-3">Total realizados</div>
-            <div class="space-y-1 text-sm">
-              <div class="text-orange-400">🔢 ${breakdown.queries.individualAnalysis} individuales</div>
-              <div class="text-pink-400">🎯 ${breakdown.queries.combinationAnalysis} combinaciones</div>
-              <div class="text-cyan-400">💡 ${breakdown.queries.suggestions} sugerencias</div>
-            </div>
-          </div>
-        `;
-      }
-
-      // Configurar botones de acción con funcionalidad real
-      document.getElementById('btn-export-data').addEventListener('click', async () => {
         try {
-          const date = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-          alert(`📊 Exportando datos reales del ${date}...\n\n✅ Esta funcionalidad exportará:\n• Estadísticas de usuarios\n• Métricas de análisis\n• Datos de actividad\n• Información del sistema\n\n🔧 Implementación en desarrollo.`);
-        } catch (error) {
-          alert('❌ Error exportando datos: ' + error.message);
-        }
-      });
-      
-      document.getElementById('btn-update-db').addEventListener('click', async () => {
-        if (confirm('⚠️ ¿Estás seguro de que quieres actualizar la base de datos?\n\nEsta operación puede tardar varios minutos y afectará el rendimiento temporalmente.')) {
+          const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          
+          // Cargar estadísticas de push notifications
           try {
-            alert('🔄 Actualizando base de datos con datos reales...\n\n📋 Esta operación incluye:\n• Limpieza de datos obsoletos\n• Reindexación de consultas\n• Optimización de rendimiento\n• Sincronización de estadísticas');
-            
-            // Simular actualización
-            setTimeout(() => {
-              alert('✅ Base de datos actualizada correctamente.\n\n📊 Los cambios se reflejarán inmediatamente.');
-              window.location.reload();
-            }, 3000);
+            const pushCollection = collection(db, 'push_notifications');
+            const pushSnapshot = await getDocs(pushCollection);
+            document.getElementById('push-stats').textContent = pushSnapshot.size;
+            console.log('📱 Push notifications enviadas:', pushSnapshot.size);
           } catch (error) {
-            alert('❌ Error actualizando base de datos: ' + error.message);
+            console.log('⚠️ Colección push_notifications no disponible:', error.code);
+            document.getElementById('push-stats').textContent = 'Sin registro';
+          }
+          
+          // Cargar estadísticas de in-app notifications
+          try {
+            const inappCollection = collection(db, 'inapp_notifications');
+            const q = query(inappCollection, where('active', '==', true));
+            const inappSnapshot = await getDocs(q);
+            document.getElementById('inapp-stats').textContent = inappSnapshot.size;
+            console.log('💬 In-app notifications activas:', inappSnapshot.size);
+          } catch (error) {
+            console.log('⚠️ Colección inapp_notifications no disponible:', error.code);
+            document.getElementById('inapp-stats').textContent = 'Sin registro';
+          }
+          
+          // Cargar estadísticas de emails
+          try {
+            const emailCollection = collection(db, 'email_notifications');
+            const emailSnapshot = await getDocs(emailCollection);
+            document.getElementById('email-stats').textContent = emailSnapshot.size;
+            console.log('📧 Emails enviados:', emailSnapshot.size);
+          } catch (error) {
+            console.log('⚠️ Colección email_notifications no disponible:', error.code);
+            document.getElementById('email-stats').textContent = 'Sin registro';
+          }
+          
+        } catch (error) {
+          console.error('❌ Error cargando estadísticas de notificaciones:', error);
+          document.getElementById('push-stats').textContent = 'Sin datos';
+          document.getElementById('inapp-stats').textContent = 'Sin datos';
+          document.getElementById('email-stats').textContent = 'Sin datos';
+        }
+      }
+
+      // Función para cargar métricas en tiempo real desde Firebase
+      async function loadRealTimeMetrics() {
+        console.log('📊 Cargando métricas en tiempo real...');
+        
+        try {
+          // Usar AdminDataManager para cargar estadísticas reales
+          const [userStats, queryStats, dbStats] = await Promise.all([
+            AdminDataManager.getUserStats(),
+            AdminDataManager.getQueryStats(),
+            AdminDataManager.getDatabaseStats()
+          ]);
+          
+          // Actualizar UI con datos reales
+          updateUserMetrics(userStats);
+          updateQueryMetrics(queryStats);
+          updateDatabaseMetrics(dbStats);
+          
+          // Cargar usuarios recientes en la tabla
+          await loadRecentUsers();
+          
+          // Configurar listeners en tiempo real
+          setupRealTimeListeners();
+          
+          console.log('✅ Métricas en tiempo real cargadas:', {
+            usuarios: userStats,
+            consultas: queryStats,
+            baseDatos: dbStats
+          });
+          
+          // Actualizar indicador de última actualización
+          const lastUpdate = document.getElementById('last-update');
+          if (lastUpdate) {
+            const now = new Date().toLocaleString('es-MX');
+            lastUpdate.textContent = `Última actualización: ${now}`;
+          }
+          
+          // Actualizar estado del sistema
+          const systemStatus = document.getElementById('system-status');
+          if (systemStatus) {
+            systemStatus.textContent = 'Conectado - Solo datos reales de Firebase';
+          }
+          
+        } catch (error) {
+          console.error('❌ Error cargando métricas:', error);
+          showErrorMetrics();
+          
+          // Actualizar estado de conexión
+          const connectionStatus = document.getElementById('connection-status');
+          if (connectionStatus) {
+            connectionStatus.textContent = '🔴 Error de conexión';
+            connectionStatus.className = 'text-xs text-red-400';
           }
         }
-      });
+      }
+
+      // Función para actualizar métricas de usuarios en la UI
+      function updateUserMetrics(userStats) {
+        const activeUsersElement = document.getElementById('active-users');
+        const totalUsersElement = document.getElementById('total-users');
+        
+        if (activeUsersElement) {
+          activeUsersElement.textContent = userStats.activeUsers || 0;
+        }
+        if (totalUsersElement) {
+          totalUsersElement.textContent = userStats.totalUsers || 0;
+        }
+        
+        console.log('👥 Métricas de usuarios actualizadas:', userStats);
+      }
       
-      document.getElementById('btn-system-logs').addEventListener('click', () => {
-        alert('📋 Consultando logs del sistema...\n\n🔍 Funcionalidad en desarrollo.\n\n📄 Mostrará:\n• Errores del sistema\n• Actividad de usuarios\n• Métricas de rendimiento\n• Eventos de seguridad\n• Consultas de base de datos');
-      });
+      // Función para actualizar métricas de consultas en la UI
+      function updateQueryMetrics(queryStats) {
+        const dailyQueriesElement = document.getElementById('daily-queries');
+        const totalAnalysisElement = document.getElementById('total-analysis');
+        
+        if (dailyQueriesElement) {
+          dailyQueriesElement.textContent = queryStats.dailyQueries || 0;
+        }
+        if (totalAnalysisElement) {
+          totalAnalysisElement.textContent = queryStats.totalAnalysis || 0;
+        }
+        
+        console.log('🔍 Métricas de consultas actualizadas:', queryStats);
+      }
+      
+      // Función para actualizar métricas de base de datos en la UI  
+      function updateDatabaseMetrics(dbStats) {
+        const dbSizeElement = document.getElementById('db-size');
+        
+        if (dbSizeElement) {
+          dbSizeElement.textContent = dbStats.totalSize || 0;
+        }
+        
+        console.log('💾 Métricas de base de datos actualizadas:', dbStats);
+      }
+
+      // Función auxiliar para cargar usuarios recientes (simplificada)
+      async function loadRecentUsers() {
+        try {
+          console.log('👥 Cargando usuarios recientes...');
+          const recentUsers = await AdminDataManager.getRecentUsers();
+          
+          // Actualizar tabla de usuarios si existe
+          const userTableBody = document.getElementById('recent-users-body');
+          if (userTableBody && recentUsers && recentUsers.length > 0) {
+            userTableBody.innerHTML = recentUsers.map(user => `
+              <tr class="border-b border-gray-700">
+                <td class="px-4 py-2 text-sm">${user.email || 'Sin email'}</td>
+                <td class="px-4 py-2 text-sm">${AdminDataManager.formatDate(user.lastLogin)}</td>
+                <td class="px-4 py-2 text-sm">${AdminDataManager.getDeviceString(user.lastDeviceType, user.lastDeviceInfo)}</td>
+              </tr>
+            `).join('');
+          }
+          
+        } catch (error) {
+          console.error('❌ Error cargando usuarios recientes:', error);
+        }
+      }
+
+      // Función para mostrar error en métricas
+      function showErrorMetrics() {
+        const elements = ['total-users', 'daily-queries', 'total-analysis', 'database-size'];
+        elements.forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.textContent = 'Error';
+          }
+        });
+      }
+        
+      function setupRealTimeListeners() {
+          try {
+            console.log('👥 Intentando cargar usuarios...');
+            
+            // Verificar si la colección 'users' existe y es accesible
+            const usersCollection = collection(db, 'users');
+            const usersSnapshot = await getDocs(usersCollection);
+            const totalUsers = usersSnapshot.size;
+            
+            document.getElementById('total-users').textContent = totalUsers;
+            console.log('👥 Total usuarios:', totalUsers);
+            
+          } catch (error) {
+            console.error('❌ Error cargando usuarios:', error);
+            
+            // Verificar si es un error de permisos o si la colección no existe
+            if (error.code === 'permission-denied') {
+              console.log('⚠️ Sin permisos para acceder a la colección users');
+              document.getElementById('total-users').textContent = 'Sin permisos';
+            } else if (error.code === 'not-found') {
+              console.log('⚠️ La colección users no existe aún');
+              document.getElementById('total-users').textContent = 'Sin datos';
+            } else {
+              console.log('⚠️ Error de conexión o colección no disponible');
+              document.getElementById('total-users').textContent = 'Sin registro';
+            }
+          }
+        }
+        
+        async function loadDailyQueries() {
+          try {
+            console.log('📊 Cargando consultas del día...');
+            
+            // Obtener fecha de hoy
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // Buscar consultas de hoy en diferentes colecciones posibles
+            const collections = ['user_activity', 'analysis_logs', 'queries', 'lottery_queries'];
+            let totalQueries = 0;
+            let collectionsFound = 0;
+            
+            for (const collectionName of collections) {
+              try {
+                const collRef = collection(db, collectionName);
+                const q = query(
+                  collRef,
+                  where('timestamp', '>=', today),
+                  where('timestamp', '<', tomorrow)
+                );
+                const snapshot = await getDocs(q);
+                totalQueries += snapshot.size;
+                collectionsFound++;
+                console.log(`📊 ${collectionName}: ${snapshot.size} consultas`);
+              } catch (error) {
+                console.log(`⚠️ Colección ${collectionName}: ${error.code}`);
+              }
+            }
+            
+            if (collectionsFound === 0) {
+              // Si no encontramos ninguna colección, mostrar sin registro
+              document.getElementById('daily-queries').textContent = 'Sin registro';
+              console.log('⚠️ No se encontraron colecciones de consultas');
+            } else {
+              document.getElementById('daily-queries').textContent = totalQueries;
+              console.log('📊 Total consultas del día:', totalQueries);
+            }
+            
+          } catch (error) {
+            console.error('❌ Error cargando consultas diarias:', error);
+            document.getElementById('daily-queries').textContent = 'Sin datos';
+          }
+        }
+        
+        async function loadTotalAnalysis() {
+          try {
+            console.log('🔮 Cargando análisis totales...');
+            
+            // Buscar análisis en diferentes colecciones posibles
+            const collections = ['individual_analysis', 'combination_analysis', 'ml_predictions', 'lottery_analysis'];
+            let totalAnalysis = 0;
+            let collectionsFound = 0;
+            
+            for (const collectionName of collections) {
+              try {
+                const collRef = collection(db, collectionName);
+                const snapshot = await getDocs(collRef);
+                totalAnalysis += snapshot.size;
+                collectionsFound++;
+                console.log(`🔮 ${collectionName}: ${snapshot.size} análisis`);
+              } catch (error) {
+                console.log(`⚠️ Colección ${collectionName}: ${error.code}`);
+              }
+            }
+            
+            if (collectionsFound === 0) {
+              // Si no encontramos ninguna colección, mostrar sin registro
+              document.getElementById('total-analysis').textContent = 'Sin registro';
+              console.log('⚠️ No se encontraron colecciones de análisis');
+            } else {
+              document.getElementById('total-analysis').textContent = totalAnalysis;
+              console.log('🔮 Total análisis:', totalAnalysis);
+            }
+            
+          } catch (error) {
+            console.error('❌ Error cargando análisis totales:', error);
+            document.getElementById('total-analysis').textContent = 'Sin datos';
+          }
+        }
+        
+        async function loadDatabaseSize() {
+          try {
+            console.log('💾 Calculando tamaño de base de datos...');
+            
+            // Contar documentos en todas las colecciones principales
+            const collections = ['users', 'individual_analysis', 'combination_analysis', 'ml_predictions', 'user_activity', 'notifications'];
+            let totalRecords = 0;
+            let collectionsFound = 0;
+            
+            for (const collectionName of collections) {
+              try {
+                const collRef = collection(db, collectionName);
+                const snapshot = await getDocs(collRef);
+                const size = snapshot.size;
+                totalRecords += size;
+                collectionsFound++;
+                console.log(`💾 ${collectionName}: ${size} documentos`);
+              } catch (error) {
+                console.log(`⚠️ Colección ${collectionName}: ${error.code}`);
+              }
+            }
+            
+            if (collectionsFound === 0) {
+              // Si no encontramos ninguna colección, mostrar sin registro
+              document.getElementById('database-size').textContent = 'Sin registro';
+              console.log('⚠️ No se encontraron colecciones en la base de datos');
+            } else {
+              document.getElementById('database-size').textContent = totalRecords.toLocaleString();
+              console.log('💾 Total registros DB:', totalRecords);
+            }
+            
+          } catch (error) {
+            console.error('❌ Error cargando tamaño de DB:', error);
+            document.getElementById('database-size').textContent = 'Sin datos';
+          }
+        }
+        
+        async function loadRecentUsers() {
+          try {
+            console.log('👥 Cargando usuarios recientes...');
+            
+            const tbody = document.getElementById('users-table');
+            if (!tbody) return;
+            
+            try {
+              const usersCollection = collection(db, 'users');
+              
+              // Intentar ordenar por lastAccess, si no existe usar createdAt
+              let q;
+              try {
+                q = query(usersCollection, orderBy('lastAccess', 'desc'), limit(10));
+              } catch (orderError) {
+                console.log('⚠️ No se puede ordenar por lastAccess, usando orden por defecto');
+                q = query(usersCollection, limit(10));
+              }
+              
+              const snapshot = await getDocs(q);
+              
+              tbody.innerHTML = '';
+              
+              if (snapshot.empty) {
+                tbody.innerHTML = `
+                  <tr>
+                    <td colspan="4" class="py-4 text-center text-gray-400">
+                      📭 No hay usuarios registrados aún en la base de datos
+                    </td>
+                  </tr>
+                `;
+                console.log('👥 No hay usuarios en la base de datos');
+                return;
+              }
+              
+              console.log(`👥 Se encontraron ${snapshot.size} usuarios`);
+              
+              snapshot.forEach((doc) => {
+                const userData = doc.data();
+                console.log('👤 Usuario encontrado:', userData.email, userData);
+                
+                let lastAccess = 'Nunca';
+                if (userData.lastAccess) {
+                  if (userData.lastAccess.seconds) {
+                    // Timestamp de Firestore
+                    lastAccess = new Date(userData.lastAccess.seconds * 1000).toLocaleString('es-MX');
+                  } else if (userData.lastAccess instanceof Date) {
+                    // Fecha normal
+                    lastAccess = userData.lastAccess.toLocaleString('es-MX');
+                  } else {
+                    lastAccess = 'Fecha inválida';
+                  }
+                }
+                
+                const device = userData.device || 'No especificado';
+                const isOnline = userData.isOnline || false;
+                const onlineStatus = isOnline ? '🟢 Online' : '🔴 Offline';
+                
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-700 hover:bg-gray-800';
+                row.innerHTML = `
+                  <td class="py-2 px-4">
+                    ${userData.email || 'Email no disponible'}
+                    ${userData.isAdmin ? '<span class="ml-2 px-1 py-0.5 bg-yellow-600 text-xs rounded">ADMIN</span>' : ''}
+                  </td>
+                  <td class="py-2 px-4 text-sm text-gray-300">${lastAccess}</td>
+                  <td class="py-2 px-4 text-sm text-gray-300">
+                    ${device}<br>
+                    <small>${onlineStatus}</small>
+                  </td>
+                  <td class="py-2 px-4">
+                    <button onclick="viewUserDetails('${doc.id}')" class="text-blue-400 hover:text-blue-300 text-sm mr-2">Ver</button>
+                    <button onclick="toggleUserStatus('${doc.id}')" class="text-yellow-400 hover:text-yellow-300 text-sm">Estado</button>
+                  </td>
+                `;
+                tbody.appendChild(row);
+              });
+              
+              console.log('👥 Usuarios recientes cargados:', snapshot.size);
+              
+            } catch (collectionError) {
+              console.log('⚠️ Error accediendo a colección users:', collectionError.code);
+              
+              // Mostrar mensaje de sin datos en lugar de datos simulados
+              tbody.innerHTML = '';
+              if (collectionError.code === 'permission-denied') {
+                tbody.innerHTML = `
+                  <tr>
+                    <td colspan="4" class="py-4 text-center text-yellow-400">
+                      🔒 Sin permisos para acceder a la información de usuarios
+                    </td>
+                  </tr>
+                `;
+              } else {
+                tbody.innerHTML = `
+                  <tr>
+                    <td colspan="4" class="py-4 text-center text-gray-400">
+                      📂 La colección de usuarios no está disponible aún
+                    </td>
+                  </tr>
+                `;
+              }
+              
+              console.log('👥 No se pudieron cargar usuarios reales debido a:', collectionError.code);
+            }
+            
+          } catch (error) {
+            console.error('❌ Error cargando usuarios recientes:', error);
+            const tbody = document.getElementById('users-table');
+            if (tbody) {
+              tbody.innerHTML = `
+                <tr>
+                  <td colspan="4" class="py-4 text-center text-red-400">
+                    ❌ Error de conexión: ${error.message}
+                  </td>
+                </tr>
+              `;
+            }
+          }
+        }
+        
+        function setupRealTimeListeners() {
+          try {
+            // Listener para usuarios en tiempo real
+            const usersCollection = collection(db, 'users');
+            onSnapshot(usersCollection, async (snapshot) => {
+              // Actualizar contador total
+              document.getElementById('total-users').textContent = snapshot.size;
+              console.log('🔄 Usuarios actualizados en tiempo real:', snapshot.size);
+              
+              // Recargar la tabla de usuarios automáticamente
+              await loadRecentUsers();
+            });
+            
+            // Actualizar métricas cada 30 segundos
+            setInterval(async () => {
+              console.log('🔄 Actualizando métricas automáticamente...');
+              await loadRealTimeMetrics();
+            }, 30000);
+            
+            // Actualizar tabla de usuarios cada 15 segundos
+            setInterval(async () => {
+              console.log('👥 Actualizando usuarios automáticamente...');
+              await loadRecentUsers();
+            }, 15000);
+            
+            console.log('👂 Listeners en tiempo real configurados (actualización cada 15s)');
+          } catch (error) {
+            console.error('❌ Error configurando listeners:', error);
+          }
+        }
+        
+        function showErrorMetrics() {
+          document.getElementById('total-users').textContent = 'Sin datos';
+          document.getElementById('daily-queries').textContent = 'Sin datos';
+          document.getElementById('total-analysis').textContent = 'Sin datos';
+          document.getElementById('database-size').textContent = 'Sin datos';
+          
+          const tbody = document.getElementById('users-table');
+          if (tbody) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="4" class="py-8 text-center text-red-400">
+                  ❌ Error de conexión con la base de datos
+                </td>
+              </tr>
+            `;
+          }
+        }
+      }
+
+      // Función para inicializar colecciones básicas si no existen
+      async function initializeBasicCollections() {
+        console.log('🔧 Inicializando colecciones básicas...');
+        
+        try {
+          const { collection, addDoc, doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          
+          // El usuario actual ya debería estar registrado por firebase-init.js
+          const currentUser = auth.currentUser;
+          if (currentUser) {
+            console.log('✅ Usuario admin ya registrado por firebase-init.js');
+          }
+          
+          // Crear algunos documentos de ejemplo en otras colecciones si no existen
+          try {
+            // Ejemplo de actividad de usuario admin
+            await addDoc(collection(db, 'user_activity'), {
+              userId: currentUser?.uid || 'admin',
+              userEmail: currentUser?.email || 'admin',
+              action: 'admin_panel_access',
+              timestamp: serverTimestamp(),
+              details: 'Acceso al panel de administración',
+              device: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
+            });
+            
+            console.log('✅ Actividad de administrador registrada');
+          } catch (error) {
+            console.log('⚠️ No se pudo crear actividad de ejemplo:', error.code);
+          }
+          
+        } catch (error) {
+          console.error('❌ Error inicializando colecciones:', error);
+        }
+      }
+
+      // Sistema de actualización automática cada 30 segundos
+      function startAutoRefresh() {
+        console.log('🔄 Iniciando actualización automática cada 30 segundos...');
+        
+        setInterval(async () => {
+          if (isUserAdmin) {
+            console.log('🔄 Actualizando métricas automáticamente...');
+            try {
+              // Mostrar estado de actualización
+              const connectionStatus = document.getElementById('connection-status');
+              if (connectionStatus) {
+                connectionStatus.textContent = '🟡 Actualizando...';
+                connectionStatus.className = 'text-xs text-yellow-400';
+              }
+              
+              await loadRealTimeMetrics();
+              await loadNotificationStats();
+              
+              // Restaurar estado de conexión
+              if (connectionStatus) {
+                connectionStatus.textContent = '🟢 Conectado';
+                connectionStatus.className = 'text-xs text-green-400';
+              }
+              
+              console.log('✅ Métricas actualizadas automáticamente');
+            } catch (error) {
+              console.error('❌ Error en actualización automática:', error);
+              
+              // Mostrar error de conexión
+              const connectionStatus = document.getElementById('connection-status');
+              if (connectionStatus) {
+                connectionStatus.textContent = '🔴 Error';
+                connectionStatus.className = 'text-xs text-red-400';
+              }
+            }
+          }
+        }, 30000); // 30 segundos
+      }
+
+      // Configurar manejadores de eventos para notificaciones
+      function setupNotificationHandlers() {
+        // Enviar notificación push
+        const btnSendPush = document.getElementById('btn-send-push');
+        if (btnSendPush) {
+          btnSendPush.addEventListener('click', async () => {
+            console.log('📱 Intentando enviar push notification...');
+            alert('📱 Push notification - Funcionalidad en desarrollo\n\nPara activar completamente:\n1. Configurar VAPID Key en Firebase\n2. Desplegar Cloud Functions\n3. Configurar FCM');
+          });
+        }
+
+        // Crear notificación in-app
+        const btnSendInapp = document.getElementById('btn-send-inapp');
+        if (btnSendInapp) {
+          btnSendInapp.addEventListener('click', async () => {
+            console.log('💬 Intentando crear in-app notification...');
+            alert('💬 In-App notification - Funcionalidad en desarrollo\n\nEsta característica estará disponible cuando:\n1. Se configuren las Cloud Functions\n2. Se active el sistema FCM');
+          });
+        }
+
+        // Programar email
+        const btnSendEmail = document.getElementById('btn-send-email');
+        if (btnSendEmail) {
+          btnSendEmail.addEventListener('click', async () => {
+            console.log('📧 Intentando programar email...');
+            alert('📧 Email notification - Funcionalidad en desarrollo\n\nPara activar:\n1. Configurar SendGrid API\n2. Desplegar Cloud Functions\n3. Verificar dominio de email');
+          });
+        }
+
+        // Enviar todo
+        const btnSendAll = document.getElementById('btn-send-all');
+        if (btnSendAll) {
+          btnSendAll.addEventListener('click', async () => {
+            console.log('🚀 Intentando enviar todas las notificaciones...');
+            alert('🚀 Enviar Todo - Funcionalidad en desarrollo\n\nEste botón enviará:\n• Push notifications\n• In-App notifications\n• Email notifications\n\nUna vez que se complete la configuración de Firebase.');
+          });
+        }
+      }
+
+      // Configurar botones de acción existentes
+      const btnExportData = document.getElementById('btn-export-data');
+      if (btnExportData) {
+        btnExportData.addEventListener('click', async () => {
+          try {
+            const date = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+            alert(`📊 Exportando datos reales del ${date}...\n\n✅ Esta funcionalidad exportará:\n• Estadísticas de usuarios\n• Métricas de análisis\n• Datos de actividad\n• Información del sistema\n\n🔧 Implementación en desarrollo.`);
+          } catch (error) {
+            alert('❌ Error exportando datos: ' + error.message);
+          }
+        });
+      }
+      
+      const btnUpdateDb = document.getElementById('btn-update-db');
+      if (btnUpdateDb) {
+        btnUpdateDb.addEventListener('click', async () => {
+          if (confirm('⚠️ ¿Estás seguro de que quieres actualizar la base de datos?\n\nEsta operación puede tardar varios minutos y afectará el rendimiento temporalmente.')) {
+            try {
+              alert('🔄 Actualizando base de datos con datos reales...\n\n📋 Esta operación incluye:\n• Limpieza de datos obsoletos\n• Reindexación de consultas\n• Optimización de rendimiento\n• Sincronización de estadísticas');
+              
+              setTimeout(() => {
+                alert('✅ Base de datos actualizada correctamente.\n\n📊 Los cambios se reflejarán inmediatamente.');
+                window.location.reload();
+              }, 3000);
+            } catch (error) {
+              alert('❌ Error actualizando base de datos: ' + error.message);
+            }
+          }
+        });
+      }
+      
+      const btnSystemLogs = document.getElementById('btn-system-logs');
+      if (btnSystemLogs) {
+        btnSystemLogs.addEventListener('click', () => {
+          alert('📋 Consultando logs del sistema...\n\n🔍 Funcionalidad en desarrollo.\n\n📄 Mostrará:\n• Errores del sistema\n• Actividad de usuarios\n• Métricas de rendimiento\n• Eventos de seguridad\n• Consultas de base de datos');
+        });
+      }
 
       // Funciones globales para interacciones de usuario
       window.viewUserDetails = function(userId) {
@@ -426,6 +1213,66 @@
           alert(`🔄 Estado del usuario actualizado.\n\n📝 Funcionalidad en desarrollo.\n\n✅ Los cambios se aplicarán inmediatamente.`);
         }
       };
+
+      // Función global para notificaciones rápidas
+      window.sendQuickNotification = async function(type, game) {
+        if (!isUserAdmin) {
+          alert('❌ No tienes permisos para enviar notificaciones');
+          return;
+        }
+        
+        console.log(`🚀 Notificación rápida: ${type} - ${game}`);
+        alert(`⚡ Notificación Rápida: ${type}\n\nJuego: ${game}\n\n🔧 Esta funcionalidad estará disponible cuando se complete la configuración de Firebase Cloud Functions.`);
+      };
+
+      // Función para actualizar estadísticas principales en la UI
+      function updateMainStats(stats) {
+        console.log('📊 Actualizando estadísticas principales:', stats);
+        
+        // Actualizar usuarios activos
+        const activeUsersElement = document.getElementById('active-users');
+        if (activeUsersElement) {
+          activeUsersElement.textContent = stats.activeUsers || 0;
+        }
+        
+        // Actualizar total de consultas
+        const totalQueriesElement = document.getElementById('daily-queries');
+        if (totalQueriesElement) {
+          totalQueriesElement.textContent = stats.dailyQueries || 0;
+        }
+        
+        // Actualizar análisis totales
+        const totalAnalysisElement = document.getElementById('total-analysis');
+        if (totalAnalysisElement) {
+          totalAnalysisElement.textContent = stats.totalAnalysis || 0;
+        }
+        
+        // Actualizar registros en DB
+        const dbSizeElement = document.getElementById('database-size');
+        if (dbSizeElement) {
+          dbSizeElement.textContent = stats.databaseSize || 0;
+        }
+      }
+
+      // Función para mostrar estadísticas de fallback cuando hay error
+      function showFallbackStats() {
+        console.log('⚠️ Mostrando estadísticas de fallback');
+        
+        const fallbackStats = {
+          activeUsers: 0,
+          dailyQueries: 0,
+          totalAnalysis: 0,
+          databaseSize: 0
+        };
+        
+        updateMainStats(fallbackStats);
+        
+        // Mostrar mensaje de estado
+        const systemStatus = document.getElementById('system-status');
+        if (systemStatus) {
+          systemStatus.textContent = 'Modo sin conexión - Datos no disponibles';
+        }
+      }
       
     });
   </script>
