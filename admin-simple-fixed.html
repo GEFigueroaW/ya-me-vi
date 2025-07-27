@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - YA ME VI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%);
+      min-height: 100vh;
+    }
+    .admin-card {
+      backdrop-filter: blur(10px);
+      background: rgba(31, 41, 55, 0.8);
+      border: 1px solid rgba(156, 163, 175, 0.2);
+    }
+  </style>
+</head>
+<body class="text-white">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-white">📊 Panel de Administración</h1>
+        <p class="text-blue-200">YA ME VI - Sistema de Control</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div id="admin-status" class="text-yellow-400">🔄 Verificando...</div>
+        <button onclick="window.location.href='index.html'" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+          🏠 Volver a Home
+        </button>
+      </div>
+    </div>
+
+    <!-- Status System -->
+    <div class="admin-card p-6 rounded-lg mb-8">
+      <h2 class="text-xl font-semibold mb-4">🔧 Estado del Sistema</h2>
+      <div id="system-status" class="text-green-400">✅ Conectado - Datos en tiempo real</div>
+      <div id="last-update" class="text-gray-400 mt-2">Última actualización: --</div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Total Users -->
+      <div class="admin-card p-6 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-400 text-sm">Usuarios Activos</p>
+            <p id="total-users" class="text-2xl font-bold text-green-400">0</p>
+            <p class="text-xs text-gray-500 mt-1">Total registrados</p>
+          </div>
+          <div class="bg-green-500 p-3 rounded-full">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Queries -->
+      <div class="admin-card p-6 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-400 text-sm">Consultas Hoy</p>
+            <p id="daily-queries" class="text-2xl font-bold text-blue-400">0</p>
+            <p class="text-xs text-gray-500 mt-1">Últimas 24h</p>
+          </div>
+          <div class="bg-blue-500 p-3 rounded-full">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Analysis -->
+      <div class="admin-card p-6 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-400 text-sm">Análisis Total</p>
+            <p id="total-analysis" class="text-2xl font-bold text-yellow-400">0</p>
+            <p class="text-xs text-gray-500 mt-1">Histórico</p>
+          </div>
+          <div class="bg-yellow-500 p-3 rounded-full">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- DB Records -->
+      <div class="admin-card p-6 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-400 text-sm">Registros en DB</p>
+            <p id="db-records" class="text-2xl font-bold text-purple-400">0</p>
+            <p class="text-xs text-gray-500 mt-1">Base de datos</p>
+          </div>
+          <div class="bg-purple-500 p-3 rounded-full">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Users Table -->
+    <div class="admin-card p-6 rounded-lg mb-8">
+      <h3 class="text-xl font-semibold mb-4">👥 Usuarios Recientes</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-600">
+              <th class="text-left py-3 px-4">Email</th>
+              <th class="text-left py-3 px-4">Nombre</th>
+              <th class="text-left py-3 px-4">Registro</th>
+              <th class="text-left py-3 px-4">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body">
+            <tr>
+              <td colspan="4" class="text-center py-8 text-gray-400">Cargando usuarios...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Actions Panel -->
+    <div class="admin-card p-6 rounded-lg">
+      <h3 class="text-xl font-semibold mb-4">⚡ Acciones Rápidas</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button onclick="refreshData()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+          🔄 Actualizar Datos
+        </button>
+        <button onclick="exportData()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
+          📊 Exportar Datos
+        </button>
+        <button onclick="viewLogs()" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg transition-colors">
+          📋 Ver Logs
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, collection, getDocs, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDn3WCVaGl3lXPUIKJR0JrVi9nMbIkE0WM",
+      authDomain: "yamevi-com-mx.firebaseapp.com",
+      projectId: "yamevi-com-mx",
+      storageBucket: "yamevi-com-mx.appspot.com",
+      messagingSenderId: "461992870458",
+      appId: "1:461992870458:web:5fb2b5c3e6b9b4a6d06b9c"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Admin verification
+    let isUserAdmin = false;
+
+    // Initialize admin panel
+    console.log('🚀 Inicializando panel de administración simplificado...');
+
+    // Auth state listener
+    onAuthStateChanged(auth, async (user) => {
+      const statusElement = document.getElementById('admin-status');
+      
+      if (user) {
+        console.log('👤 Usuario autenticado:', user.email);
+        
+        // Check if user is admin
+        const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+        isUserAdmin = adminEmails.includes(user.email);
+        
+        console.log('🔍 Verificando admin:', user.email, 'en', adminEmails);
+        console.log('✅ Es admin?', isUserAdmin);
+        
+        if (isUserAdmin) {
+          statusElement.textContent = `✅ Admin: ${user.email}`;
+          statusElement.className = 'text-green-400';
+          
+          console.log('👑 Usuario admin verificado, cargando datos...');
+          
+          // Load admin data
+          await loadAdminData();
+          
+        } else {
+          statusElement.textContent = `❌ Sin permisos: ${user.email}`;
+          statusElement.className = 'text-red-400';
+          
+          setTimeout(() => {
+            alert(`❌ No tienes permisos de administrador.\n\nUsuario: ${user.email}\nAdmins: gfigueroa.w@gmail.com, eugenfw@gmail.com`);
+            window.location.href = 'index.html';
+          }, 2000);
+        }
+      } else {
+        console.log('❌ Usuario no autenticado');
+        statusElement.textContent = '🔒 No autenticado';
+        statusElement.className = 'text-yellow-400';
+        
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 3000);
+      }
+    });
+
+    // Load admin data function
+    async function loadAdminData() {
+      console.log('📊 Cargando datos de administración...');
+      
+      try {
+        // Load users
+        const usersQuery = query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(50));
+        const usersSnapshot = await getDocs(usersQuery);
+        
+        const totalUsers = usersSnapshot.size;
+        document.getElementById('total-users').textContent = totalUsers;
+        
+        // Update users table
+        const tableBody = document.getElementById('users-table-body');
+        tableBody.innerHTML = '';
+        
+        if (usersSnapshot.empty) {
+          tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-400">No hay usuarios registrados</td></tr>';
+        } else {
+          usersSnapshot.forEach(doc => {
+            const userData = doc.data();
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-700 hover:bg-gray-800';
+            
+            const createdAt = userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString('es-MX') : 'N/A';
+            const isAdmin = userData.isAdmin ? ' <span class="text-yellow-400">(ADMIN)</span>' : '';
+            
+            row.innerHTML = `
+              <td class="py-3 px-4">${userData.email}${isAdmin}</td>
+              <td class="py-3 px-4">${userData.displayName || 'N/A'}</td>
+              <td class="py-3 px-4">${createdAt}</td>
+              <td class="py-3 px-4">
+                <span class="px-2 py-1 rounded-full text-xs bg-green-600">Activo</span>
+              </td>
+            `;
+            
+            tableBody.appendChild(row);
+          });
+        }
+        
+        // Load queries (if collection exists)
+        try {
+          const queriesSnapshot = await getDocs(collection(db, 'queries'));
+          document.getElementById('daily-queries').textContent = queriesSnapshot.size;
+        } catch (error) {
+          document.getElementById('daily-queries').textContent = '0';
+        }
+        
+        // Load analysis data (if collection exists)
+        try {
+          const analysisSnapshot = await getDocs(collection(db, 'analysis'));
+          document.getElementById('total-analysis').textContent = analysisSnapshot.size;
+        } catch (error) {
+          document.getElementById('total-analysis').textContent = '0';
+        }
+        
+        // Update database records
+        document.getElementById('db-records').textContent = totalUsers;
+        
+        // Update last update time
+        const lastUpdate = document.getElementById('last-update');
+        const now = new Date().toLocaleString('es-MX');
+        lastUpdate.textContent = `Última actualización: ${now}`;
+        
+        // Update system status
+        const systemStatus = document.getElementById('system-status');
+        systemStatus.textContent = '✅ Conectado - Datos en tiempo real';
+        
+        console.log('✅ Datos de administración cargados correctamente');
+        
+      } catch (error) {
+        console.error('❌ Error cargando datos:', error);
+        document.getElementById('system-status').textContent = '❌ Error de conexión';
+      }
+    }
+
+    // Global functions
+    window.refreshData = async function() {
+      console.log('🔄 Actualizando datos...');
+      if (isUserAdmin) {
+        await loadAdminData();
+        alert('✅ Datos actualizados correctamente');
+      }
+    };
+
+    window.exportData = function() {
+      console.log('📊 Exportando datos...');
+      alert('🚧 Función de exportación en desarrollo');
+    };
+
+    window.viewLogs = function() {
+      console.log('📋 Viendo logs...');
+      alert('🚧 Función de logs en desarrollo');
+    };
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+      if (isUserAdmin) {
+        console.log('🔄 Auto-actualizando datos...');
+        loadAdminData();
+      }
+    }, 30000);
+
+  </script>
+</body>
+</html>
