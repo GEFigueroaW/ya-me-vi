@@ -168,7 +168,10 @@ function setupBasicEventListeners() {
   
   if (googleBtnNew) {
     googleBtnNew.addEventListener("click", function () {
-      showErrorMessage('⚠️ Funcionalidad de Google no disponible temporalmente. Regístrate manualmente.');
+      showErrorMessage('⚠️ Redirigiendo a registro con Google...');
+      setTimeout(() => {
+        window.location.href = "register.html";
+      }, 1000);
     });
   }
   
@@ -217,7 +220,7 @@ function setupFirebaseEventListeners(detectedUserEmail, auth, signInWithEmailAnd
     googleBtnNew.parentNode.replaceChild(newGoogleBtnNew, googleBtnNew);
     
     newGoogleBtnNew.addEventListener("click", async function () {
-      await handleGoogleLogin(auth, signInWithPopup, GoogleAuthProvider);
+      await handleGoogleRegistration(auth, signInWithPopup, GoogleAuthProvider);
     });
   }
 }
@@ -266,6 +269,58 @@ async function handlePasswordLogin(email, auth, signInWithEmailAndPassword) {
         break;
       default:
         showErrorMessage(`❌ Error: ${error.message}`);
+        break;
+    }
+  }
+}
+
+// Manejo de registro con Google (lleva a dream-input.html)
+async function handleGoogleRegistration(auth, signInWithPopup, GoogleAuthProvider) {
+  console.log('🔄 Iniciando registro con Google...');
+  showLoadingOverlay('Creando cuenta con Google...');
+
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    
+    console.log("✅ Registro con Google exitoso:", result.user.email);
+    
+    // Verificar si es usuario nuevo o existente
+    const isNewUser = result._tokenResponse?.isNewUser || 
+                     result.user.metadata?.creationTime === result.user.metadata?.lastSignInTime;
+    
+    if (isNewUser) {
+      console.log("🎉 Usuario nuevo detectado, redirigiendo a dream-input");
+      showSuccessMessage('¡Cuenta creada! Configurando tu experiencia...');
+      
+      setTimeout(() => {
+        window.location.href = "dream-input.html";
+      }, 1500);
+    } else {
+      console.log("👋 Usuario existente, redirigiendo a home");
+      showSuccessMessage('¡Bienvenido de vuelta! Redirigiendo...');
+      
+      setTimeout(() => {
+        window.location.href = "home.html";
+      }, 1500);
+    }
+    
+  } catch (error) {
+    hideLoadingOverlay();
+    console.error("❌ Error en registro con Google:", error);
+    
+    switch (error.code) {
+      case 'auth/popup-closed-by-user':
+        showErrorMessage('❌ Registro cancelado. Inténtalo de nuevo.');
+        break;
+      case 'auth/popup-blocked':
+        showErrorMessage('❌ Popup bloqueado. Por favor permite popups para este sitio.');
+        break;
+      case 'auth/account-exists-with-different-credential':
+        showErrorMessage('❌ Ya existe una cuenta con este email. Intenta iniciar sesión.');
+        break;
+      default:
+        showErrorMessage(`❌ Error en registro: ${error.message}`);
         break;
     }
   }
