@@ -215,24 +215,6 @@ export class AdminDataManager {
       };
     }
   }
-      
-      return {
-        totalQueries,
-        individualAnalysis,
-        combinationAnalysis,
-        suggestions
-      };
-      
-    } catch (error) {
-      console.error('❌ Error obteniendo estadísticas de consultas:', error);
-      return {
-        totalQueries: 0,
-        individualAnalysis: 0,
-        combinationAnalysis: 0,
-        suggestions: 0
-      };
-    }
-  }
   
   /**
    * Obtiene información sobre el tamaño de la base de datos
