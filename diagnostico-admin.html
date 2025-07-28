@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico Admin - YA ME VI</title>
+  <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+</head>
+<body class="bg-slate-800 text-white">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">🔍 Diagnóstico Admin</h1>
+    
+    <!-- Estado de autenticación -->
+    <div class="bg-slate-700 p-6 rounded-lg mb-6">
+      <h2 class="text-xl font-bold mb-3">👤 Estado de Autenticación</h2>
+      <div id="auth-status" class="flex items-center mb-4">
+        <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+        <span>Verificando autenticación...</span>
+      </div>
+      <div id="user-details" class="border border-slate-600 p-4 rounded-lg text-sm bg-slate-800 mb-4 whitespace-pre hidden"></div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button id="btn-login" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm">
+          🔑 Iniciar sesión
+        </button>
+        <button id="btn-logout" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm">
+          🚪 Cerrar sesión
+        </button>
+        <button id="btn-goto-admin" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm">
+          👑 Ir a Admin Panel
+        </button>
+      </div>
+    </div>
+    
+    <!-- Diagnóstico de permisos -->
+    <div class="bg-slate-700 p-6 rounded-lg mb-6">
+      <h2 class="text-xl font-bold mb-3">🔒 Diagnóstico de Permisos</h2>
+      <div id="admin-check" class="flex items-center mb-4">
+        <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+        <span>Verificando permisos de administrador...</span>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h3 class="font-medium mb-2">✓ Emails Autorizados:</h3>
+          <ul class="list-disc list-inside text-sm text-gray-300">
+            <li>gfigueroa.w@gmail.com</li>
+            <li>admin@yamevi.com.mx</li>
+            <li>eugenfw@gmail.com</li>
+            <li>guillermo.figueroaw@totalplay.com.mx</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-medium mb-2">📋 Resultados:</h3>
+          <ul id="permission-results" class="list-none space-y-1 text-sm">
+            <li>⏳ Verificando email...</li>
+            <li>⏳ Verificando Firestore...</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Diagnóstico de Firebase -->
+    <div class="bg-slate-700 p-6 rounded-lg mb-6">
+      <h2 class="text-xl font-bold mb-3">🔥 Diagnóstico de Firebase</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="font-medium mb-2">📊 Estado:</h3>
+          <ul id="firebase-status" class="list-none space-y-2 text-sm">
+            <li id="firebase-init" class="flex items-center">
+              <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+              <span>Verificando Firebase...</span>
+            </li>
+            <li id="firestore-status" class="flex items-center">
+              <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+              <span>Verificando Firestore...</span>
+            </li>
+            <li id="project-status" class="flex items-center">
+              <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+              <span>Verificando proyecto...</span>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-medium mb-2">🔧 Configuración:</h3>
+          <div id="firebase-config" class="border border-slate-600 p-3 rounded-lg text-sm bg-slate-800 overflow-auto max-h-28">
+            Cargando configuración...
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-4">
+        <button id="test-firestore" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm">
+          🧪 Probar escritura Firestore
+        </button>
+        <div id="firestore-result" class="mt-2 text-sm"></div>
+      </div>
+    </div>
+    
+    <!-- Log de eventos -->
+    <div class="bg-slate-700 p-6 rounded-lg">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-bold">📝 Log de Eventos</h2>
+        <button id="clear-log" class="bg-slate-600 hover:bg-slate-500 px-3 py-1 rounded text-xs">
+          Limpiar
+        </button>
+      </div>
+      <div id="event-log" class="border border-slate-600 p-3 rounded-lg text-sm bg-slate-800 h-64 overflow-y-auto font-mono">
+        Iniciando diagnóstico...
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    
+    // Log evento
+    function logEvent(message, type = 'info') {
+      const logElement = document.getElementById('event-log');
+      const now = new Date().toLocaleTimeString();
+      const classColor = type === 'error' ? 'text-red-400' : 
+                         type === 'success' ? 'text-green-400' : 
+                         type === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+                         
+      logElement.innerHTML += `<div class="${classColor}">[${now}] ${message}</div>`;
+      logElement.scrollTop = logElement.scrollHeight;
+      console.log(`[${type}] ${message}`);
+    }
+    
+    // Actualizar status
+    function updateStatus(elementId, status, message) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+      
+      const indicator = element.querySelector('div');
+      const text = element.querySelector('span');
+      
+      if (indicator) {
+        indicator.className = `w-3 h-3 rounded-full ${
+          status === 'success' ? 'bg-green-500' : 
+          status === 'error' ? 'bg-red-500' : 
+          status === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+        } mr-2`;
+      }
+      
+      if (text) {
+        text.textContent = message;
+      }
+    }
+    
+    // Lista de administradores
+    const adminEmails = [
+      'gfigueroa.w@gmail.com', 
+      'admin@yamevi.com.mx', 
+      'eugenfw@gmail.com',
+      'guillermo.figueroaw@totalplay.com.mx'
+    ];
+    
+    // Configuración Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+      authDomain: "ya-me-vi.firebaseapp.com",
+      projectId: "ya-me-vi",
+      storageBucket: "ya-me-vi.firebasestorage.app",
+      messagingSenderId: "748876890843",
+      appId: "1:748876890843:web:070d1eb476d38594d002fe",
+      measurementId: "G-D7R797S5BC"
+    };
+    
+    let app, auth, db;
+    let isAdmin = false;
+    
+    // Inicializar Firebase
+    try {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+      
+      document.getElementById('firebase-config').textContent = JSON.stringify(firebaseConfig, null, 2);
+      updateStatus('firebase-init', 'success', 'Firebase inicializado correctamente');
+      updateStatus('firestore-status', 'success', 'Conexión a Firestore establecida');
+      updateStatus('project-status', 'success', 'Proyecto: ya-me-vi');
+      
+      logEvent('Firebase inicializado correctamente', 'success');
+    } catch (error) {
+      updateStatus('firebase-init', 'error', 'Error al inicializar Firebase');
+      updateStatus('firestore-status', 'error', 'Error conectando a Firestore');
+      updateStatus('project-status', 'error', 'Error en proyecto');
+      
+      logEvent(`Error inicializando Firebase: ${error.message}`, 'error');
+    }
+    
+    // Verificar permisos admin
+    async function checkAdminPermissions(user) {
+      if (!user) {
+        updateStatus('admin-check', 'warning', 'No hay usuario autenticado');
+        document.getElementById('permission-results').innerHTML = `
+          <li class="text-yellow-400">⚠️ No hay usuario autenticado</li>
+          <li class="text-gray-400">Inicia sesión para verificar permisos</li>
+        `;
+        return false;
+      }
+      
+      const results = document.getElementById('permission-results');
+      results.innerHTML = '';
+      
+      // Verificar por email
+      let emailCheck = false;
+      if (user.email) {
+        emailCheck = adminEmails.includes(user.email.toLowerCase());
+        results.innerHTML += `
+          <li class="${emailCheck ? 'text-green-400' : 'text-red-400'}">
+            ${emailCheck ? '✅' : '❌'} Email ${user.email} ${emailCheck ? 'está' : 'no está'} en lista de admins
+          </li>
+        `;
+        
+        logEvent(`Verificación de email admin: ${emailCheck ? 'AUTORIZADO' : 'NO AUTORIZADO'}`, emailCheck ? 'success' : 'warning');
+      } else {
+        results.innerHTML += `
+          <li class="text-yellow-400">⚠️ Usuario no tiene email disponible</li>
+        `;
+        logEvent('Usuario no tiene email disponible', 'warning');
+      }
+      
+      // Verificar en Firestore
+      let firestoreCheck = false;
+      try {
+        logEvent('Verificando permisos admin en Firestore...', 'info');
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          results.innerHTML += `
+            <li class="text-blue-400">ℹ️ Datos en Firestore: UID=${user.uid}</li>
+          `;
+          
+          if (userData.isAdmin === true) {
+            firestoreCheck = true;
+            results.innerHTML += `
+              <li class="text-green-400">✅ Flag isAdmin=true encontrado en Firestore</li>
+            `;
+            logEvent('Flag isAdmin=true encontrado en Firestore', 'success');
+          } else {
+            results.innerHTML += `
+              <li class="text-red-400">❌ Flag isAdmin no encontrado en Firestore</li>
+            `;
+            logEvent('Flag isAdmin no encontrado en Firestore', 'warning');
+          }
+          
+          if (userData.email && adminEmails.includes(userData.email.toLowerCase())) {
+            firestoreCheck = true;
+            results.innerHTML += `
+              <li class="text-green-400">✅ Email en Firestore (${userData.email}) está en lista de admins</li>
+            `;
+            logEvent(`Email en Firestore (${userData.email}) es admin autorizado`, 'success');
+          }
+        } else {
+          results.innerHTML += `
+            <li class="text-yellow-400">⚠️ No hay datos de usuario en Firestore</li>
+          `;
+          logEvent('No hay datos de usuario en Firestore', 'warning');
+        }
+      } catch (error) {
+        results.innerHTML += `
+          <li class="text-red-400">❌ Error verificando Firestore: ${error.message}</li>
+        `;
+        logEvent(`Error verificando Firestore: ${error.message}`, 'error');
+      }
+      
+      // Resultado final
+      isAdmin = emailCheck || firestoreCheck;
+      
+      if (isAdmin) {
+        updateStatus('admin-check', 'success', '✅ Usuario es administrador');
+        results.innerHTML += `
+          <li class="text-green-400 font-medium">✅ USUARIO ES ADMINISTRADOR</li>
+        `;
+        logEvent('VERIFICACIÓN ADMIN: APROBADA', 'success');
+      } else {
+        updateStatus('admin-check', 'error', '❌ Usuario no es administrador');
+        results.innerHTML += `
+          <li class="text-red-400 font-medium">❌ USUARIO NO ES ADMINISTRADOR</li>
+        `;
+        logEvent('VERIFICACIÓN ADMIN: DENEGADA', 'error');
+      }
+      
+      return isAdmin;
+    }
+    
+    // Monitor de autenticación
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        logEvent(`Usuario autenticado: ${user.email || user.uid}`, 'success');
+        updateStatus('auth-status', 'success', `✅ Autenticado: ${user.email || user.uid}`);
+        
+        // Mostrar detalles
+        const details = document.getElementById('user-details');
+        details.classList.remove('hidden');
+        details.textContent = JSON.stringify({
+          uid: user.uid,
+          email: user.email || 'No disponible',
+          displayName: user.displayName || 'No disponible',
+          photoURL: user.photoURL || 'No disponible',
+          emailVerified: user.emailVerified,
+          provider: user.providerData[0]?.providerId || 'desconocido'
+        }, null, 2);
+        
+        // Verificar permisos
+        await checkAdminPermissions(user);
+        
+      } else {
+        logEvent('No hay usuario autenticado', 'warning');
+        updateStatus('auth-status', 'error', '❌ No autenticado');
+        document.getElementById('user-details').classList.add('hidden');
+        updateStatus('admin-check', 'warning', '⚠️ No hay usuario que verificar');
+      }
+    });
+    
+    // Botones
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      try {
+        logEvent('Iniciando proceso de login con Google...', 'info');
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        logEvent(`Error al iniciar sesión: ${error.message}`, 'error');
+      }
+    });
+    
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      try {
+        logEvent('Cerrando sesión...', 'info');
+        await signOut(auth);
+        logEvent('Sesión cerrada', 'success');
+      } catch (error) {
+        logEvent(`Error al cerrar sesión: ${error.message}`, 'error');
+      }
+    });
+    
+    document.getElementById('btn-goto-admin').addEventListener('click', () => {
+      if (isAdmin) {
+        logEvent('Redirigiendo a admin panel...', 'info');
+        window.location.href = 'admin.html';
+      } else {
+        logEvent('No tienes permisos de administrador', 'error');
+        alert('No tienes permisos de administrador');
+      }
+    });
+    
+    // Probar Firestore
+    document.getElementById('test-firestore').addEventListener('click', async () => {
+      const result = document.getElementById('firestore-result');
+      
+      if (!auth.currentUser) {
+        result.innerHTML = '<span class="text-red-400">❌ Debes iniciar sesión primero</span>';
+        return;
+      }
+      
+      try {
+        logEvent('Probando escritura en Firestore...', 'info');
+        result.innerHTML = '<span class="text-blue-400">⏳ Probando escritura...</span>';
+        
+        // Intentar escribir
+        await setDoc(doc(db, 'diagnostic_tests', auth.currentUser.uid), {
+          timestamp: serverTimestamp(),
+          userId: auth.currentUser.uid,
+          userEmail: auth.currentUser.email || 'No disponible',
+          test: 'admin_permissions',
+          isAdmin: isAdmin
+        });
+        
+        logEvent('Escritura en Firestore exitosa', 'success');
+        result.innerHTML = '<span class="text-green-400">✅ Escritura en Firestore exitosa</span>';
+      } catch (error) {
+        logEvent(`Error en escritura Firestore: ${error.message}`, 'error');
+        result.innerHTML = `<span class="text-red-400">❌ Error: ${error.message}</span>`;
+      }
+    });
+    
+    // Limpiar log
+    document.getElementById('clear-log').addEventListener('click', () => {
+      document.getElementById('event-log').innerHTML = '';
+    });
+    
+    logEvent('Diagnóstico admin iniciado', 'info');
+  </script>
+</body>
+</html>

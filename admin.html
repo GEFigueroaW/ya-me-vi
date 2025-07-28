@@ -279,14 +279,15 @@
     // Import AuthGuard
     import { authGuard } from './js/authGuard.js';
 
-    // Firebase config
+    // Firebase config - CONFIGURACIÓN CORREGIDA
     const firebaseConfig = {
-      apiKey: "AIzaSyDn3WCVaGl3lXPUIKJR0JrVi9nMbIkE0WM",
-      authDomain: "yamevi-com-mx.firebaseapp.com",
-      projectId: "yamevi-com-mx",
-      storageBucket: "yamevi-com-mx.appspot.com",
-      messagingSenderId: "461992870458",
-      appId: "1:461992870458:web:5fb2b5c3e6b9b4a6d06b9c"
+      apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+      authDomain: "ya-me-vi.firebaseapp.com",
+      projectId: "ya-me-vi",
+      storageBucket: "ya-me-vi.firebasestorage.app",
+      messagingSenderId: "748876890843",
+      appId: "1:748876890843:web:070d1eb476d38594d002fe",
+      measurementId: "G-D7R797S5BC"
     };
 
     // Initialize
@@ -323,40 +324,45 @@
       }
     }
 
-    // Auth listener
-    let authChecked = false;
+    // Auth listener - MEJORADO Y CORREGIDO
     onAuthStateChanged(auth, async (user) => {
-      // Evitar múltiples verificaciones
-      if (authChecked) return;
-      
       console.log('🔍 Verificando autenticación en admin.html');
       const statusElement = document.getElementById('admin-status');
       
       if (user) {
         currentUser = user;
-        console.log('👤 Usuario conectado:', user.email);
+        console.log('👤 Usuario conectado:', user.email || 'Email no disponible', '- UID:', user.uid);
         
-        // Check admin - Lista expandida de emails autorizados
+        // ADMIN EMAILS - Lista completa en un solo lugar
         const adminEmails = [
           'gfigueroa.w@gmail.com', 
           'admin@yamevi.com.mx', 
-          'eugenfw@gmail.com'
+          'eugenfw@gmail.com',
+          'guillermo.figueroaw@totalplay.com.mx'
         ];
         
-        isUserAdmin = adminEmails.includes(user.email.toLowerCase());
+        // Primera verificación - por email directo
+        isUserAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
         
-        console.log('🔍 Verificando permisos admin para:', user.email);
-        console.log('🔍 Es admin?', isUserAdmin);
+        console.log('🔍 Verificando permisos admin por email:', user.email);
+        console.log('🔍 Es admin por email directo?', isUserAdmin);
         
-        // Additional Firestore check if not in direct list
+        // Segunda verificación - por Firestore
         if (!isUserAdmin) {
           try {
-            console.log('🔍 Verificando en Firestore...');
+            console.log('🔍 Verificando en Firestore para UID:', user.uid);
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
               const userData = userDoc.data();
-              isUserAdmin = userData.isAdmin === true;
-              console.log('🔍 Admin desde Firestore:', isUserAdmin);
+              console.log('📄 Datos del usuario en Firestore:', userData);
+              
+              if (userData.isAdmin === true) {
+                isUserAdmin = true;
+                console.log('✅ Admin confirmado por flag isAdmin en Firestore');
+              } else if (userData.email && adminEmails.includes(userData.email.toLowerCase())) {
+                isUserAdmin = true;
+                console.log('✅ Admin confirmado por email en Firestore');
+              }
             }
           } catch (error) {
             console.warn('⚠️ Error verificando Firestore:', error.message);
@@ -364,28 +370,31 @@
         }
         
         if (isUserAdmin) {
-          authChecked = true; // Marcar como verificado solo si es admin válido
           // Limpiar contador de redirecciones cuando la auth es exitosa
           authGuard.clearRedirectCount();
           
-          statusElement.textContent = `✅ Admin: ${user.email}`;
+          statusElement.textContent = `✅ Admin: ${user.email || user.uid}`;
           statusElement.className = 'text-green-400 font-medium';
           updateIndicator('connection-indicator', 'online');
           
           console.log('👑 Admin verificado, cargando panel...');
+          localStorage.setItem('admin_verified', 'true'); // Persistir verificación
+          
+          // Cargar datos
           await loadAdminData();
           startAutoRefresh();
           
         } else {
-          statusElement.textContent = `❌ Sin permisos: ${user.email}`;
+          statusElement.textContent = `❌ Sin permisos: ${user.email || user.uid}`;
           statusElement.className = 'text-red-400 font-medium';
           updateIndicator('connection-indicator', 'offline');
           
-          console.log('❌ Usuario sin permisos:', user.email);
-          setTimeout(() => {
-            alert(`❌ Acceso denegado\n\nUsuario: ${user.email}\n\nAdmins autorizados:\n• eugenfw@gmail.com\n• gfigueroa.w@gmail.com\n• admin@yamevi.com.mx`);
-            authGuard.safeRedirect('home.html', 'no_admin_permissions'); // Usar redirección segura
-          }, 3000); // Aumentar tiempo de espera
+          console.log('❌ Usuario sin permisos');
+          localStorage.removeItem('admin_verified');
+          
+          // Mensaje y redirección
+          alert(`❌ Acceso denegado\n\nUsuario: ${user.email || user.uid}\n\nAdmins autorizados:\n• eugenfw@gmail.com\n• gfigueroa.w@gmail.com\n• admin@yamevi.com.mx\n• guillermo.figueroaw@totalplay.com.mx`);
+          window.location.href = 'home.html';
         }
         
       } else {
@@ -393,11 +402,10 @@
         statusElement.textContent = '🔒 No autenticado - Redirigiendo...';
         statusElement.className = 'text-yellow-400 font-medium';
         updateIndicator('connection-indicator', 'warning');
+        localStorage.removeItem('admin_verified');
         
-        // Redirigir a login con parámetro de admin usando redirección segura
-        setTimeout(() => {
-          authGuard.safeRedirect('login.html?redirect=admin', 'no_auth_admin');
-        }, 2000);
+        // Usar redirección directa sin authGuard para evitar loops
+        window.location.href = 'login.html?redirect=admin';
       }
     });
 
