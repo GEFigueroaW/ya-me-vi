@@ -176,6 +176,83 @@
       const datosGlobales = window.datosAnalisis || {};
       expandirCaja(tipo, datosGlobales);
     }
+    
+    // Ajustar ancho de cajas basado en el título más largo
+    function ajustarAnchoCajas() {
+      // Esperar a que las cajas estén cargadas
+      setTimeout(() => {
+        const cajas = document.querySelectorAll('.caja-interactiva, #contenedor-cajas > div');
+        if (!cajas.length) return;
+        
+        // Buscar el título más largo
+        let maxTitleWidth = 0;
+        let longestTitle = '';
+        
+        cajas.forEach(caja => {
+          const titleEl = caja.querySelector('h3, .caja-titulo');
+          if (titleEl) {
+            const titleText = titleEl.textContent.trim();
+            if (titleText.length > longestTitle.length) {
+              longestTitle = titleText;
+            }
+          }
+        });
+        
+        console.log('Título más largo detectado:', longestTitle);
+        
+        // Crear un elemento temporal para medir el ancho del título más largo
+        const tempEl = document.createElement('span');
+        tempEl.style.position = 'absolute';
+        tempEl.style.visibility = 'hidden';
+        tempEl.style.whiteSpace = 'nowrap';
+        tempEl.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        tempEl.style.fontSize = '1.125rem';
+        tempEl.style.fontWeight = '600';
+        tempEl.textContent = longestTitle;
+        document.body.appendChild(tempEl);
+        
+        // Medir el ancho
+        maxTitleWidth = tempEl.offsetWidth;
+        document.body.removeChild(tempEl);
+        
+        // Añadir margen para el icono y padding
+        const anchoMinimo = maxTitleWidth + 120; // Añadir espacio para ícono y padding
+        
+        // Establecer la variable CSS
+        document.documentElement.style.setProperty('--ancho-minimo-caja', `${anchoMinimo}px`);
+        console.log('Ancho mínimo de caja establecido:', `${anchoMinimo}px`);
+        
+        // Forzar tamaño igual para todas las cajas
+        cajas.forEach(caja => {
+          caja.style.width = `${anchoMinimo}px`;
+          caja.style.minWidth = `${anchoMinimo}px`;
+        });
+      }, 1000); // Esperar 1 segundo para que las cajas se hayan renderizado
+    }
+    
+    // Ejecutar cuando el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', ajustarAnchoCajas);
+    
+    // También ejecutar cuando se hayan cargado las estadísticas
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+          for (const node of mutation.addedNodes) {
+            if (node.id === 'contenedor-cajas' || 
+                (node.querySelector && node.querySelector('.caja-interactiva'))) {
+              ajustarAnchoCajas();
+              return;
+            }
+          }
+        }
+      }
+    });
+    
+    // Observar cambios en el contenedor de estadísticas
+    const chartContainer = document.getElementById('charts-container');
+    if (chartContainer) {
+      observer.observe(chartContainer, { childList: true, subtree: true });
+    }
   </script>
 
   <style>
@@ -185,17 +262,18 @@
     /* Variables CSS */
     :root {
       --ancho-caja-dinamico: 100%;
+      --ancho-minimo-caja: 280px; /* Ancho mínimo basado en el título más largo */
     }
     
     @media (min-width: 768px) {
       :root {
-        --ancho-caja-dinamico: 45%;  /* Para tablets: 2 por fila */
+        --ancho-caja-dinamico: calc(50% - 1rem);  /* Para tablets: 2 por fila */
       }
     }
     
     @media (min-width: 1024px) {
       :root {
-        --ancho-caja-dinamico: 22%;  /* Para desktop: 4 por fila */
+        --ancho-caja-dinamico: calc(25% - 1.5rem);  /* Para desktop: 4 por fila */
       }
     }
     
@@ -292,10 +370,12 @@
         width: 100% !important;
       }
       
-      #contenedor-principal:not(.expanded) .caja-interactiva {
-        flex: 0 0 calc(50% - 1.5rem) !important;
-        min-width: 250px !important;
-        max-width: 400px !important;
+      #contenedor-principal:not(.expanded) .caja-interactiva,
+      #contenedor-principal:not(.expanded) #contenedor-cajas > div {
+        width: var(--ancho-caja-dinamico) !important;
+        min-width: var(--ancho-minimo-caja) !important;
+        max-width: none !important;
+        flex: 1 1 var(--ancho-caja-dinamico) !important;
       }
     }
     
@@ -319,11 +399,12 @@
         flex-shrink: 0 !important;
       }
       
-      /* Asegurar que las cajas tengan el ancho adecuado en modo horizontal */
-      #contenedor-principal:not(.expanded) .caja-interactiva {
-        flex: 0 0 calc(25% - 1.5rem) !important; /* 4 por fila en desktop */
-        min-width: 220px !important;
-        max-width: 350px !important;
+      /* Asegurar que las cajas tengan el mismo ancho en modo horizontal */
+      #contenedor-principal:not(.expanded) .caja-interactiva,
+      #contenedor-principal:not(.expanded) #contenedor-cajas > div {
+        flex: 1 1 var(--ancho-caja-dinamico) !important; /* Distribuye espacio equitativamente */
+        min-width: var(--ancho-minimo-caja) !important; /* Ancho mínimo basado en el título más largo */
+        max-width: none !important; /* Permite crecer según sea necesario */
       }
     }
     
@@ -335,8 +416,8 @@
     }
     
     .caja-interactiva {
-      width: 100% !important; /* Ancho completo en móvil */
-      min-width: 250px !important;
+      width: var(--ancho-caja-dinamico) !important; /* Ancho dinámico según la pantalla */
+      min-width: var(--ancho-minimo-caja) !important; /* Ancho mínimo basado en el título más largo */
       max-width: 450px !important;
       position: relative !important;
       border-radius: 16px !important;
@@ -347,19 +428,27 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
       overflow: hidden !important;
       flex-shrink: 0 !important;
+      flex-grow: 1 !important; /* Permite que todas las cajas crezcan por igual */
     }
     
     /* Móvil: 1 por fila (predeterminado) */
     @media (max-width: 767px) {
-      .caja-interactiva {
+      .caja-interactiva, #contenedor-cajas > div {
         width: 100% !important;
         margin: 0 auto !important;
+        min-width: var(--ancho-minimo-caja) !important;
+        max-width: 100% !important;
+      }
+      
+      /* Si el título es demasiado largo para móvil, permitir un tamaño de fuente más pequeño */
+      .caja-titulo, #contenedor-cajas h3 {
+        font-size: 1rem !important;
       }
     }
     
     #contenedor-cajas > div:not(.caja-interactiva) {
-      width: 100% !important; /* Ancho completo en móvil */
-      min-width: 250px !important;
+      width: var(--ancho-caja-dinamico) !important; /* Ancho dinámico según la pantalla */
+      min-width: var(--ancho-minimo-caja) !important; /* Ancho mínimo basado en el título más largo */
       max-width: 450px !important;
       position: relative !important;
       border-radius: 16px !important;
@@ -370,6 +459,7 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
       overflow: hidden !important;
       flex-shrink: 0 !important;
+      flex-grow: 1 !important; /* Permite que todas las cajas crezcan por igual */
     }
     
     /* Tablet: 2 por fila */
@@ -438,9 +528,14 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
       letter-spacing: -0.02em !important;
       margin: 0 !important;
-      white-space: nowrap !important;
+      /* Permitir que el título ocupe hasta dos líneas si es necesario */
+      white-space: normal !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 2 !important;
+      -webkit-box-orient: vertical !important;
+      min-height: 2.8em !important; /* Altura para asegurar espacio uniforme */
     }
     
     /* === CONTENEDOR DE CONTENIDO EXPANDIDO === */
