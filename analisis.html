@@ -182,6 +182,23 @@
     /* Importar fuente moderna */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
+    /* Variables CSS */
+    :root {
+      --ancho-caja-dinamico: 100%;
+    }
+    
+    @media (min-width: 768px) {
+      :root {
+        --ancho-caja-dinamico: 45%;  /* Para tablets: 2 por fila */
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      :root {
+        --ancho-caja-dinamico: 22%;  /* Para desktop: 4 por fila */
+      }
+    }
+    
     #charts-container canvas {
       background-color: rgba(255, 255, 255, 0.1);
       border-radius: 1rem;
@@ -236,6 +253,7 @@
       max-width: 1200px !important;
       margin: 0 auto !important;
       transition: all 0.3s ease !important;
+      padding: 0 10px !important;
     }
     
     /* Desktop: cuando hay expansión, dos columnas */
@@ -263,13 +281,31 @@
       width: 100% !important;
     }
     
+    /* Tablet: cuando NO está expandido - 2 cajas por fila */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      #contenedor-principal:not(.expanded) #contenedor-cajas {
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        flex-wrap: wrap !important;
+        gap: 1.5rem !important;
+        width: 100% !important;
+      }
+      
+      #contenedor-principal:not(.expanded) .caja-interactiva {
+        flex: 0 0 calc(50% - 1.5rem) !important;
+        min-width: 250px !important;
+        max-width: 400px !important;
+      }
+    }
+    
     /* Desktop: cuando NO está expandido - horizontal */
     @media (min-width: 1024px) {
       #contenedor-principal:not(.expanded) #contenedor-cajas {
         flex-direction: row !important;
         justify-content: center !important;
         align-items: stretch !important;
-        flex-wrap: nowrap !important;
+        flex-wrap: wrap !important;
         gap: 1.5rem !important;
         width: 100% !important;
         max-width: none !important;
@@ -283,10 +319,11 @@
         flex-shrink: 0 !important;
       }
       
-      /* Asegurar que las cajas tengan el mismo ancho en modo horizontal */
+      /* Asegurar que las cajas tengan el ancho adecuado en modo horizontal */
       #contenedor-principal:not(.expanded) .caja-interactiva {
-        flex: 0 0 auto !important;
-        width: var(--ancho-caja-dinamico) !important;
+        flex: 0 0 calc(25% - 1.5rem) !important; /* 4 por fila en desktop */
+        min-width: 220px !important;
+        max-width: 350px !important;
       }
     }
     
@@ -298,8 +335,8 @@
     }
     
     .caja-interactiva {
-      width: var(--ancho-caja-dinamico) !important;
-      min-width: 300px !important;
+      width: 100% !important; /* Ancho completo en móvil */
+      min-width: 250px !important;
       max-width: 450px !important;
       position: relative !important;
       border-radius: 16px !important;
@@ -312,9 +349,17 @@
       flex-shrink: 0 !important;
     }
     
+    /* Móvil: 1 por fila (predeterminado) */
+    @media (max-width: 767px) {
+      .caja-interactiva {
+        width: 100% !important;
+        margin: 0 auto !important;
+      }
+    }
+    
     #contenedor-cajas > div:not(.caja-interactiva) {
-      width: var(--ancho-caja-dinamico) !important;
-      min-width: 300px !important;
+      width: 100% !important; /* Ancho completo en móvil */
+      min-width: 250px !important;
       max-width: 450px !important;
       position: relative !important;
       border-radius: 16px !important;
@@ -325,6 +370,14 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
       overflow: hidden !important;
       flex-shrink: 0 !important;
+    }
+    
+    /* Tablet: 2 por fila */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      #contenedor-cajas > div:not(.caja-interactiva) {
+        width: calc(50% - 1.5rem) !important;
+        margin: 0 auto !important;
+      }
     }
     
     .caja-interactiva:hover {
