@@ -329,7 +329,7 @@
             </div>
             <div class="text-center">
               <div class="text-purple-400 font-bold">22%</div>
-              <div>Distribución por décadas</div>
+              <div>Décadas por posición</div>
             </div>
             <div class="text-center">
               <div class="text-red-400 font-bold">12%</div>
@@ -1361,22 +1361,22 @@
     
     // Función para generar una proyección específica por sorteo
     async function generarProyeccionPorAnalisis(datosSorteo, sorteo) {
-      console.log(`🔍 Generando proyección para ${sorteo}...`);
+      console.log(`🔍 Generando proyección para ${sorteo} usando los 4 análisis de analisis.html...`);
       
-      // Análisis 1: Frecuencias históricas (22%)
+      // Análisis 1: Frecuencias históricas (22%) - igual que en analisis.html
       const frecuencias = calcularFrecuencias(datosSorteo.numeros);
       const numerosPorFrecuencia = seleccionarPorFrecuencia(frecuencias);
       
-      // Análisis 2: Suma de números (22%)
+      // Análisis 2: Suma de números (22%) - igual que en analisis.html
       const analisisSuma = analizarSumaNumeros({[sorteo]: datosSorteo});
       const numerosPorSuma = seleccionarPorSuma(analisisSuma[sorteo]);
       
-      // Análisis 3: Balance pares/impares (22%)
+      // Análisis 3: Balance pares/impares (22%) - igual que en analisis.html
       const analisisPares = analizarParesImpares({[sorteo]: datosSorteo});
       const numerosPorBalance = seleccionarPorBalance(analisisPares[sorteo]);
       
-      // Análisis 4: Distribución por décadas (22%)
-      const analisisDecadas = analizarDecadaTerminacion({[sorteo]: datosSorteo});
+      // Análisis 4: Décadas por posición (22%) - igual que en analisis.html
+      const analisisDecadas = analizarDecadaPorPosicion({[sorteo]: datosSorteo});
       const numerosPorDecadas = seleccionarPorDecadas(analisisDecadas[sorteo]);
       
       // Factor aleatorio (12%)
@@ -1391,7 +1391,8 @@
         aleatorios: numerosAleatorios
       });
       
-      const detalle = `F:${numerosPorFrecuencia.slice(0,2).join(',')} S:${numerosPorSuma.slice(0,2).join(',')} B:${numerosPorBalance.slice(0,2).join(',')} D:${numerosPorDecadas.slice(0,2).join(',')}`;
+      // Detalle que refleja exactamente los 4 análisis usados
+      const detalle = `Frecuencias: ${numerosPorFrecuencia.slice(0,2).join(',')} | Suma: ${numerosPorSuma.slice(0,2).join(',')} | Balance: ${numerosPorBalance.slice(0,2).join(',')} | Décadas: ${numerosPorDecadas.slice(0,2).join(',')}`;
       
       return {
         numeros: combinacionFinal,
@@ -1402,14 +1403,16 @@
     // Función para mostrar análisis de proyección paso a paso con mejor visibilidad
     async function mostrarAnalisisProyeccionPorPasos(elemento, sorteo) {
       const pasosAnalisis = [
-        { texto: '📊 Analizando frecuencias históricas...', duracion: 300 },
-        { texto: '🔢 Calculando suma de números...', duracion: 300 },
-        { texto: '⚖️ Evaluando balance pares/impares...', duracion: 300 },
-        { texto: '📈 Analizando distribución por décadas...', duracion: 300 },
-        { texto: '🎲 Aplicando factor aleatorio...', duracion: 200 },
-        { texto: '🔄 Combinando análisis con pesos...', duracion: 300 },
+        { texto: '📊 Analizando frecuencias históricas...', duracion: 350 },
+        { texto: '🔢 Calculando suma de números...', duracion: 350 },
+        { texto: '⚖️ Evaluando balance pares/impares...', duracion: 350 },
+        { texto: '🎯 Analizando décadas por posición...', duracion: 350 },
+        { texto: '🎲 Aplicando factor aleatorio (12%)...', duracion: 300 },
+        { texto: '🔄 Combinando los 4 análisis principales...', duracion: 300 },
         { texto: '✨ Optimizando combinación final...', duracion: 200 }
       ];
+
+      elemento.classList.add('activo');
 
       for (let i = 0; i < pasosAnalisis.length; i++) {
         const paso = pasosAnalisis[i];
@@ -1425,11 +1428,12 @@
         await new Promise(resolve => setTimeout(resolve, paso.duracion));
       }
       
+      elemento.classList.remove('activo');
       // Mensaje final
       elemento.innerHTML = `
         <span class="inline-flex items-center justify-center w-full">
           <span class="font-medium text-center">
-            🎯 Análisis estadístico completado
+            🎯 Análisis de 4 tipos completado
           </span>
         </span>
       `;
