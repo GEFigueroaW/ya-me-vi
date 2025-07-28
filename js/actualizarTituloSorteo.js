@@ -19,8 +19,10 @@ window.actualizarTituloSorteo = function() {
     // Actualizar el elemento del título
     const tituloElement = document.getElementById('titulo-sorteo');
     if (tituloElement) {
-      tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${proximoSorteo}`;
+      const nuevoTitulo = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${proximoSorteo}`;
+      tituloElement.textContent = nuevoTitulo;
       console.log(`✅ Título actualizado: Sorteo ${proximoSorteo} para usuario ${nombreUsuario}`);
+      console.log(`📝 Título completo: "${nuevoTitulo}"`);
     } else {
       console.error('❌ Elemento titulo-sorteo no encontrado');
     }
@@ -32,11 +34,14 @@ window.actualizarTituloSorteo = function() {
   } catch (error) {
     console.error('❌ Error al actualizar el título:', error);
     
-    // En caso de error, usar un mensaje genérico
+    // En caso de error, usar un mensaje genérico pero con datos válidos
     const tituloElement = document.getElementById('titulo-sorteo');
     if (tituloElement) {
       const nombreFallback = obtenerPrimerNombre();
-      tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreFallback}`;
+      const sorteoFallback = 4088; // Valor más actualizado
+      const tituloFallback = `🎯 Combinaciones sugeridas por IA para TI ${nombreFallback} para el sorteo ${sorteoFallback}`;
+      tituloElement.textContent = tituloFallback;
+      console.log(`⚠️ Usando título de fallback: "${tituloFallback}"`);
     }
     
     return null;
@@ -144,42 +149,6 @@ function calcularProximoSorteo() {
     return 4083;
   }
 }
-
-/**
- * Versión optimizada que incluye el nombre del usuario
- */
-window.actualizarTituloSorteoOptimizado = function() {
-  try {
-    console.log('🎯 Actualizando título optimizado con nombre de usuario...');
-    
-    const proximoSorteo = 4083;
-    
-    // Obtener el nombre del usuario de múltiples fuentes
-    let nombreUsuario = 'TI';
-    
-    if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
-      nombreUsuario = window.usuarioActualNombre.trim();
-    } else if (globalThis.usuarioActualNombre && globalThis.usuarioActualNombre.trim()) {
-      nombreUsuario = globalThis.usuarioActualNombre.trim(); 
-    } else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
-      nombreUsuario = window.usuarioActualEmail.split('@')[0];
-    } else if (globalThis.usuarioActualEmail && globalThis.usuarioActualEmail.trim()) {
-      nombreUsuario = globalThis.usuarioActualEmail.split('@')[0];
-    }
-    
-    // Actualizar el elemento del título
-    const tituloElement = document.getElementById('titulo-sorteo');
-    if (tituloElement) {
-      tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${proximoSorteo}`;
-      console.log(`✅ Título optimizado actualizado: Sorteo ${proximoSorteo} para usuario ${nombreUsuario}`);
-    }
-    
-    return proximoSorteo;
-  } catch (error) {
-    console.error('❌ Error en título optimizado:', error);
-    return window.actualizarTituloSorteo(); // Fallback
-  }
-};
 
 // Confirmar que la función está disponible globalmente
 console.log('✅ Función actualizarTituloSorteo disponible globalmente');

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Final - Título Correcto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center">Test Final: Título con Primer Nombre y Sorteo 4088</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6 border-l-4 border-blue-500">
+            <h2 id="titulo-sorteo" class="text-xl font-semibold text-center mb-4 text-gray-800">
+                🎯 Combinaciones sugeridas por IA para TI para el sorteo "---"
+            </h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h3 class="font-bold mb-3 text-blue-800">👤 Usuario Simulado:</h3>
+                <p><strong>Nombre completo:</strong> <span id="usuario-nombre" class="text-blue-600">---</span></p>
+                <p><strong>Primer nombre extraído:</strong> <span id="primer-nombre" class="text-blue-600 font-semibold">---</span></p>
+                <p><strong>Email:</strong> <span id="usuario-email" class="text-blue-600">---</span></p>
+            </div>
+            
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h3 class="font-bold mb-3 text-green-800">📊 Datos CSV:</h3>
+                <p><strong>Estado:</strong> <span id="datos-estado" class="text-green-600">---</span></p>
+                <p><strong>Último sorteo CSV:</strong> <span id="ultimo-sorteo" class="text-green-600 font-semibold">---</span></p>
+                <p><strong>Próximo sorteo:</strong> <span id="proximo-sorteo" class="text-green-600 font-bold">---</span></p>
+            </div>
+        </div>
+        
+        <div class="bg-yellow-50 p-4 rounded-lg mb-6">
+            <h3 class="font-bold mb-3 text-yellow-800">✅ Resultado Esperado:</h3>
+            <p class="text-yellow-700 font-medium">
+                🎯 Combinaciones sugeridas por IA para TI <strong>Guillermo</strong> para el sorteo <strong>4088</strong>
+            </p>
+        </div>
+        
+        <div class="flex flex-wrap gap-3 justify-center">
+            <button onclick="simularUsuario()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
+                1. Simular Usuario
+            </button>
+            
+            <button onclick="cargarDatos()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition">
+                2. Cargar CSV
+            </button>
+            
+            <button onclick="actualizarTitulo()" class="bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600 transition">
+                3. Actualizar Título
+            </button>
+            
+            <button onclick="ejecutarTodo()" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 transition font-bold">
+                🚀 Ejecutar Todo
+            </button>
+        </div>
+        
+        <div id="console-log" class="bg-gray-900 text-green-400 p-4 rounded-lg mt-6 font-mono text-sm max-h-60 overflow-y-auto">
+            <p>🔍 Console Log aparecerá aquí...</p>
+        </div>
+    </div>
+
+    <!-- Scripts necesarios en el orden correcto -->
+    <script src="js/dataParser.js" type="module"></script>
+    <script src="js/actualizarTituloSorteo.js"></script>
+    
+    <script type="module">
+        import { cargarDatosHistoricos } from './js/dataParser.js';
+        
+        // Capturar console.log para mostrar en la página
+        const originalLog = console.log;
+        const originalError = console.error;
+        const consoleDiv = document.getElementById('console-log');
+        
+        function addToConsole(message, type = 'log') {
+            const p = document.createElement('p');
+            p.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            p.className = type === 'error' ? 'text-red-400' : 'text-green-400';
+            consoleDiv.appendChild(p);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        // Simular usuario autenticado (Guillermo Figueroa W)
+        function simularUsuario() {
+            console.log('👤 Configurando usuario: Guillermo Figueroa W');
+            
+            window.usuarioActualNombre = 'Guillermo Figueroa W';
+            window.usuarioActualEmail = 'guillermo@yamevi.com.mx';
+            window.usuarioActualID = 'test123456789';
+            
+            document.getElementById('usuario-nombre').textContent = window.usuarioActualNombre;
+            document.getElementById('usuario-email').textContent = window.usuarioActualEmail;
+            
+            // Extraer primer nombre manualmente para mostrar
+            const primerNombre = window.usuarioActualNombre.trim().split(' ')[0];
+            document.getElementById('primer-nombre').textContent = primerNombre;
+            
+            console.log('✅ Usuario configurado - Primer nombre: ' + primerNombre);
+        }
+        
+        // Cargar datos históricos del CSV
+        async function cargarDatos() {
+            try {
+                console.log('📊 Cargando datos históricos del CSV Melate...');
+                window.datosHistoricos = await cargarDatosHistoricos('todos');
+                
+                if (window.datosHistoricos && window.datosHistoricos.melate) {
+                    document.getElementById('datos-estado').textContent = 'Cargados ✅';
+                    
+                    const sorteos = window.datosHistoricos.melate.sorteos;
+                    if (sorteos && sorteos.length > 0) {
+                        let ultimoSorteo = 0;
+                        for (const sorteo of sorteos) {
+                            const num = parseInt(sorteo.concurso);
+                            if (!isNaN(num) && num > ultimoSorteo) {
+                                ultimoSorteo = num;
+                            }
+                        }
+                        
+                        document.getElementById('ultimo-sorteo').textContent = ultimoSorteo;
+                        document.getElementById('proximo-sorteo').textContent = ultimoSorteo + 1;
+                        
+                        console.log('✅ CSV cargado - Último sorteo: ' + ultimoSorteo + ', Próximo: ' + (ultimoSorteo + 1));
+                    }
+                } else {
+                    document.getElementById('datos-estado').textContent = 'Error ❌';
+                    console.error('❌ No se pudieron cargar los datos del CSV');
+                }
+            } catch (error) {
+                console.error('❌ Error cargando datos CSV: ' + error.message);
+                document.getElementById('datos-estado').textContent = 'Error ❌';
+            }
+        }
+        
+        // Actualizar título usando la función del archivo externo
+        function actualizarTitulo() {
+            console.log('🎯 Ejecutando actualizarTituloSorteo...');
+            
+            if (typeof window.actualizarTituloSorteo === 'function') {
+                const resultado = window.actualizarTituloSorteo();
+                console.log('✅ Función ejecutada - Resultado: ' + resultado);
+            } else {
+                console.error('❌ Función actualizarTituloSorteo no disponible');
+            }
+        }
+        
+        // Ejecutar todo en secuencia
+        async function ejecutarTodo() {
+            console.log('🚀 Ejecutando test completo...');
+            
+            simularUsuario();
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await cargarDatos();
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            actualizarTitulo();
+            
+            // Verificar el resultado final
+            setTimeout(() => {
+                const titulo = document.getElementById('titulo-sorteo').textContent;
+                console.log('📝 Título final: "' + titulo + '"');
+                
+                if (titulo.includes('Guillermo') && titulo.includes('4088')) {
+                    console.log('🎉 ¡TEST EXITOSO! Título correcto con primer nombre y sorteo 4088');
+                } else if (titulo.includes('Guillermo Figueroa W')) {
+                    console.log('⚠️ PARCIAL: Título muestra nombre completo en lugar de solo "Guillermo"');
+                } else if (!titulo.includes('4088')) {
+                    console.log('⚠️ PARCIAL: Título no muestra el sorteo 4088 correcto');
+                } else {
+                    console.log('❌ TEST FALLIDO: Título no cumple los requisitos');
+                }
+            }, 1000);
+        }
+        
+        // Exponer funciones globalmente
+        window.simularUsuario = simularUsuario;
+        window.cargarDatos = cargarDatos;
+        window.actualizarTitulo = actualizarTitulo;
+        window.ejecutarTodo = ejecutarTodo;
+        
+        // Auto-ejecutar después de un momento
+        setTimeout(() => {
+            console.log('🏁 Iniciando test automático en 2 segundos...');
+            setTimeout(ejecutarTodo, 2000);
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -990,22 +990,52 @@
 
     // Función para actualizar el título con el número de sorteo
     function actualizarTituloSorteo() {
-      // Llamar a la implementación del archivo dedicado
-      if (typeof window.actualizarTituloSorteoOptimizado === 'function') {
-        window.actualizarTituloSorteoOptimizado();
+      // Llamar a la implementación principal del archivo dedicado (NO la optimizada)
+      if (typeof window.actualizarTituloSorteo === 'function' && window.actualizarTituloSorteo !== actualizarTituloSorteo) {
+        // Llamar la función del archivo externo, no la local
+        const archivoExterno = window.actualizarTituloSorteo;
+        delete window.actualizarTituloSorteo; // Evitar recursión
+        archivoExterno(); // Llamar función del archivo externo
+        window.actualizarTituloSorteo = actualizarTituloSorteo; // Restaurar función local
       } else {
         console.log('⚠️ Usando implementación de fallback para título');
-        // Fallback simple
+        // Fallback que calcula dinámicamente el sorteo
         const tituloElement = document.getElementById('titulo-sorteo');
-        if (tituloElement && !tituloElement.textContent.includes('sorteo')) {
-          const estimado = 4083 + Math.floor((new Date() - new Date(2025, 6, 18)) / (1000 * 60 * 60 * 24 * 3.5));
-          tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI para el sorteo ${estimado}`;
+        if (tituloElement) {
+          // Obtener primer nombre del usuario
+          let nombreUsuario = 'TI';
+          if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
+            nombreUsuario = window.usuarioActualNombre.trim().split(' ')[0];
+          } else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
+            nombreUsuario = window.usuarioActualEmail.split('@')[0];
+          }
+          
+          // Calcular próximo sorteo dinámicamente
+          let proximoSorteo = 4088; // Default más actualizado
+          if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+            const sorteos = window.datosHistoricos.melate.sorteos;
+            if (sorteos.length > 0) {
+              let ultimoSorteo = 0;
+              for (const sorteo of sorteos) {
+                const num = parseInt(sorteo.concurso);
+                if (!isNaN(num) && num > ultimoSorteo) {
+                  ultimoSorteo = num;
+                }
+              }
+              if (ultimoSorteo > 0) {
+                proximoSorteo = ultimoSorteo + 1;
+              }
+            }
+          }
+          
+          tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${proximoSorteo}`;
+          console.log(`✅ Título actualizado: ${nombreUsuario} para sorteo ${proximoSorteo}`);
         }
       }
     }
 
-    // Hacer función global
-    window.actualizarTituloSorteo = actualizarTituloSorteo;
+    // NO hacer función global aquí - usar la del archivo externo actualizarTituloSorteo.js
+    // window.actualizarTituloSorteo = actualizarTituloSorteo;
 
 
 
@@ -1766,7 +1796,7 @@
     window.mostrarCombinaciones = mostrarCombinaciones;
     window.generarCombinacionesAleatorias = generarCombinacionesAleatorias;
     window.obtenerNumeroSorteoActual = obtenerNumeroSorteoActual;
-    window.actualizarTituloSorteo = actualizarTituloSorteo;
+    // NO sobrescribir actualizarTituloSorteo aquí - usar la del archivo externo
     window.calcularHashDatosHistoricos = calcularHashDatosHistoricos;
     window.cargarPrediccionesAlmacenadas = cargarPrediccionesAlmacenadas;
     window.guardarPrediccionesAlmacenadas = guardarPrediccionesAlmacenadas;

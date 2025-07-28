@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Título Final</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Test de Título Dinámico - Versión Final</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-4">
+            <h2 id="titulo-sorteo" class="text-lg font-semibold text-center mb-4">
+                🎯 Combinaciones sugeridas por IA para TI para el sorteo "---"
+            </h2>
+        </div>
+        
+        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+            <h3 class="font-bold mb-2">Variables de Usuario:</h3>
+            <p><strong>Nombre:</strong> <span id="usuario-nombre">---</span></p>
+            <p><strong>Email:</strong> <span id="usuario-email">---</span></p>
+            <p><strong>ID:</strong> <span id="usuario-id">---</span></p>
+        </div>
+        
+        <div class="bg-green-50 p-4 rounded-lg mb-4">
+            <h3 class="font-bold mb-2">Estado de Datos:</h3>
+            <p><strong>Datos Históricos:</strong> <span id="datos-estado">---</span></p>
+            <p><strong>Último Sorteo CSV:</strong> <span id="ultimo-sorteo">---</span></p>
+            <p><strong>Próximo Sorteo:</strong> <span id="proximo-sorteo">---</span></p>
+        </div>
+        
+        <button onclick="actualizarTitulo()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">
+            Actualizar Título
+        </button>
+        
+        <button onclick="simularUsuario()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mr-2">
+            Simular Usuario
+        </button>
+        
+        <button onclick="cargarDatos()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+            Cargar Datos CSV
+        </button>
+    </div>
+
+    <!-- Scripts necesarios -->
+    <script src="js/dataParser.js" type="module"></script>
+    <script src="js/actualizarTituloSorteo.js"></script>
+    
+    <script type="module">
+        import { cargarDatosHistoricos } from './js/dataParser.js';
+        
+        // Simular usuario autenticado
+        function simularUsuario() {
+            window.usuarioActualNombre = 'Guillermo Figueroa W';
+            window.usuarioActualEmail = 'guillermo@yamevi.com.mx';
+            window.usuarioActualID = 'test123456789';
+            
+            document.getElementById('usuario-nombre').textContent = window.usuarioActualNombre;
+            document.getElementById('usuario-email').textContent = window.usuarioActualEmail;
+            document.getElementById('usuario-id').textContent = window.usuarioActualID;
+            
+            console.log('✅ Usuario simulado configurado');
+        }
+        
+        // Cargar datos históricos
+        async function cargarDatos() {
+            try {
+                console.log('📊 Cargando datos históricos...');
+                window.datosHistoricos = await cargarDatosHistoricos('todos');
+                
+                if (window.datosHistoricos && window.datosHistoricos.melate) {
+                    document.getElementById('datos-estado').textContent = 'Cargados ✅';
+                    
+                    const sorteos = window.datosHistoricos.melate.sorteos;
+                    if (sorteos && sorteos.length > 0) {
+                        let ultimoSorteo = 0;
+                        for (const sorteo of sorteos) {
+                            const num = parseInt(sorteo.concurso);
+                            if (!isNaN(num) && num > ultimoSorteo) {
+                                ultimoSorteo = num;
+                            }
+                        }
+                        
+                        document.getElementById('ultimo-sorteo').textContent = ultimoSorteo;
+                        document.getElementById('proximo-sorteo').textContent = ultimoSorteo + 1;
+                    }
+                    
+                    console.log('✅ Datos históricos cargados correctamente');
+                } else {
+                    document.getElementById('datos-estado').textContent = 'Error ❌';
+                }
+            } catch (error) {
+                console.error('❌ Error cargando datos:', error);
+                document.getElementById('datos-estado').textContent = 'Error ❌';
+            }
+        }
+        
+        // Actualizar título
+        function actualizarTitulo() {
+            if (typeof window.actualizarTituloSorteo === 'function') {
+                console.log('🎯 Ejecutando actualizarTituloSorteo...');
+                window.actualizarTituloSorteo();
+            } else {
+                console.error('❌ Función actualizarTituloSorteo no disponible');
+            }
+        }
+        
+        // Exponer funciones globalmente
+        window.simularUsuario = simularUsuario;
+        window.cargarDatos = cargarDatos;
+        window.actualizarTitulo = actualizarTitulo;
+        
+        // Auto-ejecutar al cargar la página
+        setTimeout(async () => {
+            simularUsuario();
+            await cargarDatos();
+            actualizarTitulo();
+        }, 1000);
+    </script>
+</body>
+</html>
