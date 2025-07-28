@@ -43,7 +43,20 @@ window.generarPrediccionesPorSorteo = async function() {
     // Generar predicciones para cada sorteo
     const sorteos = ['melate', 'revancha', 'revanchita'];
     
-    for (const sorteo of sorteos) {
+    // Inicializar todos los elementos para mostrar estado de "preparando"
+    sorteos.forEach(sorteo => {
+      const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+      if (elementoCombo) {
+        elementoCombo.innerHTML = `
+          <div class="text-gray-400 text-sm">
+            🔄 Preparando análisis...
+          </div>
+        `;
+      }
+    });
+    
+    // Procesar todos los sorteos EN PARALELO
+    const promesasSorteos = sorteos.map(async (sorteo) => {
       try {
         console.log(`🎯 Generando predicción para ${sorteo}...`);
         
@@ -55,10 +68,10 @@ window.generarPrediccionesPorSorteo = async function() {
           if (elementoCombo) {
             elementoCombo.textContent = 'Sin datos disponibles';
           }
-          continue;
+          return;
         }
         
-        // Mostrar efecto de análisis de números (2 segundos)
+        // Mostrar efecto de análisis de números (2 segundos) - TODOS AL MISMO TIEMPO
         if (elementoCombo) {
           await mostrarEfectoAnalisisNumeros(elementoCombo, sorteo);
         }
@@ -94,7 +107,10 @@ window.generarPrediccionesPorSorteo = async function() {
           elementoCombo.textContent = 'Error al generar';
         }
       }
-    }
+    });
+    
+    // Esperar a que TODOS los sorteos terminen su análisis
+    await Promise.all(promesasSorteos);
     
     if (mensajeEstado) {
       mensajeEstado.textContent = 'Predicciones generadas con análisis completo de 5 métodos';
@@ -135,7 +151,24 @@ window.generarProyeccionesAnalisis = async function() {
     // Generar proyecciones para cada sorteo usando un ID único para análisis
     const sorteos = ['melate', 'revancha', 'revanchita'];
     
-    for (const sorteo of sorteos) {
+    // Inicializar todos los elementos para mostrar estado de "preparando análisis"
+    sorteos.forEach(sorteo => {
+      const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+      const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+      if (elementoProyeccion) {
+        elementoProyeccion.innerHTML = `
+          <div class="text-gray-400 text-sm">
+            📊 Preparando análisis estadístico...
+          </div>
+        `;
+      }
+      if (elementoDetalle) {
+        elementoDetalle.textContent = 'Inicializando sistema de análisis...';
+      }
+    });
+    
+    // Procesar todos los sorteos EN PARALELO
+    const promesasAnalisis = sorteos.map(async (sorteo) => {
       try {
         console.log(`📈 Generando proyección de análisis para ${sorteo}...`);
         
@@ -151,10 +184,10 @@ window.generarProyeccionesAnalisis = async function() {
           if (elementoDetalle) {
             elementoDetalle.textContent = 'Error al cargar los datos';
           }
-          continue;
+          return;
         }
         
-        // Mostrar efecto de análisis estadístico (2 segundos)  
+        // Mostrar efecto de análisis estadístico (2 segundos) - TODOS AL MISMO TIEMPO
         if (elementoProyeccion) {
           await mostrarEfectoAnalisisEstadistico(elementoProyeccion, elementoDetalle, sorteo);
         }
@@ -198,7 +231,10 @@ window.generarProyeccionesAnalisis = async function() {
           elementoDetalle.textContent = 'Intente nuevamente';
         }
       }
-    }
+    });
+    
+    // Esperar a que TODOS los análisis terminen al mismo tiempo
+    await Promise.all(promesasAnalisis);
     
     console.log('✅ Proyecciones de análisis generadas exitosamente');
     
