@@ -1270,34 +1270,13 @@
           datosHistoricos = window.datosHistoricos;
         }
         
-        // Intentar cargar proyecciones almacenadas y verificar si son válidas
-        const proyeccionesValidas = cargarProyeccionesAlmacenadas();
-        
-        // Si no hay proyecciones válidas (datos cambiaron), generar nuevas
-        if (!proyeccionesValidas) {
-          console.log('🔄 Generando nuevas proyecciones de análisis debido a cambios en los datos históricos');
-        }
+        // SIEMPRE generar nuevas proyecciones (no usar cache)
+        console.log('🔄 Generando nuevas proyecciones de análisis cada vez...');
         
         const sorteos = ['melate', 'revancha', 'revanchita'];
         
         for (const sorteo of sorteos) {
           try {
-            // Si ya tenemos una proyección válida para este sorteo, usarla
-            if (proyeccionesValidas && window.proyeccionesAlmacenadas[sorteo] && window.proyeccionesAlmacenadas[sorteo].numeros) {
-              const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
-              const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
-              
-              if (elementoProyeccion) {
-                elementoProyeccion.textContent = window.proyeccionesAlmacenadas[sorteo].numeros.join(' - ');
-              }
-              if (elementoDetalle) {
-                elementoDetalle.textContent = window.proyeccionesAlmacenadas[sorteo].detalle;
-              }
-              
-              console.log(`✅ Usando proyección de análisis almacenada para ${sorteo}:`, window.proyeccionesAlmacenadas[sorteo].numeros);
-              continue; // Saltar a siguiente sorteo
-            }
-            
             if (!window.datosHistoricos[sorteo] || !window.datosHistoricos[sorteo].numeros) {
               console.warn(`⚠️ No hay datos disponibles para ${sorteo}`);
               const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);

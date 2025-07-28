@@ -2,7 +2,11 @@
 // Sistema unificado de inicialización para sugeridas.html
 
 import { generarPrediccionPersonalizada } from './mlPredictor.js';
-import { cargarDatosHistoricos, analizarSumaNumeros, analizarParesImpares, analizarDecadaPorPosicion } from './dataParser.js';
+import { cargarDatosHistoricos, analizarSu          // Generar descripción del análisis
+          if (elementoDetalle) {
+            const descripcion = `Frecuencias: análisis histórico | Suma: rangos optimizados | Balance: pares/impares | Décadas: por posición`;
+            elementoDetalle.textContent = descripcion;
+          }eros, analizarParesImpares, analizarDecadaPorPosicion } from './dataParser.js';
 
 console.log('🚀 Inicializando sistema unificado...');
 
