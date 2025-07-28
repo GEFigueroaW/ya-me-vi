@@ -68,6 +68,59 @@
         overflow-x: hidden;
       }
     }
+    
+    /* Estilos para frases de análisis - legibilidad mejorada */
+    .analisis-detalle {
+      transition: all 0.3s ease;
+      line-height: 1.5;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .analisis-detalle:hover {
+      transform: translateY(-1px);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Animación suave para la aparición del texto */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Efecto de pulsación para texto activo */
+    .analisis-detalle.activo {
+      animation: pulsoSuave 2s infinite;
+    }
+    
+    @keyframes pulsoSuave {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+    
+    /* Mejoras para contenedores de análisis */
+    .contenedor-analisis {
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+    
+    .contenedor-analisis:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+    }
+    
+  </style>
   </style>
   <script src="js/init.js"></script>
   <script src="js/dataParser.js"></script>
@@ -223,37 +276,37 @@
         <!-- Proyecciones por sorteo -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <!-- Melate -->
-          <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200">
+          <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200 contenedor-analisis">
             <h3 class="font-bold text-red-600 mb-2">📊 Melate</h3>
             <p id="proyeccion-melate" class="text-lg font-bold tracking-wider text-red-800">-- -- -- -- -- --</p>
             <div class="proyeccion-loading hidden">
               <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-red-600 mx-auto my-2"></div>
               <p class="text-sm text-red-600">Generando predicción...</p>
             </div>
-            <div class="text-xs text-gray-600 mt-2">
-              <span id="detalle-melate" class="analisis-detalle">Preparando análisis completo...</span>
+            <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-red-200 contenedor-analisis">
+              <span id="detalle-melate" class="analisis-detalle text-sm font-medium text-red-700 block">Preparando análisis completo...</span>
             </div>
           </div>
           
           <!-- Revancha -->
-          <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200">
+          <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200 contenedor-analisis">
             <h3 class="font-bold text-red-600 mb-2">📊 Revancha</h3>
             <p id="proyeccion-revancha" class="text-lg font-bold tracking-wider text-red-800">-- -- -- -- -- --</p>
             <div class="proyeccion-loading hidden">
               <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-red-600 mx-auto my-2"></div>
               <p class="text-sm text-red-600">Generando predicción...</p>
             </div>
-            <div class="text-xs text-gray-600 mt-2">
-              <span id="detalle-revancha" class="analisis-detalle">Preparando análisis completo...</span>
+            <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-red-200 contenedor-analisis">
+              <span id="detalle-revancha" class="analisis-detalle text-sm font-medium text-red-700 block">Preparando análisis completo...</span>
             </div>
           </div>
           
           <!-- Revanchita -->
-          <div class="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
+          <div class="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200 contenedor-analisis">
             <h3 class="font-bold text-yellow-600 mb-2">📊 Revanchita</h3>
             <p id="proyeccion-revanchita" class="text-lg font-bold tracking-wider text-yellow-800">-- -- -- -- -- --</p>
-            <div class="text-xs text-gray-600 mt-2">
-              <span id="detalle-revanchita" class="analisis-detalle">Preparando análisis completo...</span>
+            <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-yellow-200 contenedor-analisis">
+              <span id="detalle-revanchita" class="analisis-detalle text-sm font-medium text-yellow-700 block">Preparando análisis completo...</span>
             </div>
           </div>
         </div>
@@ -1247,11 +1300,15 @@
               continue;
             }
             
-            // Mostrar loading
+            // Mostrar loading con efecto mejorado
             const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
             const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
             if (elementoProyeccion) elementoProyeccion.textContent = '🔄 Analizando...';
-            if (elementoDetalle) elementoDetalle.textContent = 'Procesando 4 tipos de análisis...';
+            if (elementoDetalle) {
+              // Añadir clase activa para animación
+              elementoDetalle.classList.add('activo');
+              await mostrarAnalisisProyeccionPorPasos(elementoDetalle, sorteo);
+            }
             
             // Generar proyección usando los 4 análisis especificados
             const proyeccion = await generarProyeccionPorAnalisis(window.datosHistoricos[sorteo], sorteo);
@@ -1261,7 +1318,9 @@
             }
             
             if (elementoDetalle && proyeccion.detalle) {
-              elementoDetalle.textContent = proyeccion.detalle;
+              // Remover clase activa de animación
+              elementoDetalle.classList.remove('activo');
+              elementoDetalle.textContent = `📊 Análisis: ${proyeccion.detalle}`;
             }
             
             // Almacenar la proyección para uso futuro
@@ -1338,6 +1397,42 @@
         numeros: combinacionFinal,
         detalle: detalle
       };
+    }
+
+    // Función para mostrar análisis de proyección paso a paso con mejor visibilidad
+    async function mostrarAnalisisProyeccionPorPasos(elemento, sorteo) {
+      const pasosAnalisis = [
+        { texto: '📊 Analizando frecuencias históricas...', duracion: 300 },
+        { texto: '🔢 Calculando suma de números...', duracion: 300 },
+        { texto: '⚖️ Evaluando balance pares/impares...', duracion: 300 },
+        { texto: '📈 Analizando distribución por décadas...', duracion: 300 },
+        { texto: '🎲 Aplicando factor aleatorio...', duracion: 200 },
+        { texto: '🔄 Combinando análisis con pesos...', duracion: 300 },
+        { texto: '✨ Optimizando combinación final...', duracion: 200 }
+      ];
+
+      for (let i = 0; i < pasosAnalisis.length; i++) {
+        const paso = pasosAnalisis[i];
+        elemento.innerHTML = `
+          <span class="inline-flex items-center justify-center w-full">
+            <span class="animate-pulse font-semibold text-center">
+              ${paso.texto}
+            </span>
+          </span>
+        `;
+        
+        // Esperar antes del siguiente paso
+        await new Promise(resolve => setTimeout(resolve, paso.duracion));
+      }
+      
+      // Mensaje final
+      elemento.innerHTML = `
+        <span class="inline-flex items-center justify-center w-full">
+          <span class="font-medium text-center">
+            🎯 Análisis estadístico completado
+          </span>
+        </span>
+      `;
     }
     
     // Seleccionar números por frecuencia (más frecuentes tienen mayor probabilidad)

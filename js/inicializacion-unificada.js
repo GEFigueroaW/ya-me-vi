@@ -417,22 +417,23 @@ async function mostrarEfectoAnalisisNumeros(elemento, sorteo) {
     combinacionesTemporales.push(Array.from(nums).sort((a, b) => a - b));
   }
   
-  // Mostrar mensaje inicial de análisis
+  // Mostrar mensaje inicial de análisis con mejor visibilidad
   elemento.innerHTML = `
-    <div class="flex flex-col items-center space-y-2">
-      <div class="animate-pulse text-yellow-300">
+    <div class="flex flex-col items-center space-y-3">
+      <div class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-semibold rounded-lg shadow-lg">
         🤖 Analizando ${sorteo.charAt(0).toUpperCase() + sorteo.slice(1)}...
       </div>
-      <div id="numeros-${sorteo}" class="font-mono text-lg text-white bg-black bg-opacity-30 px-3 py-1 rounded">
+      <div id="numeros-${sorteo}" class="font-mono text-xl text-white bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2 rounded-lg border border-gray-600 shadow-xl">
         -- - -- - -- - -- - -- - --
       </div>
-      <div class="text-xs text-blue-200 animate-pulse">
-        Aplicando 5 métodos de análisis...
+      <div id="mensaje-analisis-${sorteo}" class="px-3 py-2 bg-white bg-opacity-90 text-gray-800 font-medium rounded-lg shadow-md min-h-[2rem] flex items-center">
+        <span class="animate-pulse">🔄 Iniciando análisis completo...</span>
       </div>
     </div>
   `;
   
   const numerosElement = document.getElementById(`numeros-${sorteo}`);
+  const mensajeElement = document.getElementById(`mensaje-analisis-${sorteo}`);
   
   // Efecto de análisis paso a paso
   let cambioActual = 0;
@@ -442,14 +443,17 @@ async function mostrarEfectoAnalisisNumeros(elemento, sorteo) {
       if (cambioActual >= totalCambios) {
         clearInterval(intervalo);
         
-        // Efecto final de "análisis completado"
+        // Efecto final de "análisis completado" con mejor diseño
         elemento.innerHTML = `
-          <div class="flex flex-col items-center space-y-2">
-            <div class="text-green-400 animate-bounce">
+          <div class="flex flex-col items-center space-y-3">
+            <div class="px-4 py-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold rounded-lg shadow-lg animate-bounce">
               ✅ Análisis ${sorteo.charAt(0).toUpperCase() + sorteo.slice(1)} completado
             </div>
-            <div id="resultado-final-${sorteo}" class="font-mono text-xl text-white bg-gradient-to-r from-green-500 to-blue-500 bg-opacity-20 px-4 py-2 rounded-lg">
+            <div id="resultado-final-${sorteo}" class="font-mono text-xl text-white bg-gradient-to-r from-green-600 to-blue-600 px-6 py-3 rounded-lg shadow-xl border border-green-400">
               Generando resultado final...
+            </div>
+            <div class="px-3 py-2 bg-green-50 text-green-800 font-medium rounded-lg shadow-md">
+              <span>🎯 Predicción personalizada lista</span>
             </div>
           </div>
         `;
@@ -462,25 +466,28 @@ async function mostrarEfectoAnalisisNumeros(elemento, sorteo) {
         return;
       }
       
-      // Mostrar diferentes mensajes de análisis
+      // Mostrar diferentes mensajes de análisis con mejor contraste
       const mensajesAnalisis = [
-        '📊 Analizando frecuencias...',
-        '🔢 Calculando probabilidades...',
-        '📈 Detectando patrones...',
-        '📉 Evaluando desviación estándar...',
-        '🔄 Analizando números delta...',
-        '🤖 Aplicando inteligencia artificial...',
-        '⚡ Optimizando combinación...',
-        '🎯 Refinando predicción...'
+        { texto: '📊 Analizando frecuencias históricas...', color: 'from-blue-500 to-blue-600' },
+        { texto: '🔢 Calculando probabilidades...', color: 'from-purple-500 to-purple-600' },
+        { texto: '📈 Detectando patrones recientes...', color: 'from-green-500 to-green-600' },
+        { texto: '📉 Evaluando desviación estándar...', color: 'from-red-500 to-red-600' },
+        { texto: '🔄 Analizando números delta...', color: 'from-orange-500 to-orange-600' },
+        { texto: '🤖 Aplicando inteligencia artificial...', color: 'from-indigo-500 to-indigo-600' },
+        { texto: '⚡ Optimizando combinación...', color: 'from-yellow-500 to-yellow-600' },
+        { texto: '🎯 Refinando predicción final...', color: 'from-pink-500 to-pink-600' }
       ];
       
       const mensajeIndex = Math.floor((cambioActual / totalCambios) * mensajesAnalisis.length);
       const mensajeActual = mensajesAnalisis[Math.min(mensajeIndex, mensajesAnalisis.length - 1)];
       
-      // Actualizar mensaje de análisis
-      const mensajeDiv = elemento.querySelector('.animate-pulse');
-      if (mensajeDiv) {
-        mensajeDiv.textContent = mensajeActual;
+      // Actualizar mensaje de análisis con colores y efectos mejorados
+      if (mensajeElement) {
+        mensajeElement.innerHTML = `
+          <div class="bg-gradient-to-r ${mensajeActual.color} text-white px-4 py-2 rounded-lg font-semibold shadow-lg animate-pulse w-full text-center">
+            ${mensajeActual.texto}
+          </div>
+        `;
       }
       
       // Mostrar combinación temporal con efecto de "escaneo"
@@ -505,11 +512,16 @@ async function mostrarEfectoAnalisisNumeros(elemento, sorteo) {
         
         numerosElement.textContent = displayNums.join(' - ');
         
-        // Efecto visual adicional
+        // Efecto visual adicional con colores dinámicos
         if (cambioActual % 4 === 0) {
-          numerosElement.style.boxShadow = '0 0 10px rgba(34, 197, 94, 0.5)';
+          numerosElement.style.boxShadow = '0 0 15px rgba(34, 197, 94, 0.6)';
+          numerosElement.style.borderColor = '#22c55e';
+        } else if (cambioActual % 4 === 2) {
+          numerosElement.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.6)';
+          numerosElement.style.borderColor = '#3b82f6';
         } else {
           numerosElement.style.boxShadow = 'none';
+          numerosElement.style.borderColor = '#6b7280';
         }
       }
       

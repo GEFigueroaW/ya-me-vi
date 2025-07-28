@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mejoras Visuales - Frases de Análisis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos para frases de análisis - legibilidad mejorada */
+        .analisis-detalle {
+            transition: all 0.3s ease;
+            line-height: 1.5;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .analisis-detalle:hover {
+            transform: translateY(-1px);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Animación suave para la aparición del texto */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Efecto de pulsación para texto activo */
+        .analisis-detalle.activo {
+            animation: pulsoSuave 2s infinite;
+        }
+        
+        @keyframes pulsoSuave {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+        
+        /* Mejoras para contenedores de análisis */
+        .contenedor-analisis {
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .contenedor-analisis:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-white text-center mb-8">
+            ✨ Test Mejoras Visuales - Frases de Análisis IA
+        </h1>
+        
+        <!-- Sección de Proyección mejorada -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold text-white mb-4 text-center">
+                📊 Proyección basada en análisis estadístico
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Melate -->
+                <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200 contenedor-analisis">
+                    <h3 class="font-bold text-red-600 mb-2">📊 Melate</h3>
+                    <p id="proyeccion-melate" class="text-lg font-bold tracking-wider text-red-800">-- -- -- -- -- --</p>
+                    <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-red-200 contenedor-analisis">
+                        <span id="detalle-melate" class="analisis-detalle text-sm font-medium text-red-700 block">Preparando análisis completo...</span>
+                    </div>
+                </div>
+                
+                <!-- Revancha -->
+                <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200 contenedor-analisis">
+                    <h3 class="font-bold text-red-600 mb-2">📊 Revancha</h3>
+                    <p id="proyeccion-revancha" class="text-lg font-bold tracking-wider text-red-800">-- -- -- -- -- --</p>
+                    <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-red-200 contenedor-analisis">
+                        <span id="detalle-revancha" class="analisis-detalle text-sm font-medium text-red-700 block">Preparando análisis completo...</span>
+                    </div>
+                </div>
+                
+                <!-- Revanchita -->
+                <div class="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200 contenedor-analisis">
+                    <h3 class="font-bold text-yellow-600 mb-2">📊 Revanchita</h3>
+                    <p id="proyeccion-revanchita" class="text-lg font-bold tracking-wider text-yellow-800">-- -- -- -- -- --</p>
+                    <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-yellow-200 contenedor-analisis">
+                        <span id="detalle-revanchita" class="analisis-detalle text-sm font-medium text-yellow-700 block">Preparando análisis completo...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sección de simulación de predicciones -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold text-white mb-4 text-center">
+                🤖 Simulación de Predicciones IA
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div id="simulacion-melate" class="bg-gray-800 p-6 rounded-lg border border-gray-600">
+                    <!-- Aquí se mostrará la simulación -->
+                </div>
+                <div id="simulacion-revancha" class="bg-gray-800 p-6 rounded-lg border border-gray-600">
+                    <!-- Aquí se mostrará la simulación -->
+                </div>
+                <div id="simulacion-revanchita" class="bg-gray-800 p-6 rounded-lg border border-gray-600">
+                    <!-- Aquí se mostrará la simulación -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controles de prueba -->
+        <div class="text-center space-x-4">
+            <button onclick="iniciarAnalisisProyeccion()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg">
+                🔄 Iniciar Análisis Proyección
+            </button>
+            
+            <button onclick="iniciarSimulacionIA()" 
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg">
+                🤖 Iniciar Simulación IA
+            </button>
+            
+            <button onclick="reiniciarTodo()" 
+                    class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg">
+                🔄 Reiniciar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Función para simular el análisis de proyección paso a paso
+        async function mostrarAnalisisProyeccionPorPasos(elemento, sorteo) {
+            const pasosAnalisis = [
+                { texto: '📊 Analizando frecuencias históricas...', duracion: 300 },
+                { texto: '🔢 Calculando suma de números...', duracion: 300 },
+                { texto: '⚖️ Evaluando balance pares/impares...', duracion: 300 },
+                { texto: '📈 Analizando distribución por décadas...', duracion: 300 },
+                { texto: '🎲 Aplicando factor aleatorio...', duracion: 200 },
+                { texto: '🔄 Combinando análisis con pesos...', duracion: 300 },
+                { texto: '✨ Optimizando combinación final...', duracion: 200 }
+            ];
+
+            elemento.classList.add('activo');
+
+            for (let i = 0; i < pasosAnalisis.length; i++) {
+                const paso = pasosAnalisis[i];
+                elemento.innerHTML = `
+                    <span class="inline-flex items-center justify-center w-full">
+                        <span class="animate-pulse font-semibold text-center">
+                            ${paso.texto}
+                        </span>
+                    </span>
+                `;
+                
+                await new Promise(resolve => setTimeout(resolve, paso.duracion));
+            }
+            
+            elemento.classList.remove('activo');
+            elemento.innerHTML = `
+                <span class="inline-flex items-center justify-center w-full">
+                    <span class="font-medium text-center">
+                        🎯 Análisis estadístico completado
+                    </span>
+                </span>
+            `;
+        }
+
+        // Función para simular el efecto de análisis IA con mejoras visuales
+        async function mostrarEfectoAnalisisNumeros(elemento, sorteo) {
+            console.log(`🎬 Iniciando efecto de análisis para ${sorteo}...`);
+            
+            const duracionTotal = 2000;
+            const intervalos = 100;
+            const totalCambios = duracionTotal / intervalos;
+            
+            const combinacionesTemporales = [];
+            for (let i = 0; i < totalCambios; i++) {
+                const nums = new Set();
+                while (nums.size < 6) {
+                    nums.add(Math.floor(Math.random() * 56) + 1);
+                }
+                combinacionesTemporales.push(Array.from(nums).sort((a, b) => a - b));
+            }
+            
+            elemento.innerHTML = `
+                <div class="flex flex-col items-center space-y-3">
+                    <div class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-semibold rounded-lg shadow-lg">
+                        🤖 Analizando ${sorteo.charAt(0).toUpperCase() + sorteo.slice(1)}...
+                    </div>
+                    <div id="numeros-${sorteo}" class="font-mono text-xl text-white bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-2 rounded-lg border border-gray-600 shadow-xl">
+                        -- - -- - -- - -- - -- - --
+                    </div>
+                    <div id="mensaje-analisis-${sorteo}" class="px-3 py-2 bg-white bg-opacity-90 text-gray-800 font-medium rounded-lg shadow-md min-h-[2rem] flex items-center">
+                        <span class="animate-pulse">🔄 Iniciando análisis completo...</span>
+                    </div>
+                </div>
+            `;
+            
+            const numerosElement = document.getElementById(`numeros-${sorteo}`);
+            const mensajeElement = document.getElementById(`mensaje-analisis-${sorteo}`);
+            
+            let cambioActual = 0;
+            
+            return new Promise((resolve) => {
+                const intervalo = setInterval(() => {
+                    if (cambioActual >= totalCambios) {
+                        clearInterval(intervalo);
+                        
+                        elemento.innerHTML = `
+                            <div class="flex flex-col items-center space-y-3">
+                                <div class="px-4 py-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold rounded-lg shadow-lg animate-bounce">
+                                    ✅ Análisis ${sorteo.charAt(0).toUpperCase() + sorteo.slice(1)} completado
+                                </div>
+                                <div class="font-mono text-xl text-white bg-gradient-to-r from-green-600 to-blue-600 px-6 py-3 rounded-lg shadow-xl border border-green-400">
+                                    ${generarNumerosFinal()}
+                                </div>
+                                <div class="px-3 py-2 bg-green-50 text-green-800 font-medium rounded-lg shadow-md">
+                                    <span>🎯 Predicción personalizada lista</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        setTimeout(() => resolve(), 300);
+                        return;
+                    }
+                    
+                    const mensajesAnalisis = [
+                        { texto: '📊 Analizando frecuencias históricas...', color: 'from-blue-500 to-blue-600' },
+                        { texto: '🔢 Calculando probabilidades...', color: 'from-purple-500 to-purple-600' },
+                        { texto: '📈 Detectando patrones recientes...', color: 'from-green-500 to-green-600' },
+                        { texto: '📉 Evaluando desviación estándar...', color: 'from-red-500 to-red-600' },
+                        { texto: '🔄 Analizando números delta...', color: 'from-orange-500 to-orange-600' },
+                        { texto: '🤖 Aplicando inteligencia artificial...', color: 'from-indigo-500 to-indigo-600' },
+                        { texto: '⚡ Optimizando combinación...', color: 'from-yellow-500 to-yellow-600' },
+                        { texto: '🎯 Refinando predicción final...', color: 'from-pink-500 to-pink-600' }
+                    ];
+                    
+                    const mensajeIndex = Math.floor((cambioActual / totalCambios) * mensajesAnalisis.length);
+                    const mensajeActual = mensajesAnalisis[Math.min(mensajeIndex, mensajesAnalisis.length - 1)];
+                    
+                    if (mensajeElement) {
+                        mensajeElement.innerHTML = `
+                            <div class="bg-gradient-to-r ${mensajeActual.color} text-white px-4 py-2 rounded-lg font-semibold shadow-lg animate-pulse w-full text-center">
+                                ${mensajeActual.texto}
+                            </div>
+                        `;
+                    }
+                    
+                    if (numerosElement && combinacionesTemporales[cambioActual]) {
+                        const nums = combinacionesTemporales[cambioActual];
+                        const progreso = (cambioActual / totalCambios) * 6;
+                        const numerosRevelados = Math.floor(progreso);
+                        
+                        let displayNums = [];
+                        for (let i = 0; i < 6; i++) {
+                            if (i < numerosRevelados) {
+                                displayNums.push(nums[i].toString().padStart(2, '0'));
+                            } else if (i === numerosRevelados && cambioActual % 3 === 0) {
+                                displayNums.push('??');
+                            } else {
+                                displayNums.push('--');
+                            }
+                        }
+                        
+                        numerosElement.textContent = displayNums.join(' - ');
+                        
+                        if (cambioActual % 4 === 0) {
+                            numerosElement.style.boxShadow = '0 0 15px rgba(34, 197, 94, 0.6)';
+                            numerosElement.style.borderColor = '#22c55e';
+                        } else if (cambioActual % 4 === 2) {
+                            numerosElement.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.6)';
+                            numerosElement.style.borderColor = '#3b82f6';
+                        } else {
+                            numerosElement.style.boxShadow = 'none';
+                            numerosElement.style.borderColor = '#6b7280';
+                        }
+                    }
+                    
+                    cambioActual++;
+                }, intervalos);
+            });
+        }
+
+        function generarNumerosFinal() {
+            const nums = new Set();
+            while (nums.size < 6) {
+                nums.add(Math.floor(Math.random() * 56) + 1);
+            }
+            return Array.from(nums).sort((a, b) => a - b).map(n => n.toString().padStart(2, '0')).join(' - ');
+        }
+
+        // Funciones de control
+        async function iniciarAnalisisProyeccion() {
+            const sorteos = ['melate', 'revancha', 'revanchita'];
+            
+            for (const sorteo of sorteos) {
+                const elemento = document.getElementById(`detalle-${sorteo}`);
+                const proyeccion = document.getElementById(`proyeccion-${sorteo}`);
+                
+                if (elemento) {
+                    proyeccion.textContent = '🔄 Analizando...';
+                    await mostrarAnalisisProyeccionPorPasos(elemento, sorteo);
+                    proyeccion.textContent = generarNumerosFinal();
+                    elemento.innerHTML = `
+                        <span class="font-medium text-center">
+                            📊 Análisis: F:12,34 S:45,56 B:11,22 D:33,44
+                        </span>
+                    `;
+                }
+            }
+        }
+
+        async function iniciarSimulacionIA() {
+            const sorteos = ['melate', 'revancha', 'revanchita'];
+            
+            const promesas = sorteos.map(async (sorteo) => {
+                const elemento = document.getElementById(`simulacion-${sorteo}`);
+                if (elemento) {
+                    await mostrarEfectoAnalisisNumeros(elemento, sorteo);
+                }
+            });
+            
+            await Promise.all(promesas);
+        }
+
+        function reiniciarTodo() {
+            const elementos = [
+                'detalle-melate', 'detalle-revancha', 'detalle-revanchita',
+                'proyeccion-melate', 'proyeccion-revancha', 'proyeccion-revanchita',
+                'simulacion-melate', 'simulacion-revancha', 'simulacion-revanchita'
+            ];
+            
+            elementos.forEach(id => {
+                const elemento = document.getElementById(id);
+                if (elemento) {
+                    if (id.startsWith('detalle-')) {
+                        elemento.innerHTML = '<span class="analisis-detalle text-sm font-medium block">Preparando análisis completo...</span>';
+                    } else if (id.startsWith('proyeccion-')) {
+                        elemento.textContent = '-- -- -- -- -- --';
+                    } else {
+                        elemento.innerHTML = '';
+                    }
+                }
+            });
+        }
+        
+        // Inicialización automática después de 2 segundos
+        setTimeout(() => {
+            console.log('🚀 Iniciando demostración automática...');
+            iniciarAnalisisProyeccion();
+        }, 2000);
+    </script>
+</body>
+</html>
