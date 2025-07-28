@@ -196,8 +196,124 @@ window.generarProyeccionesAnalisis = async function() {
           await mostrarEfectoAnalisisEstadistico(elementoProyeccion, elementoDetalle, sorteo);
         }
         
-        // Usar un ID diferente para proyecciones (análisis) vs predicciones
-        const userIdAnalisis = `${userId}-analisis`;
+// Asegurar que las funciones básicas estén disponibles globalmente
+if (typeof window.cargarDatosHistoricos !== 'function') {
+  // Importar desde dataParser.js
+  if (typeof cargarDatosHistoricos === 'function') {
+    window.cargarDatosHistoricos = cargarDatosHistoricos;
+  }
+}
+
+if (typeof window.generarPrediccionPersonalizada !== 'function') {
+  // Importar desde mlPredictor.js  
+  if (typeof generarPrediccionPersonalizada === 'function') {
+    window.generarPrediccionPersonalizada = generarPrediccionPersonalizada;
+  }
+}
+
+// Implementar funciones faltantes de análisis
+if (typeof window.analizarSumaNumeros !== 'function') {
+  window.analizarSumaNumeros = function(datosHistoricos) {
+    console.log('⚠️ Usando implementación fallback de analizarSumaNumeros');
+    const resultado = {};
+    
+    ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+      if (datosHistoricos[sorteo] && datosHistoricos[sorteo].sorteos) {
+        const sumas = datosHistoricos[sorteo].sorteos.map(s => 
+          s.numeros.reduce((sum, num) => sum + num, 0)
+        );
+        
+        // Categorizar sumas en rangos
+        const rangos = {
+          '120-149': sumas.filter(s => s >= 120 && s <= 149).length,
+          '150-179': sumas.filter(s => s >= 150 && s <= 179).length,
+          '180-209': sumas.filter(s => s >= 180 && s <= 209).length,
+          '210-239': sumas.filter(s => s >= 210 && s <= 239).length
+        };
+        
+        const rangoMasFrecuente = Object.entries(rangos).sort(([,a], [,b]) => b - a)[0];
+        
+        resultado[sorteo] = {
+          promedioSuma: sumas.reduce((a, b) => a + b, 0) / sumas.length,
+          rangoMasFrecuente: [rangoMasFrecuente[0]]
+        };
+      }
+    });
+    
+    return resultado;
+  };
+}
+
+if (typeof window.analizarParesImpares !== 'function') {
+  window.analizarParesImpares = function(datosHistoricos) {
+    console.log('⚠️ Usando implementación fallback de analizarParesImpares');
+    const resultado = {};
+    
+    ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+      if (datosHistoricos[sorteo] && datosHistoricos[sorteo].sorteos) {
+        const distribuciones = datosHistoricos[sorteo].sorteos.map(s => {
+          const pares = s.numeros.filter(num => num % 2 === 0).length;
+          const impares = 6 - pares;
+          return `${pares}p-${impares}i`;
+        });
+        
+        // Contar frecuencias
+        const frecuencias = {};
+        distribuciones.forEach(dist => {
+          frecuencias[dist] = (frecuencias[dist] || 0) + 1;
+        });
+        
+        const distribucionMasFrecuente = Object.entries(frecuencias).sort(([,a], [,b]) => b - a)[0];
+        
+        resultado[sorteo] = {
+          distribucionMasFrecuente: [distribucionMasFrecuente[0]]
+        };
+      }
+    });
+    
+    return resultado;
+  };
+}
+
+if (typeof window.analizarDecadaPorPosicion !== 'function') {
+  window.analizarDecadaPorPosicion = function(datosHistoricos) {
+    console.log('⚠️ Usando implementación fallback de analizarDecadaPorPosicion');
+    const resultado = {};
+    
+    ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+      if (datosHistoricos[sorteo] && datosHistoricos[sorteo].numeros) {
+        // Analizar qué décadas son más frecuentes
+        const numeros = datosHistoricos[sorteo].numeros;
+        const decadas = {
+          '1-10': numeros.filter(n => n >= 1 && n <= 10).length,
+          '11-20': numeros.filter(n => n >= 11 && n <= 20).length,
+          '21-30': numeros.filter(n => n >= 21 && n <= 30).length,
+          '31-40': numeros.filter(n => n >= 31 && n <= 40).length,
+          '41-50': numeros.filter(n => n >= 41 && n <= 50).length,
+          '51-56': numeros.filter(n => n >= 51 && n <= 56).length
+        };
+        
+        const decadaMasFrecuente = Object.entries(decadas).sort(([,a], [,b]) => b - a)[0];
+        
+        resultado[sorteo] = {
+          decadaMasFrecuente: [decadaMasFrecuente[0]]
+        };
+      }
+    });
+    
+    return resultado;
+  };
+}
+
+if (typeof window.calcularFrecuencias !== 'function') {
+  window.calcularFrecuencias = function(numeros) {
+    const frecuencias = {};
+    numeros.forEach(num => {
+      frecuencias[num] = (frecuencias[num] || 0) + 1;
+    });
+    return frecuencias;
+  };
+}
         
         // Generar proyección usando el sistema de IA
         const proyeccion = await generarPrediccionPersonalizada(userIdAnalisis, datosSorteo);
@@ -208,7 +324,7 @@ window.generarProyeccionesAnalisis = async function() {
           
           // Generar descripción del análisis
           if (elementoDetalle) {
-            const descripcion = `Basado en estadísticas, patrones, probabilidad, desviación estándar y delta`;
+            const descripcion = `Frecuencias: análisis histórico | Suma: rangos optimizados | Balance: pares/impares | Décadas: por posición`;
             elementoDetalle.textContent = descripcion;
           }
           
