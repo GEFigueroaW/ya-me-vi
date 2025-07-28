@@ -176,104 +176,20 @@
       const datosGlobales = window.datosAnalisis || {};
       expandirCaja(tipo, datosGlobales);
     }
-    
-    // Ajustar ancho de cajas basado en el título más largo
-    function ajustarAnchoCajas() {
-      // Esperar a que las cajas estén cargadas
-      setTimeout(() => {
-        const cajas = document.querySelectorAll('.caja-interactiva, #contenedor-cajas > div');
-        if (!cajas.length) return;
-        
-        // Buscar el título más largo
-        let maxTitleWidth = 0;
-        let longestTitle = '';
-        
-        cajas.forEach(caja => {
-          const titleEl = caja.querySelector('h3, .caja-titulo');
-          if (titleEl) {
-            const titleText = titleEl.textContent.trim();
-            if (titleText.length > longestTitle.length) {
-              longestTitle = titleText;
-            }
-          }
-        });
-        
-        console.log('Título más largo detectado:', longestTitle);
-        
-        // Crear un elemento temporal para medir el ancho del título más largo
-        const tempEl = document.createElement('span');
-        tempEl.style.position = 'absolute';
-        tempEl.style.visibility = 'hidden';
-        tempEl.style.whiteSpace = 'nowrap';
-        tempEl.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        tempEl.style.fontSize = '1.125rem';
-        tempEl.style.fontWeight = '600';
-        tempEl.textContent = longestTitle;
-        document.body.appendChild(tempEl);
-        
-        // Medir el ancho
-        maxTitleWidth = tempEl.offsetWidth;
-        document.body.removeChild(tempEl);
-        
-        // Añadir margen para el icono y padding
-        const anchoMinimo = maxTitleWidth + 120; // Añadir espacio para ícono y padding
-        
-        // Establecer la variable CSS
-        document.documentElement.style.setProperty('--ancho-minimo-caja', `${anchoMinimo}px`);
-        console.log('Ancho mínimo de caja establecido:', `${anchoMinimo}px`);
-        
-        // Forzar tamaño igual para todas las cajas
-        cajas.forEach(caja => {
-          caja.style.width = `${anchoMinimo}px`;
-          caja.style.minWidth = `${anchoMinimo}px`;
-        });
-      }, 1000); // Esperar 1 segundo para que las cajas se hayan renderizado
-    }
-    
-    // Ejecutar cuando el DOM esté completamente cargado
-    document.addEventListener('DOMContentLoaded', ajustarAnchoCajas);
-    
-    // También ejecutar cuando se hayan cargado las estadísticas
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.addedNodes && mutation.addedNodes.length > 0) {
-          for (const node of mutation.addedNodes) {
-            if (node.id === 'contenedor-cajas' || 
-                (node.querySelector && node.querySelector('.caja-interactiva'))) {
-              ajustarAnchoCajas();
-              return;
-            }
-          }
-        }
-      }
-    });
-    
-    // Observar cambios en el contenedor de estadísticas
-    const chartContainer = document.getElementById('charts-container');
-    if (chartContainer) {
-      observer.observe(chartContainer, { childList: true, subtree: true });
-    }
   </script>
 
   <style>
     /* Importar fuente moderna */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Variables CSS */
+    /* Variables CSS - simplificadas */
     :root {
-      --ancho-caja-dinamico: 100%;
-      --ancho-minimo-caja: 280px; /* Ancho mínimo basado en el título más largo */
+      --gap-cajas: 1rem;
     }
     
-    @media (min-width: 768px) {
+    @media (max-width: 767px) {
       :root {
-        --ancho-caja-dinamico: calc(50% - 1rem);  /* Para tablets: 2 por fila */
-      }
-    }
-    
-    @media (min-width: 1024px) {
-      :root {
-        --ancho-caja-dinamico: calc(25% - 1.5rem);  /* Para desktop: 4 por fila */
+        --gap-cajas: 0.5rem;
       }
     }
     
@@ -350,46 +266,27 @@
     
     /* === CONTENEDOR DE CAJAS === */
     
-    /* Contenedor de cajas - base */
+    /* Contenedor de cajas - SIEMPRE EN LÍNEA HORIZONTAL */
     #contenedor-cajas {
       display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      gap: 1.5rem !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      justify-content: center !important;
+      gap: 1rem !important;
+      width: 100% !important;
+      flex-wrap: nowrap !important; /* Nunca permitir que se envuelvan */
+      overflow-x: auto !important; /* Scroll horizontal si es necesario */
+    }
+    
+    /* Todas las cajas siempre en línea horizontal */
+    #contenedor-principal:not(.expanded) #contenedor-cajas {
+      flex-direction: row !important;
+      justify-content: center !important;
+      align-items: stretch !important;
+      flex-wrap: nowrap !important;
+      gap: 1rem !important;
       width: 100% !important;
     }
-    
-    /* Tablet: cuando NO está expandido - 2 cajas por fila */
-    @media (min-width: 768px) and (max-width: 1023px) {
-      #contenedor-principal:not(.expanded) #contenedor-cajas {
-        flex-direction: row !important;
-        justify-content: center !important;
-        align-items: stretch !important;
-        flex-wrap: wrap !important;
-        gap: 1.5rem !important;
-        width: 100% !important;
-      }
-      
-      #contenedor-principal:not(.expanded) .caja-interactiva,
-      #contenedor-principal:not(.expanded) #contenedor-cajas > div {
-        width: var(--ancho-caja-dinamico) !important;
-        min-width: var(--ancho-minimo-caja) !important;
-        max-width: none !important;
-        flex: 1 1 var(--ancho-caja-dinamico) !important;
-      }
-    }
-    
-    /* Desktop: cuando NO está expandido - horizontal */
-    @media (min-width: 1024px) {
-      #contenedor-principal:not(.expanded) #contenedor-cajas {
-        flex-direction: row !important;
-        justify-content: center !important;
-        align-items: stretch !important;
-        flex-wrap: wrap !important;
-        gap: 1.5rem !important;
-        width: 100% !important;
-        max-width: none !important;
-      }
       
       /* Desktop: cuando SÍ está expandido - vertical a la izquierda */
       #contenedor-principal.expanded #contenedor-cajas {
@@ -399,12 +296,12 @@
         flex-shrink: 0 !important;
       }
       
-      /* Asegurar que las cajas tengan el mismo ancho en modo horizontal */
+      /* Todas las cajas tienen el mismo ancho y se distribuyen equitativamente */
       #contenedor-principal:not(.expanded) .caja-interactiva,
       #contenedor-principal:not(.expanded) #contenedor-cajas > div {
-        flex: 1 1 var(--ancho-caja-dinamico) !important; /* Distribuye espacio equitativamente */
-        min-width: var(--ancho-minimo-caja) !important; /* Ancho mínimo basado en el título más largo */
-        max-width: none !important; /* Permite crecer según sea necesario */
+        flex: 1 1 0 !important; /* Distribuye espacio equitativamente entre las 4 cajas */
+        min-width: 0 !important; /* Permite que se encojan si es necesario */
+        max-width: none !important;
       }
     }
     
@@ -416,9 +313,9 @@
     }
     
     .caja-interactiva {
-      width: var(--ancho-caja-dinamico) !important; /* Ancho dinámico según la pantalla */
-      min-width: var(--ancho-minimo-caja) !important; /* Ancho mínimo basado en el título más largo */
-      max-width: 450px !important;
+      flex: 1 1 0 !important; /* Distribuye equitativamente en 4 cajas */
+      min-width: 0 !important; /* Permite encogerse si es necesario */
+      max-width: none !important;
       position: relative !important;
       border-radius: 16px !important;
       backdrop-filter: blur(12px) !important;
@@ -427,29 +324,38 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
       overflow: hidden !important;
-      flex-shrink: 0 !important;
-      flex-grow: 1 !important; /* Permite que todas las cajas crezcan por igual */
+      flex-shrink: 1 !important; /* Permite encogerse */
     }
     
-    /* Móvil: 1 por fila (predeterminado) */
+    /* Móvil: mantener en línea horizontal */
     @media (max-width: 767px) {
-      .caja-interactiva, #contenedor-cajas > div {
-        width: 100% !important;
-        margin: 0 auto !important;
-        min-width: var(--ancho-minimo-caja) !important;
-        max-width: 100% !important;
+      #contenedor-cajas {
+        gap: 0.5rem !important; /* Reducir espacio en móvil */
+        padding: 0 0.5rem !important;
       }
       
-      /* Si el título es demasiado largo para móvil, permitir un tamaño de fuente más pequeño */
-      .caja-titulo, #contenedor-cajas h3 {
-        font-size: 1rem !important;
+      .caja-interactiva, #contenedor-cajas > div {
+        flex: 1 1 0 !important; /* Distribuir equitativamente */
+        min-width: 0 !important; /* Permitir encogimiento */
+      }
+      
+      /* Reducir padding de botones en móvil */
+      .caja-interactiva button,
+      #contenedor-cajas button {
+        padding: 1rem 0.5rem !important;
+      }
+      
+      /* Emojis más pequeños en móvil */
+      .caja-emoji,
+      #contenedor-cajas .text-2xl {
+        font-size: 1.5rem !important;
       }
     }
     
     #contenedor-cajas > div:not(.caja-interactiva) {
-      width: var(--ancho-caja-dinamico) !important; /* Ancho dinámico según la pantalla */
-      min-width: var(--ancho-minimo-caja) !important; /* Ancho mínimo basado en el título más largo */
-      max-width: 450px !important;
+      flex: 1 1 0 !important; /* Distribuye equitativamente en 4 cajas */
+      min-width: 0 !important; /* Permite encogerse si es necesario */
+      max-width: none !important;
       position: relative !important;
       border-radius: 16px !important;
       backdrop-filter: blur(12px) !important;
@@ -458,8 +364,7 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
       overflow: hidden !important;
-      flex-shrink: 0 !important;
-      flex-grow: 1 !important; /* Permite que todas las cajas crezcan por igual */
+      flex-shrink: 1 !important; /* Permite encogerse */
     }
     
     /* Tablet: 2 por fila */
@@ -517,11 +422,11 @@
       flex-shrink: 0 !important;
     }
     
-    /* Títulos modernos */
+    /* Títulos modernos - adaptables para todas las pantallas */
     .caja-titulo,
     #contenedor-cajas h3 {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-      font-size: 1.125rem !important;
+      font-size: clamp(0.875rem, 2vw, 1.125rem) !important; /* Tamaño adaptativo */
       font-weight: 600 !important;
       line-height: 1.3 !important;
       color: rgba(255, 255, 255, 0.95) !important;
@@ -536,6 +441,7 @@
       -webkit-line-clamp: 2 !important;
       -webkit-box-orient: vertical !important;
       min-height: 2.8em !important; /* Altura para asegurar espacio uniforme */
+      text-align: center !important;
     }
     
     /* === CONTENEDOR DE CONTENIDO EXPANDIDO === */
