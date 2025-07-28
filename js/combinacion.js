@@ -605,7 +605,299 @@ export {
   calcularIndicePorSorteo,
   calcularFrecuenciaTotal,
   calcularPorcentajeTotal,
-  clasificarProbabilidad,
+  clasificarProbabilidad,  
   generarHtmlAnalisisSorteo,
   generarMensajeSuerte
 };
+
+/**
+ * Inicialización cuando se carga el DOM
+ */
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 Inicializando módulo de combinaciones...');
+  
+  // Inicializar acordeones
+  inicializarAcordeones();
+  
+  // Inicializar evaluadores
+  inicializarEvaluadores();
+  
+  // Cargar datos históricos
+  prepararDatosHistoricos();
+});
+
+/**
+ * Inicializar funcionalidad de acordeones
+ */
+function inicializarAcordeones() {
+  // Acordeón para número individual
+  const triggerNumero = document.getElementById('trigger-numero-individual');
+  const contentNumero = document.getElementById('content-numero-individual');
+  
+  if (triggerNumero && contentNumero) {
+    triggerNumero.addEventListener('click', function() {
+      const isHidden = contentNumero.classList.contains('hidden');
+      const arrow = triggerNumero.querySelector('svg');
+      
+      if (isHidden) {
+        contentNumero.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        contentNumero.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+  
+  // Acordeón para combinación
+  const triggerCombinacion = document.getElementById('trigger-combinacion');
+  const contentCombinacion = document.getElementById('content-combinacion');
+  
+  if (triggerCombinacion && contentCombinacion) {
+    triggerCombinacion.addEventListener('click', function() {
+      const isHidden = contentCombinacion.classList.contains('hidden');
+      const arrow = triggerCombinacion.querySelector('svg');
+      
+      if (isHidden) {
+        contentCombinacion.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        contentCombinacion.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+  
+  console.log('✅ Acordeones inicializados');
+}
+
+/**
+ * Inicializar evaluadores de números
+ */
+function inicializarEvaluadores() {
+  // Evaluador de número individual
+  const btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
+  const inputNumero = document.getElementById('numero-individual');
+  
+  if (btnEvaluarNumero && inputNumero) {
+    btnEvaluarNumero.addEventListener('click', function() {
+      const numero = parseInt(inputNumero.value);
+      if (numero >= 1 && numero <= 56) {
+        evaluarNumeroIndividual(numero);
+      } else {
+        alert('⚠️ Por favor ingresa un número entre 1 y 56');
+      }
+    });
+    
+    // Permitir evaluar con Enter
+    inputNumero.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        btnEvaluarNumero.click();
+      }
+    });
+  }
+  
+  // Evaluador de combinación
+  const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
+  const inputsCombinacion = document.querySelectorAll('.combo-input');
+  
+  if (btnEvaluarCombinacion && inputsCombinacion.length === 6) {
+    btnEvaluarCombinacion.addEventListener('click', function() {
+      const numeros = [];
+      let valido = true;
+      
+      inputsCombinacion.forEach(input => {
+        const num = parseInt(input.value);
+        if (isNaN(num) || num < 1 || num > 56) {
+          valido = false;
+        } else {
+          numeros.push(num);
+        }
+      });
+      
+      if (valido && numeros.length === 6) {
+        // Verificar duplicados
+        const numerosUnicos = [...new Set(numeros)];
+        if (numerosUnicos.length !== 6) {
+          alert('⚠️ No puedes repetir números en tu combinación');
+          return;
+        }
+        
+        evaluarCombinacion(numeros);
+      } else {
+        alert('⚠️ Por favor ingresa 6 números válidos entre 1 y 56');
+      }
+    });
+    
+    // Permitir evaluar con Enter en cualquier input
+    inputsCombinacion.forEach(input => {
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          btnEvaluarCombinacion.click();
+        }
+      });
+    });
+  }
+  
+  console.log('✅ Evaluadores inicializados');
+}
+
+/**
+ * Evaluar número individual
+ */
+function evaluarNumeroIndividual(numero) {
+  console.log(`🔍 Evaluando número individual: ${numero}`);
+  
+  const resultadoDiv = document.getElementById('resultado-numero');
+  if (!resultadoDiv) return;
+  
+  // Mostrar indicador de carga
+  resultadoDiv.innerHTML = '<div class="text-center py-4"><div class="animate-spin inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full"></div></div>';
+  
+  setTimeout(() => {
+    const analisisPorSorteo = calcularFrecuenciaPorSorteo(numero);
+    const porcentajeTotal = calcularPorcentajeTotal(numero);
+    const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
+    
+    resultadoDiv.innerHTML = `
+      <div class="bg-white bg-opacity-80 rounded-xl p-6 shadow-lg">
+        <h3 class="text-xl font-bold text-center mb-4 text-gray-800">
+          🎯 Análisis del Número ${numero}
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          ${Object.entries(analisisPorSorteo).map(([sorteo, datos]) => {
+            const clasificacion = clasificarProbabilidad(datos.porcentaje);
+            const iconos = {
+              melate: '🎲',
+              revancha: '🍀', 
+              revanchita: '🌈'
+            };
+            
+            return `
+              <div class="text-center p-4 ${clasificacion.bgColor} rounded-lg border">
+                <div class="text-2xl mb-2">${iconos[sorteo]}</div>
+                <div class="font-bold text-gray-800 capitalize">${sorteo}</div>
+                <div class="text-2xl font-bold ${clasificacion.color} my-2">
+                  ${datos.porcentaje.toFixed(1)}%
+                </div>
+                <div class="text-sm ${clasificacion.color} px-2 py-1 rounded-full ${clasificacion.bgColor}">
+                  ${clasificacion.categoria}
+                </div>
+                <div class="text-xs text-gray-600 mt-1">
+                  ${datos.frecuencia} apariciones
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        
+        <div class="text-center p-4 ${clasificacionTotal.bgColor} rounded-lg border-2 ${clasificacionTotal.color.includes('green') ? 'border-green-300' : 'border-gray-300'}">
+          <h4 class="font-bold text-lg text-gray-800 mb-2">🌟 Evaluación General</h4>
+          <div class="text-3xl font-bold ${clasificacionTotal.color} mb-2">
+            ${porcentajeTotal.toFixed(1)}%
+          </div>
+          <div class="text-lg ${clasificacionTotal.color}">
+            ${clasificacionTotal.emoji} ${clasificacionTotal.categoria}
+          </div>
+          <div class="text-sm text-gray-600 mt-2">
+            ${generarMensajeNumeroIndividual(clasificacionTotal.categoria)}
+          </div>
+        </div>
+      </div>
+    `;
+  }, 500);
+}
+
+/**
+ * Evaluar combinación completa
+ */
+function evaluarCombinacion(numeros) {
+  console.log(`🔍 Evaluando combinación: ${numeros.join(', ')}`);
+  
+  const resultadoDiv = document.getElementById('resultado-combinacion');
+  if (!resultadoDiv) {
+    // Crear el div de resultado si no existe
+    const contentCombinacion = document.getElementById('content-combinacion');
+    if (contentCombinacion) {
+      const newDiv = document.createElement('div');
+      newDiv.id = 'resultado-combinacion';
+      newDiv.className = 'mt-6';
+      contentCombinacion.appendChild(newDiv);
+    }
+  }
+  
+  const targetDiv = document.getElementById('resultado-combinacion');
+  if (!targetDiv) return;
+  
+  // Mostrar indicador de carga
+  targetDiv.innerHTML = '<div class="text-center py-4"><div class="animate-spin inline-block w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full"></div></div>';
+  
+  setTimeout(() => {
+    const analisisIndividual = numeros.map(num => ({
+      numero: num,
+      porSorteo: calcularFrecuenciaPorSorteo(num),
+      porcentajeTotal: calcularPorcentajeTotal(num),
+      clasificacion: clasificarProbabilidad(calcularPorcentajeTotal(num))
+    }));
+    
+    targetDiv.innerHTML = `
+      <div class="bg-white bg-opacity-90 rounded-xl p-6 shadow-lg">
+        <h3 class="text-xl font-bold text-center mb-6 text-gray-800">
+          🎯 Análisis de tu Combinación
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <!-- Melate -->
+          <div class="bg-blue-50 rounded-lg p-4">
+            <h4 class="text-center font-bold text-blue-800 mb-4">🎲 Melate</h4>
+            <div class="grid grid-cols-2 gap-2">
+              ${generarHtmlAnalisisSorteo(analisisIndividual, 'melate', 'bg-blue-100', 'border-blue-200')}
+            </div>
+          </div>
+          
+          <!-- Revancha -->
+          <div class="bg-purple-50 rounded-lg p-4">
+            <h4 class="text-center font-bold text-purple-800 mb-4">🍀 Revancha</h4>
+            <div class="grid grid-cols-2 gap-2">
+              ${generarHtmlAnalisisSorteo(analisisIndividual, 'revancha', 'bg-purple-100', 'border-purple-200')}
+            </div>
+          </div>
+          
+          <!-- Revanchita -->
+          <div class="bg-green-50 rounded-lg p-4">
+            <h4 class="text-center font-bold text-green-800 mb-4">🌈 Revanchita</h4>
+            <div class="grid grid-cols-2 gap-2">
+              ${generarHtmlAnalisisSorteo(analisisIndividual, 'revanchita', 'bg-green-100', 'border-green-200')}
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-center p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg border-2 border-yellow-300">
+          <h4 class="font-bold text-lg text-gray-800 mb-2">✨ Mensaje de la Suerte</h4>
+          <p class="text-gray-700">
+            ${generarMensajeSuerte(analisisIndividual.map(a => a.clasificacion))}
+          </p>
+        </div>
+      </div>
+    `;
+  }, 800);
+}
+
+/**
+ * Generar mensaje para número individual
+ */
+function generarMensajeNumeroIndividual(categoria) {
+  const mensajes = {
+    'Excepcional': '¡Tu número es una verdadera joya! Tiene un historial excepcional.',
+    'Muy Alta': '¡Excelente elección! Este número tiene muy buen potencial.',
+    'Alta': '¡Buena selección! Tu número muestra buen rendimiento histórico.',
+    'Buena': 'Tu número tiene un equilibrio favorable en los sorteos.',
+    'Moderada': 'Tu número mantiene una presencia constante en los sorteos.',
+    'Aceptable': 'Tu número participa regularmente en las combinaciones ganadoras.',
+    'Baja': 'Tu número tiene potencial de sorpresa en futuros sorteos.',
+    'Muy Baja': 'Tu número puede ser la clave secreta para una gran sorpresa.'
+  };
+  
+  return mensajes[categoria] || 'Tu número tiene su propia energía especial.';
+}
