@@ -271,7 +271,7 @@
       
       <!-- Contenido expandible (oculto por defecto) -->
       <div id="contenido-analisis" class="hidden mt-6 contenido-expandible">
-        <p class="text-sm italic text-center mb-6 text-gray-300">Combinaciones generadas usando análisis de frecuencias, suma de números, balance pares/impares y distribución por décadas</p>
+        <p class="text-sm italic text-center mb-6 text-gray-300">Combinaciones basadas en los 4 análisis de los últimos 30 meses: frecuencias, suma de números, balance pares/impares y décadas por posición</p>
         
         <!-- Proyecciones por sorteo -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -783,6 +783,13 @@
                 console.error('❌ Función cargarDatosHistoricos no disponible');
               }
             }
+            
+            // FORZAR REGENERACIÓN: Limpiar proyecciones almacenadas cada vez que se abre
+            console.log('🔄 Forzando regeneración de proyecciones en cada clic...');
+            if (window.proyeccionesAlmacenadas) {
+              delete window.proyeccionesAlmacenadas;
+            }
+            localStorage.removeItem('proyeccionesAnalisis');
             
             // Verificar funciones de análisis
             console.log('🔍 Verificando funciones de análisis:', {
