@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Sugeridas Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Test de Funciones de Sugeridas.html</h1>
+    <div id="results"></div>
+    
+    <!-- Cargar los mismos scripts que sugeridas.html -->
+    <script src="js/init.js"></script>
+    <script src="js/dataParser.js"></script>
+    <script src="js/mlPredictor.js"></script>
+    <script src="js/actualizarTituloSorteo.js"></script>
+    <script type="module" src="js/inicializacion-unificada.js"></script>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function testFunctionExists(name, obj = window) {
+            const exists = typeof obj[name] === 'function';
+            addResult(`${name}: ${exists ? 'DISPONIBLE' : 'NO DISPONIBLE'}`, exists ? 'success' : 'error');
+            return exists;
+        }
+        
+        async function runTests() {
+            addResult('=== INICIANDO TESTS ===', 'info');
+            
+            // Test 1: Verificar que las funciones críticas existan
+            addResult('--- Test 1: Funciones críticas ---', 'info');
+            const criticalFunctions = [
+                'generarPrediccionPersonalizada',
+                'generarPrediccionesPorSorteo', 
+                'generarProyeccionesAnalisis',
+                'cargarDatosHistoricos',
+                'actualizarTituloSorteo'
+            ];
+            
+            let criticalPassed = 0;
+            for (const func of criticalFunctions) {
+                if (testFunctionExists(func)) {
+                    criticalPassed++;
+                }
+            }
+            
+            addResult(`Funciones críticas disponibles: ${criticalPassed}/${criticalFunctions.length}`, 
+                     criticalPassed === criticalFunctions.length ? 'success' : 'warning');
+            
+            // Esperar un poco para que se carguen los módulos
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Test 2: Probar generarPrediccionPersonalizada
+            addResult('--- Test 2: generarPrediccionPersonalizada ---', 'info');
+            try {
+                if (window.generarPrediccionPersonalizada) {
+                    const testUserId = 'test-user-123';
+                    const testData = {
+                        sorteo: 'melate',
+                        numeros: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        sorteos: [{concurso: '4082', numeros: [1, 2, 3, 4, 5, 6]}]
+                    };
+                    
+                    const resultado = await window.generarPrediccionPersonalizada(testUserId, testData);
+                    
+                    if (Array.isArray(resultado) && resultado.length === 6) {
+                        addResult(`generarPrediccionPersonalizada EXITOSA: [${resultado.join(', ')}]`, 'success');
+                    } else {
+                        addResult(`generarPrediccionPersonalizada ERROR: resultado inválido ${JSON.stringify(resultado)}`, 'error');
+                    }
+                } else {
+                    addResult('generarPrediccionPersonalizada NO DISPONIBLE', 'error');
+                }
+            } catch (error) {
+                addResult(`generarPrediccionPersonalizada ERROR: ${error.message}`, 'error');
+            }
+            
+            // Test 3: Probar cargarDatosHistoricos
+            addResult('--- Test 3: cargarDatosHistoricos ---', 'info');
+            try {
+                if (window.cargarDatosHistoricos) {
+                    addResult('Intentando cargar datos históricos...', 'info');
+                    
+                    // Timeout para evitar que se cuelgue
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Timeout')), 5000)
+                    );
+                    
+                    const datos = await Promise.race([
+                        window.cargarDatosHistoricos('todos'),
+                        timeoutPromise
+                    ]);
+                    
+                    if (datos && typeof datos === 'object') {
+                        const sorteos = Object.keys(datos).filter(key => !key.startsWith('_'));
+                        addResult(`cargarDatosHistoricos EXITOSA: cargados ${sorteos.length} sorteos [${sorteos.join(', ')}]`, 'success');
+                        window.testDatosHistoricos = datos;
+                    } else {
+                        addResult(`cargarDatosHistoricos ERROR: datos inválidos`, 'error');
+                    }
+                } else {
+                    addResult('cargarDatosHistoricos NO DISPONIBLE', 'error');
+                }
+            } catch (error) {
+                addResult(`cargarDatosHistoricos ERROR: ${error.message}`, 'error');
+            }
+            
+            addResult('=== TESTS COMPLETADOS ===', 'info');
+        }
+        
+        // Ejecutar tests después de que se cargue la página
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runTests, 1000);
+        });
+        
+        // También ejecutar inmediatamente si ya está cargada
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(runTests, 1000));
+        } else {
+            setTimeout(runTests, 1000);
+        }
+    </script>
+</body>
+</html>
