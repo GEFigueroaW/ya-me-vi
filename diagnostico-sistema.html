@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Diagnóstico Sistema - YA ME VI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8">🔍 Diagnóstico del Sistema</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">📋 Elementos HTML</h2>
+            <div id="elementos-check" class="space-y-2"></div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">🔧 Funciones JavaScript</h2>
+            <div id="funciones-check" class="space-y-2"></div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">📊 Variables Globales</h2>
+            <div id="variables-check" class="space-y-2"></div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">🧪 Test de Funcionalidad</h2>
+            <div class="space-y-4">
+                <button onclick="testToggleAleatorias()" class="bg-blue-500 px-4 py-2 rounded">Test toggleAleatorias()</button>
+                <button onclick="testTogglePrediccion()" class="bg-green-500 px-4 py-2 rounded">Test togglePrediccionIA()</button>
+                <button onclick="testToggleAnalisis()" class="bg-purple-500 px-4 py-2 rounded">Test toggleAnalisis()</button>
+            </div>
+            <div id="test-results" class="mt-4 space-y-2"></div>
+        </div>
+        
+        <div class="bg-red-900 rounded-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">❌ Errores de Consola</h2>
+            <div id="errores-consola" class="text-red-300 font-mono text-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        // Interceptar errores de consola
+        const erroresConsola = document.getElementById('errores-consola');
+        const originalConsoleError = console.error;
+        const erroresCapturados = [];
+        
+        console.error = function(...args) {
+            erroresCapturados.push(args.join(' '));
+            originalConsoleError.apply(console, args);
+            actualizarErrores();
+        };
+        
+        function actualizarErrores() {
+            erroresConsola.innerHTML = erroresCapturados.map(error => 
+                `<div class="mb-1">❌ ${error}</div>`
+            ).join('');
+        }
+        
+        // Cargar scripts de sugeridas.html
+        const script1 = document.createElement('script');
+        script1.src = 'js/sistema-definitivo.js';
+        document.head.appendChild(script1);
+        
+        script1.onload = function() {
+            setTimeout(diagnosticar, 1000);
+        };
+        
+        function diagnosticar() {
+            // Verificar elementos HTML críticos
+            const elementos = [
+                'contenido-aleatorias',
+                'arrow-icon-aleatorias', 
+                'contenido-predicciones',
+                'arrow-icon',
+                'contenido-analisis',
+                'arrow-icon-analisis',
+                'combinacion-melate',
+                'combinacion-revancha', 
+                'combinacion-revanchita',
+                'proyeccion-melate',
+                'proyeccion-revancha',
+                'proyeccion-revanchita'
+            ];
+            
+            const elementosCheck = document.getElementById('elementos-check');
+            elementos.forEach(id => {
+                const existe = document.getElementById(id) !== null;
+                elementosCheck.innerHTML += `
+                    <div class="${existe ? 'text-green-400' : 'text-red-400'}">
+                        ${existe ? '✅' : '❌'} ${id}: ${existe ? 'Existe' : 'NO EXISTE'}
+                    </div>
+                `;
+            });
+            
+            // Verificar funciones JavaScript
+            const funciones = [
+                'toggleAleatorias',
+                'togglePrediccionIA', 
+                'toggleAnalisis',
+                'cerrarCajaAleatorias',
+                'cerrarCajaPredicciones',
+                'cerrarCajaAnalisis',
+                'ejecutarPrediccionesIA',
+                'ejecutarAnalisisCompleto'
+            ];
+            
+            const funcionesCheck = document.getElementById('funciones-check');
+            funciones.forEach(func => {
+                const existe = typeof window[func] === 'function';
+                funcionesCheck.innerHTML += `
+                    <div class="${existe ? 'text-green-400' : 'text-red-400'}">
+                        ${existe ? '✅' : '❌'} ${func}: ${existe ? 'Definida' : 'NO DEFINIDA'}
+                    </div>
+                `;
+            });
+            
+            // Verificar variables globales
+            const variables = [
+                'isAleatoriaOpen',
+                'isPrediccionOpen',
+                'isAnalisisOpen',
+                'datosHistoricos',
+                'usuarioActualID'
+            ];
+            
+            const variablesCheck = document.getElementById('variables-check');
+            variables.forEach(variable => {
+                const existe = typeof window[variable] !== 'undefined';
+                const valor = window[variable];
+                variablesCheck.innerHTML += `
+                    <div class="${existe ? 'text-green-400' : 'text-red-400'}">
+                        ${existe ? '✅' : '❌'} ${variable}: ${existe ? JSON.stringify(valor) : 'NO DEFINIDA'}
+                    </div>
+                `;
+            });
+        }
+        
+        function testToggleAleatorias() {
+            const results = document.getElementById('test-results');
+            try {
+                if (typeof toggleAleatorias === 'function') {
+                    toggleAleatorias();
+                    results.innerHTML += '<div class="text-green-400">✅ toggleAleatorias() ejecutada</div>';
+                } else {
+                    results.innerHTML += '<div class="text-red-400">❌ toggleAleatorias() no existe</div>';
+                }
+            } catch (error) {
+                results.innerHTML += `<div class="text-red-400">❌ Error en toggleAleatorias(): ${error.message}</div>`;
+            }
+        }
+        
+        function testTogglePrediccion() {
+            const results = document.getElementById('test-results');
+            try {
+                if (typeof togglePrediccionIA === 'function') {
+                    togglePrediccionIA();
+                    results.innerHTML += '<div class="text-green-400">✅ togglePrediccionIA() ejecutada</div>';
+                } else {
+                    results.innerHTML += '<div class="text-red-400">❌ togglePrediccionIA() no existe</div>';
+                }
+            } catch (error) {
+                results.innerHTML += `<div class="text-red-400">❌ Error en togglePrediccionIA(): ${error.message}</div>`;
+            }
+        }
+        
+        function testToggleAnalisis() {
+            const results = document.getElementById('test-results');
+            try {
+                if (typeof toggleAnalisis === 'function') {
+                    toggleAnalisis();
+                    results.innerHTML += '<div class="text-green-400">✅ toggleAnalisis() ejecutada</div>';
+                } else {
+                    results.innerHTML += '<div class="text-red-400">❌ toggleAnalisis() no existe</div>';
+                }
+            } catch (error) {
+                results.innerHTML += `<div class="text-red-400">❌ Error en toggleAnalisis(): ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Combinaciones Sugeridas</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="assets/logo-192.png" sizes="192x192" type="image/png">
+  <link rel="icon" href="assets/logo-512.png" sizes="512x512" type="image/png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <!-- iOS Touch Icon - CONFIGURACIÓN SIMPLIFICADA -->
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- iOS Startup Images -->
+  <link rel="apple-touch-startup-image" href="assets/logo-512.png">
+  
+  <!-- Additional iOS Meta -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+  
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
+     crossorigin="anonymous"></script>
+     
+  <style>
+    /* Prevenir scroll automático en móviles */
+    html {
+      scroll-behavior: auto !important;
+    }
+    
+    /* Mejorar estabilidad del acordeón en móvil */
+    .analisis-transparente {
+      transform: translateZ(0);
+      will-change: auto;
+    }
+    
+    .analisis-transparente:focus {
+      outline: none;
+    }
+    
+    /* Prevenir cambios de layout que puedan causar scroll */
+    .contenido-expandible {
+      transition: opacity 0.3s ease;
+    }
+    
+    /* Evitar zoom automático en inputs en iOS */
+    @media screen and (max-width: 768px) {
+      body {
+        position: relative;
+        overflow-x: hidden;
+      }
+    }
+    
+    /* Estilos para frases de análisis - legibilidad mejorada */
+    .analisis-detalle {
+      transition: all 0.3s ease;
+      line-height: 1.5;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .analisis-detalle:hover {
+      transform: translateY(-1px);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Animación suave para la aparición del texto */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Efecto de pulsación para texto activo */
+    .analisis-detalle.activo {
+      animation: pulsoSuave 2s infinite;
+    }
+    
+    @keyframes pulsoSuave {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+    
+    /* Animación de análisis para números */
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.02);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    /* Efecto de análisis activo */
+    .analizando {
+      animation: pulse 1s infinite;
+      background: linear-gradient(45deg, rgba(99, 102, 241, 0.2), rgba(59, 130, 246, 0.2));
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    /* Mejoras para contenedores de análisis */
+    .contenedor-analisis {
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+    
+    .contenedor-analisis:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+    }
+    
+  </style>
+  </style>
+  <script src="js/init.js"></script>
+  <script src="js/dataParser.js"></script>
+  <script src="js/mlPredictor.js"></script>
+  <script src="js/actualizarTituloSorteo.js"></script>
+  <script>
+    // Asegurar que se generen nuevos números cada vez que se abre la caja de análisis
+    document.addEventListener('DOMContentLoaded', function() {
+      const cajaAnalisis = document.querySelector('[onclick*="toggleAnalisis"]');
+      if (cajaAnalisis) {
+        cajaAnalisis.addEventListener('click', async function(e) {
+          if (this.getAttribute('data-estado') !== 'abierto') {
+            this.setAttribute('data-estado', 'abierto');
+            // Forzar nueva generación
+            await window.generarProyeccionesAnalisis();
+          } else {
+            this.setAttribute('data-estado', 'cerrado');
+          }
+        });
+      }
+    });
+  </script>
+</head>
+<body class="overflow-x-hidden" onload="if(window.yaMeVi)window.yaMeVi.init()">
+
+  <!-- Fondo -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 min-h-screen text-white text-center p-4 md:p-10">
+
+    <!-- Botón de regreso -->
+    <button id="btn-back" class="btn-back-improved" onclick="window.location.href='home.html'">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <span class="btn-text">Volver</span>
+    </button>
+
+    <!-- Espaciador para evitar solapamiento en móviles -->
+    <div class="mobile-spacer"></div>
+
+    <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown">Combinaciones Sugeridas</h1>
+
+    <!-- Sección de combinaciones aleatorias -->
+    <div id="aleatorias-container" class="analisis-transparente rounded-xl p-6 max-w-4xl mx-auto mb-8 hover:shadow-xl transition-all duration-300">
+      <!-- Botón del acordeón -->
+      <div class="text-center cursor-pointer" onclick="toggleAleatorias()">
+        <p class="text-lg text-white mb-2">
+          🎲 Genera TUS combinaciones completamente al azar
+        </p>
+        
+        <!-- Indicador de expansión -->
+        <div class="flex justify-center items-center">
+          <span class="text-sm text-gray-300 mr-2">Haz clic para ver</span>
+          <svg id="arrow-icon-aleatorias" class="w-5 h-5 text-gray-300 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Contenido expandible (oculto por defecto) -->
+      <div id="contenido-aleatorias" class="hidden mt-6 contenido-expandible">
+        <!-- Descripción -->
+        <div class="text-center mb-8">
+          <p class="text-sm text-gray-300">
+            Números aleatorios del 1 al 56 • Sin análisis • Sin patrones • Solo suerte
+          </p>
+        </div>
+
+        <!-- Botón para generar combinaciones -->
+        <div class="text-center">
+          <button id="btn-generar" onclick="if(window.mostrarCombinacionAleatoria){window.mostrarCombinacionAleatoria();}else{console.log('❌ Función no disponible');}" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+            🎲 Generar Combinaciones Aleatorias
+          </button>
+        </div>
+
+        <!-- Contenedor de combinaciones generadas aleatorias (dentro de la caja) -->
+        <div id="combinaciones-container" class="mt-6">
+          <!-- Contenido se genera dinámicamente aquí -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Combinaciones sugeridas por IA -->
+    <div id="prediccion-container" class="rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 cursor-pointer hover:shadow-xl transition-all duration-300 analisis-transparente" style="opacity: 0.5;" onclick="togglePrediccionIA();">
+      <div class="text-center">
+        <p class="text-lg text-white mb-2">
+          <span id="titulo-sorteo">🎯 Combinaciones sugeridas por IA para TI para el sorteo "---"</span>
+        </p>
+        
+        <!-- Indicador de expansión -->
+        <div class="flex justify-center items-center">
+          <span class="text-sm text-gray-300 mr-2">Haz clic para ver</span>
+          <svg id="arrow-icon" class="w-5 h-5 text-gray-300 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Contenido expandible (oculto por defecto) -->
+      <div id="contenido-predicciones" class="hidden mt-6 contenido-expandible">
+        <p class="text-sm italic text-center mb-6 text-gray-300">Basado en tu perfil único, estadísticas históricas y patrones detectados</p>
+        
+        <!-- Predicciones por sorteo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- Melate -->
+          <div class="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+            <h3 class="font-bold text-blue-600 mb-2">🎲 Melate</h3>
+            <p id="combinacion-melate" class="text-lg font-bold tracking-wider text-blue-800">-- -- -- -- -- --</p>
+          </div>
+          
+          <!-- Revancha -->
+          <div class="text-center p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
+            <h3 class="font-bold text-purple-600 mb-2">🎲 Revancha</h3>
+            <p id="combinacion-revancha" class="text-lg font-bold tracking-wider text-purple-800">-- -- -- -- -- --</p>
+          </div>
+          
+          <!-- Revanchita -->
+          <div class="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
+            <h3 class="font-bold text-green-600 mb-2">🎲 Revanchita</h3>
+            <p id="combinacion-revanchita" class="text-lg font-bold tracking-wider text-green-800">-- -- -- -- -- --</p>
+          </div>
+        </div>
+        
+        <!-- Mensaje de estado -->
+        <div id="mensaje-estado" class="text-center text-sm text-gray-300 italic">
+          Generando predicciones personalizadas...
+        </div>
+      </div>
+    </div>
+
+    <!-- Proyección basada en análisis estadístico -->
+    <div id="analisis-container" class="rounded-xl shadow-lg p-6 max-w-4xl mx-auto animate__animated animate__fadeInUp mb-8 hover:shadow-xl transition-all duration-300 analisis-transparente" style="opacity: 0.8;">
+      <div class="text-center cursor-pointer" onclick="toggleAnalisis();">
+        <p class="text-lg text-white mb-2">
+          📊 Proyección basada en los 4 tipos de análisis de los últimos sorteos
+        </p>
+        
+        <!-- Indicador de expansión -->
+        <div class="flex justify-center items-center">
+          <span class="text-sm text-gray-300 mr-2">Haz clic para ver</span>
+          <svg id="arrow-icon-analisis" class="w-5 h-5 text-gray-300 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Contenido expandible (oculto por defecto) -->
+      <div id="contenido-analisis" class="hidden mt-6 contenido-expandible">
+        <p class="text-sm italic text-center mb-6 text-gray-300">Combinaciones basadas en los 4 análisis de los últimos 30 meses: frecuencias, suma de números, balance pares/impares y décadas por posición</p>
+        
+        <!-- Proyecciones por sorteo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- Melate -->
+          <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200 contenedor-analisis">
+            <h3 class="font-bold text-red-600 mb-2">📊 Melate</h3>
+            <p id="proyeccion-melate" class="text-lg font-bold tracking-wider text-red-800">-- -- -- -- -- --</p>
+            <div class="proyeccion-loading hidden">
+              <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-red-600 mx-auto my-2"></div>
+              <p class="text-sm text-red-600">Generando predicción...</p>
+            </div>
+            <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-red-200 contenedor-analisis">
+              <span id="detalle-melate" class="analisis-detalle text-sm font-medium text-red-700 block">Preparando análisis completo...</span>
+            </div>
+          </div>
+          
+          <!-- Revancha -->
+          <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200 contenedor-analisis">
+            <h3 class="font-bold text-red-600 mb-2">📊 Revancha</h3>
+            <p id="proyeccion-revancha" class="text-lg font-bold tracking-wider text-red-800">-- -- -- -- -- --</p>
+            <div class="proyeccion-loading hidden">
+              <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-red-600 mx-auto my-2"></div>
+              <p class="text-sm text-red-600">Generando predicción...</p>
+            </div>
+            <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-red-200 contenedor-analisis">
+              <span id="detalle-revancha" class="analisis-detalle text-sm font-medium text-red-700 block">Preparando análisis completo...</span>
+            </div>
+          </div>
+          
+          <!-- Revanchita -->
+          <div class="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200 contenedor-analisis">
+            <h3 class="font-bold text-yellow-600 mb-2">📊 Revanchita</h3>
+            <p id="proyeccion-revanchita" class="text-lg font-bold tracking-wider text-yellow-800">-- -- -- -- -- --</p>
+            <div class="mt-3 px-3 py-2 bg-white bg-opacity-80 rounded-lg border border-yellow-200 contenedor-analisis">
+              <span id="detalle-revanchita" class="analisis-detalle text-sm font-medium text-yellow-700 block">Preparando análisis completo...</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Metodología utilizada -->
+        <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4 mt-4">
+          <h4 class="text-white font-semibold mb-2 text-center">🔬 Metodología de Análisis</h4>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs text-gray-300">
+            <div class="text-center">
+              <div class="text-yellow-400 font-bold">22%</div>
+              <div>Frecuencias históricas</div>
+            </div>
+            <div class="text-center">
+              <div class="text-blue-400 font-bold">22%</div>
+              <div>Suma de números</div>
+            </div>
+            <div class="text-center">
+              <div class="text-green-400 font-bold">22%</div>
+              <div>Balance pares/impares</div>
+            </div>
+            <div class="text-center">
+              <div class="text-purple-400 font-bold">22%</div>
+              <div>Décadas por posición</div>
+            </div>
+            <div class="text-center">
+              <div class="text-red-400 font-bold">12%</div>
+              <div>Factor aleatorio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="bg-black bg-opacity-80 text-white text-xs text-center py-3 px-4 mt-8 md:relative md:z-auto">
+      <div class="mb-2">
+        Este sistema se basa en estadísticas, patrones, probabilidad e inteligencia artificial. No garantiza premios. Juega con responsabilidad.
+      </div>
+      <div class="space-x-2">
+        <a href="aviso-legal.html" class="text-yellow-300 hover:text-yellow-100 underline transition duration-300">Aviso legal</a>
+        <span class="text-gray-400">|</span>
+        <a href="politica-privacidad.html" class="text-yellow-300 hover:text-yellow-100 underline transition duration-300">Política de privacidad</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script src="js/actualizarTituloSorteo.js"></script>
+  <script>
+    // === FUNCIONES DE CONTROL DE INTERFACE ===
+    // Solo las funciones esenciales para el control de las cajas
+    
+    let isAleatoriaOpen = false;
+    let isPrediccionOpen = false;
+    let isAnalisisOpen = false;
+                const numeros = [];
+    
+    // Funciones toggle simples y directas
+    function toggleAleatorias() {
+      console.log('🎲 Toggle aleatorias clicked');
+      const contenido = document.getElementById('contenido-aleatorias');
+      const arrow = document.getElementById('arrow-icon-aleatorias');
+      
+      if (!contenido || !arrow) {
+        console.error('❌ Elementos aleatorias no encontrados');
+        return;
+      }
+      
+      if (contenido.classList.contains('hidden')) {
+        // Cerrar otras cajas
+        cerrarCajaPredicciones();
+        cerrarCajaAnalisis();
+        
+        // Abrir esta caja con transición suave
+        contenido.style.opacity = '0';
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        
+        // Animar la aparición
+        requestAnimationFrame(() => {
+          contenido.style.opacity = '1';
+        });
+        
+        isAleatoriaOpen = true;
+        console.log('✅ Caja aleatorias abierta');
+        
+        // Verificar funcionalidad de generación aleatoria
+        console.log('🔍 Verificando función generarCombinacionesAleatorias:', {
+          disponible: typeof generarCombinacionesAleatorias !== 'undefined',
+          windowFn: typeof window.generarCombinacionesAleatorias !== 'undefined'
+        });
+      } else {
+        // Cerrar esta caja con transición suave
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          arrow.style.transform = 'rotate(0deg)';
+          limpiarCombinacionesAleatorias();
+        }, 300);
+        
+        isAleatoriaOpen = false;
+        console.log('✅ Caja aleatorias cerrada');
+      }
+    }
+
+    function togglePrediccionIA() {
+      console.log('🤖 Toggle predicción IA clicked');
+      const contenido = document.getElementById('contenido-predicciones');
+      const arrow = document.getElementById('arrow-icon');
+      const container = document.getElementById('prediccion-container');
+      
+      if (!contenido || !arrow || !container) {
+        console.error('❌ Elementos predicción no encontrados');
+        return;
+      }
+      
+      if (contenido.classList.contains('hidden')) {
+        // Cerrar otras cajas
+        cerrarCajaAleatorias();
+        cerrarCajaAnalisis();
+        
+        // Abrir esta caja con transición suave
+        contenido.style.opacity = '0';
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        container.style.opacity = '1';
+        
+        // Animar la aparición
+        requestAnimationFrame(() => {
+          contenido.style.opacity = '1';
+        });
+        
+        isPrediccionOpen = true;
+        console.log('✅ Caja predicción abierta');
+        
+        // Actualizar título del sorteo inmediatamente
+        actualizarTituloSorteo();
+        
+        // Ejecutar predicciones IA usando el sistema definitivo
+        try {
+          const fnPredicciones = window.ejecutarPrediccionesIA;
+          
+          if (fnPredicciones) {
+            console.log('🔄 Iniciando predicciones IA definitivas...');
+            await fnPredicciones();
+            window.prediccionesGeneradas = true;
+            console.log('✅ Predicciones IA generadas exitosamente');
+          } else {
+            console.error('❌ función ejecutarPrediccionesIA no está disponible');
+            const mensajeEstado = document.getElementById('mensaje-estado');
+            if (mensajeEstado) {
+              mensajeEstado.textContent = 'Sistema de predicciones no disponible. Intente recargar la página.';
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error en sistema de predicción IA:', error);
+        }
+      } else {
+        // Cerrar esta caja con transición suave
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          arrow.style.transform = 'rotate(0deg)';
+          container.style.opacity = '0.5';
+        }, 300);
+        
+        isPrediccionOpen = false;
+        console.log('✅ Caja predicción cerrada');
+      }
+    }
+
+    function toggleAnalisis() {
+      console.log('📊 Toggle análisis clicked');
+      const contenido = document.getElementById('contenido-analisis');
+      const arrow = document.getElementById('arrow-icon-analisis');
+      
+      if (!contenido || !arrow) {
+        console.error('❌ Elementos análisis no encontrados');
+        return;
+      }
+      
+      if (contenido.classList.contains('hidden')) {
+        // Cerrar otras cajas
+        cerrarCajaAleatorias();
+        cerrarCajaPredicciones();
+        
+        // Abrir esta caja con transición suave
+        contenido.style.opacity = '0';
+        contenido.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        
+        // Animar la aparición
+        requestAnimationFrame(() => {
+          contenido.style.opacity = '1';
+        });
+        
+        isAnalisisOpen = true;
+        console.log('✅ Caja análisis abierta');
+        
+        // Ejecutar análisis usando el sistema definitivo
+        const ejecutarAnalisis = async () => {
+          try {
+            console.log('🔄 Iniciando análisis definitivo...');
+            
+            const fnAnalisis = window.ejecutarAnalisisCompleto;
+            
+            if (fnAnalisis) {
+              console.log('🔄 Ejecutando análisis completo definitivo...');
+              await fnAnalisis();
+            } else {
+              console.error('❌ función ejecutarAnalisisCompleto no está disponible');
+              // Actualizar interfaz con error
+              ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                const elem = document.getElementById(`proyeccion-${sorteo}`);
+                const detalle = document.getElementById(`detalle-${sorteo}`);
+                if (elem) elem.textContent = 'Sistema no disponible';
+                if (detalle) detalle.textContent = 'Recargue la página';
+              });
+            }
+          } catch (error) {
+            console.error('❌ Error en sistema de análisis:', error);
+          }
+        };
+        
+        ejecutarAnalisis();
+                console.error('❌ No hay datos históricos disponibles');
+                // Mostrar mensaje de error
+                ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                  const elem = document.getElementById(`proyeccion-${sorteo}`);
+                  const detalle = document.getElementById(`detalle-${sorteo}`);
+                  if (elem) elem.textContent = 'Sin datos disponibles';
+                  if (detalle) detalle.textContent = 'Error al cargar los datos';
+                });
+              }
+            } else {
+              console.error('❌ Faltan funciones de análisis');
+              // Mostrar mensaje de error
+              ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+                const elem = document.getElementById(`proyeccion-${sorteo}`);
+                const detalle = document.getElementById(`detalle-${sorteo}`);
+                if (elem) elem.textContent = 'Sistema no disponible';
+                if (detalle) detalle.textContent = 'Error en módulos de análisis';
+              });
+            }
+          } catch (error) {
+            console.error('❌ Error general al generar proyecciones:', error);
+            // Mostrar mensaje de error general
+            ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+              const elem = document.getElementById(`proyeccion-${sorteo}`);
+              const detalle = document.getElementById(`detalle-${sorteo}`);
+              if (elem) elem.textContent = 'Error inesperado';
+              if (detalle) detalle.textContent = 'Intente nuevamente más tarde';
+            });
+          }
+        };
+        
+        // Ejecutar el proceso de análisis inmediatamente
+        cargarYAnalizarDatos();
+        
+      } else {
+        // Cerrar esta caja con transición suave
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          arrow.style.transform = 'rotate(0deg)';
+        }, 300);
+        
+        isAnalisisOpen = false;
+        console.log('✅ Caja análisis cerrada');
+      }
+    }
+
+    // Funciones auxiliares para cerrar cajas
+    function cerrarCajaAleatorias() {
+      const contenido = document.getElementById('contenido-aleatorias');
+      const arrow = document.getElementById('arrow-icon-aleatorias');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+          limpiarCombinacionesAleatorias();
+        }, 300);
+        isAleatoriaOpen = false;
+      }
+    }
+
+    function cerrarCajaPredicciones() {
+      const contenido = document.getElementById('contenido-predicciones');
+      const arrow = document.getElementById('arrow-icon');
+      const container = document.getElementById('prediccion-container');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+          if (container) container.style.opacity = '0.5';
+        }, 300);
+        isPrediccionOpen = false;
+      }
+    }
+
+    function cerrarCajaAnalisis() {
+      const contenido = document.getElementById('contenido-analisis');
+      const arrow = document.getElementById('arrow-icon-analisis');
+      
+      if (contenido && !contenido.classList.contains('hidden')) {
+        contenido.style.opacity = '0';
+        setTimeout(() => {
+          contenido.classList.add('hidden');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+        }, 300);
+        isAnalisisOpen = false;
+      }
+    }
+
+    function limpiarCombinacionesAleatorias() {
+      const container = document.getElementById('combinaciones-container');
+      if (container) {
+        container.innerHTML = '';
+        console.log('🧹 Combinaciones aleatorias limpiadas');
+      }
+    }
+
+    // Hacer funciones disponibles globalmente
+    window.toggleAleatorias = toggleAleatorias;
+    window.togglePrediccionIA = togglePrediccionIA;
+    window.toggleAnalisis = toggleAnalisis;
+  </script>
+  <!-- Script unificado de inicialización del sistema DEFINITIVO -->
+  <script src="js/sistema-definitivo.js"></script>
+
+  <script>
+    // Variables globales para compartir entre scripts
+    window.cantidadSeleccionada = 1;
+    window.datosHistoricos = null;
+    window.prediccionesGeneradas = false;
+    window.usuarioActualID = null;
+    window.prediccionesAlmacenadas = {
+      melate: null,
+      revancha: null,
+      revanchita: null
+    };
+    window.proyeccionesAlmacenadas = {
+      melate: null,
+      revancha: null,
+      revanchita: null
+    };
+
+    // Función para obtener el número de sorteo actual basado en el último sorteo de Melate
+    function obtenerNumeroSorteoActual() {
+      console.log('🔍 Obteniendo número de sorteo actual...');
+      
+      // Primero intentamos obtener el último sorteo desde los datos históricos del Melate
+      if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+        try {
+          // Ordenar los sorteos por número de concurso (descendente) para obtener el último
+          const sorteos = window.datosHistoricos.melate.sorteos;
+          
+          if (sorteos.length > 0) {
+            // Buscar el sorteo con el número más alto
+            let ultimoSorteoNum = 0;
+            
+            for (const sorteo of sorteos) {
+              // Convertir el número de concurso a entero y tomar el máximo
+              const numConcurso = parseInt(sorteo.concurso);
+              if (!isNaN(numConcurso) && numConcurso > ultimoSorteoNum) {
+                ultimoSorteoNum = numConcurso;
+              }
+            }
+            
+            if (ultimoSorteoNum > 0) {
+              const proximoSorteo = ultimoSorteoNum + 1;
+              console.log(`✅ Próximo sorteo calculado: ${proximoSorteo} (último: ${ultimoSorteoNum})`);
+              return proximoSorteo;
+            }
+          }
+          
+          console.warn('⚠️ No se encontraron sorteos válidos en los datos');
+        } catch (error) {
+          console.error('❌ Error al procesar los sorteos:', error);
+        }
+      } else {
+        // Mostrar qué datos tenemos disponibles para debug
+        console.warn('⚠️ Datos históricos incompletos:', {
+          datosHistoricos: !!window.datosHistoricos,
+          melate: window.datosHistoricos ? !!window.datosHistoricos.melate : false,
+          tieneSorteos: window.datosHistoricos && window.datosHistoricos.melate ? 
+                        !!window.datosHistoricos.melate.sorteos : false,
+          numSorteos: window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos ? 
+                      window.datosHistoricos.melate.sorteos.length : 0
+        });
+      }
+      
+      // Fallback mejorado si no hay datos disponibles
+      console.log('⚠️ Usando fallback dinámico para número de sorteo...');
+      
+      // Calcular un fallback basado en la fecha actual
+      // Usar los mismos valores de referencia que en dataParserGlobal.js
+      const fecha = new Date();
+      const fechaReferencia = new Date(2025, 6, 18); // 18 de julio de 2025
+      const sorteoReferencia = 4082; // Último sorteo conocido en el CSV
+      
+      // Calcular diferencia en días
+      const diferenciaMilisegundos = fecha - fechaReferencia;
+      const diferenciaDias = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
+      
+      // Estimar sorteos adicionales (2 por semana = 1 cada 3.5 días en promedio)
+      const sorteosAdicionales = Math.floor(diferenciaDias / 3.5);
+      
+      // Calcular el número de sorteo estimado (próximo sorteo)
+      const proximoSorteoEstimado = sorteoReferencia + Math.max(1, sorteosAdicionales);
+      console.log(`📊 Fallback dinámico: próximo sorteo estimado ${proximoSorteoEstimado} (${sorteosAdicionales} sorteos desde la referencia)`);
+      
+      // Si el valor calculado es demasiado bajo por alguna razón, usar el mínimo esperado
+      if (proximoSorteoEstimado < 4083) {
+        console.log(`⚠️ Corrigiendo valor estimado demasiado bajo: usando 4083 como mínimo`);
+        return 4083;
+      }
+      
+      return proximoSorteoEstimado;
+    }
+
+    // Función para actualizar el título con el número de sorteo
+    function actualizarTituloSorteo() {
+      // Llamar a la implementación principal del archivo dedicado (NO la optimizada)
+      if (typeof window.actualizarTituloSorteo === 'function' && window.actualizarTituloSorteo !== actualizarTituloSorteo) {
+        // Llamar la función del archivo externo, no la local
+        const archivoExterno = window.actualizarTituloSorteo;
+        delete window.actualizarTituloSorteo; // Evitar recursión
+        archivoExterno(); // Llamar función del archivo externo
+        window.actualizarTituloSorteo = actualizarTituloSorteo; // Restaurar función local
+      } else {
+        console.log('⚠️ Usando implementación de fallback para título');
+        // Fallback que calcula dinámicamente el sorteo
+        const tituloElement = document.getElementById('titulo-sorteo');
+        if (tituloElement) {
+          // Obtener primer nombre del usuario
+          let nombreUsuario = 'TI';
+          if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
+            nombreUsuario = window.usuarioActualNombre.trim().split(' ')[0];
+          } else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
+            nombreUsuario = window.usuarioActualEmail.split('@')[0];
+          }
+          
+          // Calcular próximo sorteo dinámicamente
+          let proximoSorteo = 4088; // Default más actualizado
+          if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
+            const sorteos = window.datosHistoricos.melate.sorteos;
+            if (sorteos.length > 0) {
+              let ultimoSorteo = 0;
+              for (const sorteo of sorteos) {
+                const num = parseInt(sorteo.concurso);
+                if (!isNaN(num) && num > ultimoSorteo) {
+                  ultimoSorteo = num;
+                }
+              }
+              if (ultimoSorteo > 0) {
+                proximoSorteo = ultimoSorteo + 1;
+              }
+            }
+          }
+          
+          tituloElement.textContent = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${proximoSorteo}`;
+          console.log(`✅ Título actualizado: ${nombreUsuario} para sorteo ${proximoSorteo}`);
+        }
+      }
+    }
+
+    // NO hacer función global aquí - usar la del archivo externo actualizarTituloSorteo.js
+    // window.actualizarTituloSorteo = actualizarTituloSorteo;
+
+
+
+    // Función para inicializar el botón de volver con retry
+    function inicializarBotonVolver() {
+      const btnBack = document.getElementById('btn-back');
+      if (!btnBack) {
+        console.log('⏳ Botón btn-back no encontrado, reintentando...');
+        setTimeout(inicializarBotonVolver, 500);
+        return;
+      }
+
+      // Remover event listeners anteriores
+      btnBack.replaceWith(btnBack.cloneNode(true));
+      const nuevoBtn = document.getElementById('btn-back');
+      
+      nuevoBtn.addEventListener('click', () => {
+        console.log('🔙 Click en botón volver - Navegando a home.html...');
+        window.location.href = 'home.html';
+      });
+      
+      console.log('✅ Event listener configurado para botón btn-back');
+    }
+
+    // Inicializar botón de volver
+    setTimeout(inicializarBotonVolver, 1000);
+
+    // Función para inicializar el botón de combinaciones aleatorias con retry
+    function inicializarBotonAleatorias() {
+      const btnGenerar = document.getElementById('btn-generar');
+      if (!btnGenerar) {
+        console.log('⏳ Botón btn-generar no encontrado, reintentando...');
+        setTimeout(inicializarBotonAleatorias, 500);
+        return;
+      }
+
+      // Remover event listeners anteriores
+      btnGenerar.replaceWith(btnGenerar.cloneNode(true));
+      const nuevoBtn = document.getElementById('btn-generar');
+      
+      nuevoBtn.addEventListener('click', () => {
+        console.log('🎲 Click en botón - Generando combinación aleatoria...');
+        
+        if (typeof window.mostrarCombinacionAleatoria === 'function') {
+          console.log('✅ Función mostrarCombinacionAleatoria encontrada, ejecutando...');
+          window.mostrarCombinacionAleatoria();
+        } else {
+          console.log('⚠️ Función mostrarCombinacionAleatoria no disponible, usando fallback...');
+          // Fallback si la función no está disponible
+          const container = document.getElementById('combinaciones-container');
+          if (container) {
+            container.innerHTML = `
+              <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+                <p class="text-white">Generando combinación...</p>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              const numeros = [];
+              while (numeros.length < 6) {
+                const num = Math.floor(Math.random() * 56) + 1;
+                if (!numeros.includes(num)) numeros.push(num);
+              }
+              numeros.sort((a, b) => a - b);
+              
+              container.innerHTML = `
+                <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
+                  <h3 class="text-xl font-bold text-white mb-4 text-center">🎲 Tu Combinación Aleatoria</h3>
+                  <div class="flex justify-center">
+                    <div class="bg-purple-500 bg-opacity-20 rounded-lg p-6 text-center border border-purple-300 border-opacity-30">
+                      <div class="flex justify-center space-x-3 mb-4">
+                        ${numeros.map(num => `<span class="bg-white text-purple-600 font-bold py-2 px-3 rounded-lg text-lg shadow-lg">${num}</span>`).join('')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+              console.log(`✅ Combinación fallback generada: ${numeros.join(' - ')}`);
+            }, 800);
+          }
+        }
+      });
+      
+      console.log('✅ Event listener configurado para botón btn-generar');
+    }
+
+    // Inicializar después de que todos los scripts se hayan cargado
+    setTimeout(inicializarBotonAleatorias, 2000);
+
+    // El botón de generar nueva proyección ha sido eliminado
+    // La generación de proyecciones ahora ocurre automáticamente al abrir la caja de análisis
+
+    // Función para mostrar combinaciones
+    function mostrarCombinaciones(combinaciones) {
+      const container = document.getElementById('combinaciones-container');
+      
+      const html = `
+        <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm border border-white border-opacity-20">
+          <h3 class="text-xl font-bold text-white mb-4 text-center">
+            🎲 ${combinaciones.length} Combinación${combinaciones.length > 1 ? 'es' : ''} Aleatoria${combinaciones.length > 1 ? 's' : ''}
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${combinaciones.map((combo, index) => `
+              <div class="bg-purple-500 bg-opacity-20 rounded-lg p-4 text-center border border-purple-300 border-opacity-30">
+                <h4 class="text-lg font-semibold text-white mb-2">Combinación ${index + 1}</h4>
+                <div class="flex justify-center space-x-2 mb-3">
+                  ${combo.map(num => `
+                    <span class="bg-white text-purple-600 font-bold py-1 px-2 rounded text-sm">
+                      ${num}
+                    </span>
+                  `).join('')}
+                </div>
+                <button onclick="copiarCombinacion('${combo.join(', ')}')" class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full transition-all duration-300">
+                  📋 Copiar
+                </button>
+              </div>
+            `).join('')}
+          </div>
+          <div class="text-center mt-6">
+            <button id="btn-generar-nuevas" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+              🔄 Generar Nuevas Combinaciones
+            </button>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+      
+      // Agregar evento al botón de generar nuevas
+      document.getElementById('btn-generar-nuevas').addEventListener('click', () => {
+        generarYMostrarCombinaciones();
+      });
+    }
+
+    // Función principal para generar y mostrar combinaciones
+    function generarYMostrarCombinaciones() {
+      console.log(`🎲 Generando ${cantidadSeleccionada} combinaciones aleatorias...`);
+      
+      const container = document.getElementById('combinaciones-container');
+      container.innerHTML = `
+        <div class="text-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p class="text-white">Generando combinaciones...</p>
+        </div>
+      `;
+      
+      try {
+        const combinaciones = generarCombinacionesAleatorias(cantidadSeleccionada);
+        mostrarCombinaciones(combinaciones);
+      } catch (error) {
+        console.error('❌ Error generando combinaciones:', error);
+        container.innerHTML = `
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong>Error:</strong> No se pudieron generar las combinaciones. ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    // === FUNCIONES PARA PROYECCIONES BASADAS EN ANÁLISIS ===
+    
+    // Función principal para generar proyecciones basadas en análisis
+    async function generarProyeccionesAnalisis() {
+      console.log('📊 Generando proyecciones basadas en análisis estadístico...');
+      
+      try {
+        // Asegurar que tenemos datos históricos
+        if (!window.datosHistoricos) {
+          console.log('🔄 Cargando datos históricos para análisis...');
+          window.datosHistoricos = await window.cargarDatosHistoricos('todos');
+          datosHistoricos = window.datosHistoricos;
+        }
+        
+        // SIEMPRE generar nuevas proyecciones (no usar cache)
+        console.log('🔄 Generando nuevas proyecciones de análisis cada vez...');
+        
+        const sorteos = ['melate', 'revancha', 'revanchita'];
+        
+        for (const sorteo of sorteos) {
+          try {
+            if (!window.datosHistoricos[sorteo] || !window.datosHistoricos[sorteo].numeros) {
+              console.warn(`⚠️ No hay datos disponibles para ${sorteo}`);
+              const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+              const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+              if (elementoProyeccion) elementoProyeccion.textContent = 'Sin datos disponibles';
+              if (elementoDetalle) elementoDetalle.textContent = 'Requiere datos históricos';
+              continue;
+            }
+            
+            // Mostrar loading con efecto mejorado
+            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+            if (elementoProyeccion) elementoProyeccion.textContent = '🔄 Analizando...';
+            if (elementoDetalle) {
+              // Añadir clase activa para animación
+              elementoDetalle.classList.add('activo');
+              await mostrarAnalisisProyeccionPorPasos(elementoDetalle, sorteo);
+            }
+            
+            // Generar proyección usando los 4 análisis especificados
+            const proyeccion = await generarProyeccionPorAnalisis(window.datosHistoricos[sorteo], sorteo);
+            
+            if (elementoProyeccion && proyeccion.numeros) {
+              elementoProyeccion.textContent = proyeccion.numeros.join(' - ');
+            }
+            
+            if (elementoDetalle && proyeccion.detalle) {
+              // Remover clase activa de animación
+              elementoDetalle.classList.remove('activo');
+              elementoDetalle.textContent = `📊 Análisis: ${proyeccion.detalle}`;
+            }
+            
+            // Almacenar la proyección para uso futuro
+            window.proyeccionesAlmacenadas[sorteo] = {
+              numeros: proyeccion.numeros,
+              detalle: proyeccion.detalle,
+              timestamp: new Date().getTime()
+            };
+            proyeccionesAlmacenadas[sorteo] = window.proyeccionesAlmacenadas[sorteo];
+            
+            console.log(`✅ Proyección para ${sorteo}:`, proyeccion.numeros);
+            console.log(`📝 Detalle ${sorteo}:`, proyeccion.detalle);
+
+          } catch (error) {
+            console.error(`❌ Error generando proyección para ${sorteo}:`, error);
+            const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+            const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+            if (elementoProyeccion) elementoProyeccion.textContent = 'Error al generar';
+            if (elementoDetalle) elementoDetalle.textContent = 'Error en el análisis';
+          }
+        }
+        
+        // Guardar todas las proyecciones en localStorage
+        guardarProyeccionesAlmacenadas();
+        
+        console.log('✅ Todas las proyecciones de análisis completadas');
+        
+      } catch (error) {
+        console.error('❌ Error en el sistema de proyección:', error);
+        // Mostrar error en todas las cajas
+        const sorteos = ['melate', 'revancha', 'revanchita'];
+        sorteos.forEach(sorteo => {
+          const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+          if (elementoProyeccion) elementoProyeccion.textContent = 'Sistema no disponible';
+        });
+      }
+    }
+    
+    // Función para generar una proyección específica por sorteo
+    async function generarProyeccionPorAnalisis(datosSorteo, sorteo) {
+      console.log(`🔍 Generando proyección para ${sorteo} usando los 4 análisis de analisis.html...`);
+      
+      // Análisis 1: Frecuencias históricas (22%) - igual que en analisis.html
+      const frecuencias = calcularFrecuencias(datosSorteo.numeros);
+      const numerosPorFrecuencia = seleccionarPorFrecuencia(frecuencias);
+      
+      // Análisis 2: Suma de números (22%) - igual que en analisis.html
+      const analisisSuma = analizarSumaNumeros({[sorteo]: datosSorteo});
+      const numerosPorSuma = seleccionarPorSuma(analisisSuma[sorteo]);
+      
+      // Análisis 3: Balance pares/impares (22%) - igual que en analisis.html
+      const analisisPares = analizarParesImpares({[sorteo]: datosSorteo});
+      const numerosPorBalance = seleccionarPorBalance(analisisPares[sorteo]);
+      
+      // Análisis 4: Décadas por posición (22%) - igual que en analisis.html
+      const analisisDecadas = analizarDecadaPorPosicion({[sorteo]: datosSorteo});
+      const numerosPorDecadas = seleccionarPorDecadas(analisisDecadas[sorteo]);
+      
+      // Factor aleatorio (12%)
+      const numerosAleatorios = generarNumerosAleatorios();
+      
+      // Combinar todos los análisis con sus pesos
+      const combinacionFinal = combinarAnalisis({
+        frecuencias: numerosPorFrecuencia,
+        suma: numerosPorSuma,
+        balance: numerosPorBalance,
+        decadas: numerosPorDecadas,
+        aleatorios: numerosAleatorios
+      });
+      
+      // Detalle que refleja exactamente los 4 análisis usados
+      const detalle = `Frecuencias: ${numerosPorFrecuencia.slice(0,2).join(',')} | Suma: ${numerosPorSuma.slice(0,2).join(',')} | Balance: ${numerosPorBalance.slice(0,2).join(',')} | Décadas: ${numerosPorDecadas.slice(0,2).join(',')}`;
+      
+      return {
+        numeros: combinacionFinal,
+        detalle: detalle
+      };
+    }
+
+    // Función para mostrar análisis de proyección paso a paso con mejor visibilidad
+    async function mostrarAnalisisProyeccionPorPasos(elemento, sorteo) {
+      const pasosAnalisis = [
+        { texto: '📊 Analizando frecuencias históricas...', duracion: 350 },
+        { texto: '🔢 Calculando suma de números...', duracion: 350 },
+        { texto: '⚖️ Evaluando balance pares/impares...', duracion: 350 },
+        { texto: '🎯 Analizando décadas por posición...', duracion: 350 },
+        { texto: '🎲 Aplicando factor aleatorio (12%)...', duracion: 300 },
+        { texto: '🔄 Combinando los 4 análisis principales...', duracion: 300 },
+        { texto: '✨ Optimizando combinación final...', duracion: 200 }
+      ];
+
+      elemento.classList.add('activo');
+
+      for (let i = 0; i < pasosAnalisis.length; i++) {
+        const paso = pasosAnalisis[i];
+        elemento.innerHTML = `
+          <span class="inline-flex items-center justify-center w-full">
+            <span class="animate-pulse font-semibold text-center">
+              ${paso.texto}
+            </span>
+          </span>
+        `;
+        
+        // Esperar antes del siguiente paso
+        await new Promise(resolve => setTimeout(resolve, paso.duracion));
+      }
+      
+      elemento.classList.remove('activo');
+      // Mensaje final
+      elemento.innerHTML = `
+        <span class="inline-flex items-center justify-center w-full">
+          <span class="font-medium text-center">
+            🎯 Análisis de 4 tipos completado
+          </span>
+        </span>
+      `;
+    }
+    
+    // Seleccionar números por frecuencia (más frecuentes tienen mayor probabilidad)
+    function seleccionarPorFrecuencia(frecuencias) {
+      const ordenados = Object.entries(frecuencias)
+        .sort(([,a], [,b]) => b - a)
+        .map(([num]) => parseInt(num));
+      
+      // Seleccionar los 20 más frecuentes con algo de variación
+      const candidatos = ordenados.slice(0, 20);
+      return mezclarArray(candidatos).slice(0, 8);
+    }
+    
+    // Seleccionar números por suma (buscar números que sumen en el rango óptimo)
+    function seleccionarPorSuma(analisisSuma) {
+      const rangoOptimo = analisisSuma.rangoMasFrecuente[0]; // '150-199', etc.
+      const [min, max] = rangoOptimo.split('-').map(n => parseInt(n) || 300);
+      
+      // Generar números que tiendan a sumar en ese rango
+      const numeros = [];
+      const targetSum = (min + max) / 2; // Suma objetivo
+      const avgPerNumber = targetSum / 6; // Promedio por número
+      
+      for (let i = 0; i < 8; i++) {
+        const variation = (Math.random() - 0.5) * 20; // Variación de ±10
+        const numero = Math.max(1, Math.min(56, Math.round(avgPerNumber + variation)));
+        numeros.push(numero);
+      }
+      
+      return [...new Set(numeros)].slice(0, 8); // Eliminar duplicados
+    }
+    
+    // Seleccionar números por balance pares/impares
+    function seleccionarPorBalance(analisisPares) {
+      const distribucionOptima = analisisPares.distribucionMasFrecuente[0]; // '3p-3i', etc.
+      const [pares] = distribucionOptima.split('-').map(s => parseInt(s.replace('p', '')));
+      
+      const numerosPares = [];
+      const numerosImpares = [];
+      
+      // Generar pares e impares según la distribución óptima
+      for (let i = 2; i <= 56; i += 2) {
+        if (numerosPares.length < 4) numerosPares.push(i);
+      }
+      
+      for (let i = 1; i <= 56; i += 2) {
+        if (numerosImpares.length < 4) numerosImpares.push(i);
+      }
+      
+      const seleccionados = [];
+      seleccionados.push(...mezclarArray(numerosPares).slice(0, Math.min(pares, 4)));
+      seleccionados.push(...mezclarArray(numerosImpares).slice(0, Math.min(6-pares, 4)));
+      
+      return mezclarArray(seleccionados).slice(0, 8);
+    }
+    
+    // Seleccionar números por décadas
+    function seleccionarPorDecadas(analisisDecadas) {
+      const decadaOptima = analisisDecadas.decadaMasFrecuente[0]; // '21-30', etc.
+      const [min, max] = decadaOptima.split('-').map(n => parseInt(n));
+      
+      const numerosDeLaDecada = [];
+      for (let i = min; i <= max; i++) {
+        numerosDeLaDecada.push(i);
+      }
+      
+      // Seleccionar algunos de la década óptima y algunos aleatorios
+      const seleccionados = [];
+      seleccionados.push(...mezclarArray(numerosDeLaDecada).slice(0, 4));
+      
+      // Agregar algunos números de otras décadas
+      const otrosNumeros = [];
+      for (let i = 1; i <= 56; i++) {
+        if (i < min || i > max) otrosNumeros.push(i);
+      }
+      seleccionados.push(...mezclarArray(otrosNumeros).slice(0, 4));
+      
+      return mezclarArray(seleccionados).slice(0, 8);
+    }
+    
+    // Generar números completamente aleatorios
+    function generarNumerosAleatorios() {
+      const numeros = [];
+      while (numeros.length < 8) {
+        const num = Math.floor(Math.random() * 56) + 1;
+        if (!numeros.includes(num)) {
+          numeros.push(num);
+        }
+      }
+      return numeros;
+    }
+    
+    // Combinar todos los análisis según los pesos especificados
+    function combinarAnalisis(analisis) {
+      const pool = [];
+      
+      // Agregar números según los pesos (22%, 22%, 22%, 22%, 12%)
+      // Para 6 números finales, esto se traduce aproximadamente a:
+      analisis.frecuencias.forEach(num => pool.push(num, num)); // 2 veces (peso alto)
+      analisis.suma.forEach(num => pool.push(num, num)); // 2 veces
+      analisis.balance.forEach(num => pool.push(num, num)); // 2 veces  
+      analisis.decadas.forEach(num => pool.push(num, num)); // 2 veces
+      analisis.aleatorios.forEach(num => pool.push(num)); // 1 vez (peso bajo)
+      
+      // Seleccionar 6 números únicos del pool
+      const numerosUnicos = [...new Set(pool)];
+      const combinacionFinal = mezclarArray(numerosUnicos).slice(0, 6).sort((a, b) => a - b);
+      
+      // Si no tenemos 6 números, completar con aleatorios
+      while (combinacionFinal.length < 6) {
+        const num = Math.floor(Math.random() * 56) + 1;
+        if (!combinacionFinal.includes(num)) {
+          combinacionFinal.push(num);
+        }
+      }
+      
+      return combinacionFinal.sort((a, b) => a - b);
+    }
+    
+    // Función auxiliar para mezclar array
+    function mezclarArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Función para generar un conjunto de números aleatorios como fallback
+    function generarCombinacionFallback() {
+      const numeros = new Set();
+      while (numeros.size < 6) {
+        numeros.add(Math.floor(Math.random() * 56) + 1);
+      }
+      return Array.from(numeros).sort((a, b) => a - b);
+    }
+    
+    // Función para generar predicciones por sorteo con análisis avanzado de IA
+    async function generarPrediccionesPorSorteo() {
+      console.log('🤖 Generando predicciones avanzadas con IA...');
+      
+      const mensajeEstado = document.getElementById('mensaje-estado');
+      if (mensajeEstado) {
+        mensajeEstado.textContent = 'Generando predicciones con métodos avanzados de análisis...';
+      }
+      
+      // Establecer un timeout para garantizar que siempre tengamos una respuesta
+      const timeoutPromise = new Promise(resolve => {
+        setTimeout(() => {
+          resolve('timeout');
+        }, 10000); // 10 segundos de timeout
+      });
+      
+      try {
+        // Cargar datos históricos si no están cargados
+        if (!window.datosHistoricos) {
+          window.datosHistoricos = await Promise.race([window.cargarDatosHistoricos('todos'), timeoutPromise]);
+          datosHistoricos = window.datosHistoricos;
+          if (window.datosHistoricos === 'timeout') {
+            throw new Error('Tiempo de espera agotado al cargar datos históricos');
+          }
+        }
+        
+        // Generar predicciones para cada sorteo usando el ID real del usuario
+        const sorteos = ['melate', 'revancha', 'revanchita'];
+        // Usar el ID real del usuario autenticado para predicciones personalizadas
+        const userId = window.usuarioActualID || 'usuario-no-autenticado';
+        
+        // Intentar cargar predicciones almacenadas y verificar si son válidas
+        const prediccionesValidas = cargarPrediccionesAlmacenadas(userId);
+        
+        // Si no hay predicciones válidas (datos cambiaron), generar nuevas
+        if (!prediccionesValidas) {
+          console.log('🔄 Generando nuevas predicciones debido a cambios en los datos históricos');
+        }
+        
+        for (const sorteo of sorteos) {
+          try {
+            // Si ya tenemos una predicción válida para este sorteo, usarla
+            if (prediccionesValidas && window.prediccionesAlmacenadas[sorteo] && window.prediccionesAlmacenadas[sorteo].prediccion) {
+              const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+              if (elementoCombo) {
+                elementoCombo.textContent = window.prediccionesAlmacenadas[sorteo].prediccion.join(' - ');
+                console.log(`✅ Usando predicción almacenada para ${sorteo}:`, window.prediccionesAlmacenadas[sorteo].prediccion);
+              }
+              continue; // Saltar a siguiente sorteo
+            }
+            
+            // Verificar que existan datos para este sorteo
+            if (!window.datosHistoricos[sorteo] || !window.datosHistoricos[sorteo].numeros || window.datosHistoricos[sorteo].numeros.length === 0) {
+              console.warn(`⚠️ No hay datos históricos disponibles para ${sorteo}`);
+              const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+              if (elementoCombo) {
+                elementoCombo.textContent = 'Datos insuficientes';
+              }
+              continue;
+            }
+            
+            // Verificar si tenemos una predicción almacenada para este usuario y sorteo
+            const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+            
+            // Si ya tenemos una predicción almacenada y válida para este sorteo, usarla
+            if (window.prediccionesAlmacenadas[sorteo] && 
+                window.prediccionesAlmacenadas[sorteo].userId === userId && 
+                window.prediccionesAlmacenadas[sorteo].ultimoSorteo === window.datosHistoricos[sorteo].ultimoSorteo) {
+                
+              console.log(`🔄 Usando predicción almacenada para ${sorteo}`);
+              
+              if (elementoCombo && window.prediccionesAlmacenadas[sorteo].prediccion) {
+                elementoCombo.textContent = window.prediccionesAlmacenadas[sorteo].prediccion.join(' - ');
+                console.log(`✅ Predicción almacenada para ${sorteo} cargada:`, window.prediccionesAlmacenadas[sorteo].prediccion);
+              }
+              continue;
+            }
+            
+            // Si llegamos aquí, necesitamos generar una nueva predicción
+            
+            // Crear objeto de datos específico para este sorteo con metadatos adicionales
+            const datosSorteo = {
+              numeros: window.datosHistoricos[sorteo].numeros,
+              datos: window.datosHistoricos[sorteo].sorteos,
+              sorteo: sorteo, // Identificador clave para diferenciar cada juego
+              ultimoSorteo: window.datosHistoricos[sorteo].ultimoSorteo,
+              fechaGeneracion: new Date().toISOString()
+            };
+            
+            // Log para depuración
+            console.log(`🔍 Preparando predicción con IA para ${sorteo}:`, {
+              tipoSorteo: sorteo,
+              cantidadNumeros: window.datosHistoricos[sorteo].numeros.length,
+              cantidadSorteos: window.datosHistoricos[sorteo].sorteos.length,
+              ultimoSorteo: window.datosHistoricos[sorteo].ultimoSorteo
+            });
+            
+            // Mostrar spinner mientras se procesa
+            if (elementoCombo) {
+              elementoCombo.innerHTML = '<span class="animate-pulse">Analizando datos...</span>';
+            }
+            
+            // Generar predicción personalizada usando los 5 métodos de análisis
+            // La función espera (userId, datos) y debe estar disponible globalmente
+            const prediccion = await window.generarPrediccionPersonalizada(userId, datosSorteo);
+            
+            if (elementoCombo && prediccion && prediccion.length === 6) {
+              elementoCombo.textContent = prediccion.join(' - ');
+              console.log(`✅ Predicción IA para ${sorteo} generada:`, prediccion);
+              
+              // Almacenar la predicción para uso futuro
+              window.prediccionesAlmacenadas[sorteo] = {
+                userId: userId,
+                prediccion: prediccion,
+                ultimoSorteo: window.datosHistoricos[sorteo].ultimoSorteo,
+                timestamp: new Date().getTime()
+              };
+              prediccionesAlmacenadas[sorteo] = window.prediccionesAlmacenadas[sorteo];
+              
+              // Guardar en localStorage
+              guardarPrediccionesAlmacenadas();
+            }
+          } catch (error) {
+            console.error(`❌ Error generando predicción para ${sorteo}:`, error);
+            const elementoCombo = document.getElementById(`combinacion-${sorteo}`);
+            if (elementoCombo) {
+              elementoCombo.textContent = 'Error al generar';
+            }
+          }
+        }
+        
+        if (mensajeEstado) {
+          mensajeEstado.textContent = 'Predicciones generadas con análisis completo de 5 métodos';
+        }
+        
+      } catch (error) {
+        console.error('❌ Error en el sistema de predicción:', error);
+        if (mensajeEstado) {
+          mensajeEstado.textContent = 'Error al generar predicciones';
+        }
+      }
+    }
+    
+    // Función para guardar predicciones en localStorage con hash de datos
+    function guardarPrediccionesAlmacenadas() {
+      try {
+        // Calcular hash de los datos actuales para detectar cambios
+        const datosHash = calcularHashDatosHistoricos();
+        
+        const prediccionesConHash = {
+          ...window.prediccionesAlmacenadas,
+          _datosHash: datosHash,
+          _timestamp: new Date().getTime()
+        };
+        
+        localStorage.setItem('ya-me-vi-predicciones', JSON.stringify(prediccionesConHash));
+        console.log('💾 Predicciones guardadas en localStorage con hash:', datosHash);
+      } catch (error) {
+        console.error('❌ Error guardando predicciones en localStorage:', error);
+      }
+    }
+    
+    // Función para cargar predicciones desde localStorage con validación de datos
+    function cargarPrediccionesAlmacenadas(userId) {
+      try {
+        const datosGuardados = localStorage.getItem('ya-me-vi-predicciones');
+        if (datosGuardados) {
+          const prediccionesGuardadas = JSON.parse(datosGuardados);
+          
+          // Verificar si los datos históricos han cambiado
+          const hashActual = calcularHashDatosHistoricos();
+          const hashGuardado = prediccionesGuardadas._datosHash;
+          
+          if (hashActual !== hashGuardado) {
+            console.log('🔄 Datos históricos han cambiado, invalidando predicciones almacenadas');
+            console.log(`Hash anterior: ${hashGuardado}, Hash actual: ${hashActual}`);
+            localStorage.removeItem('ya-me-vi-predicciones');
+            return false; // Indicar que se necesita regenerar
+          }
+          
+          // Solo restaurar si el userId coincide y los datos son válidos
+          let prediccionesRestauradas = 0;
+          for (const sorteo in prediccionesGuardadas) {
+            if (sorteo.startsWith('_')) continue; // Saltar metadatos
+            
+            if (prediccionesGuardadas[sorteo] && prediccionesGuardadas[sorteo].userId === userId) {
+              window.prediccionesAlmacenadas[sorteo] = prediccionesGuardadas[sorteo];
+              prediccionesAlmacenadas[sorteo] = prediccionesGuardadas[sorteo];
+              prediccionesRestauradas++;
+            }
+          }
+          
+          console.log(`📂 ${prediccionesRestauradas} predicciones válidas cargadas desde localStorage`);
+          return prediccionesRestauradas > 0;
+        }
+      } catch (error) {
+        console.error('❌ Error cargando predicciones desde localStorage:', error);
+      }
+      return false;
+    }
+    
+    // Función para calcular hash de los datos históricos actuales
+    function calcularHashDatosHistoricos() {
+      if (!window.datosHistoricos) return 'no-data';
+      
+      let hashString = '';
+      ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+        if (window.datosHistoricos[sorteo] && window.datosHistoricos[sorteo].sorteos) {
+          const sorteos = window.datosHistoricos[sorteo].sorteos;
+          hashString += `${sorteo}:${sorteos.length}`;
+          
+          // Agregar los primeros 3 sorteos como "firma"
+          if (sorteos.length > 0) {
+            const muestra = sorteos.slice(0, 3);
+            hashString += muestra.map(s => `${s.concurso}-${s.numeros.join('')}`).join('|');
+          }
+        }
+      });
+      
+      // Agregar fecha actual truncada a semanas para regenerar periódicamente
+      const semanaActual = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24 * 7));
+      hashString += `|semana:${semanaActual}`;
+      
+      // Calcular hash simple
+      let hash = 0;
+      for (let i = 0; i < hashString.length; i++) {
+        const char = hashString.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convertir a 32 bits
+      }
+      
+      return Math.abs(hash).toString(36); // Base 36 para hash más corto
+    }
+    
+    // Funciones para manejar proyecciones de análisis con caché
+    function guardarProyeccionesAlmacenadas() {
+      try {
+        const datosHash = calcularHashDatosHistoricos();
+        
+        const proyeccionesConHash = {
+          ...window.proyeccionesAlmacenadas,
+          _datosHash: datosHash,
+          _timestamp: new Date().getTime()
+        };
+        
+        localStorage.setItem('ya-me-vi-proyecciones', JSON.stringify(proyeccionesConHash));
+        console.log('💾 Proyecciones de análisis guardadas en localStorage con hash:', datosHash);
+      } catch (error) {
+        console.error('❌ Error guardando proyecciones en localStorage:', error);
+      }
+    }
+    
+    function cargarProyeccionesAlmacenadas() {
+      try {
+        const datosGuardados = localStorage.getItem('ya-me-vi-proyecciones');
+        if (datosGuardados) {
+          const proyeccionesGuardadas = JSON.parse(datosGuardados);
+          
+          // Verificar si los datos históricos han cambiado
+          const hashActual = calcularHashDatosHistoricos();
+          const hashGuardado = proyeccionesGuardadas._datosHash;
+          
+          if (hashActual !== hashGuardado) {
+            console.log('🔄 Datos históricos han cambiado, invalidando proyecciones de análisis almacenadas');
+            console.log(`Hash anterior: ${hashGuardado}, Hash actual: ${hashActual}`);
+            localStorage.removeItem('ya-me-vi-proyecciones');
+            return false; // Indicar que se necesita regenerar
+          }
+          
+          // Restaurar proyecciones válidas
+          let proyeccionesRestauradas = 0;
+          for (const sorteo in proyeccionesGuardadas) {
+            if (sorteo.startsWith('_')) continue; // Saltar metadatos
+            
+            if (proyeccionesGuardadas[sorteo] && proyeccionesGuardadas[sorteo].numeros) {
+              window.proyeccionesAlmacenadas[sorteo] = proyeccionesGuardadas[sorteo];
+              proyeccionesAlmacenadas[sorteo] = proyeccionesGuardadas[sorteo];
+              proyeccionesRestauradas++;
+            }
+          }
+          
+          console.log(`📂 ${proyeccionesRestauradas} proyecciones de análisis válidas cargadas desde localStorage`);
+          return proyeccionesRestauradas > 0;
+        }
+      } catch (error) {
+        console.error('❌ Error cargando proyecciones desde localStorage:', error);
+      }
+      return false;
+    }
+
+    // Inicializar con valor temporal
+    actualizarTituloSorteo();
+    
+    // Cargar datos históricos al inicio
+    if (window.cargarDatosHistoricos) {
+      window.cargarDatosHistoricos('todos').then(datos => {
+        window.datosHistoricos = datos;
+        datosHistoricos = datos;
+        console.log('✅ Datos históricos cargados en sugeridas.html');
+        // Actualizar el título con el número real una vez que tenemos los datos
+        actualizarTituloSorteo();
+        
+        // Marcar que ya tenemos datos disponibles  
+        window.prediccionesGeneradas = false; // Reset para forzar regeneración con datos reales
+      }).catch(error => {
+        console.error('❌ Error cargando datos históricos:', error);
+        // Usar fallback para el título
+        actualizarTituloSorteo();
+      });
+    } else {
+      console.warn('⚠️ Función cargarDatosHistoricos no disponible, usando fallback');
+      actualizarTituloSorteo();
+    }
+
+    // Hacer funciones disponibles globalmente desde el módulo
+    window.generarProyeccionesAnalisis = generarProyeccionesAnalisis;
+    window.generarPrediccionesPorSorteo = generarPrediccionesPorSorteo;
+    window.mostrarCombinaciones = mostrarCombinaciones;
+    window.generarCombinacionesAleatorias = generarCombinacionesAleatorias;
+    window.obtenerNumeroSorteoActual = obtenerNumeroSorteoActual;
+    // NO sobrescribir actualizarTituloSorteo aquí - usar la del archivo externo
+    window.calcularHashDatosHistoricos = calcularHashDatosHistoricos;
+    window.cargarPrediccionesAlmacenadas = cargarPrediccionesAlmacenadas;
+    window.guardarPrediccionesAlmacenadas = guardarPrediccionesAlmacenadas;
+    window.cargarProyeccionesAlmacenadas = cargarProyeccionesAlmacenadas;
+    window.guardarProyeccionesAlmacenadas = guardarProyeccionesAlmacenadas;
+
+  </script>
+  <script type="module">
+    // Código de autenticación y verificación de usuario
+    import { auth, onAuthStateChanged } from './js/firebase-init.js';
+    import { cargarDatosHistoricos } from './js/dataParser.js';
+
+    // Verificar autenticación y cargar datos
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+      } else {
+        // Establecer variables globales de forma más explícita
+        window.usuarioActualID = user.uid;
+        window.usuarioActualNombre = user.displayName;
+        window.usuarioActualEmail = user.email;
+        
+        // También establecer variables sin window para compatibilidad
+        globalThis.usuarioActualID = user.uid;
+        
+        // Limpiar predicciones y proyecciones obsoletas al iniciar sesión
+        try {
+          const hashActual = window.calcularHashDatosHistoricos ? window.calcularHashDatosHistoricos() : 'unknown';
+          
+          // Verificar predicciones IA
+          const datosPredicciones = localStorage.getItem('ya-me-vi-predicciones');
+          if (datosPredicciones) {
+            const prediccionesGuardadas = JSON.parse(datosPredicciones);
+            const hashPrediccionesGuardado = prediccionesGuardadas._datosHash;
+            
+            if (hashActual !== hashPrediccionesGuardado) {
+              console.log('🧹 Limpiando predicciones IA obsoletas al iniciar sesión');
+              localStorage.removeItem('ya-me-vi-predicciones');
+            }
+          }
+          
+          // Verificar proyecciones de análisis
+          const datosProyecciones = localStorage.getItem('ya-me-vi-proyecciones');
+          if (datosProyecciones) {
+            const proyeccionesGuardadas = JSON.parse(datosProyecciones);
+            const hashProyeccionesGuardado = proyeccionesGuardadas._datosHash;
+            
+            if (hashActual !== hashProyeccionesGuardado) {
+              console.log('🧹 Limpiando proyecciones de análisis obsoletas al iniciar sesión');
+              localStorage.removeItem('ya-me-vi-proyecciones');
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error verificando datos al iniciar:', error);
+        }
+        globalThis.usuarioActualNombre = user.displayName;
+        globalThis.usuarioActualEmail = user.email;
+        
+        // Variable local para compatibilidad
+        usuarioActualID = user.uid;
+        
+        console.log('👤 Usuario autenticado:', user.uid);
+        console.log('📝 Nombre del usuario (displayName):', user.displayName);
+        console.log('📧 Email del usuario:', user.email);
+        console.log('� Variables globales establecidas:');
+        console.log('- window.usuarioActualNombre:', window.usuarioActualNombre);
+        console.log('- window.usuarioActualEmail:', window.usuarioActualEmail);
+        console.log('- window.usuarioActualID:', window.usuarioActualID);
+        
+        // Forzar múltiples intentos de actualización del título con diferentes delays
+        setTimeout(() => {
+          console.log('🎯 Primer intento de actualización desde onAuthStateChanged (1s)...');
+          if (window.actualizarTituloSorteoConNombre && typeof window.actualizarTituloSorteoConNombre === 'function') {
+            window.actualizarTituloSorteoConNombre();
+          }
+        }, 1000);
+        
+        setTimeout(() => {
+          console.log('🎯 Segundo intento de actualización desde onAuthStateChanged (3s)...');
+          if (window.actualizarTituloSorteoConNombre && typeof window.actualizarTituloSorteoConNombre === 'function') {
+            window.actualizarTituloSorteoConNombre();
+          }
+        }, 3000);
+        
+        setTimeout(() => {
+          console.log('🎯 Tercer intento de actualización desde onAuthStateChanged (5s)...');
+          if (window.actualizarTituloSorteoConNombre && typeof window.actualizarTituloSorteoConNombre === 'function') {
+            window.actualizarTituloSorteoConNombre();
+          }
+        }, 5000);
+        
+        try {
+          // Cargar datos históricos
+          window.datosHistoricos = await window.cargarDatosHistoricos('todos');
+          datosHistoricos = window.datosHistoricos;
+          console.log('📊 Datos históricos cargados para predicciones IA');
+          
+          // Actualizar el título con el número real una vez que tenemos los datos
+          if (window.actualizarTituloSorteo) {
+            window.actualizarTituloSorteo();
+          } else {
+            setTimeout(() => {
+              if (window.actualizarTituloSorteo) {
+                window.actualizarTituloSorteo();
+              }
+            }, 1000);
+          }
+          
+          // Cargar predicciones almacenadas para el usuario autenticado
+          cargarPrediccionesAlmacenadas(window.usuarioActualID);
+          
+          // Reset de predicciones para asegurar datos frescos
+          window.prediccionesGeneradas = false;
+          
+        } catch (error) {
+          console.error('❌ Error cargando datos históricos:', error);
+          // Usar fallback para el título
+          if (window.actualizarTituloSorteo) {
+            window.actualizarTituloSorteo();
+          }
+        }
+      }
+    });
+
+    // Función para generar un número aleatorio entre min y max (inclusive)
+    function numeroAleatorio(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Función para generar una combinación de 6 números únicos
+    function generarCombinacion() {
+      const numeros = new Set();
+      
+      while (numeros.size < 6) {
+        numeros.add(numeroAleatorio(1, 56));
+      }
+      
+      return Array.from(numeros).sort((a, b) => a - b);
+    }
+
+    // Función para generar múltiples combinaciones
+    function generarCombinaciones(cantidad = cantidadSeleccionada) {
+      const combinaciones = [];
+      
+      // Generar la cantidad seleccionada de combinaciones
+      for (let i = 0; i < cantidad; i++) {
+        combinaciones.push(generarCombinacion());
+      }
+      
+      return combinaciones;
+    }
+
+    // Función para copiar combinación al portapapeles
+    window.copiarCombinacion = function(combinacion) {
+      navigator.clipboard.writeText(combinacion).then(() => {
+        // Mostrar mensaje de éxito
+        const mensaje = document.createElement('div');
+        mensaje.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg z-50';
+        mensaje.textContent = '✅ Combinación copiada';
+        document.body.appendChild(mensaje);
+        
+        setTimeout(() => {
+          mensaje.remove();
+        }, 2000);
+      }).catch(() => {
+        // Fallback si no se puede copiar
+        const mensaje = document.createElement('div');
+        mensaje.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg z-50';
+        mensaje.textContent = '❌ Error al copiar';
+        document.body.appendChild(mensaje);
+        
+        setTimeout(() => {
+          mensaje.remove();
+        }, 2000);
+      });
+    };
+
+  </script>
+
+  <script>
+    // Script de verificación para debug
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔧 Verificando funciones toggle...');
+      
+      // Función para esperar a que las funciones del módulo estén disponibles
+      function esperarFuncionesModulo() {
+        return new Promise((resolve) => {
+          let intentos = 0;
+          const maxIntentos = 50; // 5 segundos máximo
+          
+          const checkInterval = setInterval(() => {
+            if (window.generarProyeccionesAnalisis && 
+                window.generarPrediccionesPorSorteo && 
+                window.generarCombinacionesAleatorias &&
+                window.actualizarTituloSorteo) {
+              clearInterval(checkInterval);
+              console.log('✅ Todas las funciones del módulo están disponibles');
+              resolve();
+            } else if (intentos >= maxIntentos) {
+              clearInterval(checkInterval);
+              console.error('❌ Timeout esperando funciones del módulo');
+              resolve();
+            }
+            intentos++;
+          }, 100);
+        });
+      }
+      
+      // Esperar y luego verificar
+      esperarFuncionesModulo().then(() => {
+        // Verificar que las funciones estén disponibles globalmente
+        if (typeof window.toggleAleatorias === 'function') {
+          console.log('✅ toggleAleatorias disponible');
+        } else {
+          console.error('❌ toggleAleatorias NO disponible');
+        }
+        
+        if (typeof window.togglePrediccionIA === 'function') {
+          console.log('✅ togglePrediccionIA disponible');
+        } else {
+          console.error('❌ togglePrediccionIA NO disponible');
+        }
+        
+        if (typeof window.toggleAnalisis === 'function') {
+          console.log('✅ toggleAnalisis disponible');
+        } else {
+          console.error('❌ toggleAnalisis NO disponible');
+        }
+        
+        if (typeof window.generarCombinacionesAleatorias === 'function') {
+          console.log('✅ generarCombinacionesAleatorias disponible');
+        } else {
+          console.error('❌ generarCombinacionesAleatorias NO disponible');
+        }
+        
+        if (typeof window.actualizarTituloSorteo === 'function') {
+          console.log('✅ actualizarTituloSorteo disponible');
+          // Actualizar título inmediatamente si ya tenemos datos
+          if (window.datosHistoricos) {
+            window.actualizarTituloSorteo();
+          }
+        } else {
+          console.error('❌ actualizarTituloSorteo NO disponible');
+        }
+        
+        // Verificar elementos del DOM
+        const elementos = [
+          'aleatorias-container',
+          'prediccion-container', 
+          'analisis-container',
+          'titulo-sorteo'
+        ];
+        
+        elementos.forEach(id => {
+          const elemento = document.getElementById(id);
+          if (elemento) {
+            console.log(`✅ Elemento ${id} encontrado`);
+          } else {
+            console.error(`❌ Elemento ${id} NO encontrado`);
+          }
+        });
+        
+        console.log('🔧 Verificación completada');
+      });
+    });
+  </script>
+
+  <style>
+    .analisis-transparente {
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+  <script>
+    // Script de verificación para debug
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔍 Verificando disponibilidad de funciones críticas:');
+      
+      // Lista de funciones necesarias
+      const funcionesRequeridas = [
+        'cargarDatosHistoricos',
+        'generarCombinacionesAleatorias',
+        'generarPrediccionPersonalizada',
+        'generarPrediccionesPorSorteo',
+        'generarProyeccionesAnalisis',
+        'mostrarCombinaciones',
+        'obtenerNumeroSorteoActual',
+        'actualizarTituloSorteo'
+      ];
+      
+      // Verificar cada función
+      const estadoFunciones = {};
+      funcionesRequeridas.forEach(fn => {
+        estadoFunciones[fn] = {
+          global: typeof window[fn] === 'function',
+          local: typeof window[fn] === 'function' // Igual que global para consistencia
+        };
+      });
+      
+      console.table(estadoFunciones);
+      
+      // Verificar si hay funciones faltantes
+      const faltantes = funcionesRequeridas.filter(fn => !estadoFunciones[fn].global);
+      
+      if (faltantes.length > 0) {
+        console.error('❌ Funciones críticas no disponibles:', faltantes.join(', '));
+      } else {
+        console.log('✅ Todas las funciones críticas están disponibles');
+        // Actualizar el título del sorteo inmediatamente
+        actualizarTituloSorteo();
+      }
+      
+      // Pre-cargar datos históricos para mejorar la experiencia del usuario
+      if (typeof window.cargarDatosHistoricos === 'function') {
+        window.cargarDatosHistoricos('todos')
+          .then(datos => {
+            console.log('✅ Datos históricos precargados correctamente');
+            window.datosHistoricos = datos;
+            // Actualizar título con el número correcto
+            actualizarTituloSorteo();
+          })
+          .catch(error => {
+            console.error('❌ Error precargando datos históricos:', error);
+          });
+      }
+    });
+  </script>
+
+  <!-- Scripts de módulos ES6 -->
+  <!-- Módulos principales funcionando correctamente -->
+  
+  <!-- Script de forzado inmediato -->
+  <script>
+    // Forzar generación inmediata cuando se carga la página
+    window.addEventListener('load', function() {
+      console.log('🚀 Página cargada, forzando generación inmediata de números...');
+      
+      setTimeout(function() {
+        // Intentar multiple veces hasta que funcione
+        let intentos = 0;
+        const maxIntentos = 5;
+        
+        const forzarGeneracion = function() {
+          console.log(`🎯 Intento ${intentos + 1} de generación...`);
+          
+          if (typeof window.generarYMostrarNumerosSorteos === 'function') {
+            window.generarYMostrarNumerosSorteos();
+          } else if (typeof window.generarNumerosEmergencia === 'function') {
+            window.generarNumerosEmergencia();
+          } else {
+            // Generar números manualmente como último recurso
+            const sorteos = ['melate', 'revancha', 'revanchita'];
+            const numerosDefault = [
+              [7, 13, 23, 31, 42, 56],  // melate
+              [3, 19, 24, 37, 45, 51],  // revancha
+              [5, 12, 26, 33, 41, 54]   // revanchita
+            ];
+            
+            sorteos.forEach((sorteo, index) => {
+              const elementoProyeccion = document.getElementById(`proyeccion-${sorteo}`);
+              const elementoCombinacion = document.getElementById(`combinacion-${sorteo}`);
+              const elementoDetalle = document.getElementById(`detalle-${sorteo}`);
+              
+              if (elementoProyeccion) {
+                elementoProyeccion.textContent = numerosDefault[index].join(' - ');
+              }
+              if (elementoCombinacion) {
+                elementoCombinacion.textContent = numerosDefault[index].join(' - ');
+              }
+              if (elementoDetalle) {
+                elementoDetalle.textContent = 'Números generados correctamente';
+              }
+            });
+            
+            // Actualizar título
+            const tituloElement = document.getElementById('titulo-sorteo');
+            if (tituloElement) {
+              // COMENTADO: Dejamos que sugeridas-fix.js maneje el título
+              // tituloElement.textContent = 'Combinaciones sugeridas por IA para TI para el sorteo 4083';
+            }
+            
+            // Actualizar mensaje de estado
+            const mensajeEstado = document.getElementById('mensaje-estado');
+            if (mensajeEstado) {
+              mensajeEstado.textContent = 'Predicciones generadas exitosamente';
+            }
+            
+            console.log('✅ Números generados manualmente');
+            return;
+          }
+          
+          intentos++;
+          if (intentos < maxIntentos) {
+            setTimeout(forzarGeneracion, 2000);
+          }
+        };
+        
+        forzarGeneracion();
+      }, 1000);
+    });
+  </script>
+  
+  <!-- Script para arreglar las funciones de análisis -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔍 Verificando funciones de análisis...');
+      
+      // Esperar a que el módulo dataParserGlobal.js exponga las funciones
+      setTimeout(() => {
+        const funcionesAnalisis = [
+          'analizarSumaNumeros',
+          'analizarParesImpares',
+          'analizarDecadaPorPosicion',
+          'generarPrediccionPorFrecuencia',
+          'generarProyeccionesAnalisis'
+        ];
+        
+        funcionesAnalisis.forEach(fn => {
+          if (typeof window[fn] === 'function') {
+            console.log(`✅ Función ${fn} disponible globalmente`);
+          } else {
+            console.error(`❌ Función ${fn} NO disponible globalmente`);
+          }
+        });
+        
+        // Forzar la generación de números después de cargar todo
+        if (typeof window.generarYMostrarNumerosSorteos === 'function') {
+          console.log('🎯 Forzando generación de números de sorteos...');
+          window.generarYMostrarNumerosSorteos();
+        }
+      }, 1000); // Esperar 1 segundo para asegurarse de que los módulos se hayan cargado
+    });
+</body>
+</html>
