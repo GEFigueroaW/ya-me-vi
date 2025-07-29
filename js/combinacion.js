@@ -410,7 +410,7 @@ function mostrarIndicadorDatosPrueba() {
 }
 
 /**
- * Calcular frecuencia por sorteo with motivation factor
+ * Calcular frecuencia por sorteo
  */
 function calcularFrecuenciaPorSorteo(num) {
   const resultados = {};
@@ -423,10 +423,8 @@ function calcularFrecuenciaPorSorteo(num) {
     // Calcular porcentaje base
     const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
     
-    // Aplicar el factor de motivación ajustado
-    const factorMotivacion = 12.5; // Factor matemático según especificaciones
-    const porcentajeAjustado = porcentajeBase * factorMotivacion;
-    const porcentajeFinal = Math.max(porcentajeAjustado, 8.0); // Mínimo 8%
+    // Usar el porcentaje base sin factores matemáticos
+    const porcentajeFinal = Math.max(porcentajeBase, 8.0); // Mínimo 8%
     
     resultados[sorteo] = {
       frecuencia: frecuencia,
@@ -471,7 +469,7 @@ function calcularFrecuenciaTotal(num) {
 }
 
 /**
- * Calcular porcentaje total with motivation factor
+ * Calcular porcentaje total
  */
 function calcularPorcentajeTotal(num) {
   let totalNumeros = 0;
@@ -484,12 +482,9 @@ function calcularPorcentajeTotal(num) {
     frecuenciaTotal += frecuenciaSorteo;
   });
   
-  // Cálculo base
+  // Cálculo base sin factores matemáticos
   const porcentajeBase = totalNumeros > 0 ? (frecuenciaTotal / totalNumeros) * 100 : 0;
-  
-  // Factor de motivación: 12.5x según especificaciones
-  const factorMotivacion = 12.5;
-  const porcentajeAjustado = porcentajeBase * factorMotivacion;
+  const porcentajeAjustado = porcentajeBase;
   
   // Asegurar que ningún número tenga menos de 8% (mínimo 8%)
   const porcentajeFinal = Math.max(porcentajeAjustado, 8.0);
@@ -569,9 +564,7 @@ function generarHtmlAnalisisSorteo(analisisIndividual, sorteo, colorClass, borde
         </div>
         <div class="text-center mt-2">
           <div class="text-xs text-yellow-600 font-medium">🎯 Índice de éxito</div>
-          <div class="text-sm font-bold text-gray-700">${indicePorSorteo[sorteo].porcentaje.toFixed(1)}%</div>
-          <div class="text-xs text-green-600 font-medium mt-1">⭐ Potencial</div>
-          <div class="text-lg font-bold text-gray-800">${analisis.porSorteo[sorteo].porcentaje.toFixed(1)}%</div>
+          <div class="text-lg font-bold text-gray-800">${indicePorSorteo[sorteo].porcentaje.toFixed(1)}%</div>
           <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
             ${clasificacion.categoria}
           </div>
@@ -634,12 +627,34 @@ function inicializarAcordeones() {
   const triggerNumero = document.getElementById('trigger-numero-individual');
   const contentNumero = document.getElementById('content-numero-individual');
   
+  // Acordeón para combinación
+  const triggerCombinacion = document.getElementById('trigger-combinacion');
+  const contentCombinacion = document.getElementById('content-combinacion');
+  
+  // Función para cerrar todas las cajas
+  const cerrarTodasLasCajas = () => {
+    if (contentNumero) {
+      contentNumero.classList.add('hidden');
+      const arrowNumero = triggerNumero.querySelector('svg');
+      if (arrowNumero) arrowNumero.style.transform = 'rotate(0deg)';
+    }
+    
+    if (contentCombinacion) {
+      contentCombinacion.classList.add('hidden');
+      const arrowCombinacion = triggerCombinacion.querySelector('svg');
+      if (arrowCombinacion) arrowCombinacion.style.transform = 'rotate(0deg)';
+    }
+  };
+  
   if (triggerNumero && contentNumero) {
     triggerNumero.addEventListener('click', function() {
       const isHidden = contentNumero.classList.contains('hidden');
       const arrow = triggerNumero.querySelector('svg');
       
       if (isHidden) {
+        // Cerrar todas las cajas primero
+        cerrarTodasLasCajas();
+        // Abrir esta caja
         contentNumero.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
       } else {
@@ -649,16 +664,15 @@ function inicializarAcordeones() {
     });
   }
   
-  // Acordeón para combinación
-  const triggerCombinacion = document.getElementById('trigger-combinacion');
-  const contentCombinacion = document.getElementById('content-combinacion');
-  
   if (triggerCombinacion && contentCombinacion) {
     triggerCombinacion.addEventListener('click', function() {
       const isHidden = contentCombinacion.classList.contains('hidden');
       const arrow = triggerCombinacion.querySelector('svg');
       
       if (isHidden) {
+        // Cerrar todas las cajas primero
+        cerrarTodasLasCajas();
+        // Abrir esta caja
         contentCombinacion.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
       } else {
@@ -756,8 +770,6 @@ function evaluarNumeroIndividual(numero) {
   
   setTimeout(() => {
     const analisisPorSorteo = calcularFrecuenciaPorSorteo(numero);
-    const porcentajeTotal = calcularPorcentajeTotal(numero);
-    const clasificacionTotal = clasificarProbabilidad(porcentajeTotal);
     
     resultadoDiv.innerHTML = `
       <div class="bg-white bg-opacity-80 rounded-xl p-6 shadow-lg">
@@ -765,7 +777,7 @@ function evaluarNumeroIndividual(numero) {
           🎯 Análisis del Número ${numero}
         </h3>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           ${Object.entries(analisisPorSorteo).map(([sorteo, datos]) => {
             const clasificacion = clasificarProbabilidad(datos.porcentaje);
             const iconos = {
@@ -790,19 +802,6 @@ function evaluarNumeroIndividual(numero) {
               </div>
             `;
           }).join('')}
-        </div>
-        
-        <div class="text-center p-4 ${clasificacionTotal.bgColor} rounded-lg border-2 ${clasificacionTotal.color.includes('green') ? 'border-green-300' : 'border-gray-300'}">
-          <h4 class="font-bold text-lg text-gray-800 mb-2">🌟 Evaluación General</h4>
-          <div class="text-3xl font-bold ${clasificacionTotal.color} mb-2">
-            ${porcentajeTotal.toFixed(1)}%
-          </div>
-          <div class="text-lg ${clasificacionTotal.color}">
-            ${clasificacionTotal.emoji} ${clasificacionTotal.categoria}
-          </div>
-          <div class="text-sm text-gray-600 mt-2">
-            ${generarMensajeNumeroIndividual(clasificacionTotal.categoria)}
-          </div>
         </div>
       </div>
     `;
