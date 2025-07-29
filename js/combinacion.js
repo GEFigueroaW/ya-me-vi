@@ -683,12 +683,20 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Preparando datos históricos...');
     prepararDatosHistoricos();
     
+    // Ejecutar limpieza inicial
+    setTimeout(() => {
+      limpiarTodosLosCampos();
+      console.log('🧹 Limpieza inicial ejecutada');
+    }, 200);
+    
     // Exponer funciones al ámbito global para acceso desde script inline
     console.log('Exponiendo funciones globalmente...');
     try {
       // Asignar directamente al objeto window para que las funciones sean globales
       window.evaluarNumeroIndividual = evaluarNumeroIndividual;
       window.evaluarCombinacion = evaluarCombinacion;
+      window.limpiarTodosLosCampos = limpiarTodosLosCampos;
+      window.LIMPIAR_TODO_AHORA = limpiarTodosLosCampos; // Alias para compatibilidad
       window.combinacionLoaded = true;
       console.log('✅ Funciones expuestas correctamente');
     } catch (error) {
@@ -696,6 +704,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 100);
 });
+
+/**
+ * Función de limpieza de campos
+ */
+function limpiarTodosLosCampos() {
+  console.log('🔥 LIMPIEZA DIRECTA INICIADA desde combinacion.js');
+  
+  // Buscar TODOS los inputs de número en la página
+  const todosLosInputs = document.querySelectorAll('input[type="number"]');
+  console.log(`Encontrados ${todosLosInputs.length} inputs de número`);
+  
+  todosLosInputs.forEach((input, index) => {
+    // Múltiples métodos de limpieza EXTREMA
+    input.value = '';
+    input.defaultValue = '';
+    input.setAttribute('value', '');
+    
+    // Forzar actualización visual
+    input.style.color = '#000000'; // Negro sólido
+    input.style.fontWeight = 'bold';
+    
+    // Resetear bordes
+    input.style.borderColor = '#D1D5DB';
+    input.classList.remove('border-red-500', 'border-green-500');
+    input.classList.add('border-gray-300');
+  });
+  
+  // Limpiar resultados
+  const resultados = document.querySelectorAll('#resultado-numero, #resultado-combinacion');
+  resultados.forEach(resultado => {
+    if (resultado) {
+      resultado.innerHTML = '';
+      resultado.style.display = 'none';
+    }
+  });
+  
+  console.log('✅ LIMPIEZA COMPLETADA - TODOS LOS CAMPOS VACÍOS');
+}
 
 /**
  * Inicializar funcionalidad de acordeones
@@ -741,12 +787,20 @@ function inicializarAcordeones() {
       if (isHidden) {
         // Cerrar todas las cajas primero
         cerrarTodasLasCajas();
-        // Abrir esta caja
-        contentNumero.classList.remove('hidden');
-        if (arrow) arrow.style.transform = 'rotate(180deg)';
+        // LIMPIAR ANTES DE ABRIR
+        limpiarTodosLosCampos();
+        // Abrir esta caja después de limpiar
+        setTimeout(() => {
+          contentNumero.classList.remove('hidden');
+          if (arrow) arrow.style.transform = 'rotate(180deg)';
+        }, 100);
       } else {
         contentNumero.classList.add('hidden');
         if (arrow) arrow.style.transform = 'rotate(0deg)';
+        // LIMPIAR AL CERRAR
+        setTimeout(() => {
+          limpiarTodosLosCampos();
+        }, 100);
       }
     };
   }
@@ -760,12 +814,20 @@ function inicializarAcordeones() {
       if (isHidden) {
         // Cerrar todas las cajas primero
         cerrarTodasLasCajas();
-        // Abrir esta caja
-        contentCombinacion.classList.remove('hidden');
-        if (arrow) arrow.style.transform = 'rotate(180deg)';
+        // LIMPIAR ANTES DE ABRIR
+        limpiarTodosLosCampos();
+        // Abrir esta caja después de limpiar
+        setTimeout(() => {
+          contentCombinacion.classList.remove('hidden');
+          if (arrow) arrow.style.transform = 'rotate(180deg)';
+        }, 100);
       } else {
         contentCombinacion.classList.add('hidden');
         if (arrow) arrow.style.transform = 'rotate(0deg)';
+        // LIMPIAR AL CERRAR
+        setTimeout(() => {
+          limpiarTodosLosCampos();
+        }, 100);
       }
     };
   }

@@ -141,287 +141,47 @@
   <script type="module" src="js/combinacion.js"></script>
   <script src="js/evaluadores.js"></script>
   
-  <!-- SCRIPT DE LIMPIEZA Y FUNCIONALIDAD - VERSION SIMPLIFICADA QUE FUNCIONA -->
+  <!-- SCRIPT MÍNIMO - Solo para funciones de debugging -->
   <script>
-    // FUNCIÓN DE LIMPIEZA QUE YA PROBAMOS QUE FUNCIONA AL 100%
-    function LIMPIAR_TODO_AHORA() {
-      console.log('🔥 LIMPIEZA DIRECTA INICIADA');
-      
-      // Buscar TODOS los inputs de número en la página
-      const todosLosInputs = document.querySelectorAll('input[type="number"]');
-      console.log(`Encontrados ${todosLosInputs.length} inputs de número`);
-      
-      todosLosInputs.forEach((input, index) => {
-        console.log(`Limpiando input ${index + 1}: valor actual "${input.value}"`);
-        
-        // Múltiples métodos de limpieza EXTREMA
-        input.value = '';
-        input.defaultValue = '';
-        input.setAttribute('value', '');
-        
-        // Forzar actualización visual
-        input.style.color = '#000000'; // Negro sólido
-        input.style.fontWeight = 'bold';
-        
-        // Resetear bordes
-        input.style.borderColor = '#D1D5DB';
-        input.classList.remove('border-red-500', 'border-green-500');
-        input.classList.add('border-gray-300');
-        
-        console.log(`✅ Input ${index + 1} limpiado completemente`);
-      });
-      
-      // Limpiar resultados
-      const resultados = document.querySelectorAll('#resultado-numero, #resultado-combinacion');
-      resultados.forEach(resultado => {
-        if (resultado) {
-          resultado.innerHTML = '';
-          resultado.style.display = 'none';
-        }
-      });
-      
-      console.log('✅ LIMPIEZA COMPLETADA - TODOS LOS CAMPOS VACÍOS');
-    }
-    
-    // Hacer función disponible globalmente
-    window.LIMPIAR_TODO_AHORA = LIMPIAR_TODO_AHORA;
-    
-    // CONFIGURACIÓN COMPLETA AL CARGAR LA PÁGINA
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Página cargada - Iniciando configuración...');
-      
-      // Limpieza inicial
-      setTimeout(() => {
-        LIMPIAR_TODO_AHORA();
-        console.log('🧹 Limpieza inicial completada');
-      }, 500);
-      
-      // Obtener elementos
-      const triggerNumero = document.getElementById('trigger-numero-individual');
-      const contentNumero = document.getElementById('content-numero-individual');
-      const triggerCombinacion = document.getElementById('trigger-combinacion');
-      const contentCombinacion = document.getElementById('content-combinacion');
-      const btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
-      const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
-      
-      // ACORDEÓN NÚMERO INDIVIDUAL
-      if (triggerNumero && contentNumero) {
-        triggerNumero.onclick = function() {
-          console.log('🖱️ Click en Número de la Suerte');
-          const isHidden = contentNumero.classList.contains('hidden');
-          const arrow = triggerNumero.querySelector('svg');
-          
-          if (isHidden) {
-            // Cerrar otra sección primero
-            if (contentCombinacion && !contentCombinacion.classList.contains('hidden')) {
-              contentCombinacion.classList.add('hidden');
-              const arrowCombo = triggerCombinacion?.querySelector('svg');
-              if (arrowCombo) arrowCombo.style.transform = 'rotate(0deg)';
-            }
-            
-            // LIMPIAR ANTES DE ABRIR
-            LIMPIAR_TODO_AHORA();
-            
-            // Abrir después de limpiar
-            setTimeout(() => {
-              contentNumero.classList.remove('hidden');
-              if (arrow) arrow.style.transform = 'rotate(180deg)';
-              console.log('📂 Sección número individual abierta');
-            }, 200);
-            
-          } else {
-            contentNumero.classList.add('hidden');
-            if (arrow) arrow.style.transform = 'rotate(0deg)';
-            console.log('📁 Sección número individual cerrada');
-            
-            // LIMPIAR AL CERRAR
-            setTimeout(() => {
-              LIMPIAR_TODO_AHORA();
-            }, 100);
-          }
-        };
-      }
-      
-      // ACORDEÓN COMBINACIÓN
-      if (triggerCombinacion && contentCombinacion) {
-        triggerCombinacion.onclick = function() {
-          console.log('🖱️ Click en Combinación de la Suerte');
-          const isHidden = contentCombinacion.classList.contains('hidden');
-          const arrow = triggerCombinacion.querySelector('svg');
-          
-          if (isHidden) {
-            // Cerrar otra sección primero
-            if (contentNumero && !contentNumero.classList.contains('hidden')) {
-              contentNumero.classList.add('hidden');
-              const arrowNumero = triggerNumero?.querySelector('svg');
-              if (arrowNumero) arrowNumero.style.transform = 'rotate(0deg)';
-            }
-            
-            // LIMPIAR ANTES DE ABRIR
-            LIMPIAR_TODO_AHORA();
-            
-            // Abrir después de limpiar
-            setTimeout(() => {
-              contentCombinacion.classList.remove('hidden');
-              if (arrow) arrow.style.transform = 'rotate(180deg)';
-              console.log('📂 Sección combinación abierta');
-            }, 200);
-            
-          } else {
-            contentCombinacion.classList.add('hidden');
-            if (arrow) arrow.style.transform = 'rotate(0deg)';
-            console.log('📁 Sección combinación cerrada');
-            
-            // LIMPIAR AL CERRAR
-            setTimeout(() => {
-              LIMPIAR_TODO_AHORA();
-            }, 100);
-          }
-        };
-      }
-      
-      // BOTÓN EVALUAR NÚMERO INDIVIDUAL
-      if (btnEvaluarNumero) {
-        btnEvaluarNumero.onclick = function() {
-          console.log('🎯 Click en Evaluar Número');
-          
-          const inputNumero = document.getElementById('numero-individual');
-          if (!inputNumero || !inputNumero.value) {
-            alert('Por favor, ingresa un número entre 1 y 56');
-            inputNumero?.focus();
-            return;
-          }
-          
-          const numero = parseInt(inputNumero.value);
-          if (numero < 1 || numero > 56) {
-            alert('El número debe estar entre 1 y 56');
-            inputNumero.focus();
-            return;
-          }
-          
-          console.log(`🔢 Evaluando número: ${numero}`);
-          
-          // Llamar función de evaluación desde combinacion.js
-          if (typeof window.evaluarNumeroIndividual === 'function') {
-            console.log('✅ Llamando evaluarNumeroIndividual...');
-            window.evaluarNumeroIndividual(numero);
-          } else if (typeof evaluarNumeroIndividual === 'function') {
-            console.log('✅ Llamando evaluarNumeroIndividual (global)...');
-            evaluarNumeroIndividual(numero);
-          } else {
-            console.warn('⚠️ Función evaluarNumeroIndividual no disponible, intentando cargar...');
-            
-            // Mostrar mensaje de carga
-            const resultado = document.getElementById('resultado-numero');
-            if (resultado) {
-              resultado.innerHTML = '<div class="text-center p-4 bg-yellow-100 rounded-lg"><p class="text-yellow-800">⚠️ Cargando sistema de evaluación...</p></div>';
-              resultado.style.display = 'block';
-              
-              // Intentar nuevamente después de un delay
-              setTimeout(() => {
-                if (typeof window.evaluarNumeroIndividual === 'function') {
-                  console.log('✅ Función cargada, evaluando...');
-                  window.evaluarNumeroIndividual(numero);
-                } else {
-                  resultado.innerHTML = '<div class="text-center p-4 bg-red-100 rounded-lg"><p class="text-red-800">❌ Error: Sistema de evaluación no disponible</p></div>';
-                }
-              }, 2000);
-            }
-          }
-        };
-      }
-      
-      // BOTÓN EVALUAR COMBINACIÓN
-      if (btnEvaluarCombinacion) {
-        btnEvaluarCombinacion.onclick = function() {
-          console.log('🎯 Click en Evaluar Combinación');
-          
-          const inputsCombinacion = document.querySelectorAll('.combo-input');
-          const numeros = [];
-          
-          // Validar que todos los campos estén llenos
-          for (let i = 0; i < inputsCombinacion.length; i++) {
-            const input = inputsCombinacion[i];
-            if (!input.value) {
-              alert(`Por favor, completa todos los 6 números. Falta el número ${i + 1}`);
-              input.focus();
-              return;
-            }
-            
-            const numero = parseInt(input.value);
-            if (numero < 1 || numero > 56) {
-              alert(`El número ${i + 1} debe estar entre 1 y 56`);
-              input.focus();
-              return;
-            }
-            
-            // Verificar duplicados
-            if (numeros.includes(numero)) {
-              alert(`El número ${numero} está repetido. Todos los números deben ser diferentes.`);
-              input.focus();
-              return;
-            }
-            
-            numeros.push(numero);
-          }
-          
-          console.log(`🎲 Evaluando combinación: ${numeros.join(', ')}`);
-          
-          // Llamar función de evaluación desde combinacion.js
-          if (typeof window.evaluarCombinacion === 'function') {
-            console.log('✅ Llamando evaluarCombinacion...');
-            window.evaluarCombinacion(numeros);
-          } else if (typeof evaluarCombinacion === 'function') {
-            console.log('✅ Llamando evaluarCombinacion (global)...');
-            evaluarCombinacion(numeros);
-          } else {
-            console.warn('⚠️ Función evaluarCombinacion no disponible, intentando cargar...');
-            
-            // Mostrar mensaje de carga
-            const resultado = document.getElementById('resultado-combinacion');
-            if (resultado) {
-              resultado.innerHTML = '<div class="text-center p-4 bg-yellow-100 rounded-lg"><p class="text-yellow-800">⚠️ Cargando sistema de evaluación...</p></div>';
-              resultado.style.display = 'block';
-              
-              // Intentar nuevamente después de un delay
-              setTimeout(() => {
-                if (typeof window.evaluarCombinacion === 'function') {
-                  console.log('✅ Función cargada, evaluando...');
-                  window.evaluarCombinacion(numeros);
-                } else {
-                  resultado.innerHTML = '<div class="text-center p-4 bg-red-100 rounded-lg"><p class="text-red-800">❌ Error: Sistema de evaluación no disponible</p></div>';
-                }
-              }, 2000);
-            }
-          }
-        };
-      }
-      
-      // Verificar que las funciones de evaluación estén cargadas
-      setTimeout(() => {
-        console.log('🔧 Verificando funciones de evaluación...');
-        
-        if (typeof window.evaluarNumeroIndividual === 'function') {
-          console.log('✅ evaluarNumeroIndividual disponible');
-        } else {
-          console.warn('⚠️ evaluarNumeroIndividual NO disponible');
-        }
-        
-        if (typeof window.evaluarCombinacion === 'function') {
-          console.log('✅ evaluarCombinacion disponible');
-        } else {
-          console.warn('⚠️ evaluarCombinacion NO disponible');
-        }
-      }, 2000);
-      
-      console.log('✅ Configuración completa terminada');
-    });
-    
-    // Funciones de debugging
+    // Funciones de debugging disponibles en consola
     window.testLimpieza = () => {
       console.log('🧪 Test de limpieza manual');
-      LIMPIAR_TODO_AHORA();
+      if (typeof window.LIMPIAR_TODO_AHORA === 'function') {
+        window.LIMPIAR_TODO_AHORA();
+      } else {
+        console.warn('⚠️ Función de limpieza no disponible aún');
+      }
     };
+    
+    window.testBotones = () => {
+      console.log('🧪 Estado del sistema:');
+      console.log('✅ evaluarNumeroIndividual disponible:', typeof window.evaluarNumeroIndividual === 'function');
+      console.log('✅ evaluarCombinacion disponible:', typeof window.evaluarCombinacion === 'function');
+      console.log('✅ LIMPIAR_TODO_AHORA disponible:', typeof window.LIMPIAR_TODO_AHORA === 'function');
+      
+      const btnNumero = document.getElementById('evaluar-numero-btn');
+      const btnCombinacion = document.getElementById('evaluar-combinacion-btn');
+      console.log('✅ Botón evaluar número encontrado:', !!btnNumero);
+      console.log('✅ Botón evaluar combinación encontrado:', !!btnCombinacion);
+      
+      // Verificar si tienen event listeners
+      if (btnNumero) {
+        console.log('✅ Botón número tiene onclick:', !!btnNumero.onclick);
+      }
+      if (btnCombinacion) {
+        console.log('✅ Botón combinación tiene onclick:', !!btnCombinacion.onclick);
+      }
+      
+      console.log('🎯 Sistema completamente manejado por combinacion.js');
+    };
+    
+    // Verificación automática del estado del sistema
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(() => {
+        console.log('🚀 Verificación automática del sistema:');
+        window.testBotones();
+      }, 2000);
+    });
   </script>
 </body>
 </html>
