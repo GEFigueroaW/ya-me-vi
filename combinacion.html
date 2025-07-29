@@ -210,6 +210,36 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 Inicializando combinacion.html...');
       
+      // Limpiar todos los campos al cargar la página
+      const limpiarAlCargar = () => {
+        console.log('🧹 Limpieza inicial al cargar la página...');
+        
+        // Limpiar inputs de combinación
+        const inputsCombinacion = document.querySelectorAll('.combo-input');
+        inputsCombinacion.forEach((input, index) => {
+          input.value = '';
+          input.classList.remove('border-red-500', 'border-green-500');
+          input.classList.add('border-gray-300');
+        });
+        
+        // Limpiar input de número individual
+        const inputNumero = document.getElementById('numero-individual');
+        if (inputNumero) {
+          inputNumero.value = '';
+        }
+        
+        // Limpiar resultados
+        const resultadoNumero = document.getElementById('resultado-numero');
+        const resultadoCombinacion = document.getElementById('resultado-combinacion');
+        if (resultadoNumero) resultadoNumero.innerHTML = '';
+        if (resultadoCombinacion) resultadoCombinacion.innerHTML = '';
+        
+        console.log('✅ Limpieza inicial completada');
+      };
+      
+      // Ejecutar limpieza inicial
+      limpiarAlCargar();
+      
       // Verificar funciones después de la carga
       setTimeout(() => {
         console.log('🔧 Verificando funciones globales...');
@@ -237,37 +267,58 @@
       
       // Función para limpiar datos cuando se cierran las cajas
       const limpiarDatos = () => {
+        console.log('🧹 Limpiando todos los datos...');
+        
         // Limpiar resultado de número individual
         const resultadoNumero = document.getElementById('resultado-numero');
         if (resultadoNumero) {
           resultadoNumero.innerHTML = '';
+          console.log('✅ Resultado de número individual limpiado');
         }
         
         // Limpiar input de número individual
         const inputNumero = document.getElementById('numero-individual');
         if (inputNumero) {
           inputNumero.value = '';
+          console.log('✅ Input de número individual limpiado');
         }
         
         // Limpiar resultado de combinación
         const resultadoCombinacion = document.getElementById('resultado-combinacion');
         if (resultadoCombinacion) {
           resultadoCombinacion.innerHTML = '';
+          console.log('✅ Resultado de combinación limpiado');
         }
         
         // Limpiar inputs de combinación
         const inputsCombinacion = document.querySelectorAll('.combo-input');
-        inputsCombinacion.forEach(input => {
-          input.value = '';
-          input.classList.remove('border-red-500', 'border-green-500');
-          input.classList.add('border-gray-300');
-        });
+        console.log(`🔍 Encontrados ${inputsCombinacion.length} inputs de combinación`);
+        
+        if (inputsCombinacion.length > 0) {
+          inputsCombinacion.forEach((input, index) => {
+            input.value = '';
+            input.classList.remove('border-red-500', 'border-green-500');
+            input.classList.add('border-gray-300');
+            console.log(`✅ Input ${index + 1} limpiado`);
+          });
+        }
         
         // Limpiar mensajes de error
         const errorMessage = document.getElementById('error-message');
         if (errorMessage) {
           errorMessage.remove();
+          console.log('✅ Mensaje de error eliminado');
         }
+        
+        // Habilitar botón de evaluación de combinación
+        const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
+        if (btnEvaluarCombinacion) {
+          btnEvaluarCombinacion.disabled = false;
+          btnEvaluarCombinacion.classList.remove('opacity-50', 'cursor-not-allowed');
+          console.log('✅ Botón de evaluación habilitado');
+        }
+        
+        console.log('🎯 Limpieza completa finalizada');
       };
       
       // Función para cerrar todas las cajas
@@ -293,18 +344,37 @@
           const arrow = triggerNumero.querySelector('svg');
           
           if (isHidden) {
+            console.log('📂 Abriendo caja de número individual...');
             cerrarTodasLasCajas();
             limpiarDatos(); // Limpiar datos antes de abrir
-            contentNumero.classList.remove('hidden');
-            if (arrow) arrow.style.transform = 'rotate(180deg)';
+            
+            // Pequeño delay para asegurar que la limpieza se complete
+            setTimeout(() => {
+              contentNumero.classList.remove('hidden');
+              if (arrow) arrow.style.transform = 'rotate(180deg)';
+              console.log('✅ Caja de número individual abierta y limpiada');
+            }, 50);
+            
           } else {
+            console.log('📁 Cerrando caja de número individual...');
             contentNumero.classList.add('hidden');
             if (arrow) arrow.style.transform = 'rotate(0deg)';
-            // Limpiar datos al cerrar
+            
+            // Limpiar datos al cerrar (específico para número individual)
             const resultadoNumero = document.getElementById('resultado-numero');
             const inputNumero = document.getElementById('numero-individual');
-            if (resultadoNumero) resultadoNumero.innerHTML = '';
-            if (inputNumero) inputNumero.value = '';
+            
+            if (resultadoNumero) {
+              resultadoNumero.innerHTML = '';
+              console.log('✅ Resultado de número individual limpiado al cerrar');
+            }
+            
+            if (inputNumero) {
+              inputNumero.value = '';
+              console.log('✅ Input de número individual limpiado al cerrar');
+            }
+            
+            console.log('🎯 Caja de número individual cerrada y limpiada');
           }
         };
       }
@@ -317,24 +387,55 @@
           const arrow = triggerCombinacion.querySelector('svg');
           
           if (isHidden) {
+            console.log('📂 Abriendo caja de combinación...');
             cerrarTodasLasCajas();
             limpiarDatos(); // Limpiar datos antes de abrir
-            contentCombinacion.classList.remove('hidden');
-            if (arrow) arrow.style.transform = 'rotate(180deg)';
+            
+            // Pequeño delay para asegurar que la limpieza se complete
+            setTimeout(() => {
+              contentCombinacion.classList.remove('hidden');
+              if (arrow) arrow.style.transform = 'rotate(180deg)';
+              console.log('✅ Caja de combinación abierta y limpiada');
+            }, 50);
+            
           } else {
+            console.log('📁 Cerrando caja de combinación...');
             contentCombinacion.classList.add('hidden');
             if (arrow) arrow.style.transform = 'rotate(0deg)';
-            // Limpiar datos al cerrar
+            
+            // Limpiar datos al cerrar (específico para combinación)
             const resultadoCombinacion = document.getElementById('resultado-combinacion');
             const inputsCombinacion = document.querySelectorAll('.combo-input');
-            if (resultadoCombinacion) resultadoCombinacion.innerHTML = '';
-            inputsCombinacion.forEach(input => {
+            
+            if (resultadoCombinacion) {
+              resultadoCombinacion.innerHTML = '';
+              console.log('✅ Resultado de combinación limpiado al cerrar');
+            }
+            
+            console.log(`🔍 Limpiando ${inputsCombinacion.length} inputs de combinación...`);
+            inputsCombinacion.forEach((input, index) => {
               input.value = '';
               input.classList.remove('border-red-500', 'border-green-500');
               input.classList.add('border-gray-300');
+              console.log(`✅ Input ${index + 1} limpiado al cerrar`);
             });
+            
+            // Eliminar mensaje de error
             const errorMessage = document.getElementById('error-message');
-            if (errorMessage) errorMessage.remove();
+            if (errorMessage) {
+              errorMessage.remove();
+              console.log('✅ Mensaje de error eliminado al cerrar');
+            }
+            
+            // Habilitar botón
+            const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
+            if (btnEvaluarCombinacion) {
+              btnEvaluarCombinacion.disabled = false;
+              btnEvaluarCombinacion.classList.remove('opacity-50', 'cursor-not-allowed');
+              console.log('✅ Botón habilitado al cerrar');
+            }
+            
+            console.log('🎯 Caja de combinación cerrada y limpiada');
           }
         };
       }
