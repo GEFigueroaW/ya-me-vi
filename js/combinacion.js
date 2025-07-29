@@ -607,7 +607,9 @@ export {
   calcularPorcentajeTotal,
   clasificarProbabilidad,  
   generarHtmlAnalisisSorteo,
-  generarMensajeSuerte
+  generarMensajeSuerte,
+  evaluarNumeroIndividual,
+  evaluarCombinacion
 };
 
 /**
@@ -631,8 +633,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Exponer funciones al ámbito global para acceso desde script inline
     console.log('Exponiendo funciones globalmente...');
-    window.evaluarNumeroIndividual = evaluarNumeroIndividual;
-    window.evaluarCombinacion = evaluarCombinacion;
+    try {
+      // Asignar directamente al objeto window para que las funciones sean globales
+      window.evaluarNumeroIndividual = evaluarNumeroIndividual;
+      window.evaluarCombinacion = evaluarCombinacion;
+      window.combinacionLoaded = true;
+      console.log('✅ Funciones expuestas correctamente');
+    } catch (error) {
+      console.error('❌ Error al exponer funciones globalmente:', error);
+    }
   }, 100);
 });
 
