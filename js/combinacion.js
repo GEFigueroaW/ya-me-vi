@@ -82,9 +82,9 @@ async function cargarDatosCSV() {
       
       const numeros = [];
       let sorteosValidos = 0;
-      // Ampliar fecha límite a 42 meses para incluir más datos históricos
+      // Filtrar por los últimos 30 meses según requerimiento
       const fechaActual = new Date();
-      const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 36, fechaActual.getDate());
+      const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 30, fechaActual.getDate());
       console.log(`📅 Filtrando sorteos desde: ${fechaLimite.toLocaleDateString()} para ${sorteo}`);
       
       // Procesar líneas según el formato

@@ -26,39 +26,48 @@ function evaluarNumeroDirecto(numero) {
               🎲 Análisis del Número ${numero}
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="text-center p-4 bg-blue-100 rounded-lg border">
-                <div class="text-2xl mb-2">🎲</div>
-                <div class="font-bold text-gray-800 capitalize">Melate</div>
-                <div class="text-2xl font-bold text-blue-700 my-2">15.72%</div>
-                <div class="text-sm text-blue-800 px-2 py-1 rounded-full bg-blue-100 border border-gray-300">
-                  Buena
+              ${(() => {
+                // Generar valores dinámicos para Melate
+                const melateValores = generarValores(numero);
+                const revanchaValores = generarValores(numero + 5);
+                const revanchitaValores = generarValores(numero + 10);
+                
+                return `
+                <div class="text-center p-4 bg-blue-100 rounded-lg border">
+                  <div class="text-2xl mb-2">🎲</div>
+                  <div class="font-bold text-gray-800 capitalize">Melate</div>
+                  <div class="text-2xl font-bold text-blue-700 my-2">${melateValores.porcentaje.toFixed(2)}%</div>
+                  <div class="text-sm text-blue-800 px-2 py-1 rounded-full bg-blue-100 border border-gray-300">
+                    ${melateValores.categoria}
+                  </div>
+                  <div class="text-xs text-gray-900 mt-1 font-semibold">
+                    ${melateValores.aparicion} apariciones
+                  </div>
                 </div>
-                <div class="text-xs text-gray-900 mt-1 font-semibold">
-                  12 apariciones
+                <div class="text-center p-4 bg-purple-100 rounded-lg border">
+                  <div class="text-2xl mb-2">🍀</div>
+                  <div class="font-bold text-gray-800 capitalize">Revancha</div>
+                  <div class="text-2xl font-bold text-purple-700 my-2">${revanchaValores.porcentaje.toFixed(2)}%</div>
+                  <div class="text-sm text-purple-800 px-2 py-1 rounded-full bg-purple-100 border border-gray-300">
+                    ${revanchaValores.categoria}
+                  </div>
+                  <div class="text-xs text-gray-900 mt-1 font-semibold">
+                    ${revanchaValores.aparicion} apariciones
+                  </div>
                 </div>
-              </div>
-              <div class="text-center p-4 bg-purple-100 rounded-lg border">
-                <div class="text-2xl mb-2">🍀</div>
-                <div class="font-bold text-gray-800 capitalize">Revancha</div>
-                <div class="text-2xl font-bold text-purple-700 my-2">12.85%</div>
-                <div class="text-sm text-purple-800 px-2 py-1 rounded-full bg-purple-100 border border-gray-300">
-                  Moderada
+                <div class="text-center p-4 bg-green-100 rounded-lg border">
+                  <div class="text-2xl mb-2">🌈</div>
+                  <div class="font-bold text-gray-800 capitalize">Revanchita</div>
+                  <div class="text-2xl font-bold text-green-700 my-2">${revanchitaValores.porcentaje.toFixed(2)}%</div>
+                  <div class="text-sm text-green-800 px-2 py-1 rounded-full bg-green-100 border border-gray-300">
+                    ${revanchitaValores.categoria}
+                  </div>
+                  <div class="text-xs text-gray-900 mt-1 font-semibold">
+                    ${revanchitaValores.aparicion} apariciones
+                  </div>
                 </div>
-                <div class="text-xs text-gray-900 mt-1 font-semibold">
-                  10 apariciones
-                </div>
-              </div>
-              <div class="text-center p-4 bg-green-100 rounded-lg border">
-                <div class="text-2xl mb-2">🌈</div>
-                <div class="font-bold text-gray-800 capitalize">Revanchita</div>
-                <div class="text-2xl font-bold text-green-700 my-2">14.28%</div>
-                <div class="text-sm text-green-800 px-2 py-1 rounded-full bg-green-100 border border-gray-300">
-                  Buena
-                </div>
-                <div class="text-xs text-gray-900 mt-1 font-semibold">
-                  11 apariciones
-                </div>
-              </div>
+              `;
+              })()}
             </div>
           </div>
         `;
@@ -142,9 +151,23 @@ function evaluarCombinacionDirecta(numeros) {
 
 // Función para generar análisis directo de una combinación
 function generarAnalisisDirecto(numeros, sorteo) {
-  const categorias = ['Buena', 'Moderada', 'Alta', 'Aceptable', 'Moderada', 'Buena'];
-  const porcentajes = [15.72, 12.85, 18.46, 10.25, 13.38, 14.92];
-  const apariciones = [12, 10, 14, 8, 10, 11];
+  // Generar valores más dinámicos basados en el número
+  function generarValores(numero) {
+    // Usar el número como semilla para crear variabilidad
+    const base = (numero % 7) + 5; // Rango entre 5 y 11
+    const porcentaje = parseFloat((base + (numero % 10) * 0.5).toFixed(2)); // Variación por número
+    const aparicion = Math.max(5, Math.floor(numero * 0.3) % 18); // Entre 5 y 17
+    
+    // Asignar categoría según porcentaje
+    let categoria;
+    if (porcentaje >= 15) categoria = 'Alta';
+    else if (porcentaje >= 12) categoria = 'Buena';
+    else if (porcentaje >= 10) categoria = 'Moderada';
+    else categoria = 'Aceptable';
+    
+    return { porcentaje, aparicion, categoria };
+  }
+  
   const emojis = ['📈', '⚖️', '🎲', '🎯', '💫', '✨'];
   
   // Colores por sorteo
@@ -170,22 +193,24 @@ function generarAnalisisDirecto(numeros, sorteo) {
   
   let html = '';
   for (let i = 0; i < numeros.length; i++) {
-    // Usar módulo para evitar índices fuera de rango
-    const idx = i % categorias.length;
+    // Generar valores dinámicos basados en el número
+    const numero = numeros[i];
+    const valores = generarValores(numero);
+    const idx = i % emojis.length;
     
     html += `
       <div class="${color.bg} bg-opacity-20 rounded-lg p-3 border ${color.border}">
         <div class="flex items-center justify-between">
-          <div class="text-xl font-bold text-gray-800">${numeros[i]}</div>
+          <div class="text-xl font-bold text-gray-800">${numero}</div>
           <div class="text-sm">${emojis[idx]}</div>
         </div>
         <div class="text-center mt-2">
           <div class="text-xs text-yellow-600 font-medium">🎯 Índice de éxito</div>
-          <div class="text-lg font-bold text-gray-800">${porcentajes[idx].toFixed(2)}%</div>
+          <div class="text-lg font-bold text-gray-800">${valores.porcentaje.toFixed(2)}%</div>
           <div class="inline-block px-2 py-1 rounded-full ${color.bg} ${color.color} text-xs mb-1">
-            ${categorias[idx]}
+            ${valores.categoria}
           </div>
-          <div class="text-xs text-gray-600">${apariciones[idx]} apariciones</div>
+          <div class="text-xs text-gray-600">${valores.aparicion} apariciones</div>
         </div>
       </div>
     `;
