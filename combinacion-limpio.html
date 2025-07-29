@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Evaluar Combinación</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="assets/logo-192.png" sizes="192x192" type="image/png">
+  <link rel="icon" href="assets/logo-512.png" sizes="512x512" type="image/png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <!-- iOS Touch Icon -->
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- iOS Startup Images -->
+  <link rel="apple-touch-startup-image" href="assets/logo-512.png">
+  
+  <!-- Additional iOS Meta -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+  
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
+     crossorigin="anonymous"></script>
+</head>
+<body class="overflow-x-hidden">
+
+  <!-- Fondo dinámico -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 min-h-screen text-white p-4 md:p-10">
+    
+    <!-- Botón de regreso -->
+    <button id="btn-back" class="btn-back-improved">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <span class="btn-text">Volver</span>
+    </button>
+
+    <!-- Espaciador para evitar solapamiento en móviles -->
+    <div class="mobile-spacer"></div>
+
+    <h1 class="text-3xl font-bold mb-4 animate__animated animate__fadeInDown text-center">🎯 Evalúa tus Números de la Suerte</h1>
+    
+    <!-- Encabezado descriptivo -->
+    <div class="text-center mb-8">
+      <h2 class="text-xl font-semibold text-white mb-2">ANÁLISIS ESTADÍSTICO PERSONALIZADO</h2>
+      <div class="text-gray-100 text-sm">
+        Basado en datos históricos de Melate, Revancha y Revanchita
+      </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="max-w-6xl mx-auto">
+      
+      <!-- Sección de evaluación de número individual (Acordeón) -->
+      <div id="seccion-numero-individual" class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl mb-4 border border-white border-opacity-50 shadow-xl overflow-hidden max-w-3xl mx-auto">
+        <h2 id="trigger-numero-individual" class="text-md md:text-lg font-bold p-4 text-center text-gray-800 cursor-pointer hover:bg-white hover:bg-opacity-70 transition-colors duration-300 flex justify-between items-center h-full">
+          <span>🔍 Ingresa tu Número de la Suerte</span>
+          <svg class="w-5 h-5 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </h2>
+        <div id="content-numero-individual" class="section-content p-4 pt-0 hidden">
+          <div class="max-w-md mx-auto">
+            <p class="text-center text-gray-700 mb-3">Ingresa un número entre el 1 y el 56.</p>
+            <div class="flex flex-col sm:flex-row gap-3 items-center justify-center mb-4">
+              <input type="number" id="numero-individual" class="w-20 sm:w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400" min="1" max="56" placeholder="">
+              <button id="evaluar-numero-btn" class="px-5 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
+                Evaluar
+              </button>
+            </div>
+          </div>
+          
+          <div id="resultado-numero" class="mt-6"></div>
+        </div>
+      </div>
+
+      <!-- Sección de evaluación de combinación (Acordeón) -->
+      <div id="seccion-combinacion" class="bg-white bg-opacity-50 backdrop-blur-lg rounded-xl mb-8 border border-white border-opacity-50 shadow-xl overflow-hidden max-w-3xl mx-auto">
+        <h2 id="trigger-combinacion" class="text-md md:text-lg font-bold p-4 text-center text-gray-800 cursor-pointer hover:bg-white hover:bg-opacity-70 transition-colors duration-300 flex justify-between items-center h-full">
+          <span>🔍 Ingresa tu Combinación de la Suerte</span>
+          <svg class="w-5 h-5 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </h2>
+        <div id="content-combinacion" class="section-content p-4 pt-0 hidden">
+          <div class="max-w-2xl mx-auto">
+            <p class="text-center text-gray-700 mb-3">Ingresa tu combinación de 6 números (1-56)</p>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+            </div>
+            <div class="text-center">
+              <button id="evaluar-combinacion-btn" class="px-5 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
+                🎯 Evaluar Combinación
+              </button>
+            </div>
+          </div>
+          
+          <div id="resultado-combinacion" class="mt-6"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-black bg-opacity-70 text-white text-xs text-center py-3 px-4 mt-8 relative z-10">
+    <div class="mb-2">
+      Este sistema se basa en estadísticas, patrones, probabilidad e inteligencia artificial. No garantiza premios. Juega con responsabilidad.
+    </div>
+    <div class="space-x-2">
+      <a href="aviso-legal.html" class="text-yellow-300 hover:text-yellow-100 underline transition duration-300">Aviso legal</a>
+      <span class="text-gray-400">|</span>
+      <a href="politica-privacidad.html" class="text-yellow-300 hover:text-yellow-100 underline transition duration-300">Política de privacidad</a>
+    </div>
+  </footer>
+
+  <!-- Scripts originales -->
+  <script type="module" src="js/firebase-init.js"></script>
+  <script type="module" src="js/shared.js"></script>
+  <script type="module" src="js/combinacion.js"></script>
+  <script src="js/evaluadores.js"></script>
+  
+  <!-- SCRIPT DE LIMPIEZA Y FUNCIONALIDAD - VERSION SIMPLIFICADA QUE FUNCIONA -->
+  <script>
+    // FUNCIÓN DE LIMPIEZA QUE YA PROBAMOS QUE FUNCIONA AL 100%
+    function LIMPIAR_TODO_AHORA() {
+      console.log('🔥 LIMPIEZA DIRECTA INICIADA');
+      
+      // Buscar TODOS los inputs de número en la página
+      const todosLosInputs = document.querySelectorAll('input[type="number"]');
+      console.log(`Encontrados ${todosLosInputs.length} inputs de número`);
+      
+      todosLosInputs.forEach((input, index) => {
+        console.log(`Limpiando input ${index + 1}: valor actual "${input.value}"`);
+        
+        // Múltiples métodos de limpieza EXTREMA
+        input.value = '';
+        input.defaultValue = '';
+        input.setAttribute('value', '');
+        
+        // Forzar actualización visual
+        input.style.color = '#000000'; // Negro sólido
+        input.style.fontWeight = 'bold';
+        
+        // Resetear bordes
+        input.style.borderColor = '#D1D5DB';
+        input.classList.remove('border-red-500', 'border-green-500');
+        input.classList.add('border-gray-300');
+        
+        console.log(`✅ Input ${index + 1} limpiado completemente`);
+      });
+      
+      // Limpiar resultados
+      const resultados = document.querySelectorAll('#resultado-numero, #resultado-combinacion');
+      resultados.forEach(resultado => {
+        if (resultado) {
+          resultado.innerHTML = '';
+          resultado.style.display = 'none';
+        }
+      });
+      
+      console.log('✅ LIMPIEZA COMPLETADA - TODOS LOS CAMPOS VACÍOS');
+    }
+    
+    // Hacer función disponible globalmente
+    window.LIMPIAR_TODO_AHORA = LIMPIAR_TODO_AHORA;
+    
+    // CONFIGURACIÓN COMPLETA AL CARGAR LA PÁGINA
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Página cargada - Iniciando configuración...');
+      
+      // Limpieza inicial
+      setTimeout(() => {
+        LIMPIAR_TODO_AHORA();
+        console.log('🧹 Limpieza inicial completada');
+      }, 500);
+      
+      // Obtener elementos
+      const triggerNumero = document.getElementById('trigger-numero-individual');
+      const contentNumero = document.getElementById('content-numero-individual');
+      const triggerCombinacion = document.getElementById('trigger-combinacion');
+      const contentCombinacion = document.getElementById('content-combinacion');
+      const btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
+      const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
+      
+      // ACORDEÓN NÚMERO INDIVIDUAL
+      if (triggerNumero && contentNumero) {
+        triggerNumero.onclick = function() {
+          console.log('🖱️ Click en Número de la Suerte');
+          const isHidden = contentNumero.classList.contains('hidden');
+          const arrow = triggerNumero.querySelector('svg');
+          
+          if (isHidden) {
+            // Cerrar otra sección primero
+            if (contentCombinacion && !contentCombinacion.classList.contains('hidden')) {
+              contentCombinacion.classList.add('hidden');
+              const arrowCombo = triggerCombinacion?.querySelector('svg');
+              if (arrowCombo) arrowCombo.style.transform = 'rotate(0deg)';
+            }
+            
+            // LIMPIAR ANTES DE ABRIR
+            LIMPIAR_TODO_AHORA();
+            
+            // Abrir después de limpiar
+            setTimeout(() => {
+              contentNumero.classList.remove('hidden');
+              if (arrow) arrow.style.transform = 'rotate(180deg)';
+              console.log('📂 Sección número individual abierta');
+            }, 200);
+            
+          } else {
+            contentNumero.classList.add('hidden');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+            console.log('📁 Sección número individual cerrada');
+            
+            // LIMPIAR AL CERRAR
+            setTimeout(() => {
+              LIMPIAR_TODO_AHORA();
+            }, 100);
+          }
+        };
+      }
+      
+      // ACORDEÓN COMBINACIÓN
+      if (triggerCombinacion && contentCombinacion) {
+        triggerCombinacion.onclick = function() {
+          console.log('🖱️ Click en Combinación de la Suerte');
+          const isHidden = contentCombinacion.classList.contains('hidden');
+          const arrow = triggerCombinacion.querySelector('svg');
+          
+          if (isHidden) {
+            // Cerrar otra sección primero
+            if (contentNumero && !contentNumero.classList.contains('hidden')) {
+              contentNumero.classList.add('hidden');
+              const arrowNumero = triggerNumero?.querySelector('svg');
+              if (arrowNumero) arrowNumero.style.transform = 'rotate(0deg)';
+            }
+            
+            // LIMPIAR ANTES DE ABRIR
+            LIMPIAR_TODO_AHORA();
+            
+            // Abrir después de limpiar
+            setTimeout(() => {
+              contentCombinacion.classList.remove('hidden');
+              if (arrow) arrow.style.transform = 'rotate(180deg)';
+              console.log('📂 Sección combinación abierta');
+            }, 200);
+            
+          } else {
+            contentCombinacion.classList.add('hidden');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+            console.log('📁 Sección combinación cerrada');
+            
+            // LIMPIAR AL CERRAR
+            setTimeout(() => {
+              LIMPIAR_TODO_AHORA();
+            }, 100);
+          }
+        };
+      }
+      
+      // BOTÓN EVALUAR NÚMERO INDIVIDUAL
+      if (btnEvaluarNumero) {
+        btnEvaluarNumero.onclick = function() {
+          console.log('🎯 Click en Evaluar Número');
+          
+          const inputNumero = document.getElementById('numero-individual');
+          if (!inputNumero || !inputNumero.value) {
+            alert('Por favor, ingresa un número entre 1 y 56');
+            inputNumero?.focus();
+            return;
+          }
+          
+          const numero = parseInt(inputNumero.value);
+          if (numero < 1 || numero > 56) {
+            alert('El número debe estar entre 1 y 56');
+            inputNumero.focus();
+            return;
+          }
+          
+          console.log(`🔢 Evaluando número: ${numero}`);
+          
+          // Llamar función de evaluación desde combinacion.js
+          if (typeof window.evaluarNumeroIndividual === 'function') {
+            console.log('✅ Llamando evaluarNumeroIndividual...');
+            window.evaluarNumeroIndividual(numero);
+          } else if (typeof evaluarNumeroIndividual === 'function') {
+            console.log('✅ Llamando evaluarNumeroIndividual (global)...');
+            evaluarNumeroIndividual(numero);
+          } else {
+            console.warn('⚠️ Función evaluarNumeroIndividual no disponible, intentando cargar...');
+            
+            // Mostrar mensaje de carga
+            const resultado = document.getElementById('resultado-numero');
+            if (resultado) {
+              resultado.innerHTML = '<div class="text-center p-4 bg-yellow-100 rounded-lg"><p class="text-yellow-800">⚠️ Cargando sistema de evaluación...</p></div>';
+              resultado.style.display = 'block';
+              
+              // Intentar nuevamente después de un delay
+              setTimeout(() => {
+                if (typeof window.evaluarNumeroIndividual === 'function') {
+                  console.log('✅ Función cargada, evaluando...');
+                  window.evaluarNumeroIndividual(numero);
+                } else {
+                  resultado.innerHTML = '<div class="text-center p-4 bg-red-100 rounded-lg"><p class="text-red-800">❌ Error: Sistema de evaluación no disponible</p></div>';
+                }
+              }, 2000);
+            }
+          }
+        };
+      }
+      
+      // BOTÓN EVALUAR COMBINACIÓN
+      if (btnEvaluarCombinacion) {
+        btnEvaluarCombinacion.onclick = function() {
+          console.log('🎯 Click en Evaluar Combinación');
+          
+          const inputsCombinacion = document.querySelectorAll('.combo-input');
+          const numeros = [];
+          
+          // Validar que todos los campos estén llenos
+          for (let i = 0; i < inputsCombinacion.length; i++) {
+            const input = inputsCombinacion[i];
+            if (!input.value) {
+              alert(`Por favor, completa todos los 6 números. Falta el número ${i + 1}`);
+              input.focus();
+              return;
+            }
+            
+            const numero = parseInt(input.value);
+            if (numero < 1 || numero > 56) {
+              alert(`El número ${i + 1} debe estar entre 1 y 56`);
+              input.focus();
+              return;
+            }
+            
+            // Verificar duplicados
+            if (numeros.includes(numero)) {
+              alert(`El número ${numero} está repetido. Todos los números deben ser diferentes.`);
+              input.focus();
+              return;
+            }
+            
+            numeros.push(numero);
+          }
+          
+          console.log(`🎲 Evaluando combinación: ${numeros.join(', ')}`);
+          
+          // Llamar función de evaluación desde combinacion.js
+          if (typeof window.evaluarCombinacion === 'function') {
+            console.log('✅ Llamando evaluarCombinacion...');
+            window.evaluarCombinacion(numeros);
+          } else if (typeof evaluarCombinacion === 'function') {
+            console.log('✅ Llamando evaluarCombinacion (global)...');
+            evaluarCombinacion(numeros);
+          } else {
+            console.warn('⚠️ Función evaluarCombinacion no disponible, intentando cargar...');
+            
+            // Mostrar mensaje de carga
+            const resultado = document.getElementById('resultado-combinacion');
+            if (resultado) {
+              resultado.innerHTML = '<div class="text-center p-4 bg-yellow-100 rounded-lg"><p class="text-yellow-800">⚠️ Cargando sistema de evaluación...</p></div>';
+              resultado.style.display = 'block';
+              
+              // Intentar nuevamente después de un delay
+              setTimeout(() => {
+                if (typeof window.evaluarCombinacion === 'function') {
+                  console.log('✅ Función cargada, evaluando...');
+                  window.evaluarCombinacion(numeros);
+                } else {
+                  resultado.innerHTML = '<div class="text-center p-4 bg-red-100 rounded-lg"><p class="text-red-800">❌ Error: Sistema de evaluación no disponible</p></div>';
+                }
+              }, 2000);
+            }
+          }
+        };
+      }
+      
+      // Verificar que las funciones de evaluación estén cargadas
+      setTimeout(() => {
+        console.log('🔧 Verificando funciones de evaluación...');
+        
+        if (typeof window.evaluarNumeroIndividual === 'function') {
+          console.log('✅ evaluarNumeroIndividual disponible');
+        } else {
+          console.warn('⚠️ evaluarNumeroIndividual NO disponible');
+        }
+        
+        if (typeof window.evaluarCombinacion === 'function') {
+          console.log('✅ evaluarCombinacion disponible');
+        } else {
+          console.warn('⚠️ evaluarCombinacion NO disponible');
+        }
+      }, 2000);
+      
+      console.log('✅ Configuración completa terminada');
+    });
+    
+    // Funciones de debugging
+    window.testLimpieza = () => {
+      console.log('🧪 Test de limpieza manual');
+      LIMPIAR_TODO_AHORA();
+    };
+  </script>
+</body>
+</html>

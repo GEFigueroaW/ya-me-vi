@@ -679,6 +679,52 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Inicializando evaluadores...');
     inicializarEvaluadores();
     
+    // Verificar que los elementos existen después de la inicialización
+    setTimeout(() => {
+      const btnNumero = document.getElementById('evaluar-numero-btn');
+      const btnCombinacion = document.getElementById('evaluar-combinacion-btn');
+      const inputNumero = document.getElementById('numero-individual');
+      const inputsCombinacion = document.querySelectorAll('.combo-input');
+      
+      console.log('🔍 Verificación de elementos:');
+      console.log('  - Botón evaluar número:', !!btnNumero, btnNumero ? 'ENCONTRADO' : 'NO ENCONTRADO');
+      console.log('  - Botón evaluar combinación:', !!btnCombinacion, btnCombinacion ? 'ENCONTRADO' : 'NO ENCONTRADO');
+      console.log('  - Input número individual:', !!inputNumero, inputNumero ? 'ENCONTRADO' : 'NO ENCONTRADO');
+      console.log('  - Inputs combinación:', inputsCombinacion.length, 'encontrados');
+      
+      if (btnNumero) {
+        console.log('  - Botón número es visible:', !btnNumero.closest('.hidden'));
+        console.log('  - Botón número tiene event listeners:', !!btnNumero.onclick);
+      }
+      
+      if (btnCombinacion) {
+        console.log('  - Botón combinación es visible:', !btnCombinacion.closest('.hidden'));
+        console.log('  - Botón combinación tiene event listeners:', !!btnCombinacion.onclick);
+      }
+      
+      // Test manual de funciones
+      window.testEvaluarNumero = (num = 7) => {
+        console.log(`🧪 Test manual: evaluando número ${num}`);
+        try {
+          evaluarNumeroIndividual(num);
+          console.log('✅ Función evaluarNumeroIndividual funciona');
+        } catch (error) {
+          console.error('❌ Error en evaluarNumeroIndividual:', error);
+        }
+      };
+      
+      window.testEvaluarCombinacion = () => {
+        console.log('🧪 Test manual: evaluando combinación [1, 2, 3, 4, 5, 6]');
+        try {
+          evaluarCombinacion([1, 2, 3, 4, 5, 6]);
+          console.log('✅ Función evaluarCombinacion funciona');
+        } catch (error) {
+          console.error('❌ Error en evaluarCombinacion:', error);
+        }
+      };
+      
+    }, 1000);
+    
     // Cargar datos históricos
     console.log('Preparando datos históricos...');
     prepararDatosHistoricos();
@@ -836,167 +882,134 @@ function inicializarAcordeones() {
 }
 
 /**
- * Inicializar evaluadores de números
+ * Inicializar evaluadores de números usando delegación de eventos
  */
 function inicializarEvaluadores() {
-  // Evaluador de número individual
-  const btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
-  const inputNumero = document.getElementById('numero-individual');
+  console.log('🎯 Configurando evaluadores con delegación de eventos...');
   
-  if (btnEvaluarNumero && inputNumero) {
-    btnEvaluarNumero.addEventListener('click', function() {
-      const numero = parseInt(inputNumero.value);
-      if (numero >= 1 && numero <= 56) {
-        evaluarNumeroIndividual(numero);
-      } else {
+  // Usar delegación de eventos en el documento para capturar clicks en botones
+  // incluso si están ocultos inicialmente
+  document.addEventListener('click', function(e) {
+    console.log('📍 Click detectado en:', e.target.tagName, e.target.id, e.target.className);
+    
+    // Evaluar número individual
+    if (e.target && e.target.id === 'evaluar-numero-btn') {
+      console.log('🎯 Click detectado en evaluar-numero-btn - PROCESANDO');
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const inputNumero = document.getElementById('numero-individual');
+      if (!inputNumero || !inputNumero.value) {
+        console.warn('⚠️ Input no encontrado o vacío');
         alert('⚠️ Por favor ingresa un número entre 1 y 56');
-      }
-    });
-    
-    // Permitir evaluar con Enter
-    inputNumero.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        btnEvaluarNumero.click();
-      }
-    });
-  }
-  
-  // Evaluador de combinación
-  const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
-  const inputsCombinacion = document.querySelectorAll('.combo-input');
-  
-  if (btnEvaluarCombinacion && inputsCombinacion.length === 6) {
-    // Función de validación en tiempo real
-    const validarCombinacionEnTiempoReal = () => {
-      let errorMessage = document.getElementById('error-message');
-      
-      // Crear mensaje de error si no existe
-      if (!errorMessage) {
-        errorMessage = document.createElement('div');
-        errorMessage.id = 'error-message';
-        errorMessage.className = 'mt-3 p-3 bg-red-100 border border-red-300 rounded-lg text-red-800 text-sm text-center hidden';
-        
-        const contentCombinacion = document.getElementById('content-combinacion');
-        const botonContainer = contentCombinacion.querySelector('.text-center');
-        botonContainer.appendChild(errorMessage);
+        if (inputNumero) inputNumero.focus();
+        return;
       }
       
-      const numeros = [];
-      let hayError = false;
-      let mensajeError = '';
+      const numero = parseInt(inputNumero.value);
+      console.log('🔢 Número parseado:', numero);
       
-      // Validar cada input
-      inputsCombinacion.forEach((input) => {
-        const valor = parseInt(input.value);
-        
-        // Resetear estilos
-        input.classList.remove('border-red-500', 'border-green-500');
-        input.classList.add('border-gray-300');
-        
-        if (input.value && input.value.trim() !== '') {
-          // Validar rango
-          if (valor < 1 || valor > 56) {
-            input.classList.remove('border-gray-300');
-            input.classList.add('border-red-500');
-            hayError = true;
-            mensajeError = '⚠️ Los números deben estar entre 1 y 56';
-          } else {
-            numeros.push(valor);
-            input.classList.remove('border-gray-300');
-            input.classList.add('border-green-500');
-          }
+      if (numero >= 1 && numero <= 56) {
+        console.log(`🔢 Evaluando número: ${numero}`);
+        try {
+          evaluarNumeroIndividual(numero);
+          console.log('✅ evaluarNumeroIndividual ejecutado correctamente');
+        } catch (error) {
+          console.error('❌ Error al ejecutar evaluarNumeroIndividual:', error);
         }
-      });
-      
-      // Validar duplicados
-      if (numeros.length > 0) {
-        const numerosUnicos = [...new Set(numeros)];
-        if (numerosUnicos.length !== numeros.length) {
-          hayError = true;
-          mensajeError = '⚠️ No se permiten números duplicados';
-          
-          // Marcar inputs duplicados en rojo
-          const duplicados = numeros.filter((num, index) => numeros.indexOf(num) !== index);
-          inputsCombinacion.forEach(input => {
-            const valor = parseInt(input.value);
-            if (duplicados.includes(valor)) {
-              input.classList.remove('border-green-500', 'border-gray-300');
-              input.classList.add('border-red-500');
-            }
-          });
-        }
-      }
-      
-      // Mostrar/ocultar mensaje de error
-      if (hayError) {
-        errorMessage.textContent = mensajeError;
-        errorMessage.classList.remove('hidden');
-        btnEvaluarCombinacion.disabled = true;
-        btnEvaluarCombinacion.classList.add('opacity-50', 'cursor-not-allowed');
       } else {
-        errorMessage.classList.add('hidden');
-        btnEvaluarCombinacion.disabled = false;
-        btnEvaluarCombinacion.classList.remove('opacity-50', 'cursor-not-allowed');
+        console.warn('⚠️ Número fuera de rango:', numero);
+        alert('⚠️ Por favor ingresa un número entre 1 y 56');
+        inputNumero.focus();
       }
       
-      return !hayError;
-    };
+      return; // Importante: salir después de procesar
+    }
     
-    btnEvaluarCombinacion.addEventListener('click', function() {
-      // Validar antes de evaluar
-      if (!validarCombinacionEnTiempoReal()) {
-        console.log('⚠️ Validación fallida, no se puede evaluar');
+    // Evaluar combinación
+    if (e.target && e.target.id === 'evaluar-combinacion-btn') {
+      console.log('🎯 Click detectado en evaluar-combinacion-btn - PROCESANDO');
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const inputsCombinacion = document.querySelectorAll('.combo-input');
+      console.log('🔍 Inputs de combinación encontrados:', inputsCombinacion.length);
+      
+      if (inputsCombinacion.length !== 6) {
+        console.error('❌ Error: No se encontraron los 6 campos de combinación');
+        alert('⚠️ Error: No se encontraron los 6 campos de combinación');
         return;
       }
       
       const numeros = [];
-      inputsCombinacion.forEach(input => {
-        const num = parseInt(input.value);
-        if (num >= 1 && num <= 56) {
-          numeros.push(num);
-        }
-      });
       
-      if (numeros.length === 6) {
-        evaluarCombinacion(numeros);
+      // Validar que todos los campos estén llenos
+      for (let i = 0; i < inputsCombinacion.length; i++) {
+        const input = inputsCombinacion[i];
+        console.log(`🔍 Validando input ${i + 1}:`, input.value);
+        
+        if (!input.value) {
+          console.warn(`⚠️ Campo ${i + 1} vacío`);
+          alert(`⚠️ Por favor, completa todos los 6 números. Falta el número ${i + 1}`);
+          input.focus();
+          return;
+        }
+        
+        const numero = parseInt(input.value);
+        if (numero < 1 || numero > 56) {
+          console.warn(`⚠️ Número ${numero} fuera de rango en campo ${i + 1}`);
+          alert(`⚠️ El número ${i + 1} debe estar entre 1 y 56`);
+          input.focus();
+          return;
+        }
+        
+        // Verificar duplicados
+        if (numeros.includes(numero)) {
+          console.warn(`⚠️ Número ${numero} duplicado`);
+          alert(`⚠️ El número ${numero} está repetido. Todos los números deben ser diferentes.`);
+          input.focus();
+          return;
+        }
+        
+        numeros.push(numero);
       }
-    });
-    
-    // Agregar validación en tiempo real a cada input
-    inputsCombinacion.forEach((input) => {
-      input.addEventListener('input', validarCombinacionEnTiempoReal);
-      input.addEventListener('blur', validarCombinacionEnTiempoReal);
       
-      // Prevenir números fuera de rango
-      input.addEventListener('keydown', function(e) {
-        // Permitir teclas de control
-        if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' || e.key === 'Enter') {
-          return;
-        }
-        
-        // Solo permitir números
-        if (!/[0-9]/.test(e.key)) {
-          e.preventDefault();
-          return;
-        }
-        
-        // Prevenir números mayores a 56
-        const currentValue = this.value + e.key;
-        if (parseInt(currentValue) > 56) {
-          e.preventDefault();
-        }
-      });
+      console.log(`🎲 Evaluando combinación: ${numeros.join(', ')}`);
+      try {
+        evaluarCombinacion(numeros);
+        console.log('✅ evaluarCombinacion ejecutado correctamente');
+      } catch (error) {
+        console.error('❌ Error al ejecutar evaluarCombinacion:', error);
+      }
       
-      // Permitir evaluar con Enter
-      input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && validarCombinacionEnTiempoReal()) {
+      return; // Importante: salir después de procesar
+    }
+  });
+  
+  // También configurar Enter en campos de número
+  document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      if (e.target && e.target.id === 'numero-individual') {
+        console.log('⌨️ Enter presionado en numero-individual');
+        const btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
+        if (btnEvaluarNumero) {
+          console.log('🎯 Simulando click en evaluar-numero-btn');
+          btnEvaluarNumero.click();
+        }
+      }
+      
+      if (e.target && e.target.classList.contains('combo-input')) {
+        console.log('⌨️ Enter presionado en combo-input');
+        const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
+        if (btnEvaluarCombinacion) {
+          console.log('🎯 Simulando click en evaluar-combinacion-btn');
           btnEvaluarCombinacion.click();
         }
-      });
-    });
-  }
+      }
+    }
+  });
   
-  console.log('✅ Evaluadores inicializados');
+  console.log('✅ Evaluadores configurados con delegación de eventos');
 }
 
 /**
