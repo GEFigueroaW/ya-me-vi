@@ -628,6 +628,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar datos históricos
     console.log('Preparando datos históricos...');
     prepararDatosHistoricos();
+    
+    // Exponer funciones al ámbito global para acceso desde script inline
+    console.log('Exponiendo funciones globalmente...');
+    window.evaluarNumeroIndividual = evaluarNumeroIndividual;
+    window.evaluarCombinacion = evaluarCombinacion;
   }, 100);
 });
 

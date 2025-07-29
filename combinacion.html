@@ -267,6 +267,114 @@
           }
         };
       }
+      
+      // Inicializar el botón "Evaluar" para número individual
+      const btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
+      const inputNumero = document.getElementById('numero-individual');
+      
+      if (btnEvaluarNumero && inputNumero) {
+        console.log('Inicializando botón Evaluar para número individual');
+        btnEvaluarNumero.onclick = function() {
+          console.log('Click en botón Evaluar número');
+          const numero = parseInt(inputNumero.value);
+          if (numero >= 1 && numero <= 56) {
+            console.log('Evaluando número:', numero);
+            // Usar una función de respaldo local si la función del módulo no está disponible
+            const evaluarNumero = function(num) {
+              const resultadoDiv = document.getElementById('resultado-numero');
+              if (!resultadoDiv) return;
+              
+              // Mostrar indicador de carga
+              resultadoDiv.innerHTML = '<div class="text-center py-4"><div class="animate-spin inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full"></div><div class="mt-2 text-gray-700">Cargando resultados...</div></div>';
+              
+              // Esperar que el módulo se cargue y llamar a la función real
+              setTimeout(() => {
+                if (typeof window.evaluarNumeroIndividual === 'function') {
+                  window.evaluarNumeroIndividual(num);
+                } else {
+                  resultadoDiv.innerHTML = '<div class="bg-red-100 text-red-800 p-4 rounded-lg text-center">Error: No se pudo cargar el evaluador. Por favor recarga la página.</div>';
+                }
+              }, 500);
+            };
+            
+            // Intentar llamar a la función global, o usar nuestra función de respaldo
+            if (typeof window.evaluarNumeroIndividual === 'function') {
+              window.evaluarNumeroIndividual(numero);
+            } else {
+              evaluarNumero(numero);
+            }
+          } else {
+            alert('⚠️ Por favor ingresa un número entre 1 y 56');
+          }
+        };
+        
+        // Permitir evaluar con Enter
+        inputNumero.onkeypress = function(e) {
+          if (e.key === 'Enter') {
+            btnEvaluarNumero.click();
+          }
+        };
+      }
+      
+      // Inicializar el botón "Evaluar Combinación"
+      const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
+      const inputsCombinacion = document.querySelectorAll('.combo-input');
+      
+      if (btnEvaluarCombinacion && inputsCombinacion.length === 6) {
+        console.log('Inicializando botón Evaluar para combinación');
+        btnEvaluarCombinacion.onclick = function() {
+          console.log('Click en botón Evaluar combinación');
+          const numeros = [];
+          let valido = true;
+          
+          inputsCombinacion.forEach(input => {
+            const num = parseInt(input.value);
+            if (isNaN(num) || num < 1 || num > 56) {
+              valido = false;
+            } else {
+              numeros.push(num);
+            }
+          });
+          
+          if (valido && numeros.length === 6) {
+            // Verificar duplicados
+            const numerosUnicos = [...new Set(numeros)];
+            if (numerosUnicos.length !== 6) {
+              alert('⚠️ No puedes repetir números en tu combinación');
+              return;
+            }
+            
+            console.log('Evaluando combinación:', numeros);
+            
+            // Usar una función de respaldo local si la función del módulo no está disponible
+            const evaluarCombo = function(nums) {
+              const resultadoDiv = document.getElementById('resultado-combinacion');
+              if (!resultadoDiv) return;
+              
+              // Mostrar indicador de carga
+              resultadoDiv.innerHTML = '<div class="text-center py-4"><div class="animate-spin inline-block w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full"></div><div class="mt-2 text-gray-700">Cargando resultados...</div></div>';
+              
+              // Esperar que el módulo se cargue y llamar a la función real
+              setTimeout(() => {
+                if (typeof window.evaluarCombinacion === 'function') {
+                  window.evaluarCombinacion(nums);
+                } else {
+                  resultadoDiv.innerHTML = '<div class="bg-red-100 text-red-800 p-4 rounded-lg text-center">Error: No se pudo cargar el evaluador. Por favor recarga la página.</div>';
+                }
+              }, 500);
+            };
+            
+            // Intentar llamar a la función global, o usar nuestra función de respaldo
+            if (typeof window.evaluarCombinacion === 'function') {
+              window.evaluarCombinacion(numeros);
+            } else {
+              evaluarCombo(numeros);
+            }
+          } else {
+            alert('⚠️ Por favor ingresa 6 números válidos entre 1 y 56');
+          }
+        };
+      }
     });
   </script>
 </body>
