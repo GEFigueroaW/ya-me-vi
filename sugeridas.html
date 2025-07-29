@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-      <!-- CAJA 2: Predicción IA -->
-    <div class="max-w-4xl mx-auto mb-8 px-4">
-      <div id="prediccion-container" class="box-container bg-white bg-opacity-20 rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-300 backdrop-blur-sm border border-white border-opacity-20" style="opacity: 0.8;" onclick="togglePrediccionIA()">tle>YA ME VI - Combinaciones Sugeridas</title>
+  <title>YA ME VI - Combinaciones Sugeridas</title>
   
   <!-- Favicon -->
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
@@ -92,11 +90,11 @@
 </head>
 
 <body class="overflow-x-hidden" style="margin: 0; padding: 0;">
-  <!-- Fondo -->
-  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+  <!-- Fondo - Sin transición para evitar parpadeo -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center" style="background-color: rgba(0, 0, 0, 0.9);"></div>
   
-  <!-- Overlay -->
-  <div class="fixed inset-0 z-10 bg-black bg-opacity-40"></div>
+  <!-- Overlay - Reducida opacidad -->
+  <div class="fixed inset-0 z-10 bg-black bg-opacity-30"></div>
   
   <!-- Contenido Principal -->
   <div class="relative z-20 min-h-screen">
@@ -140,7 +138,7 @@
 
     <!-- CAJA 2: Predicciones IA -->
     <div class="max-w-4xl mx-auto mb-8 px-4">
-      <div id="prediccion-container" class="bg-white bg-opacity-20 rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-all duration-300 backdrop-blur-sm border border-white border-opacity-20" style="opacity: 0.8;" onclick="togglePrediccionIA()">
+      <div id="prediccion-container" class="box-container bg-white bg-opacity-20 rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-300 backdrop-blur-sm border border-white border-opacity-20" style="opacity: 0.8;" onclick="togglePrediccionIA()">
         
         <div class="text-center">
           <h2 id="titulo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">🎯 Combinaciones sugeridas por IA para TI Guillermo para el sorteo 4088</h2>
@@ -173,11 +171,6 @@
           
           <div class="text-center">
             <p id="mensaje-estado" class="text-white text-sm mb-4">Predicciones completas de 5 métodos</p>
-            <button id="btn-ejecutar-prediccion" 
-                   class="btn-accion bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300" 
-                   onclick="event.stopPropagation(); ejecutarPrediccionesIA();">
-              🤖 Generar predicciones IA
-            </button>
           </div>
         </div>
       </div>
@@ -356,38 +349,26 @@
         isPrediccionOpen = true;
         console.log('✅ Caja predicción abierta');
         
-        // Ejecutar predicciones IA
-        if (window.ejecutarPrediccionesIA) {
-          window.ejecutarPrediccionesIA();
-        } else {
-          console.error('❌ ejecutarPrediccionesIA no disponible');
+        // Verificar si ya hay predicciones generadas
+        const melateElement = document.getElementById('combinacion-melate');
+        if (!melateElement || melateElement.textContent === '-- -- -- -- -- --') {
+          // Ejecutar predicciones IA solo si no hay datos previos
+          if (window.ejecutarPrediccionesIA) {
+            window.ejecutarPrediccionesIA();
+          } else {
+            console.error('❌ ejecutarPrediccionesIA no disponible');
+          }
         }
       } else {
-        // Cerrar caja y limpiar contenido
+        // Cerrar caja sin limpiar el contenido
         contenido.classList.remove('abierto');
         arrow.style.transform = 'rotate(0deg)';
-        container.style.opacity = '0';
+        container.style.opacity = '0.8';
         isPrediccionOpen = false;
         console.log('✅ Caja predicción cerrada');
         
-        // Limpiar resultados de predicciones
-        const melateCombinacion = document.getElementById('combinacion-melate');
-        const revanchaCombinacion = document.getElementById('combinacion-revancha');
-        const revanchitaCombinacion = document.getElementById('combinacion-revanchita');
-        const mensajeEstado = document.getElementById('mensaje-estado');
-        
-        if (melateCombinacion) {
-          melateCombinacion.textContent = '-- -- -- -- -- --';
-        }
-        if (revanchaCombinacion) {
-          revanchaCombinacion.textContent = '-- -- -- -- -- --';
-        }
-        if (revanchitaCombinacion) {
-          revanchitaCombinacion.textContent = '-- -- -- -- -- --';
-        }
-        if (mensajeEstado) {
-          mensajeEstado.textContent = 'Predicciones completas de 5 métodos';
-        }
+        // No limpiamos las predicciones para mantenerlas disponibles
+        // cuando el usuario vuelva a abrir la caja
         
         isPrediccionOpen = false;
         console.log('✅ Caja predicción cerrada y limpiada');
@@ -485,24 +466,8 @@
           container.style.opacity = '0.8';
         }
         
-        // Limpiar resultados de predicciones
-        const melateCombinacion = document.getElementById('combinacion-melate');
-        const revanchaCombinacion = document.getElementById('combinacion-revancha');
-        const revanchitaCombinacion = document.getElementById('combinacion-revanchita');
-        const mensajeEstado = document.getElementById('mensaje-estado');
-        
-        if (melateCombinacion) {
-          melateCombinacion.textContent = '-- -- -- -- -- --';
-        }
-        if (revanchaCombinacion) {
-          revanchaCombinacion.textContent = '-- -- -- -- -- --';
-        }
-        if (revanchitaCombinacion) {
-          revanchitaCombinacion.textContent = '-- -- -- -- -- --';
-        }
-        if (mensajeEstado) {
-          mensajeEstado.textContent = 'Predicciones completas de 5 métodos';
-        }
+        // NO limpiamos los resultados de predicciones para mantener la consistencia
+        // cuando el usuario vuelva a abrir la caja
         
         isPrediccionOpen = false;
         console.log('✅ Caja predicción cerrada y limpiada');
@@ -610,6 +575,14 @@
       const revanchitaElement = document.getElementById('combinacion-revanchita');
       const mensajeEstado = document.getElementById('mensaje-estado');
       
+      // Si ya tenemos predicciones generadas, no hacemos nada
+      if (melateElement && melateElement.textContent && 
+          melateElement.textContent !== '-- -- -- -- -- --' && 
+          melateElement.textContent !== 'Analizando...') {
+        console.log('✅ Ya hay predicciones generadas');
+        return;
+      }
+      
       // Mostrar estado "cargando"
       if (melateElement) melateElement.textContent = 'Analizando...';
       if (revanchaElement) revanchaElement.textContent = 'Analizando...';
@@ -626,15 +599,25 @@
           if (revanchitaElement) revanchitaElement.textContent = prediccionesCached.revanchita;
           if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas de 5 métodos';
         } else {
-          // Generar nuevas predicciones basadas en los CSV (esto sería reemplazado por tu análisis real)
-          // En un sistema real, aquí se cargarían los datos de los CSV y se procesarían
+          // Generar nuevas predicciones basadas en el ID de usuario para que sean consistentes
+          const userId = window.usuarioActualID || 'Guillermo';
+          const seed = userId.charCodeAt(0) + (userId.charCodeAt(1) || 0);
+          
+          // Crear predicciones deterministas basadas en el ID de usuario
+          const generarNumeros = (base) => {
+            const nums = new Set();
+            while (nums.size < 6) {
+              const num = (seed * (base + nums.size + 1)) % 56 + 1;
+              nums.add(num);
+            }
+            return [...nums].sort((a, b) => a - b).join(' - ');
+          };
           
           // Simular predicciones generadas a partir del análisis de CSV
-          // Estas predicciones se mantendrían consistentes hasta que los CSV cambien
           const nuevasPredicciones = {
-            melate: "2 - 20 - 23 - 32 - 45 - 53",
-            revancha: "12 - 15 - 30 - 37 - 42 - 48",
-            revanchita: "7 - 19 - 22 - 31 - 43 - 50"
+            melate: generarNumeros(10),
+            revancha: generarNumeros(20),
+            revanchita: generarNumeros(30)
           };
           
           // Actualizar caché
@@ -649,7 +632,7 @@
           
           console.log('✅ Nuevas predicciones generadas y almacenadas en caché');
         }
-      }, 1500);
+      }, 1000);
     }
     
     // Hacer funciones disponibles globalmente
