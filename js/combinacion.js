@@ -20,14 +20,7 @@ async function cargarDatosCSV() {
   const sorteos = ['melate', 'revancha', 'revanchita'];
   let datosRealesCargados = false;
   
-                <div class="text-center mt-2">
-          <div class="text-xs text-yellow-800 font-semibold">🎯 Índice de éxito</div>
-          <div class="text-lg font-bold text-gray-900">${indicePorSorteo[sorteo].porcentaje.toFixed(2)}%</div>
-          <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
-            ${clasificacion.categoria}
-          </div>
-          <div class="text-xs text-gray-900">${analisis.porSorteo[sorteo].frecuencia} apariciones</div>
-        </div>nitialize arrays to ensure clean state
+  // Initialize arrays to ensure clean state
   numerosPorSorteo = {
     melate: [],
     revancha: [],
@@ -427,11 +420,11 @@ function calcularFrecuenciaPorSorteo(num) {
     const frecuencia = numeros.filter(n => n === num).length;
     const total = numeros.length;
     
-    // Calcular porcentaje base
+    // Calcular porcentaje base real sin mínimos artificiales
     const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
     
-    // Usar el porcentaje base sin factores matemáticos
-    const porcentajeFinal = Math.max(porcentajeBase, 2.0); // Mínimo 2% para permitir más variación
+    // Usar el porcentaje real calculado
+    const porcentajeFinal = porcentajeBase;
     
     resultados[sorteo] = {
       frecuencia: frecuencia,
@@ -555,12 +548,70 @@ function clasificarProbabilidad(porcentaje) {
 }
 
 /**
+ * Clasificar probabilidad real (para porcentajes pequeños)
+ */
+function clasificarProbabilidadReal(porcentaje) {
+  // Rangos para porcentajes reales más pequeños
+  if (porcentaje >= 3.0) return { 
+    categoria: 'Excepcional', 
+    color: 'text-green-800 font-bold', 
+    bgColor: 'bg-green-100', 
+    emoji: '🔥' 
+  };
+  if (porcentaje >= 2.5) return { 
+    categoria: 'Muy Alta', 
+    color: 'text-green-900 font-bold', 
+    bgColor: 'bg-green-50', 
+    emoji: '⚡' 
+  };
+  if (porcentaje >= 2.0) return { 
+    categoria: 'Alta', 
+    color: 'text-blue-900 font-bold', 
+    bgColor: 'bg-blue-50', 
+    emoji: '📈' 
+  };
+  if (porcentaje >= 1.8) return { 
+    categoria: 'Buena', 
+    color: 'text-yellow-900 font-bold', 
+    bgColor: 'bg-yellow-100', 
+    emoji: '⚖️' 
+  };
+  if (porcentaje >= 1.6) return { 
+    categoria: 'Moderada', 
+    color: 'text-orange-900 font-bold', 
+    bgColor: 'bg-orange-100', 
+    emoji: '🎲' 
+  };
+  if (porcentaje >= 1.4) return { 
+    categoria: 'Aceptable', 
+    color: 'text-purple-900 font-bold', 
+    bgColor: 'bg-purple-100', 
+    emoji: '🎯' 
+  };
+  if (porcentaje >= 1.0) return { 
+    categoria: 'Baja', 
+    color: 'text-cyan-900 font-bold', 
+    bgColor: 'bg-cyan-100', 
+    emoji: '💫' 
+  };
+  return { 
+    categoria: 'Muy Baja', 
+    color: 'text-gray-900 font-bold', 
+    bgColor: 'bg-gray-100', 
+    emoji: '✨' 
+  };
+}
+
+/**
  * Generar HTML para análisis de combinación por sorteo
  */
 function generarHtmlAnalisisSorteo(analisisIndividual, sorteo, colorClass, borderClass) {
   return analisisIndividual.map(analisis => {
-    const clasificacion = clasificarProbabilidad(analisis.porSorteo[sorteo].porcentaje);
+    // Usar el porcentaje real del análisis por sorteo, no el calculado con mínimos
     const indicePorSorteo = calcularIndicePorSorteo(analisis.numero);
+    const porcentajeReal = indicePorSorteo[sorteo].porcentaje;
+    const clasificacion = clasificarProbabilidadReal(porcentajeReal);
+    
     return `
       <div class="${colorClass} bg-opacity-20 rounded-lg p-3 border ${borderClass}">
         <div class="flex items-center justify-between">
@@ -571,7 +622,7 @@ function generarHtmlAnalisisSorteo(analisisIndividual, sorteo, colorClass, borde
         </div>
         <div class="text-center mt-2">
           <div class="text-xs text-yellow-600 font-medium">🎯 Índice de éxito</div>
-          <div class="text-lg font-bold text-gray-800">${indicePorSorteo[sorteo].porcentaje.toFixed(2)}%</div>
+          <div class="text-lg font-bold text-gray-800">${porcentajeReal.toFixed(4)}%</div>
           <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
             ${clasificacion.categoria}
           </div>
@@ -605,7 +656,8 @@ export {
   calcularIndicePorSorteo,
   calcularFrecuenciaTotal,
   calcularPorcentajeTotal,
-  clasificarProbabilidad,  
+  clasificarProbabilidad,
+  clasificarProbabilidadReal,
   generarHtmlAnalisisSorteo,
   generarMensajeSuerte,
   evaluarNumeroIndividual,
@@ -798,14 +850,37 @@ function inicializarEvaluadores() {
 function evaluarNumeroIndividual(numero) {
   console.log(`🔍 Evaluando número individual: ${numero}`);
   
+  // Validar que el número esté en el rango correcto
+  if (numero < 1 || numero > 56) {
+    console.error('❌ Número fuera de rango');
+    const resultadoDiv = document.getElementById('resultado-numero');
+    if (resultadoDiv) {
+      resultadoDiv.innerHTML = `
+        <div class="bg-red-100 border-2 border-red-300 rounded-xl p-6 shadow-lg">
+          <h3 class="text-xl font-bold text-center mb-4 text-red-800">
+            ⚠️ Error
+          </h3>
+          <p class="text-center text-red-700">
+            Por favor ingresa un número válido entre 1 y 56.
+          </p>
+        </div>
+      `;
+    }
+    return;
+  }
+  
   const resultadoDiv = document.getElementById('resultado-numero');
-  if (!resultadoDiv) return;
+  if (!resultadoDiv) {
+    console.error('❌ No se encontró el div resultado-numero');
+    return;
+  }
   
   // Mostrar indicador de carga
   resultadoDiv.innerHTML = '<div class="text-center py-4"><div class="animate-spin inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full"></div></div>';
   
   setTimeout(() => {
-    const analisisPorSorteo = calcularFrecuenciaPorSorteo(numero);
+    // Usar el cálculo de índice real (sin mínimos artificiales)
+    const analisisPorSorteo = calcularIndicePorSorteo(numero);
     
     resultadoDiv.innerHTML = `
       <div class="bg-white bg-opacity-80 rounded-xl p-6 shadow-lg">
@@ -815,7 +890,7 @@ function evaluarNumeroIndividual(numero) {
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           ${Object.entries(analisisPorSorteo).map(([sorteo, datos]) => {
-            const clasificacion = clasificarProbabilidad(datos.porcentaje);
+            const clasificacion = clasificarProbabilidadReal(datos.porcentaje);
             const iconos = {
               melate: '🎲',
               revancha: '🍀', 
@@ -827,7 +902,7 @@ function evaluarNumeroIndividual(numero) {
                 <div class="text-2xl mb-2">${iconos[sorteo]}</div>
                 <div class="font-bold text-gray-900 capitalize">${sorteo}</div>
                 <div class="text-2xl font-bold ${clasificacion.color} my-2">
-                  ${datos.porcentaje.toFixed(2)}%
+                  ${datos.porcentaje.toFixed(4)}%
                 </div>
                 <div class="text-sm ${clasificacion.color} px-2 py-1 rounded-full ${clasificacion.bgColor} border border-gray-300">
                   ${clasificacion.categoria}

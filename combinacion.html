@@ -204,11 +204,28 @@
   <script type="module" src="js/combinacion.js"></script>
   <script src="js/evaluadores.js"></script>
   
-  <!-- Script de inicialización directa para acordeones -->
+  <!-- Script de inicialización mejorado -->
   <script>
-    // Inicialización directa para asegurar que los acordeones funcionen
+    // Inicialización con mejor manejo de errores
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('Inicializando acordeones directamente...');
+      console.log('🚀 Inicializando combinacion.html...');
+      
+      // Verificar funciones después de la carga
+      setTimeout(() => {
+        console.log('🔧 Verificando funciones globales...');
+        
+        if (typeof window.evaluarNumeroIndividual === 'function') {
+          console.log('✅ evaluarNumeroIndividual disponible');
+        } else {
+          console.error('❌ evaluarNumeroIndividual NO disponible');
+        }
+        
+        if (typeof window.evaluarCombinacion === 'function') {
+          console.log('✅ evaluarCombinacion disponible');  
+        } else {
+          console.error('❌ evaluarCombinacion NO disponible');
+        }
+      }, 1000);
       
       // Acordeón para número individual
       const triggerNumero = document.getElementById('trigger-numero-individual');
