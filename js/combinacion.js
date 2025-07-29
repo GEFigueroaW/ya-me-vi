@@ -20,7 +20,14 @@ async function cargarDatosCSV() {
   const sorteos = ['melate', 'revancha', 'revanchita'];
   let datosRealesCargados = false;
   
-  // Reinitialize arrays to ensure clean state
+                <div class="text-center mt-2">
+          <div class="text-xs text-yellow-800 font-semibold">🎯 Índice de éxito</div>
+          <div class="text-lg font-bold text-gray-900">${indicePorSorteo[sorteo].porcentaje.toFixed(2)}%</div>
+          <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
+            ${clasificacion.categoria}
+          </div>
+          <div class="text-xs text-gray-900">${analisis.porSorteo[sorteo].frecuencia} apariciones</div>
+        </div>nitialize arrays to ensure clean state
   numerosPorSorteo = {
     melate: [],
     revancha: [],
@@ -424,7 +431,7 @@ function calcularFrecuenciaPorSorteo(num) {
     const porcentajeBase = total > 0 ? (frecuencia / total) * 100 : 0;
     
     // Usar el porcentaje base sin factores matemáticos
-    const porcentajeFinal = Math.max(porcentajeBase, 8.0); // Mínimo 8%
+    const porcentajeFinal = Math.max(porcentajeBase, 2.0); // Mínimo 2% para permitir más variación
     
     resultados[sorteo] = {
       frecuencia: frecuencia,
@@ -486,8 +493,8 @@ function calcularPorcentajeTotal(num) {
   const porcentajeBase = totalNumeros > 0 ? (frecuenciaTotal / totalNumeros) * 100 : 0;
   const porcentajeAjustado = porcentajeBase;
   
-  // Asegurar que ningún número tenga menos de 8% (mínimo 8%)
-  const porcentajeFinal = Math.max(porcentajeAjustado, 8.0);
+  // Asegurar que ningún número tenga menos de 2% (reducido de 8% para permitir más variación)
+  const porcentajeFinal = Math.max(porcentajeAjustado, 2.0);
   
   return porcentajeFinal;
 }
@@ -496,53 +503,53 @@ function calcularPorcentajeTotal(num) {
  * Clasificar probabilidad según rangos definidos
  */
 function clasificarProbabilidad(porcentaje) {
-  // Rangos ajustados para el factor 12.5x con colores más contrastantes y sombras
+  // Rangos ajustados con colores de alto contraste para mejor legibilidad
   if (porcentaje >= 30) return { 
     categoria: 'Excepcional', 
-    color: 'text-green-600 font-bold', 
-    bgColor: 'bg-green-100 bg-opacity-80', 
+    color: 'text-green-800 font-bold', 
+    bgColor: 'bg-green-100', 
     emoji: '🔥' 
   };
   if (porcentaje >= 25) return { 
     categoria: 'Muy Alta', 
-    color: 'text-green-700 font-bold', 
-    bgColor: 'bg-green-50 bg-opacity-80', 
+    color: 'text-green-900 font-bold', 
+    bgColor: 'bg-green-50', 
     emoji: '⚡' 
   };
   if (porcentaje >= 20) return { 
     categoria: 'Alta', 
-    color: 'text-blue-700 font-bold', 
-    bgColor: 'bg-blue-50 bg-opacity-80', 
+    color: 'text-blue-900 font-bold', 
+    bgColor: 'bg-blue-50', 
     emoji: '📈' 
   };
   if (porcentaje >= 16) return { 
     categoria: 'Buena', 
-    color: 'text-yellow-700 font-bold', 
-    bgColor: 'bg-yellow-50 bg-opacity-80', 
+    color: 'text-yellow-900 font-bold', 
+    bgColor: 'bg-yellow-100', 
     emoji: '⚖️' 
   };
   if (porcentaje >= 12) return { 
     categoria: 'Moderada', 
-    color: 'text-orange-700 font-bold', 
-    bgColor: 'bg-orange-50 bg-opacity-80', 
+    color: 'text-orange-900 font-bold', 
+    bgColor: 'bg-orange-100', 
     emoji: '🎲' 
   };
   if (porcentaje >= 10) return { 
     categoria: 'Aceptable', 
-    color: 'text-purple-700 font-bold', 
-    bgColor: 'bg-purple-50 bg-opacity-80', 
+    color: 'text-purple-900 font-bold', 
+    bgColor: 'bg-purple-100', 
     emoji: '🎯' 
   };
   if (porcentaje >= 8) return { 
     categoria: 'Baja', 
-    color: 'text-cyan-700 font-bold', 
-    bgColor: 'bg-cyan-50 bg-opacity-80', 
+    color: 'text-cyan-900 font-bold', 
+    bgColor: 'bg-cyan-100', 
     emoji: '💫' 
   };
   return { 
     categoria: 'Muy Baja', 
-    color: 'text-gray-700 font-bold', 
-    bgColor: 'bg-gray-50 bg-opacity-80', 
+    color: 'text-gray-900 font-bold', 
+    bgColor: 'bg-gray-100', 
     emoji: '✨' 
   };
 }
@@ -564,7 +571,7 @@ function generarHtmlAnalisisSorteo(analisisIndividual, sorteo, colorClass, borde
         </div>
         <div class="text-center mt-2">
           <div class="text-xs text-yellow-600 font-medium">🎯 Índice de éxito</div>
-          <div class="text-lg font-bold text-gray-800">${indicePorSorteo[sorteo].porcentaje.toFixed(1)}%</div>
+          <div class="text-lg font-bold text-gray-800">${indicePorSorteo[sorteo].porcentaje.toFixed(2)}%</div>
           <div class="inline-block px-2 py-1 rounded-full ${clasificacion.bgColor} ${clasificacion.color} text-xs mb-1">
             ${clasificacion.categoria}
           </div>
@@ -789,14 +796,14 @@ function evaluarNumeroIndividual(numero) {
             return `
               <div class="text-center p-4 ${clasificacion.bgColor} rounded-lg border">
                 <div class="text-2xl mb-2">${iconos[sorteo]}</div>
-                <div class="font-bold text-gray-800 capitalize">${sorteo}</div>
+                <div class="font-bold text-gray-900 capitalize">${sorteo}</div>
                 <div class="text-2xl font-bold ${clasificacion.color} my-2">
-                  ${datos.porcentaje.toFixed(1)}%
+                  ${datos.porcentaje.toFixed(2)}%
                 </div>
-                <div class="text-sm ${clasificacion.color} px-2 py-1 rounded-full ${clasificacion.bgColor}">
+                <div class="text-sm ${clasificacion.color} px-2 py-1 rounded-full ${clasificacion.bgColor} border border-gray-300">
                   ${clasificacion.categoria}
                 </div>
-                <div class="text-xs text-gray-600 mt-1">
+                <div class="text-xs text-gray-900 mt-1 font-semibold">
                   ${datos.frecuencia} apariciones
                 </div>
               </div>
