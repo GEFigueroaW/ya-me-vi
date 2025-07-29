@@ -374,12 +374,28 @@
           console.error('❌ ejecutarAnalisisCompleto no disponible');
         }
       } else {
-        // Cerrar caja
+        // Cerrar caja y limpiar contenido
         contenido.classList.remove('abierto');
         arrow.style.transform = 'rotate(0deg)';
         container.style.opacity = '0.8';
+        
+        // Limpiar resultados de análisis
+        const melateProyeccion = document.getElementById('proyeccion-melate');
+        const revanchaProyeccion = document.getElementById('proyeccion-revancha');
+        const revanchitaProyeccion = document.getElementById('proyeccion-revanchita');
+        
+        if (melateProyeccion) {
+          melateProyeccion.textContent = '-- -- -- -- -- --';
+        }
+        if (revanchaProyeccion) {
+          revanchaProyeccion.textContent = '-- -- -- -- -- --';
+        }
+        if (revanchitaProyeccion) {
+          revanchitaProyeccion.textContent = '-- -- -- -- -- --';
+        }
+        
         isAnalisisOpen = false;
-        console.log('✅ Caja análisis cerrada');
+        console.log('✅ Caja análisis cerrada y limpiada');
       }
     }
     
@@ -428,12 +444,30 @@
         const contenido = document.getElementById('contenido-analisis');
         const arrow = document.getElementById('arrow-icon-analisis');
         const container = document.getElementById('analisis-container');
+        
         if (contenido && arrow && container) {
           contenido.classList.remove('abierto');
           arrow.style.transform = 'rotate(0deg)';
           container.style.opacity = '0.8';
         }
+        
+        // Limpiar resultados de análisis
+        const melateProyeccion = document.getElementById('proyeccion-melate');
+        const revanchaProyeccion = document.getElementById('proyeccion-revancha');
+        const revanchitaProyeccion = document.getElementById('proyeccion-revanchita');
+        
+        if (melateProyeccion) {
+          melateProyeccion.textContent = '-- -- -- -- -- --';
+        }
+        if (revanchaProyeccion) {
+          revanchaProyeccion.textContent = '-- -- -- -- -- --';
+        }
+        if (revanchitaProyeccion) {
+          revanchitaProyeccion.textContent = '-- -- -- -- -- --';
+        }
+        
         isAnalisisOpen = false;
+        console.log('✅ Caja análisis cerrada y limpiada');
       }
     }
     
