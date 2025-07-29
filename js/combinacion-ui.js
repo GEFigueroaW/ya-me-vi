@@ -9,8 +9,6 @@ import {
   generarMensajeSuerte
 } from './combinacion.js';
 
-import { DatabaseSetup } from './databaseSetup.js';
-
 /**
  * YA ME VI - Combinación UI Module
  * Módulo para manejar la interfaz de usuario y validaciones
@@ -500,22 +498,7 @@ export class UIManager {
       resultadoContainer.innerHTML = html;
       console.log('✅ Resultado generado exitosamente');
       
-      // Registrar análisis individual en la base de datos
-      const analisisData = {
-        numero: numero,
-        frecuenciaPorSorteo: frecuenciaPorSorteo,
-        indicePorSorteo: indicePorSorteo,
-        clasificaciones: {
-          melate: clasificacionMelate,
-          revancha: clasificacionRevancha,
-          revanchita: clasificacionRevanchita
-        }
-      };
-      
-      // Logging asíncrono sin bloquear la UI
-      DatabaseSetup.logIndividualAnalysis(numero, 'individual', analisisData).catch(error => {
-        console.warn('⚠️ No se pudo registrar análisis individual:', error);
-      });
+      console.log(`✅ Número ${numero} evaluado correctamente`);
       
     } catch (error) {
       console.error('❌ Error al analizar número individual:', error);
@@ -586,18 +569,7 @@ export class UIManager {
       
       console.log('✅ Análisis de combinación completado exitosamente');
       
-      // Registrar análisis de combinación en la base de datos
-      const combinacionData = {
-        combination: numeros,
-        analysis: analisisIndividual,
-        promedios: this.calcularPromediosPorSorteo(analisisIndividual),
-        timestamp: new Date()
-      };
-      
-      // Logging asíncrono sin bloquear la UI
-      DatabaseSetup.logCombinationAnalysis(numeros, 'combination', combinacionData).catch(error => {
-        console.warn('⚠️ No se pudo registrar análisis de combinación:', error);
-      });
+      console.log(`✅ Combinación ${numeros.join(', ')} evaluada correctamente`);
       
       // Agregar event listener para el botón de explicación en resultados
       const btnExplicacionResultados = document.getElementById('mostrar-explicacion-btn-resultados');
