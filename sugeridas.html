@@ -104,15 +104,15 @@
         </div>
         
         <div id="contenido-aleatorias" class="contenido-expandible mt-6">
-          <div class="text-center mb-6">
+          <div class="text-center mb-6" onclick="event.stopPropagation()">
             <label class="text-white text-lg">¿Cuántas combinaciones quieres?</label>
-            <select id="cantidad-combinaciones" class="ml-4 px-4 py-2 rounded bg-white text-gray-800">
+            <select id="cantidad-combinaciones" class="ml-4 px-4 py-2 rounded bg-white text-gray-800" onclick="event.stopPropagation()">
               <option value="1">1 combinación</option>
               <option value="3">3 combinaciones</option>
               <option value="5">5 combinaciones</option>
               <option value="10">10 combinaciones</option>
             </select>
-            <button onclick="generarAleatorias()" class="ml-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition-all duration-300">
+            <button onclick="event.stopPropagation(); generarAleatorias()" class="ml-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition-all duration-300">
               🎲 Generar
             </button>
           </div>
@@ -294,12 +294,24 @@
         isAleatoriaOpen = true;
         console.log('✅ Caja aleatorias abierta');
       } else {
-        // Cerrar caja
+        // Cerrar caja y limpiar contenido
         contenido.classList.remove('abierto');
         arrow.style.transform = 'rotate(0deg)';
         container.style.opacity = '0.5';
+        
+        // Limpiar contenido y resetear selección
+        const combinacionesContainer = document.getElementById('combinaciones-container');
+        const cantidadSelect = document.getElementById('cantidad-combinaciones');
+        
+        if (combinacionesContainer) {
+          combinacionesContainer.innerHTML = '<p>Selecciona cantidad y genera tus combinaciones</p>';
+        }
+        if (cantidadSelect) {
+          cantidadSelect.value = '1';
+        }
+        
         isAleatoriaOpen = false;
-        console.log('✅ Caja aleatorias cerrada');
+        console.log('✅ Caja aleatorias cerrada y limpiada');
       }
     }
     
@@ -383,12 +395,25 @@
         const contenido = document.getElementById('contenido-aleatorias');
         const arrow = document.getElementById('arrow-icon-aleatorias');
         const container = document.getElementById('aleatorias-container');
+        const combinacionesContainer = document.getElementById('combinaciones-container');
+        const cantidadSelect = document.getElementById('cantidad-combinaciones');
+        
         if (contenido && arrow && container) {
           contenido.classList.remove('abierto');
           arrow.style.transform = 'rotate(0deg)';
           container.style.opacity = '0.5';
         }
+        
+        // Limpiar contenido y resetear selección
+        if (combinacionesContainer) {
+          combinacionesContainer.innerHTML = '<p>Selecciona cantidad y genera tus combinaciones</p>';
+        }
+        if (cantidadSelect) {
+          cantidadSelect.value = '1';
+        }
+        
         isAleatoriaOpen = false;
+        console.log('✅ Caja aleatorias cerrada y limpiada');
       }
       
       // Cerrar predicción
