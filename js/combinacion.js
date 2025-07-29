@@ -678,12 +678,25 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Exponiendo funciones globalmente...');
     try {
       // Asignar directamente al objeto window para que las funciones sean globales
-      window.evaluarNumeroIndividual = evaluarNumeroIndividual;
-      window.evaluarCombinacion = evaluarCombinacion;
+      window.calcularFrecuenciaPorSorteo = calcularFrecuenciaPorSorteo;
+      window.calcularIndicePorSorteo = calcularIndicePorSorteo;
+      window.calcularFrecuenciaTotal = calcularFrecuenciaTotal;
+      window.calcularPorcentajeTotal = calcularPorcentajeTotal;
+      window.clasificarProbabilidad = clasificarProbabilidad;
+      window.clasificarProbabilidadReal = clasificarProbabilidadReal;
+      window.generarHtmlAnalisisSorteo = generarHtmlAnalisisSorteo;
+      window.generarMensajeSuerte = generarMensajeSuerte;
+      window.generarMensajeNumeroIndividual = generarMensajeNumeroIndividual;
       window.limpiarTodosLosCampos = limpiarTodosLosCampos;
       window.LIMPIAR_TODO_AHORA = limpiarTodosLosCampos; // Alias para compatibilidad
       window.combinacionLoaded = true;
-      console.log('✅ Funciones expuestas correctamente');
+      
+      console.log('✅ Funciones expuestas correctamente:');
+      console.log('  - calcularFrecuenciaPorSorteo');
+      console.log('  - calcularIndicePorSorteo');
+      console.log('  - calcularPorcentajeTotal');
+      console.log('  - clasificarProbabilidad');
+      console.log('  - Y otras funciones de análisis...');
     } catch (error) {
       console.error('❌ Error al exponer funciones globalmente:', error);
     }
