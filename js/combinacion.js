@@ -804,37 +804,130 @@ function inicializarEvaluadores() {
   const inputsCombinacion = document.querySelectorAll('.combo-input');
   
   if (btnEvaluarCombinacion && inputsCombinacion.length === 6) {
-    btnEvaluarCombinacion.addEventListener('click', function() {
-      const numeros = [];
-      let valido = true;
+    // Función de validación en tiempo real
+    const validarCombinacionEnTiempoReal = () => {
+      let errorMessage = document.getElementById('error-message');
       
+      // Crear mensaje de error si no existe
+      if (!errorMessage) {
+        errorMessage = document.createElement('div');
+        errorMessage.id = 'error-message';
+        errorMessage.className = 'mt-3 p-3 bg-red-100 border border-red-300 rounded-lg text-red-800 text-sm text-center hidden';
+        
+        const contentCombinacion = document.getElementById('content-combinacion');
+        const botonContainer = contentCombinacion.querySelector('.text-center');
+        botonContainer.appendChild(errorMessage);
+      }
+      
+      const numeros = [];
+      let hayError = false;
+      let mensajeError = '';
+      
+      // Validar cada input
+      inputsCombinacion.forEach((input) => {
+        const valor = parseInt(input.value);
+        
+        // Resetear estilos
+        input.classList.remove('border-red-500', 'border-green-500');
+        input.classList.add('border-gray-300');
+        
+        if (input.value && input.value.trim() !== '') {
+          // Validar rango
+          if (valor < 1 || valor > 56) {
+            input.classList.remove('border-gray-300');
+            input.classList.add('border-red-500');
+            hayError = true;
+            mensajeError = '⚠️ Los números deben estar entre 1 y 56';
+          } else {
+            numeros.push(valor);
+            input.classList.remove('border-gray-300');
+            input.classList.add('border-green-500');
+          }
+        }
+      });
+      
+      // Validar duplicados
+      if (numeros.length > 0) {
+        const numerosUnicos = [...new Set(numeros)];
+        if (numerosUnicos.length !== numeros.length) {
+          hayError = true;
+          mensajeError = '⚠️ No se permiten números duplicados';
+          
+          // Marcar inputs duplicados en rojo
+          const duplicados = numeros.filter((num, index) => numeros.indexOf(num) !== index);
+          inputsCombinacion.forEach(input => {
+            const valor = parseInt(input.value);
+            if (duplicados.includes(valor)) {
+              input.classList.remove('border-green-500', 'border-gray-300');
+              input.classList.add('border-red-500');
+            }
+          });
+        }
+      }
+      
+      // Mostrar/ocultar mensaje de error
+      if (hayError) {
+        errorMessage.textContent = mensajeError;
+        errorMessage.classList.remove('hidden');
+        btnEvaluarCombinacion.disabled = true;
+        btnEvaluarCombinacion.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        errorMessage.classList.add('hidden');
+        btnEvaluarCombinacion.disabled = false;
+        btnEvaluarCombinacion.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+      
+      return !hayError;
+    };
+    
+    btnEvaluarCombinacion.addEventListener('click', function() {
+      // Validar antes de evaluar
+      if (!validarCombinacionEnTiempoReal()) {
+        console.log('⚠️ Validación fallida, no se puede evaluar');
+        return;
+      }
+      
+      const numeros = [];
       inputsCombinacion.forEach(input => {
         const num = parseInt(input.value);
-        if (isNaN(num) || num < 1 || num > 56) {
-          valido = false;
-        } else {
+        if (num >= 1 && num <= 56) {
           numeros.push(num);
         }
       });
       
-      if (valido && numeros.length === 6) {
-        // Verificar duplicados
-        const numerosUnicos = [...new Set(numeros)];
-        if (numerosUnicos.length !== 6) {
-          alert('⚠️ No puedes repetir números en tu combinación');
-          return;
-        }
-        
+      if (numeros.length === 6) {
         evaluarCombinacion(numeros);
-      } else {
-        alert('⚠️ Por favor ingresa 6 números válidos entre 1 y 56');
       }
     });
     
-    // Permitir evaluar con Enter en cualquier input
-    inputsCombinacion.forEach(input => {
+    // Agregar validación en tiempo real a cada input
+    inputsCombinacion.forEach((input) => {
+      input.addEventListener('input', validarCombinacionEnTiempoReal);
+      input.addEventListener('blur', validarCombinacionEnTiempoReal);
+      
+      // Prevenir números fuera de rango
+      input.addEventListener('keydown', function(e) {
+        // Permitir teclas de control
+        if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' || e.key === 'Enter') {
+          return;
+        }
+        
+        // Solo permitir números
+        if (!/[0-9]/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+        
+        // Prevenir números mayores a 56
+        const currentValue = this.value + e.key;
+        if (parseInt(currentValue) > 56) {
+          e.preventDefault();
+        }
+      });
+      
+      // Permitir evaluar con Enter
       input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && validarCombinacionEnTiempoReal()) {
           btnEvaluarCombinacion.click();
         }
       });

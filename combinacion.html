@@ -235,6 +235,41 @@
       const triggerCombinacion = document.getElementById('trigger-combinacion');
       const contentCombinacion = document.getElementById('content-combinacion');
       
+      // Función para limpiar datos cuando se cierran las cajas
+      const limpiarDatos = () => {
+        // Limpiar resultado de número individual
+        const resultadoNumero = document.getElementById('resultado-numero');
+        if (resultadoNumero) {
+          resultadoNumero.innerHTML = '';
+        }
+        
+        // Limpiar input de número individual
+        const inputNumero = document.getElementById('numero-individual');
+        if (inputNumero) {
+          inputNumero.value = '';
+        }
+        
+        // Limpiar resultado de combinación
+        const resultadoCombinacion = document.getElementById('resultado-combinacion');
+        if (resultadoCombinacion) {
+          resultadoCombinacion.innerHTML = '';
+        }
+        
+        // Limpiar inputs de combinación
+        const inputsCombinacion = document.querySelectorAll('.combo-input');
+        inputsCombinacion.forEach(input => {
+          input.value = '';
+          input.classList.remove('border-red-500', 'border-green-500');
+          input.classList.add('border-gray-300');
+        });
+        
+        // Limpiar mensajes de error
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+          errorMessage.remove();
+        }
+      };
+      
       // Función para cerrar todas las cajas
       const cerrarTodasLasCajas = () => {
         if (contentNumero) {
@@ -259,11 +294,17 @@
           
           if (isHidden) {
             cerrarTodasLasCajas();
+            limpiarDatos(); // Limpiar datos antes de abrir
             contentNumero.classList.remove('hidden');
             if (arrow) arrow.style.transform = 'rotate(180deg)';
           } else {
             contentNumero.classList.add('hidden');
             if (arrow) arrow.style.transform = 'rotate(0deg)';
+            // Limpiar datos al cerrar
+            const resultadoNumero = document.getElementById('resultado-numero');
+            const inputNumero = document.getElementById('numero-individual');
+            if (resultadoNumero) resultadoNumero.innerHTML = '';
+            if (inputNumero) inputNumero.value = '';
           }
         };
       }
@@ -277,11 +318,23 @@
           
           if (isHidden) {
             cerrarTodasLasCajas();
+            limpiarDatos(); // Limpiar datos antes de abrir
             contentCombinacion.classList.remove('hidden');
             if (arrow) arrow.style.transform = 'rotate(180deg)';
           } else {
             contentCombinacion.classList.add('hidden');
             if (arrow) arrow.style.transform = 'rotate(0deg)';
+            // Limpiar datos al cerrar
+            const resultadoCombinacion = document.getElementById('resultado-combinacion');
+            const inputsCombinacion = document.querySelectorAll('.combo-input');
+            if (resultadoCombinacion) resultadoCombinacion.innerHTML = '';
+            inputsCombinacion.forEach(input => {
+              input.value = '';
+              input.classList.remove('border-red-500', 'border-green-500');
+              input.classList.add('border-gray-300');
+            });
+            const errorMessage = document.getElementById('error-message');
+            if (errorMessage) errorMessage.remove();
           }
         };
       }
