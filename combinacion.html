@@ -202,5 +202,72 @@
   <script type="module" src="js/firebase-init.js"></script>
   <script type="module" src="js/shared.js"></script>
   <script type="module" src="js/combinacion.js"></script>
+  
+  <!-- Script de inicialización directa para acordeones -->
+  <script>
+    // Inicialización directa para asegurar que los acordeones funcionen
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Inicializando acordeones directamente...');
+      
+      // Acordeón para número individual
+      const triggerNumero = document.getElementById('trigger-numero-individual');
+      const contentNumero = document.getElementById('content-numero-individual');
+      
+      // Acordeón para combinación
+      const triggerCombinacion = document.getElementById('trigger-combinacion');
+      const contentCombinacion = document.getElementById('content-combinacion');
+      
+      // Función para cerrar todas las cajas
+      const cerrarTodasLasCajas = () => {
+        if (contentNumero) {
+          contentNumero.classList.add('hidden');
+          const arrowNumero = triggerNumero.querySelector('svg');
+          if (arrowNumero) arrowNumero.style.transform = 'rotate(0deg)';
+        }
+        
+        if (contentCombinacion) {
+          contentCombinacion.classList.add('hidden');
+          const arrowCombinacion = triggerCombinacion.querySelector('svg');
+          if (arrowCombinacion) arrowCombinacion.style.transform = 'rotate(0deg)';
+        }
+      };
+      
+      // Funcionalidad para número individual
+      if (triggerNumero && contentNumero) {
+        triggerNumero.onclick = function() {
+          console.log('Click en Número de la Suerte (directo)');
+          const isHidden = contentNumero.classList.contains('hidden');
+          const arrow = triggerNumero.querySelector('svg');
+          
+          if (isHidden) {
+            cerrarTodasLasCajas();
+            contentNumero.classList.remove('hidden');
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+          } else {
+            contentNumero.classList.add('hidden');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+          }
+        };
+      }
+      
+      // Funcionalidad para combinación
+      if (triggerCombinacion && contentCombinacion) {
+        triggerCombinacion.onclick = function() {
+          console.log('Click en Combinación de la Suerte (directo)');
+          const isHidden = contentCombinacion.classList.contains('hidden');
+          const arrow = triggerCombinacion.querySelector('svg');
+          
+          if (isHidden) {
+            cerrarTodasLasCajas();
+            contentCombinacion.classList.remove('hidden');
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+          } else {
+            contentCombinacion.classList.add('hidden');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+          }
+        };
+      }
+    });
+  </script>
 </body>
 </html>

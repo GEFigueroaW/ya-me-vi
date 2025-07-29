@@ -616,14 +616,19 @@ export {
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 Inicializando módulo de combinaciones...');
   
-  // Inicializar acordeones
-  inicializarAcordeones();
-  
-  // Inicializar evaluadores
-  inicializarEvaluadores();
-  
-  // Cargar datos históricos
-  prepararDatosHistoricos();
+  setTimeout(() => {
+    // Inicializar acordeones con un pequeño retraso para asegurar que el DOM esté listo
+    console.log('Inicializando acordeones...');
+    inicializarAcordeones();
+    
+    // Inicializar evaluadores
+    console.log('Inicializando evaluadores...');
+    inicializarEvaluadores();
+    
+    // Cargar datos históricos
+    console.log('Preparando datos históricos...');
+    prepararDatosHistoricos();
+  }, 100);
 });
 
 /**
@@ -637,6 +642,13 @@ function inicializarAcordeones() {
   // Acordeón para combinación
   const triggerCombinacion = document.getElementById('trigger-combinacion');
   const contentCombinacion = document.getElementById('content-combinacion');
+  
+  console.log('Elementos de acordeón encontrados:', {
+    triggerNumero: !!triggerNumero, 
+    contentNumero: !!contentNumero,
+    triggerCombinacion: !!triggerCombinacion,
+    contentCombinacion: !!contentCombinacion
+  });
   
   // Función para cerrar todas las cajas
   const cerrarTodasLasCajas = () => {
@@ -653,8 +665,10 @@ function inicializarAcordeones() {
     }
   };
   
-  if (triggerNumero && contentNumero) {
-    triggerNumero.addEventListener('click', function() {
+  // Funcionalidad directa para los acordeones
+  if (triggerNumero) {
+    triggerNumero.onclick = function() {
+      console.log('Click en Número de la Suerte');
       const isHidden = contentNumero.classList.contains('hidden');
       const arrow = triggerNumero.querySelector('svg');
       
@@ -663,16 +677,17 @@ function inicializarAcordeones() {
         cerrarTodasLasCajas();
         // Abrir esta caja
         contentNumero.classList.remove('hidden');
-        arrow.style.transform = 'rotate(180deg)';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
       } else {
         contentNumero.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
       }
-    });
+    };
   }
   
-  if (triggerCombinacion && contentCombinacion) {
-    triggerCombinacion.addEventListener('click', function() {
+  if (triggerCombinacion) {
+    triggerCombinacion.onclick = function() {
+      console.log('Click en Combinación de la Suerte');
       const isHidden = contentCombinacion.classList.contains('hidden');
       const arrow = triggerCombinacion.querySelector('svg');
       
@@ -681,12 +696,12 @@ function inicializarAcordeones() {
         cerrarTodasLasCajas();
         // Abrir esta caja
         contentCombinacion.classList.remove('hidden');
-        arrow.style.transform = 'rotate(180deg)';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
       } else {
         contentCombinacion.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
       }
-    });
+    };
   }
   
   console.log('✅ Acordeones inicializados');
