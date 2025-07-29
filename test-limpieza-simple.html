@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEST - Limpieza Simple</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">🧪 TEST - Limpieza de Campos</h1>
+    
+    <!-- Sección de Número Individual -->
+    <div class="bg-white rounded-lg shadow-md mb-4">
+      <div id="trigger-numero" class="p-4 cursor-pointer bg-blue-50 hover:bg-blue-100 rounded-t-lg">
+        <h2 class="font-bold">🔍 Número Individual</h2>
+      </div>
+      <div id="content-numero" class="p-4 hidden">
+        <input type="number" id="numero-individual" class="w-24 px-3 py-2 border rounded text-black font-bold text-center" min="1" max="56">
+        <button onclick="llenarNumero()" class="ml-2 px-3 py-2 bg-blue-500 text-white rounded">Llenar</button>
+      </div>
+    </div>
+    
+    <!-- Sección de Combinación -->
+    <div class="bg-white rounded-lg shadow-md mb-4">
+      <div id="trigger-combinacion" class="p-4 cursor-pointer bg-purple-50 hover:bg-purple-100 rounded-t-lg">
+        <h2 class="font-bold">🔍 Combinación</h2>
+      </div>
+      <div id="content-combinacion" class="p-4 hidden">
+        <div class="grid grid-cols-6 gap-2 mb-4">
+          <input type="number" class="combo-input w-full px-2 py-2 border rounded text-black font-bold text-center" min="1" max="56">
+          <input type="number" class="combo-input w-full px-2 py-2 border rounded text-black font-bold text-center" min="1" max="56">
+          <input type="number" class="combo-input w-full px-2 py-2 border rounded text-black font-bold text-center" min="1" max="56">
+          <input type="number" class="combo-input w-full px-2 py-2 border rounded text-black font-bold text-center" min="1" max="56">
+          <input type="number" class="combo-input w-full px-2 py-2 border rounded text-black font-bold text-center" min="1" max="56">
+          <input type="number" class="combo-input w-full px-2 py-2 border rounded text-black font-bold text-center" min="1" max="56">
+        </div>
+        <button onclick="llenarCombinacion()" class="px-3 py-2 bg-purple-500 text-white rounded">Llenar</button>
+      </div>
+    </div>
+    
+    <!-- Botones de Control -->
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <h3 class="font-bold mb-2">🎛️ Controles</h3>
+      <button onclick="LIMPIAR_TODO()" class="px-4 py-2 bg-red-500 text-white rounded mr-2">🧹 LIMPIAR TODO</button>
+      <button onclick="mostrarEstado()" class="px-4 py-2 bg-gray-500 text-white rounded mr-2">📊 Ver Estado</button>
+      <button onclick="testCompleto()" class="px-4 py-2 bg-green-500 text-white rounded">🧪 Test Completo</button>
+    </div>
+    
+    <!-- Log de Consola -->
+    <div class="bg-black text-green-400 rounded-lg p-4 mt-4 font-mono text-sm">
+      <div id="log">📝 Consola de logs...</div>
+    </div>
+  </div>
+
+  <script>
+    let logDiv = document.getElementById('log');
+    
+    function log(mensaje) {
+      console.log(mensaje);
+      logDiv.innerHTML += '<br>' + mensaje;
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    
+    // FUNCIÓN DE LIMPIEZA SÚPER SIMPLE
+    function LIMPIAR_TODO() {
+      log('🔥 INICIANDO LIMPIEZA TOTAL...');
+      
+      // Encontrar TODOS los inputs de número
+      const inputs = document.querySelectorAll('input[type="number"]');
+      log(`📊 Encontrados ${inputs.length} inputs`);
+      
+      inputs.forEach((input, index) => {
+        const valorAntes = input.value;
+        
+        // Limpieza múltiple
+        input.value = '';
+        input.defaultValue = '';
+        input.setAttribute('value', '');
+        input.style.color = '#000000';
+        
+        log(`   Campo ${index + 1}: "${valorAntes}" → "${input.value}"`);
+      });
+      
+      log('✅ LIMPIEZA COMPLETADA');
+      
+      // Verificación después de 1 segundo
+      setTimeout(() => {
+        log('🔍 VERIFICACIÓN FINAL:');
+        const inputsVerif = document.querySelectorAll('input[type="number"]');
+        let todoLimpio = true;
+        
+        inputsVerif.forEach((input, index) => {
+          if (input.value !== '') {
+            log(`❌ Campo ${index + 1} AÚN tiene: "${input.value}"`);
+            todoLimpio = false;
+          }
+        });
+        
+        if (todoLimpio) {
+          log('🎉 VERIFICACIÓN: TODOS LOS CAMPOS ESTÁN LIMPIOS');
+        } else {
+          log('💥 VERIFICACIÓN: ALGUNOS CAMPOS SIGUEN CON DATOS');
+        }
+      }, 1000);
+    }
+    
+    function llenarNumero() {
+      document.getElementById('numero-individual').value = '25';
+      log('📝 Número individual llenado con: 25');
+    }
+    
+    function llenarCombinacion() {
+      const inputs = document.querySelectorAll('.combo-input');
+      const numeros = [11, 23, 12, 13, 4, 5];
+      
+      inputs.forEach((input, index) => {
+        input.value = numeros[index] || '';
+      });
+      
+      log('📝 Combinación llenada con: ' + numeros.join(', '));
+    }
+    
+    function mostrarEstado() {
+      log('🔍 ESTADO ACTUAL:');
+      
+      const inputNumero = document.getElementById('numero-individual');
+      log(`   Número individual: "${inputNumero.value}"`);
+      
+      const inputsCombinacion = document.querySelectorAll('.combo-input');
+      inputsCombinacion.forEach((input, index) => {
+        log(`   Combinación ${index + 1}: "${input.value}"`);
+      });
+    }
+    
+    function testCompleto() {
+      log('🧪 INICIANDO TEST COMPLETO...');
+      
+      log('1️⃣ Llenando campos...');
+      llenarNumero();
+      llenarCombinacion();
+      
+      setTimeout(() => {
+        log('2️⃣ Mostrando estado antes de limpiar...');
+        mostrarEstado();
+        
+        setTimeout(() => {
+          log('3️⃣ Ejecutando limpieza...');
+          LIMPIAR_TODO();
+        }, 1000);
+      }, 1000);
+    }
+    
+    // Configurar acordeones con limpieza automática
+    document.addEventListener('DOMContentLoaded', function() {
+      const triggerNumero = document.getElementById('trigger-numero');
+      const contentNumero = document.getElementById('content-numero');
+      const triggerCombinacion = document.getElementById('trigger-combinacion');
+      const contentCombinacion = document.getElementById('content-combinacion');
+      
+      triggerNumero.onclick = function() {
+        const isHidden = contentNumero.classList.contains('hidden');
+        
+        if (isHidden) {
+          // Cerrar otra sección
+          contentCombinacion.classList.add('hidden');
+          
+          // LIMPIAR ANTES DE ABRIR
+          log('🧹 Limpiando antes de abrir número individual...');
+          LIMPIAR_TODO();
+          
+          setTimeout(() => {
+            contentNumero.classList.remove('hidden');
+            log('📂 Sección número individual abierta');
+          }, 1200);
+          
+        } else {
+          contentNumero.classList.add('hidden');
+          log('📁 Sección número individual cerrada');
+          
+          // LIMPIAR AL CERRAR
+          setTimeout(() => {
+            log('🧹 Limpiando al cerrar número individual...');
+            LIMPIAR_TODO();
+          }, 200);
+        }
+      };
+      
+      triggerCombinacion.onclick = function() {
+        const isHidden = contentCombinacion.classList.contains('hidden');
+        
+        if (isHidden) {
+          // Cerrar otra sección
+          contentNumero.classList.add('hidden');
+          
+          // LIMPIAR ANTES DE ABRIR
+          log('🧹 Limpiando antes de abrir combinación...');
+          LIMPIAR_TODO();
+          
+          setTimeout(() => {
+            contentCombinacion.classList.remove('hidden');
+            log('📂 Sección combinación abierta');
+          }, 1200);
+          
+        } else {
+          contentCombinacion.classList.add('hidden');
+          log('📁 Sección combinación cerrada');
+          
+          // LIMPIAR AL CERRAR
+          setTimeout(() => {
+            log('🧹 Limpiando al cerrar combinación...');
+            LIMPIAR_TODO();
+          }, 200);
+        }
+      };
+      
+      log('🚀 Sistema iniciado - Acordeones configurados');
+    });
+    
+    // Hacer funciones globales
+    window.LIMPIAR_TODO = LIMPIAR_TODO;
+    window.mostrarEstado = mostrarEstado;
+    window.testCompleto = testCompleto;
+  </script>
+</body>
+</html>

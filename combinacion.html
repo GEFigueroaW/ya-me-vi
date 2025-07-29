@@ -204,6 +204,88 @@
   <script type="module" src="js/combinacion.js"></script>
   <script src="js/evaluadores.js"></script>
   
+  <!-- SCRIPT DE LIMPIEZA SÚPER SIMPLE Y DIRECTO -->
+  <script>
+    // FUNCIÓN DE LIMPIEZA ULTRA SIMPLE - SIN COMPLICACIONES
+    function LIMPIAR_TODO_AHORA() {
+      console.log('🔥 LIMPIEZA DIRECTA INICIADA');
+      
+      // Buscar TODOS los inputs de número en la página
+      const todosLosInputs = document.querySelectorAll('input[type="number"]');
+      console.log(`Encontrados ${todosLosInputs.length} inputs de número`);
+      
+      todosLosInputs.forEach((input, index) => {
+        console.log(`Limpiando input ${index + 1}: valor actual "${input.value}"`);
+        
+        // Múltiples métodos de limpieza EXTREMA
+        input.value = '';
+        input.defaultValue = '';
+        input.setAttribute('value', '');
+        
+        // Forzar actualización visual
+        input.style.color = '#000000'; // Negro sólido
+        input.style.fontWeight = 'bold';
+        
+        // Resetear bordes
+        input.style.borderColor = '#D1D5DB';
+        input.classList.remove('border-red-500', 'border-green-500');
+        
+        console.log(`✅ Input ${index + 1} limpiado completemente`);
+      });
+      
+      // Limpiar resultados
+      const resultados = document.querySelectorAll('#resultado-numero, #resultado-combinacion');
+      resultados.forEach(resultado => {
+        if (resultado) {
+          resultado.innerHTML = '';
+          resultado.style.display = 'none';
+        }
+      });
+      
+      console.log('✅ LIMPIEZA COMPLETADA - TODOS LOS CAMPOS VACÍOS');
+    }
+    
+    // FUNCIÓN PARA CUANDO SE CIERRAN LAS CAJAS
+    function limpiarAlCerrar() {
+      console.log('🧹 Limpiando al cerrar caja...');
+      setTimeout(LIMPIAR_TODO_AHORA, 100);
+    }
+    
+    // Hacer función disponible globalmente
+    window.LIMPIAR_TODO_AHORA = LIMPIAR_TODO_AHORA;
+    window.limpiarAlCerrar = limpiarAlCerrar;
+    
+    // OBSERVADOR DE CAMBIOS EN EL DOM
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target;
+          
+          // Si se cierra una sección (se agrega 'hidden')
+          if (target.classList.contains('hidden') && target.id && target.id.includes('content-')) {
+            console.log(`🔍 Detectado cierre de sección: ${target.id}`);
+            limpiarAlCerrar();
+          }
+        }
+      });
+    });
+    
+    // Iniciar observación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Observar cambios en las secciones de contenido
+      const secciones = document.querySelectorAll('#content-numero-individual, #content-combinacion');
+      secciones.forEach(seccion => {
+        if (seccion) {
+          observer.observe(seccion, { attributes: true, attributeFilter: ['class'] });
+          console.log(`👁️ Observando cambios en: ${seccion.id}`);
+        }
+      });
+      
+      console.log('🚀 Sistema de limpieza automática activado');
+      console.log('💡 Usa window.LIMPIAR_TODO_AHORA() para limpiar manualmente');
+    });
+  </script>
+  
   <!-- Script de inicialización mejorado -->
   <script>
     // Inicialización con mejor manejo de errores
