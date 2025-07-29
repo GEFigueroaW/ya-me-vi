@@ -145,7 +145,7 @@
           <div class="max-w-md mx-auto">
             <p class="text-center text-gray-700 mb-3">Ingresa un número entre el 1 y el 56.</p>
             <div class="flex flex-col sm:flex-row gap-3 items-center justify-center mb-4">
-              <input type="number" id="numero-individual" class="w-20 sm:w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400" min="1" max="56" placeholder="">
+              <input type="number" id="numero-individual" class="w-20 sm:w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400" min="1" max="56" placeholder="">
               <button id="evaluar-numero-btn" class="px-5 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
                 Evaluar
               </button>
@@ -166,12 +166,12 @@
           <div class="max-w-2xl mx-auto">
             <p class="text-center text-gray-700 mb-3">Ingresa tu combinación de 6 números (1-56)</p>
             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
-              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+              <input type="number" class="combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
             </div>
             <div class="text-center">
               <button id="evaluar-combinacion-btn" class="px-5 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
@@ -265,6 +265,27 @@
         }
       }, 1000);
       
+      // Función para cerrar todas las cajas
+      const cerrarTodasLasCajas = () => {
+        console.log('🔒 Cerrando todas las cajas...');
+        
+        // Cerrar número individual
+        if (contentNumero && !contentNumero.classList.contains('hidden')) {
+          contentNumero.classList.add('hidden');
+          const arrowNumero = triggerNumero?.querySelector('svg');
+          if (arrowNumero) arrowNumero.style.transform = 'rotate(0deg)';
+        }
+        
+        // Cerrar combinación
+        if (contentCombinacion && !contentCombinacion.classList.contains('hidden')) {
+          contentCombinacion.classList.add('hidden');
+          const arrowCombinacion = triggerCombinacion?.querySelector('svg');
+          if (arrowCombinacion) arrowCombinacion.style.transform = 'rotate(0deg)';
+        }
+        
+        console.log('✅ Todas las cajas cerradas');
+      };
+      
       // Acordeón para número individual
       const triggerNumero = document.getElementById('trigger-numero-individual');
       const contentNumero = document.getElementById('content-numero-individual');
@@ -273,115 +294,206 @@
       const triggerCombinacion = document.getElementById('trigger-combinacion');
       const contentCombinacion = document.getElementById('content-combinacion');
       
-      // Función para limpiar datos de forma ULTRA AGRESIVA
-      const limpiarDatosUltraAgresivo = async () => {
-        console.log('🧹 LIMPIEZA ULTRA AGRESIVA - Iniciando...');
+      // FUNCIÓN DE LIMPIEZA RADICAL - REEMPLAZO COMPLETO DE ELEMENTOS
+      const limpiarDatosRadical = () => {
+        console.log('🔥 LIMPIEZA RADICAL - Reemplazando elementos completamente...');
         
         try {
-          // Múltiples intentos de limpieza con diferentes métodos
-          for (let intento = 1; intento <= 3; intento++) {
-            console.log(`🔄 Intento de limpieza ${intento}/3`);
+          // 1. REEMPLAZAR INPUTS DE COMBINACIÓN COMPLETAMENTE
+          const containerCombinacion = document.querySelector('.grid.grid-cols-3.sm\\:grid-cols-6');
+          if (containerCombinacion) {
+            console.log('🔄 Reemplazando inputs de combinación...');
             
-            // Limpiar inputs de combinación con todos los métodos posibles
-            const inputsCombinacion = document.querySelectorAll('.combo-input');
-            console.log(`🔍 Encontrados ${inputsCombinacion.length} inputs de combinación`);
+            // Crear nuevos inputs completamente limpios
+            const nuevosInputs = [];
+            for (let i = 0; i < 6; i++) {
+              const nuevoInput = document.createElement('input');
+              nuevoInput.type = 'number';
+              nuevoInput.className = 'combo-input w-full px-2 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400';
+              nuevoInput.min = '1';
+              nuevoInput.max = '56';
+              nuevoInput.placeholder = '';
+              nuevoInput.value = '';
+              nuevosInputs.push(nuevoInput);
+            }
             
-            inputsCombinacion.forEach((input, index) => {
-              // Método 1: Propiedades básicas
-              input.value = '';
-              input.defaultValue = '';
-              
-              // Método 2: Atributos
-              input.setAttribute('value', '');
-              input.removeAttribute('value');
-              
-              // Método 3: Propiedades del DOM
-              if (input.hasAttribute('value')) {
-                input.removeAttribute('value');
-              }
-              
-              // Método 4: Forzar recarga del input
-              const parent = input.parentNode;
-              const nextSibling = input.nextSibling;
-              parent.removeChild(input);
-              parent.insertBefore(input, nextSibling);
-              
-              // Método 5: Eventos múltiples
-              ['input', 'change', 'keyup', 'blur'].forEach(eventType => {
-                input.dispatchEvent(new Event(eventType, { bubbles: true }));
-              });
-              
-              // Resetear estilos
-              input.classList.remove('border-red-500', 'border-green-500');
-              input.classList.add('border-gray-300');
-              
-              // Verificación inmediata
-              if (input.value !== '') {
-                console.warn(`⚠️ INTENTO ${intento}: Campo ${index + 1} aún tiene valor: "${input.value}"`);
-                input.value = '';
-              } else {
-                console.log(`✅ INTENTO ${intento}: Campo ${index + 1} limpiado exitosamente`);
-              }
+            // Remover inputs antiguos y agregar nuevos
+            containerCombinacion.innerHTML = '';
+            nuevosInputs.forEach(input => {
+              containerCombinacion.appendChild(input);
             });
             
-            // Pausa entre intentos
-            if (intento < 3) {
-              await new Promise(resolve => setTimeout(resolve, 100));
-            }
+            console.log('✅ Inputs de combinación reemplazados completamente');
           }
           
-          // Limpiar input de número individual
+          // 2. REEMPLAZAR INPUT DE NÚMERO INDIVIDUAL
           const inputNumero = document.getElementById('numero-individual');
           if (inputNumero) {
-            inputNumero.value = '';
-            inputNumero.setAttribute('value', '');
-            inputNumero.defaultValue = '';
-            inputNumero.dispatchEvent(new Event('input', { bubbles: true }));
-            console.log('✅ Input de número individual limpiado');
+            console.log('🔄 Reemplazando input de número individual...');
+            
+            const nuevoInputNumero = document.createElement('input');
+            nuevoInputNumero.type = 'number';
+            nuevoInputNumero.id = 'numero-individual';
+            nuevoInputNumero.className = 'w-20 sm:w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400';
+            nuevoInputNumero.min = '1';
+            nuevoInputNumero.max = '56';
+            nuevoInputNumero.placeholder = '';
+            nuevoInputNumero.value = '';
+            
+            inputNumero.parentNode.replaceChild(nuevoInputNumero, inputNumero);
+            console.log('✅ Input de número individual reemplazado');
           }
           
-          // Limpiar resultados
+          // 3. LIMPIAR RESULTADOS COMPLETAMENTE
           const resultadoNumero = document.getElementById('resultado-numero');
           const resultadoCombinacion = document.getElementById('resultado-combinacion');
+          
           if (resultadoNumero) {
             resultadoNumero.innerHTML = '';
+            resultadoNumero.style.display = 'none';
             console.log('✅ Resultado de número individual limpiado');
           }
+          
           if (resultadoCombinacion) {
             resultadoCombinacion.innerHTML = '';
+            resultadoCombinacion.style.display = 'none';
             console.log('✅ Resultado de combinación limpiado');
           }
           
-          // Limpiar mensajes de error
-          const errorMessages = document.querySelectorAll('#error-message');
+          // 4. REMOVER MENSAJES DE ERROR
+          const errorMessages = document.querySelectorAll('#error-message, .error-message');
           errorMessages.forEach(msg => {
             msg.remove();
-            console.log('✅ Mensaje de error eliminado');
           });
           
-          // Habilitar botón
+          // 5. HABILITAR BOTONES
           const btnEvaluarCombinacion = document.getElementById('evaluar-combinacion-btn');
+          const btnEvaluarNumero = document.getElementById('evaluar-numero-btn');
+          
           if (btnEvaluarCombinacion) {
             btnEvaluarCombinacion.disabled = false;
             btnEvaluarCombinacion.classList.remove('opacity-50', 'cursor-not-allowed');
-            console.log('✅ Botón de evaluación habilitado');
           }
           
-          console.log('🎯 LIMPIEZA ULTRA AGRESIVA - Completada exitosamente');
+          if (btnEvaluarNumero) {
+            btnEvaluarNumero.disabled = false;
+            btnEvaluarNumero.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
+          
+          console.log('🎯 LIMPIEZA RADICAL COMPLETADA - Todo reemplazado exitosamente');
+          
+          // Verificación final
+          setTimeout(() => {
+            const inputsFinales = document.querySelectorAll('.combo-input');
+            const inputNumeroFinal = document.getElementById('numero-individual');
+            
+            let todosLimpios = true;
+            inputsFinales.forEach((input, index) => {
+              if (input.value !== '') {
+                console.error(`❌ Campo ${index + 1} AÚN tiene valor: "${input.value}"`);
+                todosLimpios = false;
+              }
+            });
+            
+            if (inputNumeroFinal && inputNumeroFinal.value !== '') {
+              console.error(`❌ Input número individual AÚN tiene valor: "${inputNumeroFinal.value}"`);
+              todosLimpios = false;
+            }
+            
+            if (todosLimpios) {
+              console.log('� VERIFICACIÓN FINAL: Todos los campos están completamente limpios');
+            } else {
+              console.error('💥 VERIFICACIÓN FINAL: Algunos campos siguen con datos');
+            }
+          }, 500);
           
         } catch (error) {
-          console.error('❌ Error en limpieza ultra agresiva:', error);
+          console.error('❌ Error en limpieza radical:', error);
         }
       };
       
       // Función original mantenida para compatibilidad
-      const limpiarDatos = () => limpiarDatosUltraAgresivo();
-      const limpiarDatosForzado = () => limpiarDatosUltraAgresivo();
+      const limpiarDatos = () => limpiarDatosRadical();
+      const limpiarDatosForzado = () => limpiarDatosRadical();
+      const limpiarDatosUltraAgresivo = () => limpiarDatosRadical();
       
       // Hacer función disponible globalmente para debugging
-      window.limpiarDatosUltraAgresivo = limpiarDatosUltraAgresivo;
+      window.limpiarDatosRadical = limpiarDatosRadical;
       window.limpiarDatos = limpiarDatos;
       window.limpiarDatosForzado = limpiarDatosForzado;
+      window.limpiarDatosUltraAgresivo = limpiarDatosUltraAgresivo;
+      
+      // Función de debugging mejorada para mostrar estado de los campos
+      window.mostrarEstadoCampos = () => {
+        console.log('🔍 ESTADO ACTUAL DE TODOS LOS CAMPOS:');
+        
+        // Verificar inputs de combinación
+        const inputsCombinacion = document.querySelectorAll('.combo-input');
+        console.log(`📊 Inputs de combinación encontrados: ${inputsCombinacion.length}`);
+        
+        inputsCombinacion.forEach((input, index) => {
+          const valor = input.value;
+          const placeholder = input.placeholder;
+          const clases = input.className;
+          console.log(`   Campo ${index + 1}: "${valor}" | Placeholder: "${placeholder}" | Visible: ${input.offsetParent !== null}`);
+        });
+        
+        // Verificar input individual
+        const inputNumero = document.getElementById('numero-individual');
+        if (inputNumero) {
+          console.log(`🔢 Número individual: "${inputNumero.value}" | Visible: ${inputNumero.offsetParent !== null}`);
+        } else {
+          console.log('❌ Input de número individual NO encontrado');
+        }
+        
+        // Verificar resultados
+        const resultadoNumero = document.getElementById('resultado-numero');
+        const resultadoCombinacion = document.getElementById('resultado-combinacion');
+        
+        console.log(`📋 Resultado número: ${resultadoNumero ? (resultadoNumero.innerHTML ? 'CON CONTENIDO' : 'VACÍO') : 'NO ENCONTRADO'}`);
+        console.log(`📋 Resultado combinación: ${resultadoCombinacion ? (resultadoCombinacion.innerHTML ? 'CON CONTENIDO' : 'VACÍO') : 'NO ENCONTRADO'}`);
+      };
+      
+      // Función para llenar campos de prueba
+      window.llenarCamposPrueba = () => {
+        console.log('🧪 LLENANDO CAMPOS DE PRUEBA...');
+        
+        const inputsCombinacion = document.querySelectorAll('.combo-input');
+        const numerosTest = [11, 23, 7, 10, 14, 25];
+        
+        inputsCombinacion.forEach((input, index) => {
+          if (numerosTest[index]) {
+            input.value = numerosTest[index];
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+        
+        const inputNumero = document.getElementById('numero-individual');
+        if (inputNumero) {
+          inputNumero.value = 25;
+          inputNumero.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        console.log('✅ Campos de prueba llenados');
+        window.mostrarEstadoCampos();
+      };
+      
+      // Función para testear la limpieza
+      window.testearLimpieza = () => {
+        console.log('🧪 INICIANDO TEST DE LIMPIEZA...');
+        console.log('1️⃣ Llenando campos...');
+        window.llenarCamposPrueba();
+        
+        setTimeout(() => {
+          console.log('2️⃣ Ejecutando limpieza radical...');
+          window.limpiarDatosRadical();
+          
+          setTimeout(() => {
+            console.log('3️⃣ Verificando resultado...');
+            window.mostrarEstadoCampos();
+          }, 1000);
+        }, 2000);
+      };
       
       // Función de debugging para mostrar estado de los campos
       window.mostrarEstadoCampos = () => {
@@ -416,24 +528,9 @@
         }
       };
       
-      // Función para cerrar todas las cajas
-      const cerrarTodasLasCajas = () => {
-        if (contentNumero) {
-          contentNumero.classList.add('hidden');
-          const arrowNumero = triggerNumero.querySelector('svg');
-          if (arrowNumero) arrowNumero.style.transform = 'rotate(0deg)';
-        }
-        
-        if (contentCombinacion) {
-          contentCombinacion.classList.add('hidden');
-          const arrowCombinacion = triggerCombinacion.querySelector('svg');
-          if (arrowCombinacion) arrowCombinacion.style.transform = 'rotate(0deg)';
-        }
-      };
-      
       // Funcionalidad para número individual con limpieza mejorada
       if (triggerNumero && contentNumero) {
-        triggerNumero.onclick = async function() {
+        triggerNumero.onclick = function() {
           console.log('🖱️ Click en Número de la Suerte');
           const isHidden = contentNumero.classList.contains('hidden');
           const arrow = triggerNumero.querySelector('svg');
@@ -444,33 +541,33 @@
             // Cerrar todas las cajas primero
             cerrarTodasLasCajas();
             
-            // Limpiar datos con función ultra agresiva
-            await limpiarDatosUltraAgresivo();
+            // Limpiar datos con función radical
+            limpiarDatosRadical();
             
             // Abrir la caja con un delay para asegurar la limpieza
             setTimeout(() => {
               contentNumero.classList.remove('hidden');
               if (arrow) arrow.style.transform = 'rotate(180deg)';
               console.log('✅ Caja de número individual abierta y limpiada');
-            }, 150);
+            }, 200);
             
           } else {
             console.log('📁 Cerrando caja de número individual...');
             contentNumero.classList.add('hidden');
             if (arrow) arrow.style.transform = 'rotate(0deg)';
             
-            // Limpieza ultra agresiva al cerrar
-            setTimeout(async () => {
-              await limpiarDatosUltraAgresivo();
+            // Limpieza radical al cerrar
+            setTimeout(() => {
+              limpiarDatosRadical();
               console.log('🎯 Caja de número individual cerrada y limpiada');
-            }, 50);
+            }, 100);
           }
         };
       }
       
       // Funcionalidad para combinación con limpieza mejorada
       if (triggerCombinacion && contentCombinacion) {
-        triggerCombinacion.onclick = async function() {
+        triggerCombinacion.onclick = function() {
           console.log('🖱️ Click en Combinación de la Suerte');
           const isHidden = contentCombinacion.classList.contains('hidden');
           const arrow = triggerCombinacion.querySelector('svg');
@@ -481,26 +578,26 @@
             // Cerrar todas las cajas primero
             cerrarTodasLasCajas();
             
-            // Limpiar datos con función ultra agresiva
-            await limpiarDatosUltraAgresivo();
+            // Limpiar datos con función radical
+            limpiarDatosRadical();
             
             // Abrir la caja con un delay para asegurar la limpieza
             setTimeout(() => {
               contentCombinacion.classList.remove('hidden');
               if (arrow) arrow.style.transform = 'rotate(180deg)';
               console.log('✅ Caja de combinación abierta y limpiada');
-            }, 150);
+            }, 200);
             
           } else {
             console.log('📁 Cerrando caja de combinación...');
             contentCombinacion.classList.add('hidden');
             if (arrow) arrow.style.transform = 'rotate(0deg)';
             
-            // Limpieza ultra agresiva al cerrar
-            setTimeout(async () => {
-              await limpiarDatosUltraAgresivo();
+            // Limpieza radical al cerrar
+            setTimeout(() => {
+              limpiarDatosRadical();
               console.log('🎯 Caja de combinación cerrada y limpiada');
-            }, 50);
+            }, 100);
           }
         };
       }
