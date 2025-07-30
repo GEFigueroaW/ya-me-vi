@@ -137,6 +137,13 @@
     nav *, header * {
       color: white !important;
     }
+    
+    /* Asegurar logos perfectamente redondos */
+    .logo-redondo {
+      border-radius: 50% !important;
+      aspect-ratio: 1 !important;
+      object-fit: cover !important;
+    }
   </style>
 </head>
 
@@ -148,7 +155,7 @@
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <img class="h-8 w-8 rounded-full" src="assets/apple-touch-icon.png" alt="YA ME VI Logo">
+            <img class="h-8 w-8 rounded-full object-cover logo-redondo" src="assets/apple-touch-icon.png" alt="YA ME VI Logo">
           </div>
           <div class="ml-3">
             <h1 class="text-white text-xl font-bold">YA ME VI</h1>
@@ -189,8 +196,8 @@
   <section id="inicio" class="pt-16 min-h-screen flex items-center justify-center">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div class="text-center">
-        <!-- AdSense Ad Unit - Top of Page - Temporalmente oculto -->
-        <div class="mb-8" style="display: none;">
+        <!-- AdSense Ad Unit - Top of Page -->
+        <div class="mb-8">
           <ins class="adsbygoogle"
                style="display:block"
                data-ad-client="ca-pub-2226536008153511"
@@ -200,7 +207,7 @@
         </div>
         
         <div class="floating-animation mb-8">
-          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="mx-auto h-24 w-24 rounded-full shadow-2xl">
+          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="mx-auto h-24 w-24 rounded-full shadow-2xl object-cover logo-redondo">
         </div>
         
         <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 animate__animated animate__fadeInUp">
