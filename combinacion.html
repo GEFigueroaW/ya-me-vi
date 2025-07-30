@@ -137,12 +137,12 @@
           </div>
           
           <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="1" data-index="0">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="2" data-index="1">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="3" data-index="2">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="4" data-index="3">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="5" data-index="4">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="6" data-index="5">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="" data-index="0">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="" data-index="1">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="" data-index="2">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="" data-index="3">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="" data-index="4">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="" data-index="5">
           </div>
           <div class="text-center">
             <button id="evaluar-combinacion-btn" class="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
@@ -773,11 +773,14 @@
         // Reset estilo del input
         input.classList.remove('valid', 'invalid', 'duplicate');
         
+        console.log(`🔍 Validando número ${numero} en campo ${input.dataset.index}`);
+        
         // Validar rango PRIMERO
         if (numero < 1 || numero > 56) {
           input.classList.add('invalid');
           if (mostrarMensaje) {
             mostrarAdvertencia(`❌ El número ${numero} no es válido. Debe estar entre 1 y 56`, 'error');
+            console.log(`❌ Número ${numero} fuera de rango`);
             // Hacer vibrar el input en móviles
             if (navigator.vibrate) navigator.vibrate(100);
             
@@ -792,15 +795,22 @@
           return false;
         }
         
-        // Validar duplicados SEGUNDO
-        const valores = Array.from(inputsCombinacion)
-          .map(inp => inp.value)
-          .filter(val => val !== '' && val !== input.value);
+        // Validar duplicados SEGUNDO - Obtener todos los valores de otros campos
+        const todosLosValores = [];
+        inputsCombinacion.forEach((inp, index) => {
+          if (inp !== input && inp.value && inp.value.trim() !== '') {
+            todosLosValores.push(inp.value.trim());
+          }
+        });
         
-        if (valores.includes(valor)) {
+        console.log(`🔍 Valores existentes:`, todosLosValores);
+        console.log(`🔍 Nuevo valor: ${valor}`);
+        
+        if (todosLosValores.includes(valor.toString())) {
           input.classList.add('duplicate');
           if (mostrarMensaje) {
             mostrarAdvertencia(`🔄 El número ${numero} ya está en tu combinación. Elige otro número`, 'warning');
+            console.log(`🔄 Número ${numero} duplicado`);
             // Hacer vibrar el input en móviles
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
             
@@ -817,6 +827,7 @@
         
         // Si todo está bien
         input.classList.add('valid');
+        console.log(`✅ Número ${numero} válido`);
         
         // Verificar si todos los campos están completos y válidos
         verificarCombinacionCompleta();
@@ -829,11 +840,15 @@
           .map(inp => inp.value)
           .filter(val => val !== '');
         
+        console.log(`📊 Estado actual de campos:`, valores);
+        
         const numerosUnicos = new Set(valores);
         const todosValidos = valores.every(val => {
           const num = parseInt(val);
           return num >= 1 && num <= 56;
         });
+        
+        console.log(`📊 Números únicos: ${numerosUnicos.size}, Total valores: ${valores.length}, Todos válidos: ${todosValidos}`);
         
         if (valores.length === 6 && numerosUnicos.size === 6 && todosValidos) {
           ocultarAdvertencia();
@@ -873,35 +888,51 @@
       
       // Configurar validación en tiempo real para cada input
       inputsCombinacion.forEach((input, index) => {
-        // Validación al escribir (input event)
+        // Validación al escribir (input event) - MÁS ESTRICTA
         input.addEventListener('input', function(e) {
           const valor = e.target.value;
+          
+          console.log(`📝 Input evento en campo ${index}: valor="${valor}"`);
           
           // Solo permitir números
           if (valor && !/^\d+$/.test(valor)) {
             e.target.value = valor.replace(/\D/g, '');
+            console.log(`🚫 Caracteres no numéricos removidos`);
             return;
           }
           
-          if (valor) {
-            // Validar inmediatamente al escribir
+          // Limitar a máximo 2 dígitos
+          if (valor.length > 2) {
+            e.target.value = valor.substring(0, 2);
+            console.log(`✂️ Valor truncado a 2 dígitos: ${e.target.value}`);
+            return;
+          }
+          
+          if (valor && valor.length >= 1) {
+            // Validar inmediatamente al escribir - CON LOGS
+            console.log(`🔍 Validando número: ${valor}`);
             const esValido = validarNumero(e.target, valor, true);
+            
+            console.log(`📊 Resultado validación: ${esValido ? 'VÁLIDO' : 'INVÁLIDO'}`);
             
             // Solo auto-avanzar si el número es completamente válido
             if (esValido && valor.length >= 1) {
               // Pequeño delay para que el usuario vea la validación
+              console.log(`⏭️ Intentando avanzar...`);
               setTimeout(() => {
-                moverAlSiguienteInput(e.target);
+                const pudoAvanzar = moverAlSiguienteInput(e.target);
+                console.log(`📍 Resultado avance: ${pudoAvanzar ? 'AVANZÓ' : 'NO AVANZÓ'}`);
               }, 150);
             } else {
               // Si no es válido, mantener el foco y dar feedback
-              console.log(`❌ Número ${valor} no válido en campo ${index + 1}`);
-              e.target.focus();
+              console.log(`❌ Número ${valor} no válido en campo ${index + 1} - MANTENIENDO FOCO`);
+              // NO mover el foco, mantenerlo en el campo actual
             }
           } else {
             // Campo vacío - resetear estilo
             e.target.classList.remove('valid', 'invalid', 'duplicate');
             verificarCombinacionCompleta();
+            console.log(`🗑️ Campo ${index + 1} vaciado - estilos reseteados`);
           }
         });
         
@@ -986,8 +1017,33 @@
         evaluarCombinacion();
       };
       
+      // Función para debuggear el estado actual
+      window.debugCombinacion = function() {
+        console.log('🐛 DEBUG - Estado actual de combinación:');
+        inputsCombinacion.forEach((input, i) => {
+          console.log(`Campo ${i + 1}: valor="${input.value}", clases="${input.className}"`);
+        });
+        verificarCombinacionCompleta();
+      };
+      
+      // Función para limpiar todos los campos
+      window.limpiarCombinacion = function() {
+        console.log('🧹 Limpiando todos los campos...');
+        inputsCombinacion.forEach(input => {
+          input.value = '';
+          input.classList.remove('valid', 'invalid', 'duplicate');
+        });
+        ocultarAdvertencia();
+        console.log('✅ Todos los campos limpiados');
+      };
+      
       console.log('🎉 Inicialización de botones completada');
-      console.log('💡 Puedes probar: testEvaluarNumero() o testEvaluarCombinacion() en la consola');
+      console.log('💡 Funciones disponibles en consola:');
+      console.log('   - testEvaluarNumero() - Prueba evaluación de número individual');
+      console.log('   - testEvaluarCombinacion() - Prueba evaluación de combinación');
+      console.log('   - debugCombinacion() - Muestra estado actual de todos los campos');
+      console.log('   - limpiarCombinacion() - Limpia todos los campos');
+      console.log('🔍 Sistema de validación estricta activado - NO permite duplicados ni números > 56');
     });
   </script>
 </body>
