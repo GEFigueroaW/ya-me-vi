@@ -70,7 +70,8 @@
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
      crossorigin="anonymous"></script>
-  
+
+  <!-- Custom Styles - AFTER Tailwind to override -->
   <style>
     .hero-gradient {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -138,6 +139,15 @@
       color: white !important;
     }
     
+    /* LOGOS REDONDOS - ESTILOS PRIORITARIOS */
+    /* Forzar TODOS los logos a ser redondos con máxima prioridad */
+    img[src*="apple-touch-icon"] {
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      aspect-ratio: 1 / 1 !important;
+      display: block !important;
+    }
+    
     /* Asegurar logos perfectamente redondos */
     .logo-redondo {
       border-radius: 50% !important;
@@ -175,11 +185,14 @@
       max-height: 96px !important;
     }
     
-    /* Forzar que las imágenes de logos sean redondas sin importar las clases de Tailwind */
-    img.logo-redondo {
+    /* CSS ultra específico para forzar estilos redondos - SOBRESCRIBE TAILWIND */
+    body nav img[src*="apple-touch-icon"],
+    body .floating-animation img[src*="apple-touch-icon"],
+    body footer img[src*="apple-touch-icon"] {
       border-radius: 50% !important;
       object-fit: cover !important;
-      flex-shrink: 0 !important;
+      display: block !important;
+      aspect-ratio: 1 / 1 !important;
     }
     
     /* Selectores súper específicos para sobrescribir Tailwind */
@@ -205,27 +218,12 @@
       object-fit: cover !important;
     }
     
-    /* Regla final para asegurar logos redondos en cualquier contexto */
-    img[src*="apple-touch-icon"] {
-      border-radius: 50% !important;
-      object-fit: cover !important;
-    }
-    
-    /* CSS ultra específico para forzar estilos redondos */
-    body nav img[src*="apple-touch-icon"],
-    body .floating-animation img[src*="apple-touch-icon"],
-    body footer img[src*="apple-touch-icon"] {
-      border-radius: 50% !important;
-      object-fit: cover !important;
-      display: block !important;
-    }
-    
-    /* Forzar todos los logos a ser redondos con máxima prioridad */
+    /* Forzar que las imágenes de logos sean redondas sin importar las clases de Tailwind */
     img.logo-redondo,
-    img[alt*="Logo"],
-    img[src*="apple-touch-icon"] {
+    img[alt*="Logo"] {
       border-radius: 50% !important;
       object-fit: cover !important;
+      flex-shrink: 0 !important;
       aspect-ratio: 1 / 1 !important;
     }
   </style>
