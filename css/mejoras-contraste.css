@@ -341,44 +341,76 @@ body {
 
 /* ===== MEJORAS ESPECÍFICAS PARA ANALISIS.HTML EN MÓVIL ===== */
 
-/* Forzar layout vertical en móvil para analisis.html */
+/* Forzar layout vertical en móvil para analisis.html con máxima especificidad */
 @media (max-width: 767px) {
   
-  /* Contenedor principal de cajas - forzar vertical */
-  #contenedor-cajas {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 1rem !important;
+  /* FORZAR contenedor principal vertical con máxima especificidad */
+  body #contenedor-principal,
+  body div#contenedor-principal,
+  #contenedor-principal.contenedor-principal-inicial {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
     padding: 0 1rem !important;
-    width: 100% !important;
+    max-width: 100% !important;
+    gap: 1rem !important;
   }
   
-  /* Cada caja individual - ancho completo y centrada */
-  .caja-interactiva,
-  #contenedor-cajas > div {
+  /* FORZAR contenedor de cajas vertical con máxima especificidad */
+  body #contenedor-cajas,
+  body div#contenedor-cajas,
+  #contenedor-cajas.contenedor-cajas-inicial,
+  #contenedor-principal #contenedor-cajas,
+  #contenedor-principal:not(.expanded) #contenedor-cajas {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 1rem !important;
+    padding: 0 !important;
+    width: 100% !important;
+    flex-wrap: nowrap !important;
+    overflow-x: visible !important;
+  }
+  
+  /* FORZAR cada caja individual con máxima especificidad */
+  body .caja-interactiva,
+  body #contenedor-cajas .caja-interactiva,
+  body #contenedor-cajas > div,
+  .caja-interactiva.caja-interactiva,
+  #contenedor-cajas > div.caja-interactiva,
+  #contenedor-principal .caja-interactiva,
+  #contenedor-principal:not(.expanded) .caja-interactiva,
+  #contenedor-principal:not(.expanded) #contenedor-cajas > div {
     flex: none !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: unset !important;
     margin: 0 !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
   }
   
-  /* Botones de las cajas - más altura para texto completo */
-  .caja-interactiva button,
-  #contenedor-cajas button {
+  /* FORZAR botones de las cajas con máxima especificidad */
+  body .caja-interactiva button,
+  body #contenedor-cajas button,
+  .caja-interactiva.caja-interactiva button,
+  #contenedor-cajas.contenedor-cajas-inicial button {
     padding: 1.5rem 1rem !important;
     min-height: 80px !important;
     width: 100% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
   }
   
-  /* Contenido interno - layout vertical (emoji arriba, texto abajo) */
-  .caja-content,
-  .caja-interactiva .flex,
-  #contenedor-cajas .flex {
+  /* FORZAR contenido interno vertical con máxima especificidad */
+  body .caja-content,
+  body .caja-interactiva .flex,
+  body #contenedor-cajas .flex,
+  .caja-content.caja-content,
+  #contenedor-cajas .flex.items-center.justify-center {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -388,64 +420,54 @@ body {
     width: 100% !important;
   }
   
-  /* Emojis - tamaño adecuado y centrado */
-  .caja-emoji,
-  .caja-interactiva .text-2xl,
+  /* FORZAR emojis con máxima especificidad */
+  body .caja-emoji,
+  body .caja-interactiva .text-2xl,
+  body #contenedor-cajas .text-2xl,
+  .caja-emoji.caja-emoji,
   #contenedor-cajas .text-2xl {
     font-size: 1.75rem !important;
     line-height: 1 !important;
-    margin: 0 !important;
+    margin: 0 0 0.25rem 0 !important;
     display: block !important;
+    flex-shrink: 0 !important;
   }
   
-  /* Títulos - perfectamente visibles y legibles */
-  .caja-titulo,
-  .caja-interactiva h3,
+  /* FORZAR títulos con máxima especificidad */
+  body .caja-titulo,
+  body .caja-interactiva h3,
+  body #contenedor-cajas h3,
+  .caja-titulo.caja-titulo,
   #contenedor-cajas h3 {
     font-size: 1rem !important;
     font-weight: 600 !important;
     line-height: 1.2 !important;
     color: rgba(255, 255, 255, 0.95) !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
     white-space: normal !important;
     overflow: visible !important;
     text-overflow: unset !important;
     display: block !important;
     text-align: center !important;
     margin: 0 !important;
+    padding: 0 !important;
     width: 100% !important;
-  }
-  
-  /* Asegurar que no haya restricciones de webkit */
-  .caja-titulo,
-  .caja-interactiva h3,
-  #contenedor-cajas h3 {
+    min-height: unset !important;
+    max-height: none !important;
     -webkit-line-clamp: unset !important;
+    line-clamp: unset !important;
     -webkit-box-orient: unset !important;
-    display: block !important;
   }
   
-  /* Eliminar cualquier flex horizontal que pueda causar problemas */
-  #contenedor-principal:not(.expanded) #contenedor-cajas {
+  /* REGLA NUCLEAR - Si nada más funciona, forzar con JavaScript en mente */
+  body[data-page="analisis"] #contenedor-cajas,
+  html #contenedor-cajas {
     flex-direction: column !important;
-    justify-content: flex-start !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
   }
   
-  /* Forzar que las cajas NO se distribuyan horizontalmente */
-  #contenedor-principal:not(.expanded) .caja-interactiva,
-  #contenedor-principal:not(.expanded) #contenedor-cajas > div {
-    flex: none !important;
+  body[data-page="analisis"] .caja-interactiva,
+  html .caja-interactiva {
     width: 100% !important;
-    max-width: 100% !important;
-    min-width: unset !important;
-  }
-  
-  /* Contenedor principal - ajustes para móvil */
-  #contenedor-principal {
-    padding: 0 0.5rem !important;
-    max-width: 100% !important;
-    gap: 1rem !important;
+    margin-bottom: 1rem !important;
   }
 }

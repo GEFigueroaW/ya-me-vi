@@ -776,5 +776,74 @@
       width: var(--ancho-caja-dinamico) !important;
     }
   </style>
+  
+  <!-- Script para forzar layout móvil -->
+  <script>
+    // Forzar layout vertical en móvil
+    function forzarLayoutMovil() {
+      if (window.innerWidth <= 767) {
+        console.log('📱 Forzando layout móvil para análisis...');
+        
+        const contenedorCajas = document.getElementById('contenedor-cajas');
+        if (contenedorCajas) {
+          // Aplicar estilos directamente
+          contenedorCajas.style.cssText = `
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 1rem !important;
+            padding: 0 !important;
+            width: 100% !important;
+          `;
+          
+          // Forzar cada caja individual
+          const cajas = contenedorCajas.querySelectorAll('.caja-interactiva, div');
+          cajas.forEach(caja => {
+            caja.style.cssText = `
+              width: 100% !important;
+              flex: none !important;
+              margin: 0 !important;
+              max-width: 100% !important;
+            `;
+            
+            // Forzar contenido interno
+            const content = caja.querySelector('.caja-content, .flex');
+            if (content) {
+              content.style.cssText = `
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 0.5rem !important;
+                text-align: center !important;
+              `;
+            }
+            
+            // Forzar títulos
+            const titulo = caja.querySelector('.caja-titulo, h3');
+            if (titulo) {
+              titulo.style.cssText = `
+                font-size: 1rem !important;
+                line-height: 1.2 !important;
+                text-align: center !important;
+                white-space: normal !important;
+                overflow: visible !important;
+                display: block !important;
+              `;
+            }
+          });
+          
+          console.log('✅ Layout móvil aplicado correctamente');
+        }
+      }
+    }
+    
+    // Ejecutar al cargar y al redimensionar
+    document.addEventListener('DOMContentLoaded', forzarLayoutMovil);
+    window.addEventListener('resize', forzarLayoutMovil);
+    
+    // También ejecutar después de que se generen las cajas
+    setTimeout(forzarLayoutMovil, 1000);
+    setTimeout(forzarLayoutMovil, 3000);
+  </script>
 </body>
 </html>
