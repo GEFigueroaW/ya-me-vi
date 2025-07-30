@@ -143,39 +143,45 @@
     /* Forzar TODOS los logos a ser redondos con máxima prioridad */
     img[src*="logo-192"] {
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
       aspect-ratio: 1 / 1 !important;
       display: block !important;
+      transform: scale(1.1) !important;
     }
     
     img[src*="logo-512"] {
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
       aspect-ratio: 1 / 1 !important;
       display: block !important;
+      transform: scale(1.1) !important;
     }
     
     img[src*="logo-512-adaptativo-circular"] {
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
       aspect-ratio: 1 / 1 !important;
       display: block !important;
+      transform: scale(1.1) !important;
     }
     
     img[src*="apple-touch-icon"] {
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
       aspect-ratio: 1 / 1 !important;
       display: block !important;
+      transform: scale(1.1) !important;
     }
     
     /* Asegurar logos perfectamente redondos */
     .logo-redondo {
       border-radius: 50% !important;
       aspect-ratio: 1 / 1 !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
       object-position: center !important;
       display: block !important;
+      transform: scale(1.1) !important;
+      overflow: hidden !important;
     }
     
     /* Clases específicas para cada tamaño de logo */
@@ -220,9 +226,11 @@
     body .floating-animation img[src*="apple-touch-icon"],
     body footer img[src*="apple-touch-icon"] {
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
       display: block !important;
       aspect-ratio: 1 / 1 !important;
+      transform: scale(1.1) !important;
+      overflow: hidden !important;
     }
     
     /* Selectores súper específicos para sobrescribir Tailwind */
@@ -231,30 +239,38 @@
       width: 32px !important;
       height: 32px !important;
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
+      transform: scale(1.1) !important;
+      overflow: hidden !important;
     }
     
     .floating-animation img.logo-redondo.logo-hero {
       width: 96px !important;
       height: 96px !important;
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
+      transform: scale(1.1) !important;
+      overflow: hidden !important;
     }
     
     footer img.logo-redondo.logo-footer {
       width: 96px !important;
       height: 96px !important;
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
+      transform: scale(1.1) !important;
+      overflow: hidden !important;
     }
     
     /* Forzar que las imágenes de logos sean redondas sin importar las clases de Tailwind */
     img.logo-redondo,
     img[alt*="Logo"] {
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: fill !important;
       flex-shrink: 0 !important;
       aspect-ratio: 1 / 1 !important;
+      transform: scale(1.1) !important;
+      overflow: hidden !important;
     }
   </style>
 </head>
