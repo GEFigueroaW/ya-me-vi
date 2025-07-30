@@ -12,30 +12,30 @@
   "gcm_sender_id": "748876890843",
   "icons": [
     {
-      "src": "assets/logo-512-adaptativo-circular.png",
+      "src": "assets/apple-touch-icon.png",
       "sizes": "16x16 32x32",
       "type": "image/png"
     },
     {
-      "src": "assets/logo-512-adaptativo-circular.png",
+      "src": "assets/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/logo-512-adaptativo-circular.png",
+      "src": "assets/apple-touch-icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/logo-512-adaptativo-circular.png",
+      "src": "assets/apple-touch-icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/logo-512-adaptativo-circular.png",
+      "src": "assets/apple-touch-icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
