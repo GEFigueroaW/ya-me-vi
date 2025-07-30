@@ -554,18 +554,29 @@
                 
                 htmlResultado += `
                   <div class="bg-gradient-to-br from-${colorBase}-50 to-${colorBase}-100 rounded-xl p-4 border border-${colorBase}-200 shadow-md mb-6">
-                    <!-- Encabezado compacto del sorteo -->
+                    <!-- Encabezado con explicación clara -->
                     <div class="flex items-center justify-between mb-4">
                       <div class="flex items-center gap-3">
                         <span class="text-3xl">${icono}</span>
                         <div>
                           <h4 class="text-xl font-bold text-${colorBase}-900">${nombre}</h4>
-                          <div class="text-sm text-gray-700">Promedio: <span class="font-bold ${clasificacionSorteo.color}">${promedioSorteo.toFixed(2)}%</span> <span class="text-xs ${clasificacionSorteo.color}">${clasificacionSorteo.categoria}</span></div>
+                          <div class="text-sm text-gray-700">
+                            Promedio de tu combinación: <span class="font-bold ${clasificacionSorteo.color}">${promedioSorteo.toFixed(2)}%</span> 
+                            <span class="text-xs ${clasificacionSorteo.color} ml-1">(${clasificacionSorteo.categoria})</span>
+                          </div>
                         </div>
                       </div>
                       <div class="text-xs text-gray-600 text-right">
-                        <div>Total apariciones</div>
-                        <div class="font-bold text-${colorBase}-700">${totalFrecuencia}</div>
+                        <div class="font-semibold">Análisis de ${totalFrecuencia}</div>
+                        <div class="text-gray-500">apariciones totales</div>
+                      </div>
+                    </div>
+                    
+                    <!-- Explicación para el usuario -->
+                    <div class="bg-blue-50 p-3 rounded-lg mb-4 border-l-4 border-blue-400">
+                      <div class="text-sm text-blue-800">
+                        <span class="font-bold">¿Cómo leer esto?</span> Mientras más alto el %, mejor el número. 
+                        Las "apariciones" muestran cuántas veces salió en sorteos pasados.
                       </div>
                     </div>
                     
@@ -579,26 +590,28 @@
                   const clasificacion = numData.clasificacion;
                   
                   htmlResultado += `
-                    <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-${colorBase}-200 hover:shadow-md transition-shadow">
-                      <!-- Número y su círculo -->
-                      <div class="flex items-center gap-3 min-w-0 flex-1">
-                        <div class="w-8 h-8 bg-gradient-to-br from-${colorBase}-500 to-${colorBase}-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                          ${numData.numero}
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <div class="text-sm font-bold text-gray-800 truncate">
-                            ${porcentaje.toFixed(1)}%
+                    <!-- Diseño simple y claro -->
+                    <div class="bg-white p-4 rounded-lg border border-${colorBase}-200 mb-3">
+                      <div class="flex items-center justify-between">
+                        <!-- Número con información completa -->
+                        <div class="flex items-center gap-4">
+                          <div class="w-12 h-12 bg-gradient-to-br from-${colorBase}-500 to-${colorBase}-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
+                            ${numData.numero}
                           </div>
-                          <div class="text-xs text-gray-600">
-                            ${frecuencia} veces
+                          <div>
+                            <div class="text-xl font-bold text-gray-900">${porcentaje.toFixed(1)}%</div>
+                            <div class="text-sm text-gray-600 font-medium">${frecuencia} apariciones históricas</div>
                           </div>
                         </div>
-                      </div>
-                      
-                      <!-- Clasificación -->
-                      <div class="flex items-center gap-2 ${clasificacion.color} font-bold text-sm flex-shrink-0">
-                        <span class="text-lg">${clasificacion.emoji}</span>
-                        <span class="hidden sm:inline">${clasificacion.categoria}</span>
+                        
+                        <!-- Clasificación visible y clara -->
+                        <div class="text-right">
+                          <div class="flex items-center gap-2 ${clasificacion.color} font-bold text-lg">
+                            <span class="text-2xl">${clasificacion.emoji}</span>
+                            <span class="text-base">${clasificacion.categoria}</span>
+                          </div>
+                          <div class="text-xs text-gray-500 mt-1 font-medium">Nivel de Potencial</div>
+                        </div>
                       </div>
                     </div>
                   `;
