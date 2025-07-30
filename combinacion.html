@@ -171,6 +171,14 @@
               </div>
             </div>
             
+            <!-- Botón para mostrar explicación (igual que en número individual) -->
+            <div class="mt-3 text-center">
+              <button id="mostrar-explicacion-combinacion-btn" class="bg-gray-700 bg-opacity-80 hover:bg-opacity-90 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-gray-600 shadow-lg">
+                <span id="explicacion-combinacion-text">💡 ¿Cómo interpretar resultados?</span>
+                <span id="explicacion-combinacion-icon">👁️</span>
+              </button>
+            </div>
+            
             <div id="resultado-combinacion" class="mt-4"></div>
             
             <!-- Sección de explicación expandible -->
@@ -1123,7 +1131,7 @@
       const content = section.querySelector('.accordion-content');
       const icon = header.querySelector('.accordion-icon');
       
-      // Cerrar otros accordions
+      // Cerrar otros accordions y limpiar sus inputs
       document.querySelectorAll('.accordion-section').forEach(otherSection => {
         if (otherSection !== section) {
           const otherContent = otherSection.querySelector('.accordion-content');
@@ -1131,6 +1139,9 @@
           if (otherContent && otherIcon) {
             otherContent.style.display = 'none';
             otherIcon.textContent = '▼';
+            
+            // Limpiar inputs cuando se cierre la sección
+            clearSectionInputs(otherSection);
           }
         }
       });
@@ -1142,11 +1153,94 @@
       } else {
         content.style.display = 'none';
         icon.textContent = '▼';
+        
+        // Limpiar inputs cuando se cierre la sección actual
+        clearSectionInputs(section);
+      }
+    }
+    
+    // Función para limpiar inputs de una sección
+    function clearSectionInputs(section) {
+      // Limpiar input individual
+      const inputIndividual = section.querySelector('#numero-individual');
+      if (inputIndividual) {
+        inputIndividual.value = '';
+        console.log('🧹 Input individual limpiado');
+      }
+      
+      // Limpiar inputs de combinación
+      const inputsCombinacion = section.querySelectorAll('.combo-input');
+      if (inputsCombinacion.length > 0) {
+        inputsCombinacion.forEach(input => {
+          input.value = '';
+          input.classList.remove('valid', 'invalid', 'duplicate');
+        });
+        console.log('🧹 Inputs de combinación limpiados');
+      }
+      
+      // Limpiar resultados
+      const resultadoNumero = section.querySelector('#resultado-numero');
+      const resultadoCombinacion = section.querySelector('#resultado-combinacion');
+      if (resultadoNumero) {
+        resultadoNumero.innerHTML = '';
+      }
+      if (resultadoCombinacion) {
+        resultadoCombinacion.innerHTML = '';
+      }
+      
+      // Ocultar mensajes de advertencia
+      const mensajeAdvertencia = section.querySelector('#mensaje-advertencia');
+      if (mensajeAdvertencia) {
+        mensajeAdvertencia.classList.add('hidden');
       }
     }
     
     // Hacer la función global
     window.toggleAccordion = toggleAccordion;
+    
+    // Configurar botones de explicación después de que todo esté cargado
+    setTimeout(function() {
+      // Configuración del botón de explicación individual
+      const btnExplicacionIndividual = document.getElementById('mostrar-explicacion-btn');
+      const explicacionExpansible = document.getElementById('explicacion-inicial');
+      
+      if (btnExplicacionIndividual && explicacionExpansible) {
+        btnExplicacionIndividual.addEventListener('click', function() {
+          const isHidden = explicacionExpansible.classList.contains('hidden');
+          
+          if (isHidden) {
+            explicacionExpansible.classList.remove('hidden');
+            document.getElementById('explicacion-text').textContent = 'Ocultar explicación';
+            document.getElementById('explicacion-icon').textContent = '🙈';
+          } else {
+            explicacionExpansible.classList.add('hidden');
+            document.getElementById('explicacion-text').textContent = '💡 ¿Cómo interpretar resultados?';
+            document.getElementById('explicacion-icon').textContent = '👁️';
+          }
+        });
+        console.log('✅ Botón explicación individual configurado');
+      }
+      
+      // Configuración del botón de explicación para combinación
+      const btnExplicacionCombinacion = document.getElementById('mostrar-explicacion-combinacion-btn');
+      
+      if (btnExplicacionCombinacion && explicacionExpansible) {
+        btnExplicacionCombinacion.addEventListener('click', function() {
+          const isHidden = explicacionExpansible.classList.contains('hidden');
+          
+          if (isHidden) {
+            explicacionExpansible.classList.remove('hidden');
+            document.getElementById('explicacion-combinacion-text').textContent = 'Ocultar explicación';
+            document.getElementById('explicacion-combinacion-icon').textContent = '🙈';
+          } else {
+            explicacionExpansible.classList.add('hidden');
+            document.getElementById('explicacion-combinacion-text').textContent = '💡 ¿Cómo interpretar resultados?';
+            document.getElementById('explicacion-combinacion-icon').textContent = '👁️';
+          }
+        });
+        console.log('✅ Botón explicación combinación configurado');
+      }
+    }, 100); // Pequeño delay para asegurar que los elementos estén disponibles
   </script>
 </body>
 </html>
