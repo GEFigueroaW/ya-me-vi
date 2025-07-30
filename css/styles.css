@@ -603,3 +603,69 @@ input[type="number"] {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
 }
+
+/* ========================================
+   ESTILOS PARA CAJA UNIFICADA DE NÚMEROS
+   ======================================== */
+
+/* Optimización para caja unificada en móviles */
+@media (max-width: 640px) {
+  /* Grid de análisis individual en móviles */
+  #resultado-combinacion .grid-cols-1 {
+    gap: 0.75rem;
+  }
+  
+  /* Reducir padding en contenedores pequeños */
+  #resultado-combinacion .p-4 {
+    padding: 0.75rem;
+  }
+  
+  /* Títulos más compactos */
+  #resultado-combinacion h5 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Círculos de números más pequeños en análisis */
+  #resultado-combinacion .w-10 {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Mejoras para contraste de texto */
+#resultado-combinacion .text-gray-700 {
+  color: #374151 !important;
+}
+
+#resultado-combinacion .text-gray-800 {
+  color: #1f2937 !important;
+}
+
+#resultado-combinacion .text-gray-900 {
+  color: #111827 !important;
+}
+
+/* Espaciado optimizado para caja unificada */
+#resultado-combinacion .space-y-2 > * + * {
+  margin-top: 0.25rem;
+}
+
+/* Flex mejorado para datos de números */
+#resultado-combinacion .flex.justify-between {
+  align-items: center;
+  padding: 0.125rem 0;
+}
+
+/* Líneas divisorias sutiles entre datos */
+#resultado-combinacion .space-y-2 > div:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding-bottom: 0.25rem;
+}
+
+/* Hover effects para números individuales */
+#resultado-combinacion .bg-gradient-to-br:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
