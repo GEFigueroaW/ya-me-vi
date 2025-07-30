@@ -12,9 +12,18 @@
   color: #111827 !important; /* gray-900 */
 }
 
-/* Asegurar colores consistentes en desktop y móvil */
-.bg-white * {
+/* Asegurar colores consistentes en desktop y móvil - EXCLUIR mensajes de carga */
+.bg-white *:not(.bg-blue-50):not(.bg-blue-50 *):not(.text-blue-800):not(.animate-pulse) {
   color: #111827 !important; /* Forzar texto oscuro en contenedores blancos */
+}
+
+/* GARANTIZAR que los mensajes de carga sean SIEMPRE visibles */
+.text-blue-800, .animate-pulse.text-blue-800 {
+  color: #1e40af !important; /* blue-800 forzado */
+}
+
+.bg-blue-50 {
+  background-color: #eff6ff !important; /* blue-50 forzado */
 }
 
 .bg-white .text-gray-900 {
