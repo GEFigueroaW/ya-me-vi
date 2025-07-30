@@ -583,7 +583,7 @@
                         <span>${nombre}</span>
                       </h4>
                       <div class="bg-white rounded-xl p-4 border-2 border-${colorBase}-300 shadow-md">
-                        <div class="text-sm font-bold text-${colorBase}-800 mb-2">
+                        <div class="text-sm font-bold text-gray-800 mb-2">
                           📊 Promedio de tu combinación
                         </div>
                         <div class="text-3xl font-bold ${clasificacionSorteo.color} mb-2">
@@ -598,7 +598,7 @@
                     
                     <!-- Caja unificada para todos los números -->
                     <div class="bg-white rounded-xl p-6 border-2 border-${colorBase}-300 shadow-lg">
-                      <h5 class="text-lg font-bold text-center text-${colorBase}-900 mb-4">
+                      <h5 class="text-lg font-bold text-center text-gray-900 mb-4">
                         📋 Análisis Individual de cada Número
                       </h5>
                       
@@ -617,25 +617,25 @@
                           ${numData.numero}
                         </div>
                         <div class="flex-1">
-                          <div class="text-xs font-medium text-${colorBase}-700">Número ${numData.numero}</div>
-                          <div class="text-xs text-gray-600">Análisis estadístico</div>
+                          <div class="text-sm font-bold text-gray-900">Número ${numData.numero}</div>
+                          <div class="text-xs font-medium text-gray-700">Análisis estadístico</div>
                         </div>
                       </div>
                       
                       <div class="space-y-2">
-                        <div class="flex justify-between items-center py-1">
-                          <span class="text-xs font-medium text-gray-700">🎯 ÍNDICE:</span>
-                          <span class="text-sm font-bold ${clasificacion.color}">${porcentaje.toFixed(1)}%</span>
+                        <div class="flex justify-between items-center py-1 px-2 bg-white rounded border">
+                          <span class="text-sm font-bold text-gray-800">🎯 ÍNDICE:</span>
+                          <span class="text-lg font-bold ${clasificacion.color}">${porcentaje.toFixed(1)}%</span>
                         </div>
                         
-                        <div class="flex justify-between items-center py-1">
-                          <span class="text-xs font-medium text-gray-700">📈 APARICIONES:</span>
-                          <span class="text-sm font-semibold text-gray-800">${frecuencia} veces</span>
+                        <div class="flex justify-between items-center py-1 px-2 bg-white rounded border">
+                          <span class="text-sm font-bold text-gray-800">📈 APARICIONES:</span>
+                          <span class="text-lg font-bold text-gray-900">${frecuencia} veces</span>
                         </div>
                         
-                        <div class="flex justify-between items-center py-1">
-                          <span class="text-xs font-medium text-gray-700">⭐ POTENCIAL:</span>
-                          <div class="text-xs font-bold ${clasificacion.color} flex items-center gap-1">
+                        <div class="flex justify-between items-center py-1 px-2 bg-white rounded border">
+                          <span class="text-sm font-bold text-gray-800">⭐ POTENCIAL:</span>
+                          <div class="text-sm font-bold ${clasificacion.color} flex items-center gap-1">
                             <span>${clasificacion.emoji}</span>
                             <span>${clasificacion.categoria}</span>
                           </div>
@@ -651,9 +651,9 @@
                     
                     <!-- Resumen del sorteo -->
                     <div class="mt-4 text-center">
-                      <div class="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full border-2 border-${colorBase}-300 text-sm font-bold text-${colorBase}-800 shadow-md">
+                      <div class="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full border-2 border-${colorBase}-300 text-sm font-bold text-gray-900 shadow-md">
                         <span class="text-xl">${icono}</span>
-                        <span>Total apariciones: <span class="text-${colorBase}-900">${totalFrecuencia}</span></span>
+                        <span>Total apariciones: <span class="text-${colorBase}-700">${totalFrecuencia}</span></span>
                       </div>
                     </div>
                   </div>
