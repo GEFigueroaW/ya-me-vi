@@ -697,43 +697,37 @@
       
       // Asignar eventos múltiples para máxima compatibilidad
       if (btnEvaluarNumero) {
-        // Método 1: onclick directo
+        // Limpiar eventos previos
+        btnEvaluarNumero.onclick = null;
+        
+        // Método principal: onclick directo
         btnEvaluarNumero.onclick = function(e) {
           e.preventDefault();
           e.stopPropagation();
-          console.log('🔥 CLICK DETECTADO EN EVALUAR NÚMERO (onclick)');
+          console.log('🔥 BOTÓN EVALUAR NÚMERO ACTIVADO');
           evaluarNumero();
+          return false;
         };
         
-        // Método 2: addEventListener
-        btnEvaluarNumero.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('🔥 CLICK DETECTADO EN EVALUAR NÚMERO (addEventListener)');
-        });
-        
-        console.log('✅ Botón evaluar número configurado');
+        console.log('✅ Botón evaluar número configurado y ACTIVO');
       } else {
         console.error('❌ No se encontró el botón evaluar-numero-btn');
       }
       
       if (btnEvaluarCombinacion) {
-        // Método 1: onclick directo
+        // Limpiar eventos previos
+        btnEvaluarCombinacion.onclick = null;
+        
+        // Método principal: onclick directo
         btnEvaluarCombinacion.onclick = function(e) {
           e.preventDefault();
           e.stopPropagation();
-          console.log('🔥 CLICK DETECTADO EN EVALUAR COMBINACIÓN (onclick)');
+          console.log('🔥 BOTÓN EVALUAR COMBINACIÓN ACTIVADO');
           evaluarCombinacion();
+          return false;
         };
         
-        // Método 2: addEventListener
-        btnEvaluarCombinacion.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('🔥 CLICK DETECTADO EN EVALUAR COMBINACIÓN (addEventListener)');
-        });
-        
-        console.log('✅ Botón evaluar combinación configurado');
+        console.log('✅ Botón evaluar combinación configurado y ACTIVO');
       } else {
         console.error('❌ No se encontró el botón evaluar-combinacion-btn');
       }
@@ -813,21 +807,11 @@
           if (mostrarMensaje) {
             mostrarAdvertencia(`❌ El número ${numero} no es válido. Debe estar entre 1 y 56`, 'error');
             console.log(`❌ Número ${numero} fuera de rango`);
-            // Hacer vibrar el input en móviles
-            if (navigator.vibrate) navigator.vibrate(100);
-            
-            // Limpiar el campo después de 2 segundos para que el usuario vea el error
-            setTimeout(() => {
-              input.value = '';
-              input.classList.remove('invalid');
-              input.focus();
-              console.log(`🧹 Campo limpiado automáticamente: número ${numero} fuera de rango`);
-            }, 2000);
           }
           return false;
         }
         
-        // Validar duplicados SEGUNDO - Obtener todos los valores de otros campos
+        // Validar duplicados SEGUNDO
         const todosLosValores = [];
         inputsCombinacion.forEach((inp, index) => {
           if (inp !== input && inp.value && inp.value.trim() !== '') {
@@ -835,24 +819,11 @@
           }
         });
         
-        console.log(`🔍 Valores existentes:`, todosLosValores);
-        console.log(`🔍 Nuevo valor: ${valor}`);
-        
         if (todosLosValores.includes(valor.toString())) {
           input.classList.add('duplicate');
           if (mostrarMensaje) {
             mostrarAdvertencia(`🔄 El número ${numero} ya está en tu combinación. Elige otro número`, 'warning');
             console.log(`🔄 Número ${numero} duplicado`);
-            // Hacer vibrar el input en móviles
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            
-            // Limpiar el campo después de 2 segundos para números duplicados
-            setTimeout(() => {
-              input.value = '';
-              input.classList.remove('duplicate');
-              input.focus();
-              console.log(`🧹 Campo limpiado automáticamente: número ${numero} duplicado`);
-            }, 2000);
           }
           return false;
         }
@@ -860,10 +831,7 @@
         // Si todo está bien
         input.classList.add('valid');
         console.log(`✅ Número ${numero} válido`);
-        
-        // Verificar si todos los campos están completos y válidos
         verificarCombinacionCompleta();
-        
         return true;
       }
       
@@ -920,11 +888,11 @@
       
       // Configurar validación en tiempo real para cada input
       inputsCombinacion.forEach((input, index) => {
-        // Validación al escribir (input event) - SIN AUTO-AVANCE
+        // Validación al escribir (input event) - CON PREVENCIÓN INMEDIATA
         input.addEventListener('input', function(e) {
           const valor = e.target.value;
           
-          console.log(`📝 Input evento en campo ${index}: valor="${valor}"`);
+          console.log(`📝 Input evento en campo ${index + 1}: valor="${valor}"`);
           
           // Solo permitir números
           if (valor && !/^\d+$/.test(valor)) {
@@ -940,19 +908,42 @@
             return;
           }
           
+          // VALIDACIÓN INMEDIATA para números > 56
+          if (valor && parseInt(valor) > 56) {
+            mostrarAdvertencia(`❌ El número ${valor} es muy alto. Máximo permitido: 56`, 'error');
+            e.target.value = '';
+            e.target.classList.add('invalid');
+            e.target.focus();
+            console.log(`❌ Número ${valor} > 56 rechazado inmediatamente`);
+            return;
+          }
+          
           if (valor && valor.length >= 1) {
-            // Validar inmediatamente al escribir - SIN AUTO-AVANCE
-            console.log(`🔍 Validando número: ${valor}`);
-            const esValido = validarNumero(e.target, valor, true);
+            const numero = parseInt(valor);
             
-            console.log(`📊 Resultado validación: ${esValido ? 'VÁLIDO' : 'INVÁLIDO'}`);
+            // VALIDACIÓN INMEDIATA para duplicados
+            const otrosValores = [];
+            inputsCombinacion.forEach((inp, idx) => {
+              if (idx !== index && inp.value && inp.value.trim() !== '') {
+                otrosValores.push(parseInt(inp.value.trim()));
+              }
+            });
             
-            // NO AUTO-AVANZAR - Solo validar
-            if (!esValido) {
-              console.log(`❌ Número ${valor} no válido en campo ${index + 1} - MANTENIENDO FOCO`);
-            } else {
-              console.log(`✅ Número ${valor} válido en campo ${index + 1}`);
+            if (otrosValores.includes(numero)) {
+              mostrarAdvertencia(`� El número ${numero} ya está en tu combinación. Elige otro número`, 'warning');
+              e.target.value = '';
+              e.target.classList.add('duplicate');
+              e.target.focus();
+              console.log(`🔄 Número ${numero} duplicado rechazado inmediatamente`);
+              return;
             }
+            
+            // Si llega aquí, el número es válido
+            e.target.classList.remove('invalid', 'duplicate');
+            e.target.classList.add('valid');
+            console.log(`✅ Número ${numero} válido en campo ${index + 1}`);
+            
+            verificarCombinacionCompleta();
           } else {
             // Campo vacío - resetear estilo
             e.target.classList.remove('valid', 'invalid', 'duplicate');
@@ -965,39 +956,49 @@
         input.addEventListener('blur', function(e) {
           const valor = e.target.value;
           if (valor) {
-            validarNumero(e.target, valor, true);
-          }
-        });
-        
-        // Validación adicional en keyup para números que se escriben rápido
-        input.addEventListener('keyup', function(e) {
-          const valor = e.target.value;
-          if (valor && valor.length >= 1) {
-            // Validar sin mostrar mensaje para evitar spam
-            const esValido = validarNumero(e.target, valor, false);
-            if (!esValido) {
-              // Si no es válido, mostrar mensaje después de un breve delay
-              setTimeout(() => {
-                validarNumero(e.target, valor, true);
-              }, 200);
+            const numero = parseInt(valor);
+            if (numero < 1 || numero > 56) {
+              mostrarAdvertencia(`❌ El número debe estar entre 1 y 56`, 'error');
+              e.target.value = '';
+              e.target.classList.add('invalid');
+              e.target.focus();
             }
           }
         });
         
-        // Prevenir pegar contenido no numérico - SIN AUTO-AVANCE
+        // Prevenir pegar contenido inválido
         input.addEventListener('paste', function(e) {
           e.preventDefault();
           const paste = (e.clipboardData || window.clipboardData).getData('text');
           const numeroLimpio = paste.replace(/\D/g, '');
           if (numeroLimpio && numeroLimpio.length <= 2) {
-            e.target.value = numeroLimpio;
-            // Validar al pegar PERO NO avanzar automáticamente
-            validarNumero(e.target, numeroLimpio, true);
-            console.log(`📋 PASTE: Número ${numeroLimpio} pegado en campo ${index + 1} - SIN auto-avance`);
+            const numero = parseInt(numeroLimpio);
+            if (numero >= 1 && numero <= 56) {
+              // Verificar duplicados antes de pegar
+              const otrosValores = [];
+              inputsCombinacion.forEach((inp, idx) => {
+                if (idx !== index && inp.value && inp.value.trim() !== '') {
+                  otrosValores.push(parseInt(inp.value.trim()));
+                }
+              });
+              
+              if (!otrosValores.includes(numero)) {
+                e.target.value = numeroLimpio;
+                e.target.classList.add('valid');
+                verificarCombinacionCompleta();
+                console.log(`📋 PASTE: Número ${numero} pegado válido en campo ${index + 1}`);
+              } else {
+                mostrarAdvertencia(`🔄 El número ${numero} ya está en tu combinación`, 'warning');
+                console.log(`📋 PASTE: Número ${numero} duplicado rechazado`);
+              }
+            } else {
+              mostrarAdvertencia(`❌ Número fuera del rango 1-56`, 'error');
+              console.log(`📋 PASTE: Número ${numero} fuera de rango rechazado`);
+            }
           }
         });
         
-        // Mejorar navegación con teclado - SOLO TAB Y FLECHAS
+        // Navegación mejorada con teclado
         input.addEventListener('keydown', function(e) {
           // Tab - avanzar al siguiente campo
           if (e.key === 'Tab' && !e.shiftKey && index < 5) {
@@ -1040,6 +1041,16 @@
               console.log(`⬅️ FLECHA: Moviendo del campo ${index + 1} al campo ${index}`);
             }
             e.preventDefault();
+          }
+          // Enter - evaluar combinación si está completa
+          else if (e.key === 'Enter') {
+            const valores = Array.from(inputsCombinacion).map(inp => inp.value).filter(val => val !== '');
+            if (valores.length === 6) {
+              console.log(`⌨️ Enter: Evaluando combinación completa`);
+              evaluarCombinacion();
+            } else {
+              console.log(`⌨️ Enter: Combinación incompleta (${valores.length}/6)`);
+            }
           }
         });
       });

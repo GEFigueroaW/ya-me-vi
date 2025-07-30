@@ -68,6 +68,34 @@
   box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2) !important;
 }
 
+/* NUNCA desactivar botones - asegurar que funcionen */
+button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+#evaluar-numero-btn, #evaluar-combinacion-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+}
+
+/* Estados de validación para inputs */
+.combo-input.valid {
+  border-color: #10b981 !important;
+  background-color: #f0fdf4 !important;
+}
+
+.combo-input.invalid {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.combo-input.duplicate {
+  border-color: #f59e0b !important;
+  background-color: #fffbeb !important;
+}
+
 /* Colores de fondo consistentes */
 .bg-blue-50 {
   background-color: #eff6ff !important;
