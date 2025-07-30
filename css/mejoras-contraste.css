@@ -338,3 +338,114 @@ body {
     font-size: 1rem !important;
   }
 }
+
+/* ===== MEJORAS ESPECÍFICAS PARA ANALISIS.HTML EN MÓVIL ===== */
+
+/* Forzar layout vertical en móvil para analisis.html */
+@media (max-width: 767px) {
+  
+  /* Contenedor principal de cajas - forzar vertical */
+  #contenedor-cajas {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    padding: 0 1rem !important;
+    width: 100% !important;
+  }
+  
+  /* Cada caja individual - ancho completo y centrada */
+  .caja-interactiva,
+  #contenedor-cajas > div {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: unset !important;
+    margin: 0 !important;
+  }
+  
+  /* Botones de las cajas - más altura para texto completo */
+  .caja-interactiva button,
+  #contenedor-cajas button {
+    padding: 1.5rem 1rem !important;
+    min-height: 80px !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Contenido interno - layout vertical (emoji arriba, texto abajo) */
+  .caja-content,
+  .caja-interactiva .flex,
+  #contenedor-cajas .flex {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+  
+  /* Emojis - tamaño adecuado y centrado */
+  .caja-emoji,
+  .caja-interactiva .text-2xl,
+  #contenedor-cajas .text-2xl {
+    font-size: 1.75rem !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+  
+  /* Títulos - perfectamente visibles y legibles */
+  .caja-titulo,
+  .caja-interactiva h3,
+  #contenedor-cajas h3 {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    display: block !important;
+    text-align: center !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Asegurar que no haya restricciones de webkit */
+  .caja-titulo,
+  .caja-interactiva h3,
+  #contenedor-cajas h3 {
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+    display: block !important;
+  }
+  
+  /* Eliminar cualquier flex horizontal que pueda causar problemas */
+  #contenedor-principal:not(.expanded) #contenedor-cajas {
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+  
+  /* Forzar que las cajas NO se distribuyan horizontalmente */
+  #contenedor-principal:not(.expanded) .caja-interactiva,
+  #contenedor-principal:not(.expanded) #contenedor-cajas > div {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: unset !important;
+  }
+  
+  /* Contenedor principal - ajustes para móvil */
+  #contenedor-principal {
+    padding: 0 0.5rem !important;
+    max-width: 100% !important;
+    gap: 1rem !important;
+  }
+}
