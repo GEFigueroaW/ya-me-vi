@@ -496,52 +496,52 @@ function calcularPorcentajeTotal(num) {
  * Clasificar probabilidad según rangos definidos
  */
 function clasificarProbabilidad(porcentaje) {
-  // Rangos ajustados con colores de alto contraste para mejor legibilidad
-  if (porcentaje >= 30) return { 
+  // Rangos ajustados para porcentajes más realistas (1-10%)
+  if (porcentaje >= 8) return { 
     categoria: 'Excepcional', 
     color: 'text-green-800 font-bold', 
     bgColor: 'bg-green-100', 
     emoji: '🔥' 
   };
-  if (porcentaje >= 25) return { 
+  if (porcentaje >= 6) return { 
     categoria: 'Muy Alta', 
-    color: 'text-green-900 font-bold', 
+    color: 'text-green-700 font-bold', 
     bgColor: 'bg-green-50', 
     emoji: '⚡' 
   };
-  if (porcentaje >= 20) return { 
+  if (porcentaje >= 4) return { 
     categoria: 'Alta', 
-    color: 'text-blue-900 font-bold', 
+    color: 'text-blue-800 font-bold', 
     bgColor: 'bg-blue-50', 
     emoji: '📈' 
   };
-  if (porcentaje >= 16) return { 
+  if (porcentaje >= 3) return { 
     categoria: 'Buena', 
-    color: 'text-yellow-900 font-bold', 
+    color: 'text-yellow-800 font-bold', 
     bgColor: 'bg-yellow-100', 
     emoji: '⚖️' 
   };
-  if (porcentaje >= 12) return { 
+  if (porcentaje >= 2.5) return { 
     categoria: 'Moderada', 
-    color: 'text-orange-900 font-bold', 
+    color: 'text-orange-800 font-bold', 
     bgColor: 'bg-orange-100', 
     emoji: '🎲' 
   };
-  if (porcentaje >= 10) return { 
+  if (porcentaje >= 2) return { 
     categoria: 'Aceptable', 
-    color: 'text-purple-900 font-bold', 
+    color: 'text-purple-800 font-bold', 
     bgColor: 'bg-purple-100', 
     emoji: '🎯' 
   };
-  if (porcentaje >= 8) return { 
+  if (porcentaje >= 1.5) return { 
     categoria: 'Baja', 
-    color: 'text-cyan-900 font-bold', 
+    color: 'text-cyan-800 font-bold', 
     bgColor: 'bg-cyan-100', 
     emoji: '💫' 
   };
   return { 
     categoria: 'Muy Baja', 
-    color: 'text-gray-900 font-bold', 
+    color: 'text-gray-800 font-bold', 
     bgColor: 'bg-gray-100', 
     emoji: '✨' 
   };
