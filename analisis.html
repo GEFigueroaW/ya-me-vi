@@ -287,13 +287,25 @@
       gap: 1rem !important;
       width: 100% !important;
     }
-      
+    
+    /* Desktop: reglas específicas */
+    @media (min-width: 1024px) {
       /* Desktop: cuando SÍ está expandido - vertical a la izquierda */
       #contenedor-principal.expanded #contenedor-cajas {
         flex-direction: column !important;
         align-items: flex-start !important;
-        width: auto !important;
+        width: 280px !important; /* Ancho fijo para las cajas cerradas */
         flex-shrink: 0 !important;
+        gap: 1rem !important;
+      }
+      
+      /* Cajas en modo expandido - ancho fijo y visible */
+      #contenedor-principal.expanded .caja-interactiva,
+      #contenedor-principal.expanded #contenedor-cajas > div {
+        width: 280px !important; /* Ancho fijo para que se vean completamente */
+        flex: none !important; /* No se encojan ni estiren */
+        min-width: 280px !important; /* Ancho mínimo garantizado */
+        max-width: 280px !important; /* Ancho máximo consistente */
       }
       
       /* Todas las cajas tienen el mismo ancho y se distribuyen equitativamente */
@@ -303,7 +315,6 @@
         min-width: 0 !important; /* Permite que se encojan si es necesario */
         max-width: none !important;
       }
-    }
     
     /* === CAJAS INDIVIDUALES === */
     
@@ -396,6 +407,14 @@
       overflow: hidden !important;
     }
     
+    /* En modo expandido - padding más compacto para las cajas cerradas */
+    @media (min-width: 1024px) {
+      #contenedor-principal.expanded .caja-interactiva button,
+      #contenedor-principal.expanded #contenedor-cajas button {
+        padding: 1.25rem 1.5rem !important; /* Padding más compacto */
+      }
+    }
+    
     .caja-interactiva button:hover,
     #contenedor-cajas button:hover {
       background: rgba(255, 255, 255, 0.08) !important;
@@ -422,6 +441,14 @@
       flex-shrink: 0 !important;
     }
     
+    /* Emojis en modo expandido - tamaño más compacto */
+    @media (min-width: 1024px) {
+      #contenedor-principal.expanded .caja-emoji,
+      #contenedor-principal.expanded #contenedor-cajas .text-2xl {
+        font-size: 1.5rem !important; /* Tamaño más pequeño para cajas cerradas */
+      }
+    }
+    
     /* Títulos modernos - adaptables para todas las pantallas */
     .caja-titulo,
     #contenedor-cajas h3 {
@@ -440,6 +467,16 @@
       display: block !important; /* Cambio: display block normal */
       text-align: center !important;
       min-height: 1.3em !important; /* Altura mínima reducida */
+    }
+    
+    /* Títulos en modo expandido - tamaño consistente */
+    @media (min-width: 1024px) {
+      #contenedor-principal.expanded .caja-titulo,
+      #contenedor-principal.expanded #contenedor-cajas h3 {
+        font-size: 0.95rem !important; /* Tamaño fijo más pequeño para cajas cerradas */
+        line-height: 1.25 !important;
+        text-align: center !important;
+      }
     }
     
     /* === CONTENEDOR DE CONTENIDO EXPANDIDO === */
@@ -662,6 +699,7 @@
         text-overflow: unset !important;
         display: block !important;
         -webkit-line-clamp: unset !important;
+        line-clamp: unset !important; /* Propiedad estándar */
         -webkit-box-orient: unset !important;
         min-height: unset !important;
         line-height: 1.2 !important;
