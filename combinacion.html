@@ -63,8 +63,8 @@
               </div>
             </div>
             
-            <!-- Explicación del porcentaje -->
-            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <!-- Explicación del porcentaje - Oculta hasta mostrar resultados -->
+            <div id="explicacion-porcentaje-individual" class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 hidden">
               <h4 class="font-bold text-base text-gray-900 mb-2 text-center">📊 ¿Qué significa el %?</h4>
               <p class="text-xs text-gray-700 text-center">
                 El <strong>% Índice de Frecuencia Histórica</strong> muestra qué tan seguido ha aparecido tu número en los últimos 30 meses de sorteos.
@@ -109,8 +109,8 @@
               </div>
             </div>
             
-            <!-- Explicación del porcentaje -->
-            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <!-- Explicación del porcentaje - Oculta hasta mostrar resultados -->
+            <div id="explicacion-porcentaje-combinacion" class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 hidden">
               <h4 class="font-bold text-base text-gray-900 mb-2 text-center">📊 ¿Qué significa el %?</h4>
               <p class="text-xs text-gray-700 text-center">
                 El <strong>% Índice de Frecuencia Histórica</strong> muestra qué tan seguido ha aparecido tu número en los últimos 30 meses de sorteos.
@@ -359,6 +359,13 @@
               
               resultadoNumero.innerHTML = htmlResultado;
               
+              // Mostrar la explicación del porcentaje después de mostrar resultados
+              const explicacionPorcentaje = document.getElementById('explicacion-porcentaje-individual');
+              if (explicacionPorcentaje) {
+                explicacionPorcentaje.classList.remove('hidden');
+                console.log('✅ Explicación del porcentaje mostrada');
+              }
+              
             } else {
               // Fallback si las funciones no están disponibles aún
               console.log('⚠️ Funciones de análisis no disponibles, mostrando resultado básico');
@@ -385,6 +392,13 @@
                   </div>
                 </div>
               `;
+              
+              // Mostrar la explicación del porcentaje después de mostrar resultados (fallback)
+              const explicacionPorcentaje = document.getElementById('explicacion-porcentaje-individual');
+              if (explicacionPorcentaje) {
+                explicacionPorcentaje.classList.remove('hidden');
+                console.log('✅ Explicación del porcentaje mostrada (fallback)');
+              }
             }
             
           } catch (error) {
@@ -651,6 +665,13 @@
                 </div>
               </div>
             `;
+          }
+          
+          // Mostrar la explicación del porcentaje después de mostrar resultados
+          const explicacionPorcentajeCombinacion = document.getElementById('explicacion-porcentaje-combinacion');
+          if (explicacionPorcentajeCombinacion) {
+            explicacionPorcentajeCombinacion.classList.remove('hidden');
+            console.log('✅ Explicación del porcentaje mostrada (combinación)');
           }
           
           console.log('✅ Resultado mostrado para combinación:', numeros);
@@ -1131,6 +1152,18 @@
       const mensajeAdvertencia = section.querySelector('#mensaje-advertencia');
       if (mensajeAdvertencia) {
         mensajeAdvertencia.classList.add('hidden');
+      }
+      
+      // Ocultar explicaciones del porcentaje
+      const explicacionIndividual = section.querySelector('#explicacion-porcentaje-individual');
+      const explicacionCombinacion = section.querySelector('#explicacion-porcentaje-combinacion');
+      if (explicacionIndividual) {
+        explicacionIndividual.classList.add('hidden');
+        console.log('🧹 Explicación individual ocultada');
+      }
+      if (explicacionCombinacion) {
+        explicacionCombinacion.classList.add('hidden');
+        console.log('🧹 Explicación combinación ocultada');
       }
     }
     
