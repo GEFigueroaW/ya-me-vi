@@ -132,6 +132,13 @@ button {
   opacity: 1 !important;
 }
 
+/* Asegurar que el botón de volver funcione correctamente */
+#btn-back {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+}
+
 /* Estados de validación para inputs - MEJORAR CONTRASTE */
 .combo-input.valid {
   border-color: #10b981 !important;
