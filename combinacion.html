@@ -508,13 +508,8 @@
               
               let htmlResultado = `
                 <div class="bg-white bg-opacity-95 rounded-xl p-6 shadow-lg border border-gray-200">
-                  <!-- Encabezado simple -->
-                  <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">
-                    � Tu Combinación: <span class="text-purple-600">[${numeros.join(' • ')}]</span>
-                  </h3>
-                  
-                  <!-- Análisis SEPARADO por cada sorteo -->
-                  <div class="space-y-6">
+                  <!-- Layout horizontal para escritorio, vertical para móvil -->
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               `;
               
               // Análisis individual por cada sorteo
@@ -553,20 +548,20 @@
                 const clasificacionSorteo = window.clasificarProbabilidad(promedioSorteo);
                 
                 htmlResultado += `
-                  <div class="bg-gradient-to-br from-${colorBase}-50 to-${colorBase}-100 rounded-xl p-4 border border-${colorBase}-200 shadow-md mb-6">
+                  <div class="bg-gradient-to-br from-${colorBase}-50 to-${colorBase}-100 rounded-xl p-4 border border-${colorBase}-200 shadow-md">
                     <!-- Encabezado con explicación clara -->
                     <div class="flex items-center justify-between mb-4">
                       <div class="flex items-center gap-3">
                         <span class="text-3xl">${icono}</span>
                         <div>
-                          <h4 class="text-xl font-bold text-${colorBase}-900">${nombre}</h4>
-                          <div class="text-sm text-gray-700">
+                          <h4 class="text-xl font-bold text-black">${nombre}</h4>
+                          <div class="text-sm text-black">
                             Promedio de tu combinación: <span class="font-bold ${clasificacionSorteo.color}">${promedioSorteo.toFixed(2)}%</span> 
                             <span class="text-xs ${clasificacionSorteo.color} ml-1">(${clasificacionSorteo.categoria})</span>
                           </div>
                         </div>
                       </div>
-                      <div class="text-xs text-gray-600 text-right">
+                      <div class="text-xs text-gray-600 text-right hidden">
                         <div class="font-semibold">Análisis de ${totalFrecuencia}</div>
                         <div class="text-gray-500">apariciones totales</div>
                       </div>
@@ -574,7 +569,7 @@
                     
                     <!-- Explicación para el usuario -->
                     <div class="bg-blue-50 p-3 rounded-lg mb-4 border-l-4 border-blue-400">
-                      <div class="text-sm text-blue-800">
+                      <div class="text-sm text-black">
                         <span class="font-bold">¿Cómo leer esto?</span> Mientras más alto el %, mejor el número. 
                         Las "apariciones" muestran cuántas veces salió en sorteos pasados.
                       </div>
@@ -599,18 +594,17 @@
                             ${numData.numero}
                           </div>
                           <div>
-                            <div class="text-xl font-bold text-gray-900">${porcentaje.toFixed(1)}%</div>
-                            <div class="text-sm text-gray-600 font-medium">${frecuencia} apariciones históricas</div>
+                            <div class="text-xl font-bold text-black">${porcentaje.toFixed(1)}%</div>
+                            <div class="text-sm text-black font-medium">${frecuencia} apariciones históricas</div>
                           </div>
                         </div>
                         
-                        <!-- Clasificación visible y clara -->
-                        <div class="text-right">
+                          <div class="text-right">
                           <div class="flex items-center gap-2 ${clasificacion.color} font-bold text-lg">
                             <span class="text-2xl">${clasificacion.emoji}</span>
-                            <span class="text-base">${clasificacion.categoria}</span>
+                            <span class="text-base text-black">${clasificacion.categoria}</span>
                           </div>
-                          <div class="text-xs text-gray-500 mt-1 font-medium">Nivel de Potencial</div>
+                          <div class="text-xs text-black mt-1 font-medium">Nivel de Potencial</div>
                         </div>
                       </div>
                     </div>
@@ -622,7 +616,7 @@
                     </div>
                   </div>
                 `;
-              });              // Calcular estadísticas generales de la combinación
+              });
               const promedioGeneral = analisisIndividual.reduce((sum, a) => sum + a.porcentajeTotal, 0) / analisisIndividual.length;
               const clasificacionGeneral = window.clasificarProbabilidad(promedioGeneral);
               
@@ -644,6 +638,7 @@
                 promediosPorSorteo[key] = contador > 0 ? suma / contador : 0;
               });
               
+              // Cerrar el grid horizontal
               htmlResultado += `
                   </div>
                 </div>
