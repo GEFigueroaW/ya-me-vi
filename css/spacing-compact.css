@@ -1,0 +1,100 @@
+/* Optimizaciones de espaciado para diseño compacto */
+.space-y-6 > * + * {
+  margin-top: 1rem !important; /* Reducido de 1.5rem */
+}
+
+.space-y-8 > * + * {
+  margin-top: 1.5rem !important; /* Reducido de 2rem */
+}
+
+/* Padding reducido para cajas principales */
+.p-6 {
+  padding: 1rem !important; /* Más compacto */
+}
+
+.p-8 {
+  padding: 1.5rem !important; /* Más compacto */
+}
+
+/* Márgenes reducidos para títulos */
+.mb-6 {
+  margin-bottom: 1rem !important; /* Reducido */
+}
+
+.mb-8 {
+  margin-bottom: 1.5rem !important; /* Reducido */
+}
+
+.mb-4 {
+  margin-bottom: 0.75rem !important; /* Más compacto */
+}
+
+/* Altura mínima reducida para cajas de números */
+.bg-gradient-to-br {
+  min-height: auto !important;
+}
+
+/* Espaciado más compacto para listas */
+.space-y-2 > * + * {
+  margin-top: 0.5rem !important;
+}
+
+/* Líneas de separación más sutiles */
+.border {
+  border-width: 1px !important;
+}
+
+.border-2 {
+  border-width: 1px !important; /* Reducido */
+}
+
+/* Sombras más sutiles */
+.shadow-lg {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.shadow-xl {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.shadow-2xl {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important; /* Reducido */
+}
+
+/* Texto más compacto */
+.text-3xl {
+  font-size: 1.875rem !important; /* Reducido */
+  line-height: 2.25rem !important;
+}
+
+.text-2xl {
+  font-size: 1.5rem !important; /* Reducido */
+  line-height: 2rem !important;
+}
+
+/* Responsive: En móvil todo más compacto */
+@media (max-width: 640px) {
+  .p-6 {
+    padding: 0.75rem !important; /* Extra compacto en móvil */
+  }
+  
+  .p-8 {
+    padding: 1rem !important; /* Extra compacto en móvil */
+  }
+  
+  .space-y-6 > * + * {
+    margin-top: 0.75rem !important; /* Muy compacto en móvil */
+  }
+  
+  .space-y-8 > * + * {
+    margin-top: 1rem !important; /* Muy compacto en móvil */
+  }
+  
+  .mb-6 {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1rem !important;
+  }
+}
