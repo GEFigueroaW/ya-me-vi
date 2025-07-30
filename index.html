@@ -141,8 +141,31 @@
     /* Asegurar logos perfectamente redondos */
     .logo-redondo {
       border-radius: 50% !important;
-      aspect-ratio: 1 !important;
+      aspect-ratio: 1 / 1 !important;
       object-fit: cover !important;
+      object-position: center !important;
+      width: auto !important;
+      height: auto !important;
+      display: block !important;
+    }
+    
+    /* Clases específicas para cada tamaño de logo */
+    .logo-nav {
+      width: 32px !important;
+      height: 32px !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
+      max-width: 32px !important;
+      max-height: 32px !important;
+    }
+    
+    .logo-hero {
+      width: 96px !important;
+      height: 96px !important;
+      min-width: 96px !important;
+      min-height: 96px !important;
+      max-width: 96px !important;
+      max-height: 96px !important;
     }
   </style>
 </head>
@@ -155,7 +178,7 @@
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <img class="h-8 w-8 rounded-full object-cover logo-redondo" src="assets/apple-touch-icon.png" alt="YA ME VI Logo">
+            <img class="logo-redondo logo-nav rounded-full object-cover" src="assets/apple-touch-icon.png" alt="YA ME VI Logo">
           </div>
           <div class="ml-3">
             <h1 class="text-white text-xl font-bold">YA ME VI</h1>
@@ -207,7 +230,7 @@
         </div>
         
         <div class="floating-animation mb-8">
-          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="mx-auto h-24 w-24 rounded-full shadow-2xl object-cover logo-redondo">
+          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="logo-redondo logo-hero rounded-full shadow-2xl object-cover mx-auto">
         </div>
         
         <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 animate__animated animate__fadeInUp">
@@ -742,7 +765,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
         <div class="flex items-center justify-center mb-6">
-          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="h-10 w-10 rounded-full mr-3">
+          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="logo-redondo rounded-full mr-3" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px;">
           <h3 class="text-2xl font-bold text-white">YA ME VI</h3>
         </div>
         
