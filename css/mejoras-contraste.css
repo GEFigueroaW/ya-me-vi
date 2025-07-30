@@ -50,6 +50,45 @@
   border-color: #e9d5ff !important;
 }
 
+/* Estilos del Accordion */
+.accordion-section {
+  overflow: hidden;
+}
+
+.accordion-header {
+  border-bottom: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+.accordion-header:hover {
+  background-color: rgba(55, 65, 81, 0.7) !important;
+}
+
+.accordion-content {
+  transition: all 0.3s ease-in-out;
+}
+
+.accordion-icon {
+  transition: transform 0.3s ease-in-out;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+/* Mejorar la apariencia de los headers del accordion */
+.accordion-header h2 {
+  margin: 0;
+  padding: 0;
+}
+
+.accordion-header h2 span:first-child {
+  flex-grow: 1;
+}
+
+.accordion-header h2 .accordion-icon {
+  margin-left: auto;
+  min-width: 24px;
+  text-align: center;
+}
+
 /* Asegurar que los inputs tengan fondo blanco y sean visibles */
 .combo-input {
   background-color: #ffffff !important;

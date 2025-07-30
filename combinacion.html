@@ -107,144 +107,163 @@
     <div class="max-w-6xl mx-auto">
       
       <!-- Sección de evaluación de número individual -->
-      <div class="bg-gray-800 bg-opacity-95 backdrop-blur-lg rounded-xl p-4 mb-6 border border-gray-600 shadow-xl">
-        <h2 class="text-xl font-bold mb-4 text-center text-white">🔍 Ingresa tu Número de la Suerte entre el 1 y el 56</h2>
-        <div class="max-w-md mx-auto">
-          <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-4">
-            <input type="number" id="numero-individual" class="w-20 sm:w-24 px-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400" min="1" max="56" placeholder="?">
-            <button id="evaluar-numero-btn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
-              🎯 Evaluar
-            </button>
+      <div class="accordion-section bg-gray-800 bg-opacity-95 backdrop-blur-lg rounded-xl border border-gray-600 shadow-xl mb-6">
+        <div class="accordion-header p-4 cursor-pointer hover:bg-gray-700 hover:bg-opacity-50 transition-colors duration-300" onclick="toggleAccordion(this)">
+          <h2 class="text-xl font-bold text-center text-white flex items-center justify-center">
+            <span>🔍 Número Individual</span>
+            <span class="accordion-icon ml-3 text-lg">▼</span>
+          </h2>
+        </div>
+        <div class="accordion-content" style="display: none;">
+          <div class="p-4 pt-0">
+            <p class="text-center text-gray-200 mb-4">Ingresa tu número de la suerte entre el 1 y el 56</p>
+            <div class="max-w-md mx-auto">
+              <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-4">
+                <input type="number" id="numero-individual" class="w-20 sm:w-24 px-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-800 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400" min="1" max="56">
+                <button id="evaluar-numero-btn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
+                  🎯 Evaluar
+                </button>
+              </div>
+            </div>
+            
+            <!-- Botón para mostrar explicación (siempre visible y más sutil) -->
+            <div class="mt-3 text-center">
+              <button id="mostrar-explicacion-btn" class="bg-gray-700 bg-opacity-80 hover:bg-opacity-90 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-gray-600 shadow-lg">
+                <span id="explicacion-text">💡 ¿Cómo interpretar resultados?</span>
+                <span id="explicacion-icon">👁️</span>
+              </button>
+            </div>
+            
+            <div id="resultado-numero" class="mt-4"></div>
           </div>
         </div>
-        
-        <!-- Botón para mostrar explicación (siempre visible y más sutil) -->
-        <div class="mt-3 text-center">
-          <button id="mostrar-explicacion-btn" class="bg-gray-700 bg-opacity-80 hover:bg-opacity-90 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-gray-600 shadow-lg">
-            <span id="explicacion-text">💡 ¿Cómo interpretar resultados?</span>
-            <span id="explicacion-icon">👁️</span>
-          </button>
-        </div>
-        
-        <div id="resultado-numero" class="mt-4"></div>
       </div>
 
       <!-- Sección de evaluación de combinación -->
-      <div class="bg-gray-800 bg-opacity-95 backdrop-blur-lg rounded-xl p-4 mb-6 border border-gray-600 shadow-xl">
-        <h2 class="text-xl font-bold mb-4 text-center text-white">🔍 Ingresa tu Combinación de la Suerte</h2>
-        <div class="max-w-2xl mx-auto">
-          <p class="text-center text-gray-200 mb-4">Ingresa tu combinación de 6 números (1-56)</p>
-          
-          <!-- Mensaje de advertencia dinámico -->
-          <div id="mensaje-advertencia" class="hidden mb-4 p-3 rounded-lg text-center text-white font-semibold animate__animated animate__fadeIn">
-          </div>
-          
-          <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-4">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 placeholder-gray-400 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" placeholder="?" data-index="0">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 placeholder-gray-400 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" placeholder="?" data-index="1">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 placeholder-gray-400 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" placeholder="?" data-index="2">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 placeholder-gray-400 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" placeholder="?" data-index="3">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 placeholder-gray-400 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" placeholder="?" data-index="4">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 placeholder-gray-400 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" placeholder="?" data-index="5">
-          </div>
-          <div class="text-center">
-            <button id="evaluar-combinacion-btn" class="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
-              🎯 Evaluar Combinación
-            </button>
-          </div>
+      <div class="accordion-section bg-gray-800 bg-opacity-95 backdrop-blur-lg rounded-xl border border-gray-600 shadow-xl mb-6">
+        <div class="accordion-header p-4 cursor-pointer hover:bg-gray-700 hover:bg-opacity-50 transition-colors duration-300" onclick="toggleAccordion(this)">
+          <h2 class="text-xl font-bold text-center text-white flex items-center justify-center">
+            <span>🔍 Combinación Completa</span>
+            <span class="accordion-icon ml-3 text-lg">▼</span>
+          </h2>
         </div>
-        
-        <div id="resultado-combinacion" class="mt-4"></div>
-        
-        <!-- Sección de explicación expandible -->
-        <div id="explicacion-expandible" class="mt-6 hidden">
-          <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
-            <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Cómo interpretar los resultados?</h3>
-            <div class="grid md:grid-cols-2 gap-6 text-white">
-              <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
-                <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE</h4>
-                <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial:</p>
-                <ul class="text-xs space-y-1 text-gray-200">
-                  <li>• Cuántas veces salió tu número</li>
-                  <li>• Basado en sorteos reales</li>
-                  <li>• Datos de los últimos 30 meses</li>
-                </ul>
+        <div class="accordion-content" style="display: none;">
+          <div class="p-4 pt-0">
+            <div class="max-w-2xl mx-auto">
+              <p class="text-center text-gray-200 mb-4">Ingresa tu combinación de 6 números (1-56)</p>
+              
+              <!-- Mensaje de advertencia dinámico -->
+              <div id="mensaje-advertencia" class="hidden mb-4 p-3 rounded-lg text-center text-white font-semibold animate__animated animate__fadeIn">
               </div>
-              <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
-                <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
-                <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar:</p>
-                <ul class="text-xs space-y-1 text-gray-200">
-                  <li>• Aplica factor matemático 12.5x</li>
-                  <li>• Ajusta expectativas realistas</li>
-                  <li>• Garantiza mínimo 8% siempre</li>
-                </ul>
+              
+              <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-4">
+                <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" data-index="0">
+                <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" data-index="1">
+                <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" data-index="2">
+                <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" data-index="3">
+                <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" data-index="4">
+                <input type="number" class="combo-input w-full px-3 py-3 bg-white border-2 border-gray-400 rounded-lg text-gray-800 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-colors duration-300 shadow-sm" min="1" max="56" data-index="5">
               </div>
-            </div>
-            <div class="mt-4 text-center">
-              <div class="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
-                <p class="text-sm text-yellow-200">
-                  <strong>🔥 Mientras más alto el porcentaje, mejor tu número</strong>
-                </p>
-                <p class="text-xs text-gray-300 mt-1">
-                  Si Índice = Potencial → Máxima confianza | Si Índice > Potencial → Buena recomendación
-                </p>
+              <div class="text-center">
+                <button id="evaluar-combinacion-btn" class="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
+                  🎯 Evaluar Combinación
+                </button>
               </div>
             </div>
             
-            <!-- Botón para mostrar/ocultar ayuda adicional -->
-            <div class="mt-4 text-center">
-              <button id="toggle-help-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300">
-                <span id="help-text-expandible">Ver ejemplo práctico</span>
-                <span id="help-icon-expandible">👁️</span>
-              </button>
-            </div>
+            <div id="resultado-combinacion" class="mt-4"></div>
             
-            <!-- Nuevo botón para "CÓMO FUNCIONA EL ANÁLISIS" -->
-            <div class="mt-3 text-center">
-              <button id="toggle-analisis-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-white border-opacity-30">
-                <span id="analisis-text-expandible">⚙️ ¿Cómo funciona el análisis?</span>
-                <span id="analisis-icon-expandible">🔍</span>
-              </button>
-            </div>
-            
-            <!-- Ayuda expandible -->
-            <div id="help-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
-              <h4 class="font-semibold mb-3 text-yellow-300">🧮 Ejemplo con el número 15:</h4>
-              <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
-                <ul class="text-gray-200 space-y-1">
-                  <li>📊 <strong>Frecuencia:</strong> 12 apariciones en 1,668 números históricos</li>
-                  <li>📈 <strong>Porcentaje base:</strong> (12 ÷ 1,668) × 100 = 0.72%</li>
-                  <li>⚡ <strong>Factor 12.5x:</strong> 0.72% × 12.5 = 9.0%</li>
-                  <li>🎯 <strong>Resultado final:</strong> Máximo entre 9.0% y 8% = 9.0%</li>
-                </ul>
-                <p class="text-white mt-2 font-medium text-center">
-                  <span class="text-yellow-300">🎯 Índice = 9.0%</span> | 
-                  <span class="text-green-300">⭐ Potencial = 9.0%</span>
-                  <span class="text-purple-200"> (¡Máxima confianza!)</span>
-                </p>
-              </div>
-            </div>
-            
-            <!-- Contenido del análisis expandible -->
-            <div id="analisis-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
-              <h4 class="font-semibold mb-3 text-blue-300">⚙️ ¿Cómo funciona el análisis?</h4>
-              <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
-                <div class="space-y-3">
-                  <div class="border-l-4 border-yellow-400 pl-3">
-                    <h5 class="font-semibold text-yellow-300">🔍 Recolección de datos</h5>
-                    <p class="text-gray-200 text-xs mt-1">Analizamos más de 1,668 números ganadores de los últimos 30 meses de Melate, Revancha y Revanchita.</p>
+            <!-- Sección de explicación expandible -->
+            <div id="explicacion-expandible" class="mt-6 hidden">
+              <div class="bg-gradient-to-r from-blue-500 to-purple-600 bg-opacity-90 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-30 shadow-xl">
+                <h3 class="text-lg font-bold text-white mb-4 text-center">📊 ¿Cómo interpretar los resultados?</h3>
+                <div class="grid md:grid-cols-2 gap-6 text-white">
+                  <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+                    <h4 class="font-semibold mb-2 text-yellow-300">🎯 ÍNDICE</h4>
+                    <p class="text-sm mb-2">Es lo que <strong>realmente pasó</strong> en el historial:</p>
+                    <ul class="text-xs space-y-1 text-gray-200">
+                      <li>• Cuántas veces salió tu número</li>
+                      <li>• Basado en sorteos reales</li>
+                      <li>• Datos de los últimos 30 meses</li>
+                    </ul>
                   </div>
-                  <div class="border-l-4 border-green-400 pl-3">
-                    <h5 class="font-semibold text-green-300">📊 Cálculo estadístico</h5>
-                    <p class="text-gray-200 text-xs mt-1">Calculamos la frecuencia real de cada número y aplicamos algoritmos de probabilidad avanzados.</p>
+                  <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+                    <h4 class="font-semibold mb-2 text-green-300">⭐ POTENCIAL</h4>
+                    <p class="text-sm mb-2">Es tu <strong>probabilidad real</strong> de ganar:</p>
+                    <ul class="text-xs space-y-1 text-gray-200">
+                      <li>• Aplica factor matemático 12.5x</li>
+                      <li>• Ajusta expectativas realistas</li>
+                      <li>• Garantiza mínimo 8% siempre</li>
+                    </ul>
                   </div>
-                  <div class="border-l-4 border-blue-400 pl-3">
-                    <h5 class="font-semibold text-blue-300">🎯 Factor de ajuste</h5>
-                    <p class="text-gray-200 text-xs mt-1">Multiplicamos por 12.5x para generar expectativas realistas, garantizando mínimo 8% de potencial.</p>
+                </div>
+                <div class="mt-4 text-center">
+                  <div class="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
+                    <p class="text-sm text-yellow-200">
+                      <strong>🔥 Mientras más alto el porcentaje, mejor tu número</strong>
+                    </p>
+                    <p class="text-xs text-gray-300 mt-1">
+                      Si Índice = Potencial → Máxima confianza | Si Índice > Potencial → Buena recomendación
+                    </p>
                   </div>
-                  <div class="border-l-4 border-purple-400 pl-3">
-                    <h5 class="font-semibold text-purple-300">✨ Resultado final</h5>
-                    <p class="text-gray-200 text-xs mt-1">Te mostramos tanto el dato histórico real (ÍNDICE) como tu probabilidad ajustada (POTENCIAL).</p>
+                </div>
+                
+                <!-- Botón para mostrar/ocultar ayuda adicional -->
+                <div class="mt-4 text-center">
+                  <button id="toggle-help-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300">
+                    <span id="help-text-expandible">Ver ejemplo práctico</span>
+                    <span id="help-icon-expandible">👁️</span>
+                  </button>
+                </div>
+                
+                <!-- Nuevo botón para "CÓMO FUNCIONA EL ANÁLISIS" -->
+                <div class="mt-3 text-center">
+                  <button id="toggle-analisis-expandible" class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-4 py-2 text-sm text-white transition-all duration-300 border border-white border-opacity-30">
+                    <span id="analisis-text-expandible">⚙️ ¿Cómo funciona el análisis?</span>
+                    <span id="analisis-icon-expandible">🔍</span>
+                  </button>
+                </div>
+                
+                <!-- Ayuda expandible -->
+                <div id="help-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
+                  <h4 class="font-semibold mb-3 text-yellow-300">🧮 Ejemplo con el número 15:</h4>
+                  <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+                    <ul class="text-gray-200 space-y-1">
+                      <li>📊 <strong>Frecuencia:</strong> 12 apariciones en 1,668 números históricos</li>
+                      <li>📈 <strong>Porcentaje base:</strong> (12 ÷ 1,668) × 100 = 0.72%</li>
+                      <li>⚡ <strong>Factor 12.5x:</strong> 0.72% × 12.5 = 9.0%</li>
+                      <li>🎯 <strong>Resultado final:</strong> Máximo entre 9.0% y 8% = 9.0%</li>
+                    </ul>
+                    <p class="text-white mt-2 font-medium text-center">
+                      <span class="text-yellow-300">🎯 Índice = 9.0%</span> | 
+                      <span class="text-green-300">⭐ Potencial = 9.0%</span>
+                      <span class="text-purple-200"> (¡Máxima confianza!)</span>
+                    </p>
+                  </div>
+                </div>
+                
+                <!-- Contenido del análisis expandible -->
+                <div id="analisis-content-expandible" class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm hidden">
+                  <h4 class="font-semibold mb-3 text-blue-300">⚙️ ¿Cómo funciona el análisis?</h4>
+                  <div class="bg-white bg-opacity-20 rounded-lg p-3 text-sm">
+                    <div class="space-y-3">
+                      <div class="border-l-4 border-yellow-400 pl-3">
+                        <h5 class="font-semibold text-yellow-300">🔍 Recolección de datos</h5>
+                        <p class="text-gray-200 text-xs mt-1">Analizamos más de 1,668 números ganadores de los últimos 30 meses de Melate, Revancha y Revanchita.</p>
+                      </div>
+                      <div class="border-l-4 border-green-400 pl-3">
+                        <h5 class="font-semibold text-green-300">📊 Cálculo estadístico</h5>
+                        <p class="text-gray-200 text-xs mt-1">Calculamos la frecuencia real de cada número y aplicamos algoritmos de probabilidad avanzados.</p>
+                      </div>
+                      <div class="border-l-4 border-blue-400 pl-3">
+                        <h5 class="font-semibold text-blue-300">🎯 Factor de ajuste</h5>
+                        <p class="text-gray-200 text-xs mt-1">Multiplicamos por 12.5x para generar expectativas realistas, garantizando mínimo 8% de potencial.</p>
+                      </div>
+                      <div class="border-l-4 border-purple-400 pl-3">
+                        <h5 class="font-semibold text-purple-300">✨ Resultado final</h5>
+                        <p class="text-gray-200 text-xs mt-1">Te mostramos tanto el dato histórico real (ÍNDICE) como tu probabilidad ajustada (POTENCIAL).</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -513,12 +532,6 @@
               
               let htmlResultado = `
                 <div class="bg-white rounded-xl p-4 shadow-lg border border-gray-300">
-                  <h3 class="text-xl font-bold text-center mb-4 text-gray-900">
-                    🎯 Análisis de tu Combinación: ${numeros.join(' - ')}
-                  </h3>
-                  <div class="text-sm text-center text-gray-600 mb-4">
-                    Números ordenados de menor a mayor
-                  </div>
                   <!-- Layout horizontal para escritorio, vertical para móvil -->
                   <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
               `;
@@ -574,13 +587,6 @@
                       </div>
                     </div>
                     
-                    <!-- Explicación para el usuario -->
-                    <div class="bg-blue-50 p-1 rounded-lg mb-2 border-l-4 border-blue-400">
-                      <div class="text-xs text-gray-800">
-                        <span class="font-bold">¿Cómo leer?</span> % índice histórico = qué tan frecuente ha sido tu número en sorteos pasados.
-                      </div>
-                    </div>
-                    
                     <!-- Lista simplificada de números -->
                     <div class="space-y-1">
                 `;
@@ -600,7 +606,7 @@
                             ${numData.numero}
                           </div>
                           <div>
-                            <div class="text-base font-bold text-gray-900">${porcentaje.toFixed(1)}% índice histórico</div>
+                            <div class="text-base font-bold text-gray-900">${porcentaje.toFixed(2)}% índice histórico</div>
                             <div class="text-xs text-gray-600">${frecuencia} apariciones en sorteos</div>
                           </div>
                         </div>
@@ -1110,6 +1116,37 @@
       console.log('🔍 Sistema de validación estricta activado - NO permite duplicados ni números > 56');
       console.log('⌨️ Navegación manual activada - Usa TAB, FLECHAS o CLIC para cambiar de campo (SIN auto-avance)');
     });
+
+    // Función para el accordion
+    function toggleAccordion(header) {
+      const section = header.parentElement;
+      const content = section.querySelector('.accordion-content');
+      const icon = header.querySelector('.accordion-icon');
+      
+      // Cerrar otros accordions
+      document.querySelectorAll('.accordion-section').forEach(otherSection => {
+        if (otherSection !== section) {
+          const otherContent = otherSection.querySelector('.accordion-content');
+          const otherIcon = otherSection.querySelector('.accordion-icon');
+          if (otherContent && otherIcon) {
+            otherContent.style.display = 'none';
+            otherIcon.textContent = '▼';
+          }
+        }
+      });
+      
+      // Toggle current accordion
+      if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.textContent = '▲';
+      } else {
+        content.style.display = 'none';
+        icon.textContent = '▼';
+      }
+    }
+    
+    // Hacer la función global
+    window.toggleAccordion = toggleAccordion;
   </script>
 </body>
 </html>
