@@ -117,10 +117,25 @@
     }
     
     #loading-overlay.hidden {
-      display: none;
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
     }
-  </style>
-      50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+    
+    /* Asegurar que no se muestren elementos debug o problemáticos */
+    .adsbygoogle[style*="display:none"],
+    [style*="display:none"] {
+      display: none !important;
+    }
+    
+    /* Prevenir overflow de texto negro en cualquier parte */
+    body * {
+      overflow: visible;
+    }
+    
+    /* Forzar que todos los textos oscuros en la navegación sean blancos */
+    nav *, header * {
+      color: white !important;
     }
   </style>
 </head>
@@ -174,8 +189,8 @@
   <section id="inicio" class="pt-16 min-h-screen flex items-center justify-center">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div class="text-center">
-        <!-- AdSense Ad Unit - Top of Page -->
-        <div class="mb-8">
+        <!-- AdSense Ad Unit - Top of Page - Temporalmente oculto -->
+        <div class="mb-8" style="display: none;">
           <ins class="adsbygoogle"
                style="display:block"
                data-ad-client="ca-pub-2226536008153511"
@@ -804,9 +819,9 @@
 
   <!-- Loading overlay -->
   <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-    <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
+    <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-white">
       <div class="animate-spin inline-block w-10 h-10 border-4 border-current border-t-transparent text-green-600 rounded-full mb-4"></div>
-      <p id="loading-message" class="text-lg">Verificando cuenta...</p>
+      <p id="loading-message" class="text-lg text-white">Verificando cuenta...</p>
     </div>
   </div>
 
