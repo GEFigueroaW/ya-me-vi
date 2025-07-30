@@ -131,13 +131,18 @@
         <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">🔍 Ingresa tu Combinación de la Suerte</h2>
         <div class="max-w-2xl mx-auto">
           <p class="text-center text-gray-700 mb-6">Ingresa tu combinación de 6 números (1-56)</p>
+          
+          <!-- Mensaje de advertencia dinámico -->
+          <div id="mensaje-advertencia" class="hidden mb-4 p-3 rounded-lg text-center text-white font-semibold animate__animated animate__fadeIn">
+          </div>
+          
           <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
-            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400" min="1" max="56" placeholder="">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="1" data-index="0">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="2" data-index="1">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="3" data-index="2">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="4" data-index="3">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="5" data-index="4">
+            <input type="number" class="combo-input w-full px-3 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" min="1" max="56" placeholder="6" data-index="5">
           </div>
           <div class="text-center">
             <button id="evaluar-combinacion-btn" class="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-semibold shadow-lg transform hover:scale-105">
@@ -721,6 +726,183 @@
         });
       });
       console.log(`✅ Enter configurado para ${inputsCombinacion.length} inputs de combinación`);
+      
+      // ========================================
+      // SISTEMA DE VALIDACIÓN EN TIEMPO REAL
+      // ========================================
+      
+      function mostrarAdvertencia(mensaje, tipo = 'error') {
+        const mensajeDiv = document.getElementById('mensaje-advertencia');
+        if (!mensajeDiv) return;
+        
+        // Estilos según tipo de mensaje
+        const estilos = {
+          error: 'bg-red-500',
+          warning: 'bg-yellow-500',
+          info: 'bg-blue-500',
+          success: 'bg-green-500'
+        };
+        
+        mensajeDiv.className = `mb-4 p-3 rounded-lg text-center text-white font-semibold animate__animated animate__fadeIn ${estilos[tipo]}`;
+        mensajeDiv.textContent = mensaje;
+        mensajeDiv.classList.remove('hidden');
+        
+        // Auto-ocultar después de 3 segundos para errores y warnings
+        if (tipo === 'error' || tipo === 'warning') {
+          setTimeout(() => {
+            mensajeDiv.classList.add('hidden');
+          }, 3000);
+        }
+      }
+      
+      function ocultarAdvertencia() {
+        const mensajeDiv = document.getElementById('mensaje-advertencia');
+        if (mensajeDiv) {
+          mensajeDiv.classList.add('hidden');
+        }
+      }
+      
+      function validarNumero(input, valor) {
+        const numero = parseInt(valor);
+        
+        // Reset estilo del input
+        input.style.borderColor = '';
+        input.style.backgroundColor = '';
+        
+        // Validar rango
+        if (numero < 1 || numero > 56) {
+          input.style.borderColor = '#ef4444';
+          input.style.backgroundColor = '#fef2f2';
+          mostrarAdvertencia('⚠️ Los números deben estar entre 1 y 56', 'error');
+          return false;
+        }
+        
+        // Validar duplicados
+        const valores = Array.from(inputsCombinacion)
+          .map(inp => inp.value)
+          .filter(val => val !== '' && val !== input.value);
+        
+        if (valores.includes(valor)) {
+          input.style.borderColor = '#f59e0b';
+          input.style.backgroundColor = '#fffbeb';
+          mostrarAdvertencia('🔄 No puedes repetir números en tu combinación', 'warning');
+          return false;
+        }
+        
+        // Si todo está bien
+        input.style.borderColor = '#10b981';
+        input.style.backgroundColor = '#f0fdf4';
+        
+        // Verificar si todos los campos están completos y válidos
+        verificarCombinacionCompleta();
+        
+        return true;
+      }
+      
+      function verificarCombinacionCompleta() {
+        const valores = Array.from(inputsCombinacion)
+          .map(inp => inp.value)
+          .filter(val => val !== '');
+        
+        const numerosUnicos = new Set(valores);
+        const todosValidos = valores.every(val => {
+          const num = parseInt(val);
+          return num >= 1 && num <= 56;
+        });
+        
+        if (valores.length === 6 && numerosUnicos.size === 6 && todosValidos) {
+          ocultarAdvertencia();
+          mostrarAdvertencia('✅ ¡Combinación completa y válida! Puedes evaluarla', 'success');
+        } else if (valores.length > 0) {
+          const faltan = 6 - valores.length;
+          if (faltan > 0 && numerosUnicos.size === valores.length && todosValidos) {
+            mostrarAdvertencia(`📝 Te faltan ${faltan} números más para completar`, 'info');
+          }
+        } else {
+          ocultarAdvertencia();
+        }
+      }
+      
+      function moverAlSiguienteInput(inputActual) {
+        const index = parseInt(inputActual.dataset.index);
+        if (index < 5) {
+          const siguienteInput = document.querySelector(`input[data-index="${index + 1}"]`);
+          if (siguienteInput) {
+            siguienteInput.focus();
+          }
+        }
+      }
+      
+      // Configurar validación en tiempo real para cada input
+      inputsCombinacion.forEach((input, index) => {
+        // Validación al escribir (input event)
+        input.addEventListener('input', function(e) {
+          const valor = e.target.value;
+          
+          // Solo permitir números
+          if (valor && !/^\d+$/.test(valor)) {
+            e.target.value = valor.replace(/\D/g, '');
+            return;
+          }
+          
+          if (valor) {
+            if (validarNumero(e.target, valor)) {
+              // Auto-avanzar al siguiente campo si el número es válido
+              if (valor.length >= 1) {
+                moverAlSiguienteInput(e.target);
+              }
+            }
+          } else {
+            // Campo vacío - resetear estilo
+            e.target.style.borderColor = '';
+            e.target.style.backgroundColor = '';
+            verificarCombinacionCompleta();
+          }
+        });
+        
+        // Validación al perder el foco (blur event)
+        input.addEventListener('blur', function(e) {
+          const valor = e.target.value;
+          if (valor) {
+            validarNumero(e.target, valor);
+          }
+        });
+        
+        // Prevenir pegar contenido no numérico
+        input.addEventListener('paste', function(e) {
+          e.preventDefault();
+          const paste = (e.clipboardData || window.clipboardData).getData('text');
+          const numeroLimpio = paste.replace(/\D/g, '');
+          if (numeroLimpio && numeroLimpio.length <= 2) {
+            e.target.value = numeroLimpio;
+            validarNumero(e.target, numeroLimpio);
+          }
+        });
+        
+        // Mejorar navegación con teclado
+        input.addEventListener('keydown', function(e) {
+          // Backspace en campo vacío - ir al anterior
+          if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            const anteriorInput = document.querySelector(`input[data-index="${index - 1}"]`);
+            if (anteriorInput) {
+              anteriorInput.focus();
+            }
+          }
+          
+          // Flechas para navegar
+          if (e.key === 'ArrowRight' && index < 5) {
+            const siguienteInput = document.querySelector(`input[data-index="${index + 1}"]`);
+            if (siguienteInput) siguienteInput.focus();
+            e.preventDefault();
+          } else if (e.key === 'ArrowLeft' && index > 0) {
+            const anteriorInput = document.querySelector(`input[data-index="${index - 1}"]`);
+            if (anteriorInput) anteriorInput.focus();
+            e.preventDefault();
+          }
+        });
+      });
+      
+      console.log('✅ Sistema de validación en tiempo real configurado');
       
       // Funciones de prueba globales
       window.testEvaluarNumero = function() {
