@@ -505,24 +505,30 @@
               });
               
               let htmlResultado = `
-                <div class="bg-white bg-opacity-90 rounded-xl p-6 shadow-lg">
-                  <h3 class="text-xl font-bold text-center mb-6 text-gray-800">
+                <div class="bg-white bg-opacity-95 rounded-2xl p-8 shadow-2xl border border-gray-200">
+                  <h3 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-purple-800 to-blue-800 bg-clip-text text-transparent">
                     🎯 Análisis Estadístico de tu Combinación
                   </h3>
-                  <div class="text-sm text-center text-gray-600 mb-6">
-                    Basado en los últimos 30 meses de datos históricos
+                  <div class="text-center text-gray-600 mb-8 text-lg">
+                    📊 Basado en los últimos 30 meses de datos históricos
                   </div>
                   
-                  <!-- Visualización de la combinación -->
-                  <div class="mb-6">
-                    <h4 class="text-center font-bold text-gray-800 mb-3">🎲 Tu Combinación:</h4>
-                    <div class="grid grid-cols-6 gap-2 max-w-md mx-auto">
-                      ${numeros.map(num => {
-                        const analisis = analisisIndividual.find(a => a.numero === num);
-                        const clasificacion = analisis ? analisis.clasificacion : { bgColor: 'bg-gray-100', color: 'text-gray-600' };
+                  <!-- Visualización mejorada de la combinación -->
+                  <div class="mb-10">
+                    <h4 class="text-center font-bold text-2xl text-gray-800 mb-6 flex items-center justify-center gap-3">
+                      <span class="text-3xl">🎲</span>
+                      <span>Tu Combinación de la Suerte</span>
+                    </h4>
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-4 max-w-2xl mx-auto">
+                      ${numeros.map((num, idx) => {
+                        const colores = ['purple', 'blue', 'green', 'orange', 'pink', 'indigo'];
+                        const color = colores[idx % colores.length];
                         return `
-                          <div class="text-center p-3 bg-purple-100 rounded-lg border-2 border-purple-300 shadow-md">
-                            <div class="text-xl font-bold text-purple-800">${num}</div>
+                          <div class="text-center">
+                            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-${color}-500 to-${color}-600 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                              ${num}
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2 font-medium">Número ${idx + 1}</div>
                           </div>
                         `;
                       }).join('')}
@@ -530,7 +536,7 @@
                   </div>
                   
                   <!-- Análisis SEPARADO por cada sorteo -->
-                  <div class="space-y-6">
+                  <div class="space-y-8">
               `;
               
               // Análisis individual por cada sorteo
@@ -570,20 +576,26 @@
                 
                 htmlResultado += `
                   <div class="bg-${colorBase}-50 rounded-xl p-5 border-2 border-${colorBase}-200 shadow-lg">
-                    <div class="text-center mb-4">
-                      <h4 class="text-2xl font-bold text-${colorBase}-800 mb-2">
-                        ${icono} ${nombre}
+                    <div class="text-center mb-6">
+                      <h4 class="text-3xl font-bold text-${colorBase}-900 mb-3 flex items-center justify-center gap-3">
+                        <span class="text-4xl">${icono}</span>
+                        <span>${nombre}</span>
                       </h4>
-                      <div class="text-lg font-semibold text-${colorBase}-700">
-                        Promedio de tu combinación: 
-                        <span class="text-2xl ${clasificacionSorteo.color}">${promedioSorteo.toFixed(2)}%</span>
-                      </div>
-                      <div class="text-sm ${clasificacionSorteo.color} font-medium">
-                        ${clasificacionSorteo.categoria}
+                      <div class="bg-gradient-to-r from-${colorBase}-100 to-white rounded-lg p-4 border border-${colorBase}-300">
+                        <div class="text-sm font-medium text-${colorBase}-800 mb-2">
+                          📊 Promedio de tu combinación
+                        </div>
+                        <div class="text-3xl font-bold ${clasificacionSorteo.color} mb-2">
+                          ${promedioSorteo.toFixed(2)}%
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold ${clasificacionSorteo.color} bg-white shadow-sm border">
+                          <span>${clasificacionSorteo.emoji}</span>
+                          <span>${clasificacionSorteo.categoria}</span>
+                        </div>
                       </div>
                     </div>
                     
-                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 `;
                 
                 numerosSorteo.forEach(numData => {
@@ -592,22 +604,43 @@
                   const clasificacion = numData.clasificacion;
                   
                   htmlResultado += `
-                    <div class="text-center p-3 bg-white rounded-lg border-2 border-${colorBase}-300 shadow-md">
-                      <div class="text-lg font-bold text-gray-800 mb-2">${numData.numero}</div>
-                      <div class="text-xs text-gray-500 mb-1">ÍNDICE:</div>
-                      <div class="text-sm font-semibold ${clasificacion.color} mb-1">${porcentaje.toFixed(1)}%</div>
-                      <div class="text-xs text-gray-500 mb-1">APARICIONES:</div>
-                      <div class="text-xs text-gray-600 mb-1">${frecuencia} veces</div>
-                      <div class="text-xs text-gray-500 mb-1">POTENCIAL:</div>
-                      <div class="text-xs ${clasificacion.color} font-medium">${clasificacion.categoria}</div>
+                    <div class="bg-gradient-to-br from-white to-${colorBase}-50 rounded-xl p-4 border-2 border-${colorBase}-200 shadow-md hover:shadow-lg transition-all duration-300">
+                      <div class="text-center">
+                        <div class="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-${colorBase}-500 to-${colorBase}-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                          ${numData.numero}
+                        </div>
+                        
+                        <div class="space-y-2">
+                          <div class="bg-white rounded-lg p-2 border border-${colorBase}-200">
+                            <div class="text-xs font-medium text-${colorBase}-700 mb-1">🎯 ÍNDICE</div>
+                            <div class="text-lg font-bold ${clasificacion.color}">${porcentaje.toFixed(1)}%</div>
+                          </div>
+                          
+                          <div class="bg-white rounded-lg p-2 border border-${colorBase}-200">
+                            <div class="text-xs font-medium text-${colorBase}-700 mb-1">📈 APARICIONES</div>
+                            <div class="text-sm font-semibold text-gray-700">${frecuencia} veces</div>
+                          </div>
+                          
+                          <div class="bg-gradient-to-r from-${colorBase}-100 to-white rounded-lg p-2 border border-${colorBase}-200">
+                            <div class="text-xs font-medium text-${colorBase}-700 mb-1">⭐ POTENCIAL</div>
+                            <div class="text-xs font-bold ${clasificacion.color} flex items-center justify-center gap-1">
+                              <span>${clasificacion.emoji}</span>
+                              <span class="break-words">${clasificacion.categoria}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   `;
                 });
                 
                 htmlResultado += `
                     </div>
-                    <div class="mt-3 text-center text-xs text-${colorBase}-600">
-                      Total apariciones en ${nombre}: ${totalFrecuencia} veces
+                    <div class="mt-6 text-center">
+                      <div class="inline-flex items-center gap-2 bg-gradient-to-r from-${colorBase}-100 to-white px-4 py-2 rounded-full border border-${colorBase}-300 text-sm font-medium text-${colorBase}-800 shadow-sm">
+                        <span class="text-lg">${icono}</span>
+                        <span>Total en ${nombre}: <strong class="text-${colorBase}-900">${totalFrecuencia} apariciones</strong></span>
+                      </div>
                     </div>
                   </div>
                 `;
@@ -638,8 +671,14 @@
               htmlResultado += `
                   </div>
                   
-                  <div class="mt-4 text-xs text-gray-500 text-center">
-                    Análisis completado: ${new Date().toLocaleString()} | Combinación: [${numeros.join(' - ')}]
+                  <div class="mt-8 text-center">
+                    <div class="inline-flex items-center gap-3 bg-gradient-to-r from-gray-100 to-gray-200 px-6 py-3 rounded-full border border-gray-300 text-sm text-gray-700 shadow-sm">
+                      <span class="text-lg">✅</span>
+                      <span class="font-medium">Análisis completado: <strong class="text-gray-900">${new Date().toLocaleString()}</strong></span>
+                    </div>
+                    <div class="mt-3 text-gray-600 text-sm">
+                      Combinación analizada: <span class="font-mono bg-gray-100 px-3 py-1 rounded-full border text-gray-800">[${numeros.join(' • ')}]</span>
+                    </div>
                   </div>
                 </div>
               `;
@@ -924,7 +963,7 @@
       
       // Configurar validación en tiempo real para cada input
       inputsCombinacion.forEach((input, index) => {
-        // Validación al escribir (input event) - MÁS ESTRICTA
+        // Validación al escribir (input event) - SIN AUTO-AVANCE
         input.addEventListener('input', function(e) {
           const valor = e.target.value;
           
@@ -945,24 +984,17 @@
           }
           
           if (valor && valor.length >= 1) {
-            // Validar inmediatamente al escribir - CON LOGS
+            // Validar inmediatamente al escribir - SIN AUTO-AVANCE
             console.log(`🔍 Validando número: ${valor}`);
             const esValido = validarNumero(e.target, valor, true);
             
             console.log(`📊 Resultado validación: ${esValido ? 'VÁLIDO' : 'INVÁLIDO'}`);
             
-            // Solo auto-avanzar si el número es completamente válido
-            if (esValido && valor.length >= 1) {
-              // Pequeño delay para que el usuario vea la validación
-              console.log(`⏭️ Intentando avanzar...`);
-              setTimeout(() => {
-                const pudoAvanzar = moverAlSiguienteInput(e.target);
-                console.log(`📍 Resultado avance: ${pudoAvanzar ? 'AVANZÓ' : 'NO AVANZÓ'}`);
-              }, 150);
-            } else {
-              // Si no es válido, mantener el foco y dar feedback
+            // NO AUTO-AVANZAR - Solo validar
+            if (!esValido) {
               console.log(`❌ Número ${valor} no válido en campo ${index + 1} - MANTENIENDO FOCO`);
-              // NO mover el foco, mantenerlo en el campo actual
+            } else {
+              console.log(`✅ Número ${valor} válido en campo ${index + 1}`);
             }
           } else {
             // Campo vacío - resetear estilo
@@ -995,42 +1027,61 @@
           }
         });
         
-        // Prevenir pegar contenido no numérico
+        // Prevenir pegar contenido no numérico - SIN AUTO-AVANCE
         input.addEventListener('paste', function(e) {
           e.preventDefault();
           const paste = (e.clipboardData || window.clipboardData).getData('text');
           const numeroLimpio = paste.replace(/\D/g, '');
           if (numeroLimpio && numeroLimpio.length <= 2) {
             e.target.value = numeroLimpio;
-            // Validar inmediatamente al pegar
-            const esValido = validarNumero(e.target, numeroLimpio, true);
-            if (esValido) {
-              // Solo avanzar si es válido
-              setTimeout(() => {
-                moverAlSiguienteInput(e.target);
-              }, 150);
-            }
+            // Validar al pegar PERO NO avanzar automáticamente
+            validarNumero(e.target, numeroLimpio, true);
+            console.log(`📋 PASTE: Número ${numeroLimpio} pegado en campo ${index + 1} - SIN auto-avance`);
           }
         });
         
-        // Mejorar navegación con teclado
+        // Mejorar navegación con teclado - SOLO TAB Y FLECHAS
         input.addEventListener('keydown', function(e) {
+          // Tab - avanzar al siguiente campo
+          if (e.key === 'Tab' && !e.shiftKey && index < 5) {
+            const siguienteInput = document.querySelector(`input[data-index="${index + 1}"]`);
+            if (siguienteInput) {
+              e.preventDefault();
+              siguienteInput.focus();
+              console.log(`🔄 TAB: Moviendo del campo ${index + 1} al campo ${index + 2}`);
+            }
+          }
+          // Shift + Tab - retroceder al campo anterior
+          else if (e.key === 'Tab' && e.shiftKey && index > 0) {
+            const anteriorInput = document.querySelector(`input[data-index="${index - 1}"]`);
+            if (anteriorInput) {
+              e.preventDefault();
+              anteriorInput.focus();
+              console.log(`🔄 SHIFT+TAB: Moviendo del campo ${index + 1} al campo ${index}`);
+            }
+          }
           // Backspace en campo vacío - ir al anterior
-          if (e.key === 'Backspace' && !e.target.value && index > 0) {
+          else if (e.key === 'Backspace' && !e.target.value && index > 0) {
             const anteriorInput = document.querySelector(`input[data-index="${index - 1}"]`);
             if (anteriorInput) {
               anteriorInput.focus();
+              console.log(`⬅️ BACKSPACE: Moviendo del campo ${index + 1} al campo ${index}`);
             }
           }
-          
           // Flechas para navegar
-          if (e.key === 'ArrowRight' && index < 5) {
+          else if (e.key === 'ArrowRight' && index < 5) {
             const siguienteInput = document.querySelector(`input[data-index="${index + 1}"]`);
-            if (siguienteInput) siguienteInput.focus();
+            if (siguienteInput) {
+              siguienteInput.focus();
+              console.log(`➡️ FLECHA: Moviendo del campo ${index + 1} al campo ${index + 2}`);
+            }
             e.preventDefault();
           } else if (e.key === 'ArrowLeft' && index > 0) {
             const anteriorInput = document.querySelector(`input[data-index="${index - 1}"]`);
-            if (anteriorInput) anteriorInput.focus();
+            if (anteriorInput) {
+              anteriorInput.focus();
+              console.log(`⬅️ FLECHA: Moviendo del campo ${index + 1} al campo ${index}`);
+            }
             e.preventDefault();
           }
         });
@@ -1080,6 +1131,7 @@
       console.log('   - debugCombinacion() - Muestra estado actual de todos los campos');
       console.log('   - limpiarCombinacion() - Limpia todos los campos');
       console.log('🔍 Sistema de validación estricta activado - NO permite duplicados ni números > 56');
+      console.log('⌨️ Navegación manual activada - Usa TAB, FLECHAS o CLIC para cambiar de campo (SIN auto-avance)');
     });
   </script>
 </body>

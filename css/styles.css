@@ -491,3 +491,115 @@ input[type="number"] {
     padding: 12px;
   }
 }
+
+/* ========================================
+   ESTILOS PARA RESULTADOS DE COMBINACIÓN
+   ======================================== */
+
+/* Contenedor principal de resultados */
+#resultado-combinacion {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Asegurar que textos no se salgan de sus contenedores */
+#resultado-combinacion * {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Títulos de sorteos responsivos */
+#resultado-combinacion h4 {
+  line-height: 1.3;
+  word-break: keep-all;
+}
+
+/* Números en círculos - responsivos */
+#resultado-combinacion .w-16 {
+  min-width: 4rem;
+  min-height: 4rem;
+}
+
+@media (max-width: 640px) {
+  #resultado-combinacion .w-16 {
+    width: 3.5rem;
+    height: 3.5rem;
+    min-width: 3.5rem;
+    min-height: 3.5rem;
+    font-size: 1.25rem;
+  }
+  
+  #resultado-combinacion .w-12 {
+    width: 3rem;
+    height: 3rem;
+    min-width: 3rem;
+    min-height: 3rem;
+    font-size: 1rem;
+  }
+}
+
+/* Grid responsivo para números */
+#resultado-combinacion .grid {
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  #resultado-combinacion .grid {
+    gap: 0.5rem;
+  }
+  
+  /* Forzar grid de 2 columnas en móviles para números de análisis */
+  #resultado-combinacion .grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Mantener 3 columnas para la combinación principal */
+  #resultado-combinacion .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Textos pequeños siempre legibles */
+#resultado-combinacion .text-xs {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+#resultado-combinacion .text-sm {
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+/* Contenedores de datos de números */
+#resultado-combinacion .space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+/* Badges y etiquetas responsivas */
+#resultado-combinacion .inline-flex {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Gradientes mejorados para mejor contraste */
+.bg-gradient-to-br {
+  background-attachment: local;
+}
+
+/* Sombras suaves para profundidad */
+#resultado-combinacion .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Animaciones suaves */
+#resultado-combinacion .hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+#resultado-combinacion .transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
