@@ -1,0 +1,233 @@
+/* MEJORAS DE CONTRASTE Y ESPACIADO PARA COMBINACION.HTML */
+
+/* Forzar contraste mínimo para todos los elementos */
+.bg-white.bg-opacity-50,
+.bg-white.bg-opacity-90,
+.bg-white.bg-opacity-95 {
+  background-color: rgba(55, 65, 81, 0.95) !important; /* bg-gray-700 */
+  color: white !important;
+}
+
+/* Asegurar que el texto sea visible */
+.text-gray-800,
+.text-gray-700,
+.text-black {
+  color: white !important;
+}
+
+/* Mejorar contraste en elementos de resultado */
+.bg-gradient-to-br.from-blue-50,
+.bg-gradient-to-br.from-green-50,
+.bg-gradient-to-br.from-purple-50 {
+  background: rgba(55, 65, 81, 0.9) !important;
+  border: 1px solid rgba(156, 163, 175, 0.5) !important;
+}
+
+/* Elementos específicos de resultados */
+.bg-blue-50,
+.bg-green-50,
+.bg-purple-50,
+.bg-yellow-50,
+.bg-red-50 {
+  background-color: rgba(55, 65, 81, 0.8) !important;
+  color: white !important;
+}
+
+.bg-blue-100,
+.bg-green-100,
+.bg-purple-100,
+.bg-yellow-100,
+.bg-red-100 {
+  background-color: rgba(75, 85, 99, 0.9) !important;
+  color: white !important;
+}
+
+/* Texto de colores claros */
+.text-blue-600,
+.text-green-600,
+.text-purple-600,
+.text-yellow-600,
+.text-red-600 {
+  color: rgb(252, 211, 77) !important; /* yellow-300 */
+}
+
+.text-blue-800,
+.text-green-800,
+.text-purple-800,
+.text-yellow-800,
+.text-red-800 {
+  color: white !important;
+}
+
+/* Bordes más visibles */
+.border-blue-200,
+.border-green-200,
+.border-purple-200,
+.border-yellow-200,
+.border-red-200,
+.border-blue-300,
+.border-green-300,
+.border-purple-300,
+.border-yellow-300,
+.border-red-300 {
+  border-color: rgba(156, 163, 175, 0.6) !important; /* gray-400 */
+}
+
+/* Optimización de espacios para móvil */
+@media (max-width: 768px) {
+  .p-6 {
+    padding: 1rem !important;
+  }
+  
+  .p-4 {
+    padding: 0.75rem !important;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .mb-6 {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .mt-8 {
+    margin-top: 1rem !important;
+  }
+  
+  .mt-6 {
+    margin-top: 0.75rem !important;
+  }
+  
+  .mt-4 {
+    margin-top: 0.5rem !important;
+  }
+}
+
+/* Optimización de espacios para desktop */
+@media (min-width: 769px) {
+  .max-w-6xl {
+    max-width: 90% !important;
+  }
+  
+  .p-6 {
+    padding: 1.25rem !important;
+  }
+  
+  .p-4 {
+    padding: 1rem !important;
+  }
+}
+
+/* Mejoras específicas para inputs */
+.combo-input:focus,
+#numero-individual:focus {
+  border-color: rgb(147, 197, 253) !important; /* blue-300 */
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.1) !important;
+}
+
+/* Estados de validación más visibles */
+.combo-input.invalid {
+  border-color: rgb(239, 68, 68) !important; /* red-500 */
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.combo-input.valid {
+  border-color: rgb(34, 197, 94) !important; /* green-500 */
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+.combo-input.duplicate {
+  border-color: rgb(245, 158, 11) !important; /* amber-500 */
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Botones más visibles */
+button {
+  font-weight: 600 !important;
+  min-height: 44px !important; /* Mínimo para accesibilidad táctil */
+}
+
+/* Tooltips y ayudas más legibles */
+.text-xs {
+  font-size: 0.8rem !important;
+  line-height: 1.2 !important;
+}
+
+/* Asegurar que los gradientes no interfieran con la legibilidad */
+.bg-gradient-to-r,
+.bg-gradient-to-br {
+  background-image: none !important;
+  background-color: rgba(55, 65, 81, 0.95) !important;
+}
+
+/* Forzar visibilidad en elementos problemáticos específicos */
+[class*="text-gray-"] {
+  color: rgb(229, 231, 235) !important; /* gray-200 */
+}
+
+[class*="bg-white"] {
+  background-color: rgba(55, 65, 81, 0.95) !important;
+  color: white !important;
+}
+
+/* Animaciones más suaves para mejorar UX */
+* {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Espaciado compacto pero legible */
+.space-y-1 > * + * {
+  margin-top: 0.25rem !important;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem !important;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+/* Mejorar separación visual */
+.rounded-lg {
+  border-radius: 0.75rem !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Forzar contraste en elementos anidados */
+.bg-white * {
+  color: white !important;
+}
+
+/* Contenedores principales más compactos */
+.min-h-screen {
+  min-height: auto !important;
+}
+
+/* Reducir espacio vertical excesivo */
+body {
+  line-height: 1.4 !important;
+}
+
+/* Mejoras para la experiencia en dispositivos pequeños */
+@media (max-width: 640px) {
+  .text-3xl {
+    font-size: 1.5rem !important;
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+  
+  .text-xl {
+    font-size: 1.125rem !important;
+  }
+}
