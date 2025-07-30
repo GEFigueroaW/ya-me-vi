@@ -144,8 +144,6 @@
       aspect-ratio: 1 / 1 !important;
       object-fit: cover !important;
       object-position: center !important;
-      width: auto !important;
-      height: auto !important;
       display: block !important;
     }
     
@@ -166,6 +164,51 @@
       min-height: 96px !important;
       max-width: 96px !important;
       max-height: 96px !important;
+    }
+    
+    .logo-footer {
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+      max-width: 40px !important;
+      max-height: 40px !important;
+    }
+    
+    /* Forzar que las imágenes de logos sean redondas sin importar las clases de Tailwind */
+    img.logo-redondo {
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      flex-shrink: 0 !important;
+    }
+    
+    /* Selectores súper específicos para sobrescribir Tailwind */
+    nav img.logo-redondo.logo-nav,
+    .flex-shrink-0 img.logo-redondo.logo-nav {
+      width: 32px !important;
+      height: 32px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+    }
+    
+    .floating-animation img.logo-redondo.logo-hero {
+      width: 96px !important;
+      height: 96px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+    }
+    
+    footer img.logo-redondo.logo-footer {
+      width: 40px !important;
+      height: 40px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+    }
+    
+    /* Regla final para asegurar logos redondos en cualquier contexto */
+    img[src*="apple-touch-icon"] {
+      border-radius: 50% !important;
+      object-fit: cover !important;
     }
   </style>
 </head>
@@ -765,7 +808,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
         <div class="flex items-center justify-center mb-6">
-          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="logo-redondo rounded-full mr-3" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px;">
+          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="logo-redondo logo-footer rounded-full mr-3">
           <h3 class="text-2xl font-bold text-white">YA ME VI</h3>
         </div>
         
