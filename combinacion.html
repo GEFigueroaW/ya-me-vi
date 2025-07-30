@@ -523,52 +523,96 @@
                   
                   <!-- Visualización de la combinación -->
                   <div class="mb-6">
-                    <h4 class="text-center font-bold text-gray-800 mb-3">Tu Combinación:</h4>
+                    <h4 class="text-center font-bold text-gray-800 mb-3">🎲 Tu Combinación:</h4>
                     <div class="grid grid-cols-6 gap-2 max-w-md mx-auto">
                       ${numeros.map(num => {
                         const analisis = analisisIndividual.find(a => a.numero === num);
                         const clasificacion = analisis ? analisis.clasificacion : { bgColor: 'bg-gray-100', color: 'text-gray-600' };
                         return `
-                          <div class="text-center p-3 ${clasificacion.bgColor} rounded-lg border-2 border-gray-300">
-                            <div class="text-lg font-bold ${clasificacion.color}">${num}</div>
+                          <div class="text-center p-3 bg-purple-100 rounded-lg border-2 border-purple-300 shadow-md">
+                            <div class="text-xl font-bold text-purple-800">${num}</div>
                           </div>
                         `;
                       }).join('')}
                     </div>
                   </div>
                   
-                  <!-- Análisis por sorteo -->
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <!-- Análisis SEPARADO por cada sorteo -->
+                  <div class="space-y-6">
               `;
               
-              // Análisis por cada sorteo
-              ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
-                const iconos = { melate: '🎲', revancha: '🍀', revanchita: '🌈' };
-                const colores = { melate: 'blue', revancha: 'purple', revanchita: 'green' };
-                const color = colores[sorteo];
+              // Análisis individual por cada sorteo
+              const sorteos = [
+                { key: 'melate', nombre: 'Melate', icono: '🎲', colorBase: 'blue' },
+                { key: 'revancha', nombre: 'Revancha', icono: '🍀', colorBase: 'green' },
+                { key: 'revanchita', nombre: 'Revanchita', icono: '🌈', colorBase: 'purple' }
+              ];
+              
+              sorteos.forEach(sorteoInfo => {
+                const { key, nombre, icono, colorBase } = sorteoInfo;
+                
+                // Calcular estadísticas del sorteo
+                let totalFrecuencia = 0;
+                let promedioSorteo = 0;
+                let numerosValidos = 0;
+                
+                const numerosSorteo = analisisIndividual.map(analisis => {
+                  const datos = analisis.porSorteo[key];
+                  if (datos && datos.porcentaje !== undefined) {
+                    totalFrecuencia += datos.frecuencia;
+                    promedioSorteo += datos.porcentaje;
+                    numerosValidos++;
+                  }
+                  return {
+                    numero: analisis.numero,
+                    ...datos,
+                    clasificacion: window.clasificarProbabilidad(datos.porcentaje)
+                  };
+                });
+                
+                if (numerosValidos > 0) {
+                  promedioSorteo = promedioSorteo / numerosValidos;
+                }
+                
+                const clasificacionSorteo = window.clasificarProbabilidad(promedioSorteo);
                 
                 htmlResultado += `
-                  <div class="bg-${color}-50 rounded-lg p-4">
-                    <h4 class="text-center font-bold text-${color}-800 mb-4">
-                      ${iconos[sorteo]} ${sorteo.charAt(0).toUpperCase() + sorteo.slice(1)}
-                    </h4>
-                    <div class="grid grid-cols-2 gap-2">
+                  <div class="bg-${colorBase}-50 rounded-xl p-5 border-2 border-${colorBase}-200 shadow-lg">
+                    <div class="text-center mb-4">
+                      <h4 class="text-2xl font-bold text-${colorBase}-800 mb-2">
+                        ${icono} ${nombre}
+                      </h4>
+                      <div class="text-lg font-semibold text-${colorBase}-700">
+                        Promedio de tu combinación: 
+                        <span class="text-2xl ${clasificacionSorteo.color}">${promedioSorteo.toFixed(2)}%</span>
+                      </div>
+                      <div class="text-sm ${clasificacionSorteo.color} font-medium">
+                        ${clasificacionSorteo.categoria}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
                 `;
                 
-                analisisIndividual.forEach(analisis => {
-                  const datos = analisis.porSorteo[sorteo];
-                  const clasificacion = window.clasificarProbabilidad(datos.porcentaje);
+                numerosSorteo.forEach(numData => {
+                  const porcentaje = numData.porcentaje || 0;
+                  const frecuencia = numData.frecuencia || 0;
+                  const clasificacion = numData.clasificacion;
                   
                   htmlResultado += `
-                    <div class="text-center p-2 bg-${color}-100 rounded border border-${color}-200">
-                      <div class="font-bold text-${color}-800">${analisis.numero}</div>
-                      <div class="text-xs text-${color}-600">${datos.porcentaje.toFixed(1)}%</div>
-                      <div class="text-xs text-${color}-500">${datos.frecuencia} veces</div>
+                    <div class="text-center p-3 bg-white rounded-lg border-2 border-${colorBase}-300 shadow-md">
+                      <div class="text-lg font-bold text-gray-800 mb-1">${numData.numero}</div>
+                      <div class="text-sm font-semibold ${clasificacion.color}">${porcentaje.toFixed(1)}%</div>
+                      <div class="text-xs text-gray-600">${frecuencia} veces</div>
+                      <div class="text-xs ${clasificacion.color} font-medium mt-1">${clasificacion.categoria}</div>
                     </div>
                   `;
                 });
                 
                 htmlResultado += `
+                    </div>
+                    <div class="mt-3 text-center text-xs text-${colorBase}-600">
+                      Total apariciones en ${nombre}: ${totalFrecuencia} veces
                     </div>
                   </div>
                 `;
@@ -578,32 +622,87 @@
               const promedioGeneral = analisisIndividual.reduce((sum, a) => sum + a.porcentajeTotal, 0) / analisisIndividual.length;
               const clasificacionGeneral = window.clasificarProbabilidad(promedioGeneral);
               
+              // Calcular promedios por sorteo
+              const promediosPorSorteo = {};
+              sorteos.forEach(sorteoInfo => {
+                const key = sorteoInfo.key;
+                let suma = 0;
+                let contador = 0;
+                
+                analisisIndividual.forEach(analisis => {
+                  const datos = analisis.porSorteo[key];
+                  if (datos && datos.porcentaje !== undefined) {
+                    suma += datos.porcentaje;
+                    contador++;
+                  }
+                });
+                
+                promediosPorSorteo[key] = contador > 0 ? suma / contador : 0;
+              });
+              
               htmlResultado += `
                   </div>
                   
-                  <!-- Resumen general -->
-                  <div class="text-center p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg border-2 border-yellow-300">
-                    <h4 class="font-bold text-lg text-gray-800 mb-2">📊 Resumen de tu Combinación</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div class="font-semibold text-gray-700">Promedio General:</div>
-                        <div class="text-xl font-bold ${clasificacionGeneral.color}">${promedioGeneral.toFixed(2)}%</div>
-                        <div class="text-xs ${clasificacionGeneral.color}">${clasificacionGeneral.categoria}</div>
+                  <!-- Resumen INTUITIVO por sorteo -->
+                  <div class="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-6 border-2 border-yellow-300 shadow-lg">
+                    <h4 class="font-bold text-2xl text-center text-gray-800 mb-4">📊 Resumen de tu Combinación</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div class="text-center p-4 bg-white rounded-lg border-2 border-blue-300 shadow-md">
+                        <div class="text-2xl mb-2">🎲</div>
+                        <div class="font-bold text-blue-800">MELATE</div>
+                        <div class="text-2xl font-bold text-blue-600">${promediosPorSorteo.melate.toFixed(1)}%</div>
+                        <div class="text-sm text-blue-700 font-medium">
+                          ${window.clasificarProbabilidad(promediosPorSorteo.melate).categoria}
+                        </div>
                       </div>
-                      <div>
-                        <div class="font-semibold text-gray-700">Números Analizados:</div>
-                        <div class="text-xl font-bold text-gray-800">${numeros.length}/6</div>
-                        <div class="text-xs text-gray-600">Combinación completa</div>
+                      
+                      <div class="text-center p-4 bg-white rounded-lg border-2 border-green-300 shadow-md">
+                        <div class="text-2xl mb-2">🍀</div>
+                        <div class="font-bold text-green-800">REVANCHA</div>
+                        <div class="text-2xl font-bold text-green-600">${promediosPorSorteo.revancha.toFixed(1)}%</div>
+                        <div class="text-sm text-green-700 font-medium">
+                          ${window.clasificarProbabilidad(promediosPorSorteo.revancha).categoria}
+                        </div>
+                      </div>
+                      
+                      <div class="text-center p-4 bg-white rounded-lg border-2 border-purple-300 shadow-md">
+                        <div class="text-2xl mb-2">🌈</div>
+                        <div class="font-bold text-purple-800">REVANCHITA</div>
+                        <div class="text-2xl font-bold text-purple-600">${promediosPorSorteo.revanchita.toFixed(1)}%</div>
+                        <div class="text-sm text-purple-700 font-medium">
+                          ${window.clasificarProbabilidad(promediosPorSorteo.revanchita).categoria}
+                        </div>
                       </div>
                     </div>
-                    <div class="mt-3 text-xs text-gray-600">
-                      Este análisis se basa en la frecuencia histórica de aparición de cada número en los últimos 30 meses
-                      de sorteos de Melate, Revancha y Revanchita.
+                    
+                    <!-- Interpretación intuitiva -->
+                    <div class="bg-white rounded-lg p-4 border-2 border-gray-300">
+                      <h5 class="font-bold text-lg text-gray-800 mb-3 text-center">💡 ¿Qué significa esto?</h5>
+                      <div class="text-sm text-gray-700 space-y-2">
+                        <p><strong>🎯 Los porcentajes más altos</strong> indican que tus números han salido más frecuentemente en ese sorteo específico.</p>
+                        <p><strong>📈 Cada sorteo es independiente</strong>, así que tu combinación puede tener diferente "suerte histórica" en cada uno.</p>
+                        <p><strong>🔥 Recomendación</strong>: Considera jugar tu combinación en el sorteo donde tenga el porcentaje más alto.</p>
+                      </div>
+                      
+                      <div class="mt-4 p-3 bg-gray-100 rounded-lg">
+                        <div class="text-center">
+                          <div class="font-bold text-gray-800">🏆 Mejor sorteo para tu combinación:</div>
+                          <div class="text-xl font-bold mt-1">
+                            ${promediosPorSorteo.melate >= promediosPorSorteo.revancha && promediosPorSorteo.melate >= promediosPorSorteo.revanchita ? 
+                              '🎲 MELATE (' + promediosPorSorteo.melate.toFixed(1) + '%)' :
+                              promediosPorSorteo.revancha >= promediosPorSorteo.revanchita ? 
+                              '🍀 REVANCHA (' + promediosPorSorteo.revancha.toFixed(1) + '%)' :
+                              '🌈 REVANCHITA (' + promediosPorSorteo.revanchita.toFixed(1) + '%)'
+                            }
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
-                  <div class="mt-3 text-xs text-gray-500 text-center">
-                    Análisis completado: ${new Date().toLocaleString()}
+                  <div class="mt-4 text-xs text-gray-500 text-center">
+                    Análisis completado: ${new Date().toLocaleString()} | Combinación: [${numeros.join(' - ')}]
                   </div>
                 </div>
               `;
