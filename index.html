@@ -141,6 +141,13 @@
     
     /* LOGOS REDONDOS - ESTILOS PRIORITARIOS */
     /* Forzar TODOS los logos a ser redondos con máxima prioridad */
+    img[src*="logo-512-adaptativo-circular"] {
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      aspect-ratio: 1 / 1 !important;
+      display: block !important;
+    }
+    
     img[src*="apple-touch-icon"] {
       border-radius: 50% !important;
       object-fit: cover !important;
@@ -186,6 +193,9 @@
     }
     
     /* CSS ultra específico para forzar estilos redondos - SOBRESCRIBE TAILWIND */
+    body nav img[src*="logo-512-adaptativo-circular"],
+    body .floating-animation img[src*="logo-512-adaptativo-circular"],
+    body footer img[src*="logo-512-adaptativo-circular"],
     body nav img[src*="apple-touch-icon"],
     body .floating-animation img[src*="apple-touch-icon"],
     body footer img[src*="apple-touch-icon"] {
@@ -237,7 +247,7 @@
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <img class="logo-redondo logo-nav rounded-full object-cover" src="assets/apple-touch-icon.png" alt="YA ME VI Logo" style="width: 32px !important; height: 32px !important; border-radius: 50% !important; object-fit: cover !important;">
+            <img class="logo-redondo logo-nav rounded-full object-cover" src="assets/logo-512-adaptativo-circular.png" alt="YA ME VI Logo" style="width: 32px !important; height: 32px !important; border-radius: 50% !important; object-fit: cover !important;">
           </div>
           <div class="ml-3">
             <h1 class="text-white text-xl font-bold">YA ME VI</h1>
@@ -289,7 +299,7 @@
         </div>
         
         <div class="floating-animation mb-8">
-          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="logo-redondo logo-hero rounded-full shadow-2xl object-cover mx-auto" style="width: 96px !important; height: 96px !important; border-radius: 50% !important; object-fit: cover !important;">
+          <img src="assets/logo-512-adaptativo-circular.png" alt="YA ME VI Logo" class="logo-redondo logo-hero rounded-full shadow-2xl object-cover mx-auto" style="width: 96px !important; height: 96px !important; border-radius: 50% !important; object-fit: cover !important;">
         </div>
         
         <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 animate__animated animate__fadeInUp">
@@ -824,7 +834,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
         <div class="flex items-center justify-center mb-6">
-          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="logo-redondo logo-footer rounded-full mr-3" style="width: 96px !important; height: 96px !important; border-radius: 50% !important; object-fit: cover !important;">
+          <img src="assets/logo-512-adaptativo-circular.png" alt="YA ME VI Logo" class="logo-redondo logo-footer rounded-full mr-3" style="width: 96px !important; height: 96px !important; border-radius: 50% !important; object-fit: cover !important;">
           <h3 class="text-2xl font-bold text-white">YA ME VI</h3>
         </div>
         
