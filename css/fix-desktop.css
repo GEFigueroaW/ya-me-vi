@@ -1,0 +1,43 @@
+/* Ocultar título redundante */
+h3:has(span[class*="purple-"]) {
+  display: none !important;
+}
+
+/* Fallback para navegadores sin soporte :has() */
+h3 + .space-y-6 {
+  margin-top: 0 !important;
+}
+
+.text-2xl.font-bold.text-center.mb-6.text-gray-800 {
+  display: none !important;
+}
+
+/* Mejorar diseño de escritorio con columnas alineadas */
+@media (min-width: 768px) {
+  /* Header para las columnas */
+  .space-y-2:first-of-type::before {
+    content: '';
+    display: block;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Grid mejorado para escritorio */
+  .space-y-2 > div {
+    display: grid !important;
+    grid-template-columns: 3rem 1fr 4rem 6rem !important;
+    gap: 1rem !important;
+    align-items: center !important;
+  }
+  
+  /* Ocultar layout móvil en escritorio */
+  .space-y-2 > div .md\\:hidden {
+    display: none !important;
+  }
+  
+  /* Mostrar layout escritorio */
+  .space-y-2 > div .hidden.md\\:grid {
+    display: grid !important;
+  }
+}
