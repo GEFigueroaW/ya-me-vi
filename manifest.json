@@ -12,9 +12,9 @@
   "gcm_sender_id": "748876890843",
   "icons": [
     {
-      "src": "assets/apple-touch-icon.png",
-      "sizes": "16x16 32x32",
-      "type": "image/png"
+      "src": "assets/favicon-circle.svg",
+      "sizes": "16x16 32x32 48x48",
+      "type": "image/svg+xml"
     },
     {
       "src": "assets/apple-touch-icon.png",
