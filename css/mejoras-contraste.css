@@ -56,16 +56,20 @@
   color: #111827 !important;
   border: 2px solid #9ca3af !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+  font-weight: bold !important;
 }
 
 .combo-input::placeholder {
   color: #9ca3af !important;
+  font-weight: normal !important;
 }
 
 .combo-input:focus {
   background-color: #ffffff !important;
+  color: #111827 !important;
   border-color: #a855f7 !important;
   box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2) !important;
+  font-weight: bold !important;
 }
 
 /* NUNCA desactivar botones - asegurar que funcionen */
@@ -80,20 +84,42 @@ button {
   opacity: 1 !important;
 }
 
-/* Estados de validación para inputs */
+/* Estados de validación para inputs - MEJORAR CONTRASTE */
 .combo-input.valid {
   border-color: #10b981 !important;
-  background-color: #f0fdf4 !important;
+  background-color: #ffffff !important;  /* Fondo SIEMPRE blanco */
+  color: #065f46 !important;  /* Verde oscuro para mejor contraste */
+  font-weight: bold !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
 }
 
 .combo-input.invalid {
   border-color: #ef4444 !important;
-  background-color: #fef2f2 !important;
+  background-color: #ffffff !important;  /* Fondo SIEMPRE blanco */
+  color: #991b1b !important;  /* Rojo oscuro para mejor contraste */
+  font-weight: bold !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
 }
 
 .combo-input.duplicate {
   border-color: #f59e0b !important;
-  background-color: #fffbeb !important;
+  background-color: #ffffff !important;  /* Fondo SIEMPRE blanco */
+  color: #92400e !important;  /* Amarillo oscuro para mejor contraste */
+  font-weight: bold !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* También aplicar a input de número individual */
+#numero-individual {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  font-weight: bold !important;
+}
+
+#numero-individual:focus {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  font-weight: bold !important;
 }
 
 /* Colores de fondo consistentes */
