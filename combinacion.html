@@ -91,7 +91,7 @@
               <p class="text-center text-gray-200 mb-4">Ingresa tu combinación de 6 números (1-56)</p>
               
               <!-- Mensaje de advertencia dinámico -->
-              <div id="mensaje-advertencia" class="hidden mb-4 p-3 rounded-lg text-center text-white font-semibold animate__animated animate__fadeIn">
+              <div id="mensaje-advertencia" class="hidden mb-4 p-3 rounded-lg text-center font-semibold animate__animated animate__fadeIn">
               </div>
               
               <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-4">
@@ -739,13 +739,13 @@
         
         // Estilos según tipo de mensaje
         const estilos = {
-          error: 'bg-red-500',
-          warning: 'bg-yellow-500',
-          info: 'bg-blue-500',
-          success: 'bg-green-500'
+          error: 'bg-red-500 text-white',
+          warning: 'bg-yellow-400 text-gray-900',
+          info: 'bg-blue-500 text-white',
+          success: 'bg-green-500 text-white'
         };
         
-        mensajeDiv.className = `mb-4 p-3 rounded-lg text-center text-white font-semibold animate__animated animate__fadeIn ${estilos[tipo]}`;
+        mensajeDiv.className = `mb-4 p-3 rounded-lg text-center font-semibold animate__animated animate__fadeIn ${estilos[tipo]}`;
         mensajeDiv.textContent = mensaje;
         mensajeDiv.classList.remove('hidden');
         
