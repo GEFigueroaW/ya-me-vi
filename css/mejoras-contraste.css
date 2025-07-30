@@ -6,27 +6,79 @@
   color: white !important;
 }
 
-/* Los contenedores blancos de resultados deben mantenerse blancos */
+/* Los contenedores blancos de resultados deben mantenerse blancos SIEMPRE */
 .bg-white {
-  background-color: white !important;
+  background-color: #ffffff !important;
   color: #111827 !important; /* gray-900 */
 }
 
-/* Asegurar que el texto en contenedores blancos sea oscuro */
+/* Asegurar colores consistentes en desktop y móvil */
 .bg-white * {
-  color: inherit !important;
+  color: #111827 !important; /* Forzar texto oscuro en contenedores blancos */
 }
 
-.bg-white .text-gray-900,
-.bg-white .text-gray-800,
-.bg-white .text-gray-700,
+.bg-white .text-gray-900 {
+  color: #111827 !important;
+}
+
+.bg-white .text-gray-700 {
+  color: #374151 !important;
+}
+
 .bg-white .text-gray-600 {
-  color: inherit !important;
+  color: #4b5563 !important;
 }
 
-/* Mejorar contraste en elementos específicos cuando están sobre fondo blanco */
 .bg-white .text-blue-600 {
   color: #2563eb !important;
+}
+
+.bg-white .text-purple-800 {
+  color: #6b21a8 !important;
+}
+
+/* Forzar consistencia en bordes */
+.border-gray-300 {
+  border-color: #d1d5db !important;
+}
+
+.border-blue-200 {
+  border-color: #bfdbfe !important;
+}
+
+.border-purple-200 {
+  border-color: #e9d5ff !important;
+}
+
+/* Asegurar que los inputs tengan fondo blanco y sean visibles */
+.combo-input {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border: 2px solid #9ca3af !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.combo-input::placeholder {
+  color: #9ca3af !important;
+}
+
+.combo-input:focus {
+  background-color: #ffffff !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2) !important;
+}
+
+/* Colores de fondo consistentes */
+.bg-blue-50 {
+  background-color: #eff6ff !important;
+}
+
+.bg-purple-50 {
+  background-color: #faf5ff !important;
+}
+
+.bg-purple-100 {
+  background-color: #f3e8ff !important;
 }
 
 /* Optimización de espacios para móvil */
@@ -81,35 +133,46 @@
   .gap-3 {
     gap: 0.5rem !important;
   }
+  
+  /* Reducir espacios verticales en desktop */
+  .mb-4 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
 }
 
-/* Mejoras específicas para inputs - mantener fondo blanco */
+/* Mejoras específicas para inputs - mantener fondo blanco SIEMPRE */
 .combo-input,
 #numero-individual {
-  background-color: white !important;
+  background-color: #ffffff !important;
   color: #374151 !important; /* gray-700 */
+  border-color: #d1d5db !important; /* gray-300 */
 }
 
 .combo-input:focus,
 #numero-individual:focus {
-  border-color: rgb(147, 197, 253) !important; /* blue-300 */
+  border-color: #93c5fd !important; /* blue-300 */
   box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.1) !important;
+  background-color: #ffffff !important;
 }
 
 /* Estados de validación más visibles */
 .combo-input.invalid {
-  border-color: rgb(239, 68, 68) !important; /* red-500 */
-  background-color: rgba(239, 68, 68, 0.1) !important;
+  border-color: #ef4444 !important; /* red-500 */
+  background-color: #fef2f2 !important; /* red-50 */
 }
 
 .combo-input.valid {
-  border-color: rgb(34, 197, 94) !important; /* green-500 */
-  background-color: rgba(34, 197, 94, 0.1) !important;
+  border-color: #22c55e !important; /* green-500 */
+  background-color: #f0fdf4 !important; /* green-50 */
 }
 
 .combo-input.duplicate {
-  border-color: rgb(245, 158, 11) !important; /* amber-500 */
-  background-color: rgba(245, 158, 11, 0.1) !important;
+  border-color: #f59e0b !important; /* amber-500 */
+  background-color: #fffbeb !important; /* amber-50 */
 }
 
 /* Botones más visibles */
@@ -118,13 +181,15 @@ button {
   min-height: 44px !important; /* Mínimo para accesibilidad táctil */
 }
 
-/* Reducir espaciado excesivo */
-.space-y-1 > * + * {
-  margin-top: 0.125rem !important;
-}
-
-.space-y-2 > * + * {
-  margin-top: 0.25rem !important;
+/* Reducir espaciado excesivo en desktop */
+@media (min-width: 769px) {
+  .space-y-1 > * + * {
+    margin-top: 0.5rem !important;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 0.75rem !important;
+  }
 }
 
 /* Mejorar separación visual sin exceso */
