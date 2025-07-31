@@ -65,6 +65,7 @@
   <script type="module">
     import { auth } from './js/firebase-init.js';
     import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import WebViewDetector from './js/webview-detector.js';
 
     // Check if redirecting from admin panel
     const urlParams = new URLSearchParams(window.location.search);
@@ -143,29 +144,93 @@
       }
     });
 
-    document.getElementById("loginWithGoogle").addEventListener("click", () => {
+    document.getElementById("loginWithGoogle").addEventListener("click", async () => {
+      // Detectar si estamos en WebView y usar login externo
+      if (WebViewDetector.shouldUseExternalBrowser()) {
+        console.log('🔄 WebView detectado, usando login externo...');
+        
+        // Guardar información para después del login
+        if (isAdminRedirect) {
+          localStorage.setItem('pending_admin_redirect', 'true');
+        }
+        
+        // Abrir login externo
+        const opened = WebViewDetector.openExternalLogin();
+        
+        if (opened) {
+          // Esperar resultado del login externo
+          const checkExternalLogin = setInterval(() => {
+            const loginData = localStorage.getItem('external_login_success');
+            if (loginData) {
+              clearInterval(checkExternalLogin);
+              localStorage.removeItem('external_login_success');
+              
+              // Procesar resultado del login
+              try {
+                const userData = JSON.parse(loginData);
+                console.log("✅ Login externo exitoso:", userData.email);
+                
+                // Verificar permisos de admin si es necesario
+                const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+                const isAdmin = adminEmails.includes(userData.email);
+                
+                if (isAdminRedirect && isAdmin) {
+                  window.location.href = "admin.html";
+                } else if (isAdminRedirect && !isAdmin) {
+                  alert(`❌ Sin permisos de administrador\n\nUsuario: ${userData.email}\nContacta al administrador.`);
+                  window.location.href = "index.html";
+                } else {
+                  window.location.href = "home.html";
+                }
+              } catch (error) {
+                console.error('Error procesando login externo:', error);
+                alert("Error al procesar el login. Intenta nuevamente.");
+              }
+            }
+          }, 1000);
+          
+          // Timeout después de 2 minutos
+          setTimeout(() => {
+            clearInterval(checkExternalLogin);
+          }, 120000);
+          
+          return;
+        }
+      }
+      
+      // Login normal para navegadores web
       const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          console.log("✅ Usuario logueado con Google:", result.user.email);
+      
+      try {
+        const result = await signInWithPopup(auth, provider);
+        console.log("✅ Usuario logueado con Google:", result.user.email);
+        
+        // Check admin permissions
+        const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+        const isAdmin = adminEmails.includes(result.user.email);
+        
+        if (isAdminRedirect && isAdmin) {
+          window.location.href = "admin.html";
+        } else if (isAdminRedirect && !isAdmin) {
+          alert(`❌ Sin permisos de administrador\n\nUsuario: ${result.user.email}\nContacta al administrador.`);
+          window.location.href = "index.html";
+        } else {
+          window.location.href = "home.html";
+        }
+      } catch (error) {
+        console.error("❌ Error al iniciar sesión con Google:", error);
+        
+        // Manejo específico de errores de WebView
+        if (error.code === 'auth/popup-blocked' || 
+            error.code === 'auth/popup-closed-by-user' ||
+            error.code === 'auth/web-storage-unsupported') {
           
-          // Check admin permissions
-          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
-          const isAdmin = adminEmails.includes(result.user.email);
-          
-          if (isAdminRedirect && isAdmin) {
-            window.location.href = "admin.html";
-          } else if (isAdminRedirect && !isAdmin) {
-            alert(`❌ Sin permisos de administrador\n\nUsuario: ${result.user.email}\nContacta al administrador.`);
-            window.location.href = "index.html";
-          } else {
-            window.location.href = "home.html";
-          }
-        })
-        .catch((error) => {
-          console.error("❌ Error al iniciar sesión con Google:", error);
+          alert("⚠️ Login con popup bloqueado.\n\nSe abrirá en el navegador externo...");
+          WebViewDetector.openExternalLogin();
+        } else {
           alert("Error al iniciar sesión con Google: " + error.message);
-        });
+        }
+      }
     });
 
     document.getElementById("loginWithEmail").addEventListener("click", () => {

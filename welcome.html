@@ -163,6 +163,7 @@
     import { deviceDetector } from './js/deviceDetector.js';
     import { auth } from './js/firebase-init.js';
     import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import WebViewDetector from './js/webview-detector.js';
 
     // Elementos del DOM
     const welcomeMessage = document.getElementById('welcome-message');
@@ -468,6 +469,13 @@
       try {
         showLoading('Conectando con Google...');
         
+        // Detectar WebView y usar autenticación externa si es necesario
+        if (WebViewDetector.isWebView()) {
+          console.log('🔍 WebView detectado - usando autenticación externa');
+          WebViewDetector.openExternalLogin('google');
+          return;
+        }
+        
         // Guardar un indicador ANTES de iniciar el proceso de Google para asegurar que se complete el registro
         localStorage.setItem('force_dream_input', 'true');
         
@@ -497,6 +505,13 @@
         window.location.href = "dream-input.html";
       } catch (error) {
         console.error("❌ Error en autenticación con Google:", error);
+        
+        // Si falla en WebView, intentar con autenticación externa
+        if (WebViewDetector.isWebView()) {
+          console.log('🔄 Fallback a autenticación externa desde error');
+          WebViewDetector.openExternalLogin('google');
+          return;
+        }
         
         // Limpiar todas las banderas en caso de error
         localStorage.removeItem('force_dream_input');

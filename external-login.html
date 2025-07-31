@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Externo - YA ME VI</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  
+  <div class="glass-effect rounded-2xl p-8 max-w-md w-full animate__animated animate__fadeIn">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <img src="assets/apple-touch-icon.png" alt="YA ME VI" class="w-16 h-16 mx-auto rounded-full mb-4">
+      <h1 class="text-2xl font-bold text-white">YA ME VI</h1>
+      <p class="text-white/80 text-sm">Iniciar Sesión</p>
+    </div>
+    
+    <!-- Estado de carga -->
+    <div id="loading-state" class="text-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <p class="text-white">Preparando autenticación...</p>
+    </div>
+    
+    <!-- Botones de login -->
+    <div id="login-buttons" class="space-y-4 hidden">
+      <!-- Google Login -->
+      <button id="google-login" class="w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-3 transition duration-300">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span>Continuar con Google</span>
+      </button>
+      
+      <!-- Email Login -->
+      <div class="space-y-3">
+        <input type="email" id="email-input" placeholder="Correo electrónico" 
+               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="password" id="password-input" placeholder="Contraseña" 
+               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button id="email-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300">
+          Iniciar Sesión
+        </button>
+      </div>
+    </div>
+    
+    <!-- Estado de éxito -->
+    <div id="success-state" class="text-center py-8 hidden">
+      <div class="text-green-400 text-5xl mb-4">✓</div>
+      <h3 class="text-xl font-bold text-white mb-2">¡Éxito!</h3>
+      <p class="text-white/80" id="success-message">Autenticación completada</p>
+      <p class="text-white/60 text-sm mt-4">Serás redirigido automáticamente...</p>
+    </div>
+    
+    <!-- Estado de error -->
+    <div id="error-state" class="text-center py-8 hidden">
+      <div class="text-red-400 text-5xl mb-4">✗</div>
+      <h3 class="text-xl font-bold text-white mb-2">Error</h3>
+      <p class="text-white/80" id="error-message">Ocurrió un error</p>
+      <button id="retry-button" class="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
+        Reintentar
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    
+    // Estados de la UI
+    const loadingState = document.getElementById('loading-state');
+    const loginButtons = document.getElementById('login-buttons');
+    const successState = document.getElementById('success-state');
+    const errorState = document.getElementById('error-state');
+    
+    // Obtener parámetros de URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnUrl = urlParams.get('returnUrl') || window.location.origin;
+    
+    // Función para mostrar estado
+    function showState(state) {
+      [loadingState, loginButtons, successState, errorState].forEach(el => el.classList.add('hidden'));
+      document.getElementById(state + '-state').classList.remove('hidden');
+    }
+    
+    // Función para manejar éxito de login
+    function handleLoginSuccess(user, method = 'Google') {
+      console.log(`✅ Login exitoso con ${method}:`, user.email);
+      
+      // Guardar información de sesión en localStorage para la app principal
+      const sessionData = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        loginMethod: method,
+        timestamp: Date.now()
+      };
+      
+      localStorage.setItem('external_login_success', JSON.stringify(sessionData));
+      localStorage.setItem('external_login_timestamp', Date.now().toString());
+      
+      // Mostrar estado de éxito
+      showState('success');
+      document.getElementById('success-message').textContent = `Sesión iniciada como ${user.email}`;
+      
+      // Redireccionar después de 2 segundos
+      setTimeout(() => {
+        // Intentar cerrar la ventana si es popup
+        if (window.opener) {
+          window.opener.location.reload();
+          window.close();
+        } else {
+          // Si no es popup, redireccionar
+          window.location.href = returnUrl + '/home.html';
+        }
+      }, 2000);
+    }
+    
+    // Función para manejar errores
+    function handleError(error, context = '') {
+      console.error(`❌ Error en login ${context}:`, error);
+      
+      showState('error');
+      document.getElementById('error-message').textContent = 
+        error.message || 'No se pudo completar la autenticación';
+    }
+    
+    // Inicializar
+    setTimeout(() => {
+      showState('login-buttons');
+    }, 1000);
+    
+    // Login con Google
+    document.getElementById('google-login').addEventListener('click', async () => {
+      showState('loading');
+      
+      try {
+        const provider = new GoogleAuthProvider();
+        
+        // Configuraciones específicas para WebView
+        provider.setCustomParameters({
+          prompt: 'select_account',
+          // Forzar uso de redirect en lugar de popup para WebViews problemáticos
+          display: 'popup'
+        });
+        
+        // Usar signInWithPopup con configuración específica
+        const result = await signInWithPopup(auth, provider);
+        
+        handleLoginSuccess(result.user, 'Google');
+        
+      } catch (error) {
+        // Si signInWithPopup falla, intentar con configuración alternativa
+        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+          try {
+            // Configurar para redirect como fallback
+            console.log('🔄 Popup bloqueado, intentando método alternativo...');
+            showState('loading');
+            
+            // Guardar estado antes del redirect
+            sessionStorage.setItem('auth_return_url', returnUrl);
+            
+            // Usar signInWithRedirect como último recurso
+            const { signInWithRedirect, getRedirectResult } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+            await signInWithRedirect(auth, provider);
+            
+          } catch (redirectError) {
+            handleError(redirectError, 'redirect fallback');
+          }
+        } else {
+          handleError(error, 'Google popup');
+        }
+      }
+    });
+    
+    // Login con email
+    document.getElementById('email-login').addEventListener('click', async () => {
+      const email = document.getElementById('email-input').value.trim();
+      const password = document.getElementById('password-input').value.trim();
+      
+      if (!email || !password) {
+        handleError({ message: 'Por favor ingresa email y contraseña' }, 'validación');
+        return;
+      }
+      
+      showState('loading');
+      
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        handleLoginSuccess(result.user, 'Email');
+      } catch (error) {
+        handleError(error, 'email');
+      }
+    });
+    
+    // Botón de reintentar
+    document.getElementById('retry-button').addEventListener('click', () => {
+      showState('login-buttons');
+    });
+    
+    // Manejar resultado de redirect si existe
+    window.addEventListener('load', async () => {
+      try {
+        const { getRedirectResult } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+        const result = await getRedirectResult(auth);
+        
+        if (result) {
+          console.log('✅ Resultado de redirect obtenido:', result.user.email);
+          handleLoginSuccess(result.user, 'Google Redirect');
+        }
+      } catch (error) {
+        console.log('ℹ️ No hay resultado de redirect o error:', error.message);
+      }
+    });
+    
+    // Permitir login con Enter
+    document.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !loginButtons.classList.contains('hidden')) {
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        
+        if (emailInput.value && passwordInput.value) {
+          document.getElementById('email-login').click();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
