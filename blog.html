@@ -18,6 +18,26 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   
+  <!-- Custom CSS for logos -->
+  <style>
+    /* Asegurar que todos los logos sean perfectamente redondos */
+    img[src*="apple-touch-icon"] {
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      aspect-ratio: 1 / 1 !important;
+      display: block !important;
+    }
+    
+    .logo-redondo {
+      border-radius: 50% !important;
+      aspect-ratio: 1 / 1 !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      display: block !important;
+      overflow: hidden !important;
+    }
+  </style>
+  
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
      crossorigin="anonymous"></script>
@@ -31,7 +51,7 @@
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <img class="w-8 h-8 rounded-full" src="assets/favicon-circle.svg" alt="YA ME VI Logo">
+            <img class="w-8 h-8 rounded-full object-cover" src="assets/apple-touch-icon.png" alt="YA ME VI Logo" style="width: 32px !important; height: 32px !important; border-radius: 50% !important; object-fit: cover !important;">
           </div>
           <div class="ml-3">
             <h1 class="text-white text-xl font-bold">YA ME VI</h1>
@@ -263,7 +283,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
         <div class="flex items-center justify-center mb-6">
-          <img src="assets/favicon-circle.svg" alt="YA ME VI Logo" class="w-12 h-12 mr-3">
+          <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="w-12 h-12 mr-3 rounded-full object-cover" style="border-radius: 50% !important; object-fit: cover !important;">
           <h3 class="text-2xl font-bold text-white">YA ME VI</h3>
         </div>
         
