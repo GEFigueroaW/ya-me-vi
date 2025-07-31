@@ -209,36 +209,81 @@
     
     // Autenticación con Google
     async function signInWithGoogle(useRedirect = false) {
-      console.log('🌐 Iniciando autenticación Google...', { useRedirect });
+      console.log('🌐 Iniciando autenticación Google...', { useRedirect, isWebView, userAgent: navigator.userAgent.slice(0, 50) });
       
       try {
         showState('loading');
         
         const provider = new GoogleAuthProvider();
+        
+        // Configuración avanzada del provider
+        provider.setCustomParameters({
+          prompt: 'select_account',
+          access_type: 'online',
+          include_granted_scopes: 'true'
+        });
+        
         provider.addScope('email');
         provider.addScope('profile');
         
         let result;
         
-        if (useRedirect) {
-          console.log('🔄 Usando signInWithRedirect...');
+        // En WebView o móvil, usar redirect directamente
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const shouldUseRedirect = useRedirect || isWebView || isMobile;
+        
+        if (shouldUseRedirect) {
+          console.log('🔄 Usando signInWithRedirect (WebView/móvil/fallback)...');
+          
+          // Clear any existing auth state first
+          try {
+            await auth.signOut();
+            console.log('🧹 Estado de auth limpiado antes de redirect');
+          } catch (signOutError) {
+            console.log('ℹ️ No había estado previo que limpiar');
+          }
+          
+          // Wait a moment for cleanup
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           await signInWithRedirect(auth, provider);
           // La redirección ocurre, no hay resultado inmediato
           return;
         } else {
-          console.log('🪟 Usando signInWithPopup...');
+          console.log('🪟 Usando signInWithPopup (escritorio)...');
+          
+          // Clear any existing auth state first
+          try {
+            await auth.signOut();
+            console.log('🧹 Estado de auth limpiado antes de popup');
+          } catch (signOutError) {
+            console.log('ℹ️ No había estado previo que limpiar');
+          }
+          
+          // Wait a moment for cleanup
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           result = await signInWithPopup(auth, provider);
         }
         
         if (result && result.user) {
           console.log('✅ Usuario autenticado:', result.user.email);
+          console.log('📊 User data:', {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            emailVerified: result.user.emailVerified,
+            providerId: result.providerId
+          });
           
           const userData = {
             uid: result.user.uid,
             email: result.user.email,
             displayName: result.user.displayName,
             photoURL: result.user.photoURL,
-            method: useRedirect ? 'redirect' : 'popup'
+            emailVerified: result.user.emailVerified,
+            method: shouldUseRedirect ? 'redirect' : 'popup',
+            timestamp: Date.now()
           };
           
           showSuccess(`¡Hola ${result.user.displayName || result.user.email}!`);
@@ -250,13 +295,52 @@
         
       } catch (error) {
         console.error('❌ Error en Google auth:', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          stack: error.stack
+        });
         
-        // Si el popup falla, intentar con redirect
-        if (!useRedirect && (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user')) {
-          console.log('🔄 Popup bloqueado, intentando redirect...');
-          await signInWithGoogle(true);
+        let shouldRetry = false;
+        let errorMessage = 'Error en autenticación con Google';
+        
+        // Manejo específico de errores
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage = 'Popup bloqueado. Intentando con redirección...';
+          shouldRetry = true;
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = 'Ventana cerrada por el usuario';
+          showState('login-buttons'); // Volver a mostrar botones
+          return;
+        } else if (error.code === 'auth/cancelled-popup-request') {
+          errorMessage = 'Solicitud cancelada. Inténtalo de nuevo';
+          showState('login-buttons');
+          return;
+        } else if (error.code === 'auth/web-storage-unsupported') {
+          errorMessage = 'Almacenamiento web no soportado';
+        } else if (error.code === 'auth/unauthorized-domain') {
+          errorMessage = 'Dominio no autorizado para autenticación';
+        } else if (error.code === 'auth/operation-not-allowed') {
+          errorMessage = 'Autenticación con Google no habilitada';
+        } else if (error.message.includes('missing initial state') || 
+                   error.message.includes('storage-partitioned') ||
+                   error.message.includes('third-party')) {
+          errorMessage = 'Error de cookies/almacenamiento. Intentando alternativa...';
+          shouldRetry = true;
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = 'Error de conexión. Verifica tu internet';
+        }
+        
+        // Auto-retry con redirect si el popup falla
+        if (!useRedirect && shouldRetry) {
+          console.log('🔄 Auto-retry con redirect debido a:', error.code);
+          setTimeout(() => {
+            signInWithGoogle(true);
+          }, 2000);
+          
+          showError(`${errorMessage} Reintentando...`);
         } else {
-          showError(`Error: ${error.message}`);
+          showError(errorMessage);
         }
       }
     }

@@ -11,56 +11,81 @@ const db = getFirestore(app);
 // === Función para mostrar el sueño guardado del usuario ===
 async function mostrarBienvenidaConSueño(user) {
   try {
-    const dreamRef = doc(db, `users/${user.uid}/dream`, 'info');
-    const dreamSnap = await getDoc(dreamRef);
-
-    // Intentar obtener el perfil del usuario para el nombre
-    const profileRef = doc(db, `users/${user.uid}/profile`, 'info');
-    const profileSnap = await getDoc(profileRef);
+    // Obtener datos del usuario de Firestore
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
 
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) {
       // Obtener el nombre del usuario con múltiples fallbacks
       let userName = '';
+      let userDream = '';
       
-      // 1. Intentar desde el perfil guardado en Firestore
-      if (profileSnap.exists() && profileSnap.data().name) {
-        userName = profileSnap.data().name.split(' ')[0]; // Solo primer nombre
+      // 1. Intentar desde los datos guardados en Firestore
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        if (userData.displayName || userData.name) {
+          userName = (userData.displayName || userData.name).split(' ')[0]; // Solo primer nombre
+        }
+        if (userData.dream) {
+          userDream = userData.dream;
+        }
       }
+      
       // 2. Si no, usar displayName de Firebase Auth (Google login)
-      else if (user.displayName) {
+      if (!userName && user.displayName) {
         userName = user.displayName.split(' ')[0];
       }
+      
       // 3. Si no, usar la parte del email antes del @
-      else if (user.email) {
+      if (!userName && user.email) {
         userName = user.email.split('@')[0];
       }
       
       // 4. Verificar si hay datos biométricos y usar fallback
       const biometricUserInfo = localStorage.getItem('biometric_user_info');
       if (biometricUserInfo && !userName) {
-        userName = 'Usuario'; // Fallback para usuarios biométricos
+        try {
+          const bioData = JSON.parse(biometricUserInfo);
+          userName = bioData.name || 'Usuario';
+        } catch (e) {
+          userName = 'Usuario';
+        }
       }
       
-      if (dreamSnap.exists()) {
-        const { sueño } = dreamSnap.data();
-        if (userName) {
-          welcomeMsg.textContent = `¡Bienvenido ${userName}! Vas tras tu sueño: ${sueño}.`;
-        } else {
-          welcomeMsg.textContent = `¡Bienvenido! Vas tras tu sueño: ${sueño}.`;
-        }
+      // Crear mensaje de bienvenida personalizado
+      if (userDream && userName) {
+        // Mapear categorías de sueños a textos más naturales
+        const dreamDisplayMap = {
+          'casa': 'comprar tu casa',
+          'auto': 'comprar tu auto',
+          'viaje': 'viajar por el mundo',
+          'negocio': 'iniciar tu negocio',
+          'familia': 'ayudar a tu familia',
+          'estudios': 'continuar tus estudios',
+          'libertad': 'lograr libertad financiera',
+          'otro': userDream
+        };
+        
+        const dreamDisplay = dreamDisplayMap[userDream] || userDream;
+        welcomeMsg.innerHTML = `
+          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+            ¡Bienvenido ${userName}!
+          </div>
+          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
+            Listo para cumplir tu sueño: ${dreamDisplay}
+          </div>
+        `;
+      } else if (userName) {
+        welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
       } else {
-        if (userName) {
-          welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
-        } else {
-          welcomeMsg.textContent = '¡Bienvenido!';
-        }
+        welcomeMsg.textContent = '¡Bienvenido!';
       }
       
-      console.log(`Usuario identificado como: ${userName || 'Anónimo'}`);
+      console.log(`✅ Usuario identificado: ${userName || 'Anónimo'}, Sueño: ${userDream || 'No definido'}`);
     }
   } catch (error) {
-    console.error('Error obteniendo datos del usuario:', error);
+    console.error('❌ Error obteniendo datos del usuario:', error);
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) {
       // Intentar mostrar al menos el nombre aunque falle el sueño
