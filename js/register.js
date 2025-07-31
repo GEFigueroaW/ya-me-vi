@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
           
           // Redirigir después de un breve delay
           setTimeout(() => {
-            window.location.href = "dream-input.html";
+            window.location.href = "login-email.html?registered=true";
           }, 1500);
         })
         .catch((error) => {
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
           
           setTimeout(() => {
             if (isNewUser) {
-              window.location.href = "dream-input.html";
+              window.location.href = "login-email.html?registered=true";
             } else {
               window.location.href = "home.html";
             }

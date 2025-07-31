@@ -242,8 +242,8 @@
         
         // Verificar si hay un registro en progreso (redirigir directamente)
         if (localStorage.getItem('registration_in_progress') === 'true') {
-          console.log('🔄 Registro en progreso detectado, redirigiendo a dream-input...');
-          window.location.href = 'dream-input.html';
+          console.log('🔄 Registro en progreso detectado, redirigiendo a home...');
+          window.location.href = 'home.html';
           return;
         }
         
@@ -551,8 +551,8 @@
         console.log("📊 Token response:", result._tokenResponse);
         console.log("⏱️ Metadata:", result.user.metadata);
         
-        // NO verificamos si es nuevo o no - desde welcome.html SIEMPRE redirigimos a dream-input.html
-        console.log("🎉 Redirigiendo a dream-input para completar el registro (desde welcome.html)");
+        // NO verificamos si es nuevo o no - desde welcome.html SIEMPRE redirigimos a home.html
+        console.log("🎉 Redirigiendo a home para completar el registro (desde welcome.html)");
         showLoading('¡Cuenta verificada! Completando tu registro...');
         
         // Guardar información necesaria en localStorage
@@ -560,8 +560,8 @@
         localStorage.setItem('from_welcome_google', 'true');
         localStorage.setItem('user_email', result.user.email || '');
         
-        // Redirección inmediata a dream-input.html
-        window.location.href = "dream-input.html";
+        // Redirección inmediata a home.html
+        window.location.href = "home.html";
       } catch (error) {
         console.error("❌ Error en autenticación con Google:", error);
         

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Iniciar Sesión</title>
+  
+  <!-- DETECCIÓN TEMPRANA DE WEBVIEW -->
+  <script>
+    // Detección inmediata de WebView antes de que se cargue cualquier otra cosa
+    (function() {
+      console.log('🔍 [LOGIN-EMAIL] Detección temprana de WebView iniciada...');
+      
+      const ua = navigator.userAgent.toLowerCase();
+      const isWebView = 
+        // Detección específica de WebIntoApp y otros WebViews
+        ua.includes('webintoapp') ||
+        ua.includes('webview') ||
+        /android.*version.*chrome/i.test(ua) ||
+        /crios|fxios/i.test(ua) ||
+        // Detección por características de entorno
+        (window.navigator.standalone === false && /iPhone|iPad/.test(ua)) ||
+        // Detección por proporciones de pantalla completa
+        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
+        // Forzar en móviles para debug
+        (/Android|iPhone/i.test(ua) && window.location.href.includes('webintoapp'));
+      
+      console.log('🔍 [LOGIN-EMAIL] WebView detectado:', isWebView);
+      console.log('📱 [LOGIN-EMAIL] User Agent:', ua.slice(0, 100));
+      
+      if (isWebView) {
+        console.log('🚨 [LOGIN-EMAIL] WebView detectado - redirigiendo a navegador externo INMEDIATAMENTE');
+        
+        // Crear URL de login externo
+        const baseUrl = window.location.origin;
+        const returnUrl = encodeURIComponent(window.location.href);
+        const externalUrl = `${baseUrl}/external-login.html?type=email&return=${returnUrl}&webview=true&immediate=true`;
+        
+        console.log('🔗 [LOGIN-EMAIL] Redirigiendo a:', externalUrl);
+        
+        // Mostrar mensaje inmediato al usuario
+        document.write(`
+          <div style="
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+          ">
+            <div style="
+              background: rgba(255, 255, 255, 0.1);
+              backdrop-filter: blur(10px);
+              border-radius: 20px;
+              padding: 30px;
+              max-width: 400px;
+              width: 100%;
+            ">
+              <div style="font-size: 3em; margin: 20px 0;">📧</div>
+              <h2 style="margin: 20px 0;">Abriendo Login de Email</h2>
+              <p style="margin: 15px 0; opacity: 0.8;">
+                Se detectó un entorno WebView. Abriendo navegador externo para login con email...
+              </p>
+              <div style="
+                margin: 20px 0;
+                padding: 10px;
+                background: rgba(0,0,0,0.2);
+                border-radius: 10px;
+                font-size: 0.9em;
+              ">
+                Si no se abre automáticamente, toca el enlace de abajo
+              </div>
+              <a href="${externalUrl}" style="
+                display: inline-block;
+                background: #4CAF50;
+                color: white;
+                text-decoration: none;
+                padding: 15px 25px;
+                border-radius: 10px;
+                margin: 10px;
+                font-weight: bold;
+              ">📧 Abrir Login Email</a>
+            </div>
+          </div>
+        `);
+        
+        // Intentar redirección automática después de un breve delay
+        setTimeout(() => {
+          try {
+            // Método 1: window.open
+            const popup = window.open(externalUrl, '_blank', 'width=400,height=600');
+            if (!popup || popup.closed) {
+              throw new Error('Popup bloqueado');
+            }
+          } catch (error) {
+            // Método 2: redirección directa
+            window.location.href = externalUrl;
+          }
+        }, 1500);
+        
+        // Detener la carga del resto de la página
+        return;
+      }
+      
+      console.log('🖥️ [LOGIN-EMAIL] Navegador normal detectado - continuando con carga normal');
+    })();
+  </script>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="min-h-screen text-white bg-cover bg-center bg-no-repeat relative" style="background-image: url('assets/vg1.jpg');">
+
+  <!-- Overlay oscuro para mejor legibilidad -->
+  <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+
+  <!-- Contenido principal -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <!-- Logo -->
+    <div class="mb-8">
+      <div class="w-20 h-20 bg-white bg-opacity-20 backdrop-blur-lg rounded-full flex items-center justify-center border border-white border-opacity-30">
+        <span class="text-3xl font-bold text-white">YA</span>
+      </div>
+    </div>
+
+    <!-- Título -->
+    <h1 class="text-3xl font-bold mb-2 text-center">Iniciar Sesión</h1>
+    <p class="text-white text-opacity-80 mb-8 text-center">Ingresa con tu cuenta</p>
+
+    <!-- Formulario de login -->
+    <div class="w-full max-w-sm">
+      
+      <!-- Google Login Button -->
+      <button id="googleLoginBtn" class="w-full mb-4 bg-white text-gray-700 py-3 px-4 rounded-lg flex items-center justify-center space-x-3 hover:bg-gray-100 transition duration-300 shadow-lg">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span class="font-medium">Continuar con Google</span>
+      </button>
+
+      <!-- Divider -->
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-white border-opacity-30"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-2 bg-transparent text-white text-opacity-80">o</span>
+        </div>
+      </div>
+
+      <!-- Email Input -->
+      <div class="mb-4">
+        <input 
+          type="email" 
+          id="emailInput" 
+          placeholder="Correo electrónico" 
+          class="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          required
+        />
+      </div>
+
+      <!-- Password Input -->
+      <div class="mb-6">
+        <input 
+          type="password" 
+          id="passwordInput" 
+          placeholder="Contraseña" 
+          class="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          required
+        />
+      </div>
+
+      <!-- Login Button -->
+      <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 shadow-lg">
+        Iniciar Sesión
+      </button>
+
+      <!-- Error Message -->
+      <div id="errorMessage" class="hidden mt-4 p-3 bg-red-600 bg-opacity-80 backdrop-blur-lg rounded-lg text-white text-sm text-center"></div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="hidden mt-4 p-3 bg-blue-600 bg-opacity-80 backdrop-blur-lg rounded-lg text-white text-sm text-center">
+        <div class="flex items-center justify-center space-x-2">
+          <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          <span>Iniciando sesión...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="mt-8 text-center space-y-3">
+      <a href="recover.html" class="block text-white text-opacity-80 hover:text-opacity-100 transition duration-300">
+        ¿Olvidaste tu contraseña?
+      </a>
+      <div class="text-white text-opacity-60">
+        ¿No tienes cuenta? 
+        <a href="register.html" class="text-blue-300 hover:text-blue-200 transition duration-300">
+          Regístrate
+        </a>
+      </div>
+      <a href="index.html" class="block text-white text-opacity-60 hover:text-opacity-80 transition duration-300">
+        ← Volver al inicio
+      </a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Check if redirecting from admin panel
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdminRedirect = urlParams.get('redirect') === 'admin';
+    const isRegistrationSuccess = urlParams.get('registered') === 'true';
+
+    // Show registration success message if redirected from registration
+    if (isRegistrationSuccess) {
+      setTimeout(() => {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-4 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown';
+        successDiv.innerHTML = `
+          <div class="flex items-center">
+            <div class="mr-3">✅</div>
+            <div>
+              <p class="font-semibold">¡Cuenta creada exitosamente!</p>
+              <p class="text-sm opacity-90">Ahora puedes iniciar sesión con tu email y contraseña</p>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(successDiv);
+        
+        // Auto-hide after 8 seconds
+        setTimeout(() => {
+          if (successDiv.parentNode) {
+            successDiv.classList.remove('animate__fadeInDown');
+            successDiv.classList.add('animate__fadeOutUp');
+            setTimeout(() => {
+              successDiv.remove();
+            }, 500);
+          }
+        }, 8000);
+        
+        // Clean URL without reloading
+        const cleanUrl = new URL(window.location);
+        cleanUrl.searchParams.delete('registered');
+        window.history.replaceState({}, document.title, cleanUrl);
+      }, 500);
+    }
+
+    // Elements
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const loadingState = document.getElementById('loadingState');
+
+    // Show error message
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.remove('hidden');
+      loadingState.classList.add('hidden');
+    }
+
+    // Show loading state
+    function showLoading(message = 'Iniciando sesión...') {
+      loadingState.querySelector('span').textContent = message;
+      loadingState.classList.remove('hidden');
+      errorMessage.classList.add('hidden');
+    }
+
+    // Hide loading state
+    function hideLoading() {
+      loadingState.classList.add('hidden');
+    }
+
+    // Check if user is already authenticated
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log('✅ Usuario ya autenticado:', user.email || user.uid);
+        
+        // Lista completa de admins
+        const adminEmails = [
+          'gfigueroa.w@gmail.com', 
+          'admin@yamevi.com.mx', 
+          'eugenfw@gmail.com',
+          'guillermo.figueroaw@totalplay.com.mx'
+        ];
+        
+        // Verificación por email
+        let isAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
+        
+        if (isAdminRedirect && isAdmin) {
+          console.log('🔄 Redirigiendo a admin panel...');
+          localStorage.setItem('admin_verified', 'true');
+          window.location.href = "admin.html";
+        } else if (isAdminRedirect && !isAdmin) {
+          console.log('❌ Usuario sin permisos de admin:', user.email || user.uid);
+          showError(`Sin permisos de administrador. Usuario: ${user.email || user.uid}`);
+        } else {
+          // Normal redirect
+          window.location.href = "home.html";
+        }
+      }
+    });
+
+    // Email/Password Login
+    loginBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!email || !password) {
+        showError('Por favor ingresa email y contraseña');
+        return;
+      }
+
+      try {
+        showLoading('Iniciando sesión...');
+        
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        console.log('✅ Login exitoso:', result.user.email);
+        
+        hideLoading();
+        
+        // Redirect based on admin status
+        const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+        const isAdmin = adminEmails.includes(result.user.email.toLowerCase());
+        
+        if (isAdminRedirect && isAdmin) {
+          localStorage.setItem('admin_verified', 'true');
+          window.location.href = "admin.html";
+        } else if (isAdminRedirect && !isAdmin) {
+          showError(`Sin permisos de administrador. Usuario: ${result.user.email}`);
+        } else {
+          window.location.href = "home.html";
+        }
+        
+      } catch (error) {
+        console.error('❌ Error en login:', error);
+        
+        let errorMsg = 'Error al iniciar sesión';
+        if (error.code === 'auth/user-not-found') {
+          errorMsg = 'Usuario no encontrado';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMsg = 'Contraseña incorrecta';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMsg = 'Email inválido';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMsg = 'Demasiados intentos. Espera un momento';
+        }
+        
+        showError(errorMsg);
+      }
+    });
+
+    // Google Login
+    googleLoginBtn.addEventListener('click', async () => {
+      console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google...');
+      
+      // Usar la detección temprana de WebView
+      if (window.WEBVIEW_MODE || localStorage.getItem('webview_detected') === 'true') {
+        console.log('🔍 [LOGIN-EMAIL] WebView detectado - usando autenticación externa');
+        
+        // Crear URL de login externo
+        const baseUrl = window.location.origin;
+        const returnUrl = encodeURIComponent(window.location.href);
+        const externalUrl = `${baseUrl}/external-login.html?type=google&return=${returnUrl}&webview=true&from=login-email`;
+        
+        console.log('🔗 [LOGIN-EMAIL] Redirigiendo a:', externalUrl);
+        
+        try {
+          // Intentar window.open primero
+          const popup = window.open(externalUrl, '_blank', 'width=400,height=600');
+          if (!popup || popup.closed) {
+            throw new Error('Popup bloqueado');
+          }
+        } catch (error) {
+          // Si falla, usar redirección directa
+          console.log('🔄 [LOGIN-EMAIL] Popup falló, usando redirección');
+          window.location.href = externalUrl;
+        }
+        
+        return;
+      }
+
+      try {
+        showLoading('Conectando con Google...');
+        
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        
+        console.log('✅ Google login exitoso:', result.user.email);
+        hideLoading();
+        
+        // Redirect based on admin status
+        const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+        const isAdmin = adminEmails.includes(result.user.email.toLowerCase());
+        
+        if (isAdminRedirect && isAdmin) {
+          localStorage.setItem('admin_verified', 'true');
+          window.location.href = "admin.html";
+        } else if (isAdminRedirect && !isAdmin) {
+          showError(`Sin permisos de administrador. Usuario: ${result.user.email}`);
+        } else {
+          window.location.href = "home.html";
+        }
+        
+      } catch (error) {
+        console.error('❌ Error en Google login:', error);
+        
+        let errorMsg = 'Error al conectar con Google';
+        if (error.code === 'auth/popup-closed-by-user') {
+          errorMsg = 'Ventana cerrada. Inténtalo de nuevo';
+        } else if (error.code === 'auth/popup-blocked') {
+          errorMsg = 'Popup bloqueado. Permite popups e inténtalo de nuevo';
+        }
+        
+        showError(errorMsg);
+      }
+    });
+
+    // Allow login with Enter key
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        loginBtn.click();
+      }
+    });
+
+    emailInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        passwordInput.focus();
+      }
+    });
+  </script>
+
+  <!-- Cargar shared.js para el fondo dinámico -->
+  <script src="js/shared.js"></script>
+</body>
+</html>

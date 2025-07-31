@@ -315,7 +315,7 @@ async function handlePasswordLogin(email, auth, signInWithEmailAndPassword) {
   }
 }
 
-// Manejo de registro con Google (lleva a dream-input.html)
+// Manejo de registro con Google (lleva a login-email.html)
 async function handleGoogleRegistration(auth, signInWithPopup, GoogleAuthProvider) {
   console.log('🔄 Iniciando registro con Google...');
   showLoadingOverlay('Creando cuenta con Google...');
@@ -331,11 +331,11 @@ async function handleGoogleRegistration(auth, signInWithPopup, GoogleAuthProvide
                      result.user.metadata?.creationTime === result.user.metadata?.lastSignInTime;
     
     if (isNewUser) {
-      console.log("🎉 Usuario nuevo detectado, redirigiendo a dream-input");
+      console.log("🎉 Usuario nuevo detectado, redirigiendo a login confirmación");
       showSuccessMessage('¡Cuenta creada! Configurando tu experiencia...');
       
       setTimeout(() => {
-        window.location.href = "dream-input.html";
+        window.location.href = "login-email.html?registered=true";
       }, 1500);
     } else {
       console.log("👋 Usuario existente, redirigiendo a home");
