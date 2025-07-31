@@ -460,7 +460,19 @@
     }
 
     // Function to handle successful authentication redirect
-    function handleSuccessfulAuth(user) {
+    async function handleSuccessfulAuth(user) {
+      console.log('🎯 [LOGIN-EMAIL] Procesando autenticación exitosa para:', user.email);
+      
+      // Intentar registrar credenciales biométricas si tiene email
+      if (user.email) {
+        try {
+          await registerBiometricCredentials(user.email);
+          console.log('✅ [LOGIN-EMAIL] Registro biométrico completado para:', user.email);
+        } catch (error) {
+          console.log('ℹ️ [LOGIN-EMAIL] No se pudo registrar biometría (opcional):', error.message);
+        }
+      }
+      
       // Lista completa de admins
       const adminEmails = [
         'gfigueroa.w@gmail.com', 
@@ -690,6 +702,7 @@
       // ALWAYS use external login for mobile devices to avoid popup issues
       const isMobileDevice = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
+      // NUEVA LÓGICA: Si es móvil o WebView, usar siempre external login
       if (isWebView || isMobileDevice) {
         console.log('🔍 [LOGIN-EMAIL] Usando autenticación externa (WebView o móvil detectado)');
         
@@ -709,15 +722,16 @@
             console.log('ℹ️ [LOGIN-EMAIL] No había estado previo que limpiar');
           }
           
-          // Mostrar mensaje al usuario antes de abrir
-          showLoading('Abriendo navegador externo para Google...');
-          
           // Set flags for external auth
           localStorage.setItem('external_auth_in_progress', 'true');
           localStorage.setItem('external_auth_type', 'google');
           localStorage.setItem('external_auth_return', window.location.href);
+          localStorage.setItem('external_auth_timestamp', Date.now().toString());
           
-          // Always use direct redirect for better compatibility
+          // Mostrar mensaje al usuario antes de redirigir
+          showLoading('Redirigiendo para autenticación con Google...');
+          
+          // Always use direct redirect for better compatibility in mobile/WebView
           console.log('🔄 [LOGIN-EMAIL] Usando redirección directa para máxima compatibilidad');
           setTimeout(() => {
             window.location.href = externalUrl;
@@ -735,7 +749,7 @@
       try {
         showLoading('Conectando con Google...');
         
-        // Clear any existing state first
+        // Clear any existing state first (critical for avoiding "missing initial state")
         try {
           await auth.signOut();
           console.log('🧹 [LOGIN-EMAIL] Estado de auth limpiado antes de popup');
@@ -743,23 +757,44 @@
           console.log('ℹ️ [LOGIN-EMAIL] No había estado previo que limpiar');
         }
         
-        // Wait a moment for cleanup
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Clear localStorage that might interfere
+        const keysToRemove = [
+          'firebase:authUser',
+          'firebase:host',
+          'external_auth_in_progress',
+          'external_login_success'
+        ];
+        keysToRemove.forEach(key => {
+          try {
+            localStorage.removeItem(key);
+          } catch (e) {
+            // Ignore errors
+          }
+        });
+        
+        // Wait a moment for cleanup to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         const provider = new GoogleAuthProvider();
         
-        // Enhanced provider configuration
+        // Enhanced provider configuration to avoid state issues
         provider.setCustomParameters({
           prompt: 'select_account',
           access_type: 'online',
-          include_granted_scopes: 'true'
+          include_granted_scopes: 'true',
+          // Add state parameter to avoid missing initial state error
+          state: btoa(JSON.stringify({
+            timestamp: Date.now(),
+            origin: window.location.origin,
+            page: 'login-email'
+          }))
         });
         
         // Add required scopes
         provider.addScope('email');
         provider.addScope('profile');
         
-        console.log('🚀 [LOGIN-EMAIL] Iniciando popup de Google...');
+        console.log('🚀 [LOGIN-EMAIL] Iniciando popup de Google con configuración mejorada...');
         
         const result = await signInWithPopup(auth, provider);
         
@@ -777,8 +812,8 @@
         
         hideLoading();
         
-        // Redirect using new function
-        handleSuccessfulAuth(result.user);
+        // Redirect using new function with biometric registration
+        await handleSuccessfulAuth(result.user);
         
       } catch (error) {
         console.error('❌ Error en Google login:', error);
@@ -796,32 +831,47 @@
         if (error.code === 'auth/popup-closed-by-user') {
           errorMsg = 'Ventana cerrada. Inténtalo de nuevo';
         } else if (error.code === 'auth/popup-blocked') {
-          errorMsg = 'Popup bloqueado. Permite popups e inténtalo de nuevo';
+          errorMsg = 'Popup bloqueado. Intentando alternativa...';
           shouldRetryWithExternal = true;
         } else if (error.code === 'auth/cancelled-popup-request') {
           errorMsg = 'Solicitud cancelada. Inténtalo de nuevo';
         } else if (error.code === 'auth/web-storage-unsupported') {
-          errorMsg = 'Almacenamiento no soportado. Usa un navegador diferente';
+          errorMsg = 'Almacenamiento no soportado. Usando navegador externo...';
+          shouldRetryWithExternal = true;
         } else if (error.code === 'auth/unauthorized-domain') {
           errorMsg = 'Dominio no autorizado para autenticación';
         } else if (error.code === 'auth/operation-not-allowed') {
           errorMsg = 'Autenticación con Google no habilitada';
-        } else if (error.message.includes('missing initial state') || error.message.includes('storage-partitioned')) {
-          errorMsg = 'Error de estado. Intentando con navegador externo...';
+        } else if (error.message.includes('missing initial state') || 
+                   error.message.includes('storage-partitioned') ||
+                   error.message.includes('third-party') ||
+                   error.code === 'auth/invalid-api-key' ||
+                   error.code === 'auth/network-request-failed') {
+          errorMsg = 'Error de configuración. Usando navegador externo...';
           shouldRetryWithExternal = true;
         }
         
+        // Auto-fallback to external login for problematic cases
         if (shouldRetryWithExternal) {
           console.log('🔄 [LOGIN-EMAIL] Fallback automático a autenticación externa');
+          showLoading('Intentando con navegador externo...');
+          
           setTimeout(() => {
             const baseUrl = window.location.origin;
             const returnUrl = encodeURIComponent(window.location.href);
-            const externalUrl = `${baseUrl}/external-login.html?type=google&return=${returnUrl}&webview=false&fallback=true&from=login-email`;
+            const externalUrl = `${baseUrl}/external-login.html?type=google&return=${returnUrl}&webview=false&fallback=true&from=login-email&error=${encodeURIComponent(error.code || 'unknown')}`;
+            
+            // Set fallback flags
+            localStorage.setItem('external_auth_in_progress', 'true');
+            localStorage.setItem('external_auth_type', 'google');
+            localStorage.setItem('external_auth_fallback', 'true');
+            localStorage.setItem('external_auth_original_error', error.code || 'unknown');
+            
             window.location.href = externalUrl;
           }, 2000);
+        } else {
+          showError(errorMsg);
         }
-        
-        showError(errorMsg);
       }
     });
 

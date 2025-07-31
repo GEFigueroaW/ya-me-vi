@@ -177,7 +177,16 @@
     async function checkRedirectResult() {
       try {
         console.log('🔍 Verificando resultado de redirección...');
-        const result = await getRedirectResult(auth);
+        
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout checking redirect result')), 10000);
+        });
+        
+        const result = await Promise.race([
+          getRedirectResult(auth),
+          timeoutPromise
+        ]);
         
         if (result && result.user) {
           console.log('✅ Usuario autenticado via redirect:', result.user.email);
@@ -187,7 +196,9 @@
             email: result.user.email,
             displayName: result.user.displayName,
             photoURL: result.user.photoURL,
-            method: 'redirect'
+            emailVerified: result.user.emailVerified,
+            method: 'redirect',
+            timestamp: Date.now()
           };
           
           showSuccess(`¡Hola ${result.user.displayName || result.user.email}!`);
@@ -198,9 +209,15 @@
           
           return true;
         }
+        
       } catch (error) {
         console.error('Error en redirect result:', error);
-        showError(`Error en autenticación: ${error.message}`);
+        
+        // Don't show error immediately, might be normal if no redirect occurred
+        if (!error.message.includes('Timeout')) {
+          console.warn('🔄 Redirect result check failed, probably no redirect occurred');
+        }
+        
         return false;
       }
       
@@ -407,21 +424,64 @@
     // Auto-iniciar según el tipo
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('🚀 External login page loaded');
+      console.log('📋 Parámetros recibidos:', { 
+        authType, 
+        returnUrl, 
+        isWebView,
+        userAgent: navigator.userAgent.slice(0, 50)
+      });
       
-      // Primero verificar si hay resultado de redirección
-      const hasRedirectResult = await checkRedirectResult();
+      // Verificar si es un fallback por error
+      const isFallback = urlParams.get('fallback') === 'true';
+      const originalError = urlParams.get('error');
       
-      if (!hasRedirectResult) {
-        if (authType === 'google') {
-          console.log('🎯 Auto-iniciando Google auth...');
-          // Dar un momento para que se cargue la UI
-          setTimeout(() => {
-            signInWithGoogle(false);
-          }, 500);
-        } else {
+      if (isFallback && originalError) {
+        console.log('🔄 Esta es una sesión de fallback por error:', originalError);
+        showError(`Error anterior: ${originalError}. Reintentando...`);
+        
+        // Wait longer for fallback attempts
+        setTimeout(async () => {
+          const hasRedirectResult = await checkRedirectResult();
+          if (!hasRedirectResult && authType === 'google') {
+            console.log('🎯 Auto-iniciando Google auth (fallback)...');
+            signInWithGoogle(true); // Force redirect for fallback
+          }
+        }, 2000);
+        
+      } else {
+        // Normal flow
+        try {
+          // Primero verificar si hay resultado de redirección
+          const hasRedirectResult = await checkRedirectResult();
+          
+          if (!hasRedirectResult) {
+            if (authType === 'google') {
+              console.log('🎯 Auto-iniciando Google auth...');
+              
+              // Check if should use redirect immediately (mobile/WebView)
+              const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+              
+              setTimeout(() => {
+                if (isWebView || isMobile) {
+                  console.log('📱 Usando redirect para móvil/WebView');
+                  signInWithGoogle(true); // Use redirect
+                } else {
+                  console.log('🖥️ Usando popup para desktop');
+                  signInWithGoogle(false); // Try popup first
+                }
+              }, 1000);
+              
+            } else {
+              showState('login-buttons');
+            }
+          }
+        } catch (initError) {
+          console.error('❌ Error en inicialización:', initError);
+          showError('Error de inicialización. Inténtalo manualmente.');
           showState('login-buttons');
         }
       }
+    });
   </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // === Firebase ===
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { app } from './firebase-init.js';
 import { isUserAdmin, toggleAdminElements } from './adminCheck.js';
 import { authGuard } from './authGuard.js';
@@ -20,6 +20,7 @@ async function mostrarBienvenidaConSueño(user) {
       // Obtener el nombre del usuario con múltiples fallbacks
       let userName = '';
       let userDream = '';
+      let needsOnboarding = false;
       
       // 1. Intentar desde los datos guardados en Firestore
       if (userSnap.exists()) {
@@ -29,6 +30,30 @@ async function mostrarBienvenidaConSueño(user) {
         }
         if (userData.dream) {
           userDream = userData.dream;
+        }
+        
+        // Verificar si necesita completar onboarding
+        needsOnboarding = !userData.onboardingCompleted && !userData.dream;
+      } else {
+        // Usuario nuevo sin documento en Firestore
+        needsOnboarding = true;
+        console.log('👤 [MAIN] Usuario nuevo detectado, creando documento base...');
+        
+        // Crear documento base para nuevos usuarios de Google
+        try {
+          await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email || '',
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || '',
+            emailVerified: user.emailVerified || false,
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString(),
+            onboardingCompleted: false
+          });
+          console.log('✅ [MAIN] Documento base creado para usuario:', user.email);
+        } catch (createError) {
+          console.error('❌ [MAIN] Error creando documento base:', createError);
         }
       }
       
@@ -51,6 +76,24 @@ async function mostrarBienvenidaConSueño(user) {
         } catch (e) {
           userName = 'Usuario';
         }
+      }
+      
+      // Si el usuario necesita onboarding, redirigir a dream-input
+      if (needsOnboarding) {
+        console.log('🎯 [MAIN] Usuario necesita completar onboarding, redirigiendo...');
+        setTimeout(() => {
+          window.location.href = 'dream-input.html';
+        }, 2000);
+        
+        welcomeMsg.innerHTML = `
+          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+            ¡Bienvenido ${userName}!
+          </div>
+          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
+            Configurando tu perfil...
+          </div>
+        `;
+        return;
       }
       
       // Crear mensaje de bienvenida personalizado
@@ -77,12 +120,19 @@ async function mostrarBienvenidaConSueño(user) {
           </div>
         `;
       } else if (userName) {
-        welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
+        welcomeMsg.innerHTML = `
+          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+            ¡Bienvenido ${userName}!
+          </div>
+          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
+            ¡Listo para ganar!
+          </div>
+        `;
       } else {
         welcomeMsg.textContent = '¡Bienvenido!';
       }
       
-      console.log(`✅ Usuario identificado: ${userName || 'Anónimo'}, Sueño: ${userDream || 'No definido'}`);
+      console.log(`✅ Usuario identificado: ${userName || 'Anónimo'}, Sueño: ${userDream || 'No definido'}, Onboarding: ${!needsOnboarding}`);
     }
   } catch (error) {
     console.error('❌ Error obteniendo datos del usuario:', error);
@@ -98,6 +148,13 @@ async function mostrarBienvenidaConSueño(user) {
       }
       
       if (userName) {
+        welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
+      } else {
+        welcomeMsg.textContent = '¡Bienvenido!';
+      }
+    }
+  }
+}
         welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
       } else {
         welcomeMsg.textContent = '¡Bienvenido!';
