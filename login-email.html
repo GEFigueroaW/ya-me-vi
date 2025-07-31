@@ -958,39 +958,55 @@
 
     // Function to show success/error notifications
     function showNotification(message, type = 'info') {
-      const notificationDiv = document.createElement('div');
-      const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+      const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500'
+      };
       
-      notificationDiv.className = `fixed top-4 left-1/2 transform -translate-x-1/2 ${bgColor} bg-opacity-90 backdrop-blur-lg text-white px-6 py-4 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown`;
-      notificationDiv.innerHTML = `
-        <div class="flex items-center">
-          <div class="mr-3">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</div>
-          <div>
-            <p class="font-semibold">${message}</p>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(notificationDiv);
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50 animate__animated animate__fadeInRight`;
+      notification.textContent = message;
       
-      // Auto-hide after 5 seconds
+      document.body.appendChild(notification);
+      
       setTimeout(() => {
-        if (notificationDiv.parentNode) {
-          notificationDiv.classList.remove('animate__fadeInDown');
-          notificationDiv.classList.add('animate__fadeOutUp');
-          setTimeout(() => {
-            notificationDiv.remove();
-          }, 500);
-        }
-      }, 5000);
+        notification.classList.remove('animate__fadeInRight');
+        notification.classList.add('animate__fadeOutRight');
+        setTimeout(() => {
+          notification.remove();
+        }, 500);
+      }, 3000);
     }
 
-    // Check for external auth return on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      checkExternalAuthReturn();
-    });
-  </script>
+    // Initialize biometric authentication system
+    async function initBiometricAuth() {
+      try {
+        // Import biometric login system
+        const { initBiometricLogin } = await import('./js/biometric-login.js');
+        
+        // Initialize biometric login
+        await initBiometricLogin('biometricLoginBtn');
+        console.log('✅ [LOGIN-EMAIL] Sistema biométrico inicializado');
+        
+      } catch (error) {
+        console.log('ℹ️ [LOGIN-EMAIL] Sistema biométrico no disponible:', error.message);
+        // Hide biometric button if import fails
+        if (biometricLoginBtn) {
+          biometricLoginBtn.style.display = 'none';
+        }
+      }
+    }
 
-  <!-- Cargar shared.js para el fondo dinámico -->
-  <script src="js/shared.js"></script>
+    // Check external auth return on page load
+    checkExternalAuthReturn();
+    
+    // Initialize biometric authentication
+    document.addEventListener('DOMContentLoaded', () => {
+      initBiometricAuth();
+    });
+
+    console.log('✅ [LOGIN-EMAIL] Sistema de login mejorado inicializado');
+  </script>
 </body>
 </html>

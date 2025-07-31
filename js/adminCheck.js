@@ -49,11 +49,17 @@ export async function isUserAdmin() {
 export function toggleAdminElements(showAdminElements) {
   const adminElements = document.querySelectorAll('.admin-only');
   
-  adminElements.forEach(element => {
+  console.log(`🔍 Encontrados ${adminElements.length} elementos admin-only`);
+  
+  adminElements.forEach((element, index) => {
     if (showAdminElements) {
+      element.classList.remove('hidden');
       element.style.display = 'block';
+      console.log(`✅ Elemento admin ${index + 1} mostrado`);
     } else {
+      element.classList.add('hidden');
       element.style.display = 'none';
+      console.log(`⛔ Elemento admin ${index + 1} ocultado`);
     }
   });
   

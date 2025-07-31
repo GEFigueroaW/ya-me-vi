@@ -4,6 +4,7 @@ import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/fireb
 import { app } from './firebase-init.js';
 import { isUserAdmin, toggleAdminElements } from './adminCheck.js';
 import { authGuard } from './authGuard.js';
+import { BiometricUtils } from './biometric-auth.js';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -155,13 +156,6 @@ async function mostrarBienvenidaConSueño(user) {
     }
   }
 }
-        welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
-      } else {
-        welcomeMsg.textContent = '¡Bienvenido!';
-      }
-    }
-  }
-}
 
 // === Manejo de sesión activa y bienvenida ===
 let authChecked = false;
@@ -177,11 +171,26 @@ onAuthStateChanged(auth, async (user) => {
     // Limpiar contador de redirecciones cuando la auth es exitosa
     authGuard.clearRedirectCount();
     
-    mostrarBienvenidaConSueño(user);
+    await mostrarBienvenidaConSueño(user);
+    
+    // Registrar credenciales biométricas si es la primera vez
+    try {
+      await BiometricUtils.registerAfterLogin(user);
+    } catch (error) {
+      console.log('ℹ️ [MAIN] No se pudo registrar biometría (opcional):', error.message);
+    }
     
     // Verificar si el usuario es administrador y mostrar/ocultar elementos
     const isAdmin = await isUserAdmin();
+    console.log('🔐 Verificación de admin completada:', isAdmin);
     toggleAdminElements(isAdmin);
+    
+    // Mostrar botón de admin si es administrador
+    const btnAdmin = document.getElementById('btn-admin');
+    if (btnAdmin && isAdmin) {
+      btnAdmin.classList.remove('hidden');
+      console.log('✅ Botón de administrador mostrado');
+    }
     
     if (isAdmin) {
       console.log('✅ Usuario identificado como administrador');
@@ -195,57 +204,85 @@ onAuthStateChanged(auth, async (user) => {
 
 // === Inicialización cuando el DOM está listo ===
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('🎯 DOM cargado, inicializando botones...');
+  
   // === Referencias DOM ===
   const btnAnalizar = document.getElementById('btn-analizar');
   const btnCombinacion = document.getElementById('btn-combinacion');
   const btnSugeridas = document.getElementById('btn-sugeridas');
   const btnAdmin = document.getElementById('btn-admin');
 
+  // Verificar que los elementos existen
+  console.log('🔍 Elementos encontrados:', {
+    btnAnalizar: !!btnAnalizar,
+    btnCombinacion: !!btnCombinacion,
+    btnSugeridas: !!btnSugeridas,
+    btnAdmin: !!btnAdmin
+  });
+
   // === Botones: alternar visibilidad y redirigir ===
   if (btnAnalizar && btnCombinacion && btnSugeridas) {
+    console.log('✅ Configurando event listeners para botones principales');
+    
     btnAnalizar.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('Botón Analizar clickeado');
-      btnAnalizar.classList.add('hidden');
-      btnCombinacion.classList.remove('hidden');
-      btnSugeridas.classList.remove('hidden');
-      window.location.href = "analisis.html";
+      console.log('🎯 Botón Analizar clickeado');
+      // Mostrar feedback visual inmediato
+      btnAnalizar.style.opacity = '0.5';
+      setTimeout(() => {
+        window.location.href = "analisis.html";
+      }, 100);
     });
 
     btnCombinacion.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('Botón Combinación clickeado');
-      btnCombinacion.classList.add('hidden');
-      btnAnalizar.classList.remove('hidden');
-      btnSugeridas.classList.remove('hidden');
-      window.location.href = "combinacion.html";
+      console.log('🎯 Botón Combinación clickeado');
+      // Mostrar feedback visual inmediato
+      btnCombinacion.style.opacity = '0.5';
+      setTimeout(() => {
+        window.location.href = "combinacion.html";
+      }, 100);
     });
 
     btnSugeridas.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('Botón Sugeridas clickeado');
-      btnSugeridas.classList.add('hidden');
-      btnAnalizar.classList.remove('hidden');
-      btnCombinacion.classList.remove('hidden');
-      window.location.href = "sugeridas.html";
+      console.log('🎯 Botón Sugeridas clickeado');
+      // Mostrar feedback visual inmediato
+      btnSugeridas.style.opacity = '0.5';
+      setTimeout(() => {
+        window.location.href = "sugeridas.html";
+      }, 100);
     });
   } else {
-    console.warn('No se encontraron los botones principales');
+    console.warn('❌ No se encontraron todos los botones principales');
   }
   
   // Botón de administración (solo visible para admins)
   if (btnAdmin) {
+    console.log('✅ Configurando event listener para botón de admin');
     btnAdmin.addEventListener('click', (e) => {
       e.preventDefault();
       console.log('🔐 Accediendo al panel de administración');
-      window.location.href = "admin.html";
+      btnAdmin.style.opacity = '0.5';
+      setTimeout(() => {
+        window.location.href = "admin.html";
+      }, 100);
     });
     
-    // Verificación adicional de administrador
-    isUserAdmin().then(isAdmin => {
-      if (isAdmin) {
-        btnAdmin.classList.remove('hidden');
+    // Verificación adicional de administrador después de un tiempo
+    setTimeout(async () => {
+      try {
+        const isAdmin = await isUserAdmin();
+        console.log('🔍 Verificación tardía de admin:', isAdmin);
+        if (isAdmin) {
+          btnAdmin.classList.remove('hidden');
+          console.log('✅ Botón de admin mostrado por verificación tardía');
+        }
+      } catch (error) {
+        console.error('❌ Error en verificación tardía de admin:', error);
       }
-    });
+    }, 2000);
+  } else {
+    console.warn('❌ No se encontró el botón de administración');
   }
 });
