@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Selecciona tu Sueño</title>
+  
+  <!-- DETECCIÓN TEMPRANA DE WEBVIEW -->
+  <script>
+    // Detección inmediata de WebView
+    (function() {
+      console.log('🔍 [DREAM-INPUT] Detección temprana de WebView iniciada...');
+      
+      const ua = navigator.userAgent.toLowerCase();
+      const isWebView = 
+        ua.includes('webintoapp') ||
+        ua.includes('webview') ||
+        /android.*version.*chrome/i.test(ua) ||
+        /crios|fxios/i.test(ua) ||
+        (window.navigator.standalone === false && /iPhone|iPad/.test(ua)) ||
+        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
+        (/Android|iPhone/i.test(ua) && window.location.href.includes('webintoapp'));
+      
+      if (isWebView) {
+        console.log('🚨 [DREAM-INPUT] WebView detectado - página optimizada para WebView');
+        localStorage.setItem('webview_detected', 'true');
+      }
+    })();
+  </script>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="css/styles.css" />
+  
+  <!-- Custom styles -->
+  <style>
+    .floating-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .logo-redondo {
+      border-radius: 50% !important;
+      object-fit: cover !important;
+    }
+    
+    .logo-hero {
+      width: 96px !important;
+      height: 96px !important;
+    }
+    
+    .dream-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .dream-card:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .dream-card.selected {
+      background: rgba(34, 197, 94, 0.3);
+      border-color: rgba(34, 197, 94, 0.6);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-white bg-cover bg-center bg-no-repeat relative" style="background-image: url('assets/vg2.jpg');">
+
+  <!-- Overlay oscuro para mejor legibilidad -->
+  <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+
+  <!-- Contenido principal -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <!-- Logo -->
+    <div class="mb-8">
+      <div class="floating-animation">
+        <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="logo-redondo logo-hero rounded-full shadow-2xl object-cover mx-auto" style="width: 96px !important; height: 96px !important; border-radius: 50% !important; object-fit: cover !important;">
+      </div>
+    </div>
+
+    <!-- Título -->
+    <h1 class="text-3xl md:text-4xl font-bold mb-4 text-center">¡Bienvenido a YA ME VI!</h1>
+    <p class="text-white text-opacity-90 mb-8 text-center max-w-md">
+      Para personalizar tu experiencia, cuéntanos <strong>¿cuál es tu sueño?</strong><br>
+      ¿Qué harías con el dinero que pudieras ganar?
+    </p>
+
+    <!-- Opciones de sueños -->
+    <div class="w-full max-w-md space-y-4 mb-8">
+      
+      <div class="dream-card p-4 rounded-xl cursor-pointer" data-dream="casa">
+        <div class="flex items-center space-x-4">
+          <div class="text-3xl">🏠</div>
+          <div>
+            <h3 class="font-semibold text-lg">Comprar una casa</h3>
+            <p class="text-white text-opacity-80 text-sm">Tu hogar soñado</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dream-card p-4 rounded-xl cursor-pointer" data-dream="auto">
+        <div class="flex items-center space-x-4">
+          <div class="text-3xl">🚗</div>
+          <div>
+            <h3 class="font-semibold text-lg">Comprar un auto</h3>
+            <p class="text-white text-opacity-80 text-sm">El vehículo que necesitas</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dream-card p-4 rounded-xl cursor-pointer" data-dream="viaje">
+        <div class="flex items-center space-x-4">
+          <div class="text-3xl">✈️</div>
+          <div>
+            <h3 class="font-semibold text-lg">Viajar por el mundo</h3>
+            <p class="text-white text-opacity-80 text-sm">Conocer nuevos lugares</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dream-card p-4 rounded-xl cursor-pointer" data-dream="negocio">
+        <div class="flex items-center space-x-4">
+          <div class="text-3xl">💼</div>
+          <div>
+            <h3 class="font-semibold text-lg">Iniciar un negocio</h3>
+            <p class="text-white text-opacity-80 text-sm">Tu propia empresa</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dream-card p-4 rounded-xl cursor-pointer" data-dream="familia">
+        <div class="flex items-center space-x-4">
+          <div class="text-3xl">👨‍👩‍👧‍👦</div>
+          <div>
+            <h3 class="font-semibold text-lg">Ayudar a mi familia</h3>
+            <p class="text-white text-opacity-80 text-sm">El bienestar de los tuyos</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dream-card p-4 rounded-xl cursor-pointer" data-dream="estudios">
+        <div class="flex items-center space-x-4">
+          <div class="text-3xl">🎓</div>
+          <div>
+            <h3 class="font-semibold text-lg">Estudiar o especializarme</h3>
+            <p class="text-white text-opacity-80 text-sm">Invertir en educación</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dream-card p-4 rounded-xl cursor-pointer" data-dream="libertad">
+        <div class="flex items-center space-x-4">
+          <div class="text-3xl">🗽</div>
+          <div>
+            <h3 class="font-semibold text-lg">Libertad financiera</h3>
+            <p class="text-white text-opacity-80 text-sm">Independencia económica</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dream-card p-4 rounded-xl cursor-pointer" data-dream="otro">
+        <div class="flex items-center space-x-4">
+          <div class="text-3xl">💭</div>
+          <div>
+            <h3 class="font-semibold text-lg">Otro sueño</h3>
+            <p class="text-white text-opacity-80 text-sm">Algo más específico</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campo personalizado para "otro" -->
+    <div id="customDreamContainer" class="w-full max-w-md mb-6 hidden">
+      <input 
+        type="text" 
+        id="customDreamInput" 
+        placeholder="Describe tu sueño..." 
+        class="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        maxlength="100"
+      />
+    </div>
+
+    <!-- Botón continuar -->
+    <button id="continueBtn" class="w-full max-w-md bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+      Continuar con mi sueño ✨
+    </button>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden mt-4 p-3 bg-green-600 bg-opacity-80 backdrop-blur-lg rounded-lg text-white text-sm text-center max-w-md w-full">
+      <div class="flex items-center justify-center space-x-2">
+        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+        <span>Guardando tu sueño...</span>
+      </div>
+    </div>
+
+    <!-- Saltar por ahora -->
+    <div class="mt-6 text-center">
+      <button id="skipBtn" class="text-white text-opacity-60 hover:text-opacity-80 transition duration-300 underline">
+        Saltar por ahora →
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { app } from './js/firebase-init.js';
+
+    const db = getFirestore(app);
+
+    // Elements
+    const dreamCards = document.querySelectorAll('.dream-card');
+    const customDreamContainer = document.getElementById('customDreamContainer');
+    const customDreamInput = document.getElementById('customDreamInput');
+    const continueBtn = document.getElementById('continueBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const loadingState = document.getElementById('loadingState');
+
+    let selectedDream = null;
+    let currentUser = null;
+
+    // Check authentication
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        console.log('❌ [DREAM-INPUT] Usuario no autenticado, redirigiendo...');
+        window.location.href = 'login-email.html';
+        return;
+      }
+      
+      currentUser = user;
+      console.log('✅ [DREAM-INPUT] Usuario autenticado:', user.email || user.uid);
+    });
+
+    // Handle dream selection
+    dreamCards.forEach(card => {
+      card.addEventListener('click', () => {
+        // Remove previous selection
+        dreamCards.forEach(c => c.classList.remove('selected'));
+        
+        // Select current card
+        card.classList.add('selected');
+        selectedDream = card.dataset.dream;
+        
+        // Show/hide custom input
+        if (selectedDream === 'otro') {
+          customDreamContainer.classList.remove('hidden');
+          customDreamInput.focus();
+        } else {
+          customDreamContainer.classList.add('hidden');
+          customDreamInput.value = '';
+        }
+        
+        // Enable continue button
+        continueBtn.disabled = false;
+        
+        console.log('✅ [DREAM-INPUT] Sueño seleccionado:', selectedDream);
+      });
+    });
+
+    // Handle custom dream input
+    customDreamInput.addEventListener('input', () => {
+      const customText = customDreamInput.value.trim();
+      continueBtn.disabled = selectedDream !== 'otro' || !customText;
+    });
+
+    // Save dream and continue
+    continueBtn.addEventListener('click', async () => {
+      if (!currentUser || !selectedDream) return;
+      
+      try {
+        loadingState.classList.remove('hidden');
+        continueBtn.disabled = true;
+        
+        let dreamText = selectedDream;
+        if (selectedDream === 'otro' && customDreamInput.value.trim()) {
+          dreamText = customDreamInput.value.trim();
+        }
+        
+        // Save dream to Firestore
+        const userRef = doc(db, 'users', currentUser.uid);
+        await updateDoc(userRef, {
+          dream: dreamText,
+          dreamCategory: selectedDream,
+          dreamCompletedAt: new Date().toISOString(),
+          onboardingCompleted: true
+        }).catch(async (error) => {
+          if (error.code === 'not-found') {
+            // Create document if it doesn't exist
+            await setDoc(userRef, {
+              email: currentUser.email || '',
+              displayName: currentUser.displayName || '',
+              dream: dreamText,
+              dreamCategory: selectedDream,
+              dreamCompletedAt: new Date().toISOString(),
+              onboardingCompleted: true,
+              createdAt: new Date().toISOString()
+            });
+          } else {
+            throw error;
+          }
+        });
+        
+        console.log('✅ [DREAM-INPUT] Sueño guardado:', dreamText);
+        
+        // Clean up registration flags
+        localStorage.removeItem('registration_in_progress');
+        localStorage.removeItem('from_welcome_google');
+        localStorage.removeItem('force_dream_input');
+        
+        // Redirect to home
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 1000);
+        
+      } catch (error) {
+        console.error('❌ [DREAM-INPUT] Error guardando sueño:', error);
+        
+        loadingState.classList.add('hidden');
+        continueBtn.disabled = false;
+        
+        // Show error but still allow to continue
+        alert('No se pudo guardar tu sueño, pero puedes continuar. Lo configuraremos más tarde.');
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 500);
+      }
+    });
+
+    // Skip for now
+    skipBtn.addEventListener('click', () => {
+      console.log('ℹ️ [DREAM-INPUT] Usuario saltó selección de sueño');
+      
+      // Clean up registration flags
+      localStorage.removeItem('registration_in_progress');
+      localStorage.removeItem('from_welcome_google');
+      localStorage.removeItem('force_dream_input');
+      
+      window.location.href = 'home.html';
+    });
+
+    // Handle Enter key in custom input
+    customDreamInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !continueBtn.disabled) {
+        continueBtn.click();
+      }
+    });
+  </script>
+
+  <!-- Cargar shared.js para el fondo dinámico -->
+  <script src="js/shared.js"></script>
+</body>
+</html>

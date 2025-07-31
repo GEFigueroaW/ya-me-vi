@@ -81,12 +81,12 @@ export class SmartRedirector {
         const currentUser = await checkAuthState;
         
         if (currentUser) {
-          console.log('✅ Usuario ya autenticado encontrado:', currentUser.email);
-          console.log('➡️ Redirigiendo directamente a home.html');
+          console.log('✅ Usuario previamente autenticado encontrado:', currentUser.email);
+          console.log('🔐 Redirigiendo a login-email.html para confirmar identidad');
           
           return {
-            destination: 'home.html',
-            reason: 'already_authenticated',
+            destination: 'login-email.html',
+            reason: 'confirm_identity',
             userInfo: { email: currentUser.email }
           };
         }

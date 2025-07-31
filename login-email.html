@@ -629,8 +629,21 @@
     googleLoginBtn.addEventListener('click', async () => {
       console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google...');
       
-      // Usar la detección temprana de WebView
-      if (window.WEBVIEW_MODE || localStorage.getItem('webview_detected') === 'true') {
+      // Detectar WebView de manera más agresiva
+      const ua = navigator.userAgent.toLowerCase();
+      const isWebView = 
+        ua.includes('webintoapp') ||
+        ua.includes('webview') ||
+        ua.includes('wv') ||
+        /android.*version.*chrome/i.test(ua) ||
+        /crios|fxios/i.test(ua) ||
+        (window.navigator.standalone === false && /iPhone|iPad/.test(ua)) ||
+        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
+        (/Android|iPhone/i.test(ua) && (ua.includes('inapp') || ua.includes('fbav') || ua.includes('instagram'))) ||
+        window.WEBVIEW_MODE || 
+        localStorage.getItem('webview_detected') === 'true';
+      
+      if (isWebView) {
         console.log('🔍 [LOGIN-EMAIL] WebView detectado - usando autenticación externa');
         
         // Crear URL de login externo
@@ -641,15 +654,42 @@
         console.log('🔗 [LOGIN-EMAIL] Redirigiendo a:', externalUrl);
         
         try {
+          // Mostrar mensaje al usuario antes de abrir
+          showLoading('Abriendo navegador externo para Google...');
+          
           // Intentar window.open primero
-          const popup = window.open(externalUrl, '_blank', 'width=400,height=600');
-          if (!popup || popup.closed) {
-            throw new Error('Popup bloqueado');
+          const popup = window.open(externalUrl, '_blank', 'width=400,height=600,scrollbars=yes,resizable=yes');
+          
+          if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+            throw new Error('Popup bloqueado o no soportado');
           }
+          
+          // Verificar si el popup se cerró
+          const checkClosed = setInterval(() => {
+            if (popup.closed) {
+              clearInterval(checkClosed);
+              hideLoading();
+              console.log('🔄 [LOGIN-EMAIL] Popup cerrado por usuario');
+            }
+          }, 1000);
+          
+          // Auto-cerrar verificación después de 5 minutos
+          setTimeout(() => {
+            clearInterval(checkClosed);
+            if (!popup.closed) {
+              popup.close();
+            }
+            hideLoading();
+          }, 300000);
+          
         } catch (error) {
           // Si falla, usar redirección directa
-          console.log('🔄 [LOGIN-EMAIL] Popup falló, usando redirección');
-          window.location.href = externalUrl;
+          console.log('🔄 [LOGIN-EMAIL] Popup falló, usando redirección directa');
+          showLoading('Redirigiendo para autenticación...');
+          
+          setTimeout(() => {
+            window.location.href = externalUrl;
+          }, 1000);
         }
         
         return;
@@ -659,6 +699,13 @@
         showLoading('Conectando con Google...');
         
         const provider = new GoogleAuthProvider();
+        
+        // Configurar proveedor para evitar problemas de popup
+        provider.setCustomParameters({
+          prompt: 'select_account',
+          access_type: 'online'
+        });
+        
         const result = await signInWithPopup(auth, provider);
         
         console.log('✅ Google login exitoso:', result.user.email);
@@ -685,6 +732,10 @@
           errorMsg = 'Ventana cerrada. Inténtalo de nuevo';
         } else if (error.code === 'auth/popup-blocked') {
           errorMsg = 'Popup bloqueado. Permite popups e inténtalo de nuevo';
+        } else if (error.code === 'auth/cancelled-popup-request') {
+          errorMsg = 'Solicitud cancelada. Inténtalo de nuevo';
+        } else if (error.code === 'auth/web-storage-unsupported') {
+          errorMsg = 'Almacenamiento no soportado. Usa un navegador diferente';
         }
         
         showError(errorMsg);
