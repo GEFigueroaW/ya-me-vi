@@ -26,6 +26,8 @@ async function mostrarBienvenidaConSueño(user) {
       // 1. Intentar desde los datos guardados en Firestore
       if (userSnap.exists()) {
         const userData = userSnap.data();
+        console.log('📋 [MAIN] Datos de usuario desde Firestore:', userData);
+        
         if (userData.displayName || userData.name) {
           userName = (userData.displayName || userData.name).split(' ')[0]; // Solo primer nombre
         }
@@ -33,8 +35,16 @@ async function mostrarBienvenidaConSueño(user) {
           userDream = userData.dream;
         }
         
-        // Verificar si necesita completar onboarding
-        needsOnboarding = !userData.onboardingCompleted && !userData.dream;
+        // Verificar si necesita completar onboarding - LÓGICA CORREGIDA
+        // Solo necesita onboarding si NO tiene sueño Y NO ha completado onboarding
+        needsOnboarding = (!userData.dream || userData.dream === '') && 
+                         (userData.onboardingCompleted !== true);
+        
+        console.log('🔍 [MAIN] Verificación onboarding:', {
+          hasDream: !!userData.dream,
+          onboardingCompleted: userData.onboardingCompleted,
+          needsOnboarding: needsOnboarding
+        });
       } else {
         // Usuario nuevo sin documento en Firestore
         needsOnboarding = true;
@@ -82,6 +92,19 @@ async function mostrarBienvenidaConSueño(user) {
       // Si el usuario necesita onboarding, redirigir a dream-input
       if (needsOnboarding) {
         console.log('🎯 [MAIN] Usuario necesita completar onboarding, redirigiendo...');
+        
+        // Verificar si ya estamos en proceso de onboarding para evitar loops
+        const currentPage = window.location.pathname.split('/').pop();
+        const onboardingInProgress = localStorage.getItem('onboarding_in_progress');
+        
+        if (currentPage === 'dream-input.html') {
+          console.log('ℹ️ [MAIN] Ya estamos en dream-input.html, no redirigir');
+          return;
+        }
+        
+        // Marcar que estamos en proceso de onboarding
+        localStorage.setItem('onboarding_in_progress', 'true');
+        
         setTimeout(() => {
           window.location.href = 'dream-input.html';
         }, 2000);
@@ -96,6 +119,9 @@ async function mostrarBienvenidaConSueño(user) {
         `;
         return;
       }
+      
+      // Limpiar flag de onboarding si ya no es necesario
+      localStorage.removeItem('onboarding_in_progress');
       
       // Crear mensaje de bienvenida personalizado
       if (userDream && userName) {
