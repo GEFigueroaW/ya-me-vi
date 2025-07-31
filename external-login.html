@@ -7,7 +7,32 @@
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link     // Auto-iniciar según el tipo
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 External login page loaded');
+      console.log('📋 Parámetros:', { authType, returnUrl, isWebView });
+      
+      // Mostrar botones de login mientras cargamos
+      showState('login-buttons');
+      
+      // Si es auto-inicio desde detección temprana, intentar Google inmediatamente
+      if (urlParams.get('immediate') === 'true' && authType === 'google') {
+        console.log('🎯 Auto-inicio inmediato de Google auth...');
+        setTimeout(() => {
+          signInWithGoogle(false);
+        }, 1000);
+      }
+      
+      // Primero verificar si hay resultado de redirección
+      const hasRedirectResult = await checkRedirectResult();
+      
+      if (!hasRedirectResult && authType === 'google' && !urlParams.get('immediate')) {
+        console.log('🎯 Auto-iniciando Google auth (no inmediato)...');
+        setTimeout(() => {
+          signInWithGoogle(false);
+        }, 500);
+      }
+    });on" href="assets/apple-touch-icon.png">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>

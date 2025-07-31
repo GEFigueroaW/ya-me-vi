@@ -5,6 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bienvenido - YA ME VI</title>
   
+  <!-- DETECCIÓN TEMPRANA DE WEBVIEW -->
+  <script>
+    // Detección inmediata de WebView antes de que se cargue cualquier otra cosa
+    (function() {
+      console.log('🔍 [WELCOME] Detección temprana de WebView iniciada...');
+      
+      const ua = navigator.userAgent.toLowerCase();
+      const isWebView = 
+        // Detección específica de WebIntoApp y otros WebViews
+        ua.includes('webintoapp') ||
+        ua.includes('webview') ||
+        /android.*version.*chrome/i.test(ua) ||
+        /crios|fxios/i.test(ua) ||
+        // Detección por características de entorno
+        (window.navigator.standalone === false && /iPhone|iPad/.test(ua)) ||
+        // Detección por proporciones de pantalla completa
+        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
+        // Forzar en móviles para debug
+        (/Android|iPhone/i.test(ua) && window.location.href.includes('webintoapp'));
+      
+      console.log('🔍 [WELCOME] WebView detectado:', isWebView);
+      console.log('📱 [WELCOME] User Agent:', ua.slice(0, 100));
+      
+      if (isWebView) {
+        console.log('🚨 [WELCOME] WebView detectado - configurando modo WebView');
+        
+        // Marcar que estamos en WebView para uso posterior
+        window.WEBVIEW_MODE = true;
+        localStorage.setItem('webview_detected', 'true');
+        
+        // No redirigir inmediatamente desde welcome, solo marcar el modo
+        console.log('✅ [WELCOME] Modo WebView configurado - continuando con carga');
+      } else {
+        console.log('🖥️ [WELCOME] Navegador normal detectado');
+        window.WEBVIEW_MODE = false;
+        localStorage.removeItem('webview_detected');
+      }
+    })();
+  </script>
+  
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
@@ -469,10 +509,29 @@
       try {
         showLoading('Conectando con Google...');
         
-        // Detectar WebView y usar autenticación externa si es necesario
-        if (WebViewDetector.isWebView()) {
-          console.log('🔍 WebView detectado - usando autenticación externa');
-          WebViewDetector.openExternalLogin('google');
+        // Usar la detección temprana de WebView
+        if (window.WEBVIEW_MODE || localStorage.getItem('webview_detected') === 'true') {
+          console.log('🔍 [WELCOME] WebView detectado - usando autenticación externa');
+          
+          // Crear URL de login externo
+          const baseUrl = window.location.origin;
+          const returnUrl = encodeURIComponent(window.location.href);
+          const externalUrl = `${baseUrl}/external-login.html?type=google&return=${returnUrl}&webview=true&from=welcome`;
+          
+          console.log('🔗 [WELCOME] Redirigiendo a:', externalUrl);
+          
+          try {
+            // Intentar window.open primero
+            const popup = window.open(externalUrl, '_blank', 'width=400,height=600');
+            if (!popup || popup.closed) {
+              throw new Error('Popup bloqueado');
+            }
+          } catch (error) {
+            // Si falla, usar redirección directa
+            console.log('🔄 [WELCOME] Popup falló, usando redirección');
+            window.location.href = externalUrl;
+          }
+          
           return;
         }
         

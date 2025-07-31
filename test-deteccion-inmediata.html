@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔍 Test Detección Inmediata</title>
+  
+  <!-- DETECCIÓN ULTRA TEMPRANA -->
+  <script>
+    console.log('🚀 INICIANDO DETECCIÓN ULTRA TEMPRANA...');
+    
+    // Información del entorno
+    const userAgent = navigator.userAgent;
+    const viewport = window.innerWidth + 'x' + window.innerHeight;
+    const screen = window.screen.width + 'x' + window.screen.height;
+    
+    console.log('📱 User Agent:', userAgent);
+    console.log('📐 Viewport:', viewport);
+    console.log('🖥️ Screen:', screen);
+    console.log('🌐 URL:', window.location.href);
+    
+    // Detección de WebView
+    const ua = userAgent.toLowerCase();
+    const webViewChecks = {
+      'WebIntoApp UA': ua.includes('webintoapp'),
+      'WebView UA': ua.includes('webview'),
+      'Android Chrome': /android.*version.*chrome/i.test(ua),
+      'iOS WebView': /crios|fxios/i.test(ua),
+      'iOS Standalone': window.navigator.standalone === false && /iPhone|iPad/.test(ua),
+      'Full Screen': window.innerWidth === window.screen.width && window.innerHeight === window.screen.height,
+      'Mobile': /Android|iPhone|iPad/i.test(ua)
+    };
+    
+    console.log('🔍 CHECKS DE WEBVIEW:');
+    Object.entries(webViewChecks).forEach(([key, value]) => {
+      console.log(`  ${key}: ${value ? '✅' : '❌'}`);
+    });
+    
+    const isWebView = Object.values(webViewChecks).some(check => check);
+    
+    console.log('🎯 RESULTADO FINAL: WebView =', isWebView ? '✅ SÍ' : '❌ NO');
+    
+    if (isWebView) {
+      console.log('🚨 WEBVIEW DETECTADO - MOSTRANDO PÁGINA ESPECIAL');
+      
+      // Escribir página inmediatamente
+      document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>WebView Detectado</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+              background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+              color: white;
+              margin: 0;
+              padding: 20px;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .container {
+              background: rgba(255, 255, 255, 0.1);
+              backdrop-filter: blur(10px);
+              border-radius: 20px;
+              padding: 30px;
+              text-align: center;
+              max-width: 500px;
+              width: 100%;
+            }
+            .status { font-size: 4em; margin: 20px 0; }
+            .info {
+              background: rgba(0, 0, 0, 0.2);
+              padding: 15px;
+              border-radius: 10px;
+              margin: 15px 0;
+              text-align: left;
+              font-family: monospace;
+              font-size: 0.9em;
+            }
+            .button {
+              background: #2196F3;
+              color: white;
+              border: none;
+              padding: 15px 25px;
+              font-size: 16px;
+              border-radius: 10px;
+              margin: 10px;
+              cursor: pointer;
+              text-decoration: none;
+              display: inline-block;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="status">✅</div>
+            <h1>¡WebView Detectado!</h1>
+            <p>La detección temprana funcionó correctamente.</p>
+            
+            <div class="info">
+              <strong>Información del Entorno:</strong><br>
+              • User Agent: ${userAgent.slice(0, 80)}...<br>
+              • Viewport: ${viewport}<br>
+              • Screen: ${screen}<br>
+              • URL: ${window.location.href}<br><br>
+              
+              <strong>Checks Pasados:</strong><br>
+              ${Object.entries(webViewChecks)
+                .filter(([key, value]) => value)
+                .map(([key]) => `• ${key}: ✅`)
+                .join('<br>')}
+            </div>
+            
+            <h3>🔐 Test de Autenticación</h3>
+            <p>Ahora puedes probar el login externo:</p>
+            
+            <a href="external-login.html?type=google&return=${encodeURIComponent(window.location.href)}&webview=true" class="button">
+              🌐 Test Login Externo
+            </a>
+            
+            <a href="login.html" class="button">
+              🔙 Ir a Login Normal
+            </a>
+            
+            <div style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">
+              Si puedes ver esta página, la detección de WebView está funcionando correctamente.
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+      
+      // Detener ejecución del resto de la página
+      throw new Error('WebView detectado - página reemplazada');
+    } else {
+      console.log('🖥️ NAVEGADOR NORMAL - CONTINUANDO CON PÁGINA NORMAL');
+    }
+  </script>
+</head>
+<body style="
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  color: white;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+">
+  <div style="
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+  ">
+    <div style="font-size: 4em; margin: 20px 0;">🖥️</div>
+    <h1>Navegador Normal</h1>
+    <p>No se detectó WebView. Esta es la página normal.</p>
+    
+    <div style="
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      text-align: left;
+      font-family: monospace;
+      font-size: 0.9em;
+    ">
+      <strong>Información del Entorno:</strong><br>
+      • User Agent: <span id="ua"></span><br>
+      • Viewport: <span id="viewport"></span><br>
+      • Screen: <span id="screen"></span><br>
+    </div>
+    
+    <a href="login.html" style="
+      background: #2196F3;
+      color: white;
+      text-decoration: none;
+      padding: 15px 25px;
+      font-size: 16px;
+      border-radius: 10px;
+      margin: 10px;
+      display: inline-block;
+    ">🔐 Ir a Login</a>
+    
+    <a href="test-webintoapp.html" style="
+      background: #9C27B0;
+      color: white;
+      text-decoration: none;
+      padding: 15px 25px;
+      font-size: 16px;
+      border-radius: 10px;
+      margin: 10px;
+      display: inline-block;
+    ">🔧 Tests Avanzados</a>
+  </div>
+
+  <script>
+    // Llenar información
+    document.getElementById('ua').textContent = navigator.userAgent.slice(0, 60) + '...';
+    document.getElementById('viewport').textContent = window.innerWidth + 'x' + window.innerHeight;
+    document.getElementById('screen').textContent = window.screen.width + 'x' + window.screen.height;
+  </script>
+</body>
+</html>
