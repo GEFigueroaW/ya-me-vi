@@ -1,77 +1,145 @@
 // Detector de WebView y configuraciones específicas para WebIntoApp
 // Archivo: js/webview-detector.js
 
-export class WebViewDetector {
+class WebViewDetector {
   static isWebView() {
     const userAgent = navigator.userAgent.toLowerCase();
     
-    // Detectar diferentes tipos de WebView
+    // Detectar WebIntoApp específicamente
+    if (this.isWebIntoApp()) {
+      console.log('🔍 WebIntoApp detectado');
+      return true;
+    }
+    
+    // Detectar otros tipos de WebView
     const webViewPatterns = [
       'webview',
       'wv',
-      'webintoapp',
+      'android.*version.*chrome',
+      'crios',
+      'fxios',
+      'mobile.*safari.*version',
       'facebook',
       'instagram',
       'twitter',
       'linkedin'
     ];
     
-    return webViewPatterns.some(pattern => userAgent.includes(pattern)) ||
-           // También detectar por características específicas
-           (window.navigator.standalone === false && /iPhone|iPad/.test(userAgent)) ||
-           (typeof window.orientation !== 'undefined' && !window.DeviceMotionEvent);
+    const isWebViewUA = webViewPatterns.some(pattern => {
+      const regex = new RegExp(pattern);
+      return regex.test(userAgent);
+    });
+    
+    // Detectar por características específicas del entorno
+    const hasWebViewFeatures = 
+      (window.navigator.standalone === false && /iPhone|iPad/.test(userAgent)) ||
+      (typeof window.orientation !== 'undefined' && !window.DeviceMotionEvent) ||
+      (window.ReactNativeWebView !== undefined) ||
+      (window.webkit && window.webkit.messageHandlers) ||
+      (window.Android !== undefined);
+    
+    const result = isWebViewUA || hasWebViewFeatures;
+    console.log('🔍 WebView detectado:', result, {
+      userAgent: userAgent.slice(0, 100),
+      isWebViewUA,
+      hasWebViewFeatures
+    });
+    
+    return result;
   }
   
   static isWebIntoApp() {
-    return navigator.userAgent.toLowerCase().includes('webintoapp') ||
-           window.location.href.includes('webintoapp') ||
-           // Detectar por configuración específica de WebIntoApp
-           (this.isWebView() && window.innerWidth === window.screen.width);
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    // Múltiples formas de detectar WebIntoApp
+    const webIntoAppIndicators = [
+      userAgent.includes('webintoapp'),
+      window.location.href.includes('webintoapp'),
+      // Detectar por propiedades específicas que WebIntoApp podría establecer
+      window.WEBINTOAPP !== undefined,
+      // Detectar por características del viewport en apps móviles
+      (this.isMobile() && window.innerWidth === window.screen.width && window.innerHeight === window.screen.height)
+    ];
+    
+    return webIntoAppIndicators.some(indicator => indicator);
+  }
+  
+  static isMobile() {
+    return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
   
   static shouldUseExternalBrowser() {
-    return this.isWebView() || this.isWebIntoApp();
+    return this.isWebView();
   }
   
-  static createExternalLoginURL(returnUrl = window.location.origin) {
-    // Crear URL para login externo
+  static generateExternalLoginUrl(type = 'google') {
     const baseUrl = window.location.origin;
-    const loginUrl = `${baseUrl}/external-login.html`;
-    const params = new URLSearchParams({
-      returnUrl: returnUrl,
-      timestamp: Date.now()
-    });
-    
-    return `${loginUrl}?${params.toString()}`;
+    const returnUrl = encodeURIComponent(window.location.href);
+    return `${baseUrl}/external-login.html?type=${type}&return=${returnUrl}&webview=true`;
   }
   
-  static openExternalLogin() {
-    if (this.shouldUseExternalBrowser()) {
-      const externalUrl = this.createExternalLoginURL();
-      
-      // Intentar abrir en navegador externo
-      try {
-        // Para WebIntoApp y otros WebViews
-        if (typeof window.open === 'function') {
-          const popup = window.open(externalUrl, '_blank', 'toolbar=yes,location=yes');
-          
-          // Si no se abre popup, usar location
-          if (!popup || popup.closed) {
-            window.location.href = externalUrl;
-          }
-          
+  static openExternalLogin(type = 'google') {
+    console.log('🌐 Intentando abrir autenticación externa...');
+    
+    const externalUrl = this.generateExternalLoginUrl(type);
+    console.log('🔗 URL externa generada:', externalUrl);
+    
+    try {
+      // Método 1: Intentar window.open con configuraciones específicas para WebView
+      if (typeof window.open === 'function') {
+        console.log('📱 Intentando window.open...');
+        
+        // Configuración específica para WebViews
+        const windowFeatures = 'toolbar=yes,location=yes,directories=yes,status=yes,menubar=yes,scrollbars=yes,resizable=yes,width=400,height=600';
+        const popup = window.open(externalUrl, '_blank', windowFeatures);
+        
+        if (popup && !popup.closed) {
+          console.log('✅ Popup abierto exitosamente');
           return true;
         } else {
-          window.location.href = externalUrl;
-          return true;
+          console.log('⚠️ Popup bloqueado o falló, intentando redirección...');
         }
-      } catch (error) {
-        console.error('Error abriendo navegador externo:', error);
+      }
+      
+      // Método 2: Redirección directa
+      console.log('🔄 Redirigiendo directamente...');
+      window.location.href = externalUrl;
+      return true;
+      
+    } catch (error) {
+      console.error('❌ Error abriendo navegador externo:', error);
+      
+      // Método de respaldo: intentar location.replace
+      try {
+        window.location.replace(externalUrl);
+        return true;
+      } catch (replaceError) {
+        console.error('❌ Error en location.replace:', replaceError);
         return false;
       }
     }
-    
-    return false;
+  }
+  
+  static getEnvironmentInfo() {
+    return {
+      userAgent: navigator.userAgent,
+      isWebView: this.isWebView(),
+      isWebIntoApp: this.isWebIntoApp(),
+      isMobile: this.isMobile(),
+      shouldUseExternal: this.shouldUseExternalBrowser(),
+      viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        screenWidth: window.screen.width,
+        screenHeight: window.screen.height
+      },
+      features: {
+        webkitMessageHandlers: !!(window.webkit && window.webkit.messageHandlers),
+        reactNativeWebView: !!window.ReactNativeWebView,
+        android: !!window.Android,
+        standalone: window.navigator.standalone
+      }
+    };
   }
 }
 

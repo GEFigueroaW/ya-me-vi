@@ -88,7 +88,7 @@
 
   <script type="module">
     import { auth } from './js/firebase-init.js';
-    import { signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { signInWithPopup, signInWithRedirect, signInWithEmailAndPassword, GoogleAuthProvider, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     
     // Estados de la UI
     const loadingState = document.getElementById('loading-state');
@@ -98,156 +98,221 @@
     
     // Obtener parámetros de URL
     const urlParams = new URLSearchParams(window.location.search);
-    const returnUrl = urlParams.get('returnUrl') || window.location.origin;
+    const authType = urlParams.get('type') || 'google';
+    const returnUrl = urlParams.get('return') || window.location.origin;
+    const isWebView = urlParams.get('webview') === 'true';
     
-    // Función para mostrar estado
+    console.log('🔗 External login iniciado:', { authType, returnUrl, isWebView });
+    
     function showState(state) {
       [loadingState, loginButtons, successState, errorState].forEach(el => el.classList.add('hidden'));
       document.getElementById(state + '-state').classList.remove('hidden');
     }
     
-    // Función para manejar éxito de login
-    function handleLoginSuccess(user, method = 'Google') {
-      console.log(`✅ Login exitoso con ${method}:`, user.email);
-      
-      // Guardar información de sesión en localStorage para la app principal
-      const sessionData = {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        loginMethod: method,
-        timestamp: Date.now()
-      };
-      
-      localStorage.setItem('external_login_success', JSON.stringify(sessionData));
-      localStorage.setItem('external_login_timestamp', Date.now().toString());
-      
-      // Mostrar estado de éxito
-      showState('success');
-      document.getElementById('success-message').textContent = `Sesión iniciada como ${user.email}`;
-      
-      // Redireccionar después de 2 segundos
-      setTimeout(() => {
-        // Intentar cerrar la ventana si es popup
-        if (window.opener) {
-          window.opener.location.reload();
-          window.close();
-        } else {
-          // Si no es popup, redireccionar
-          window.location.href = returnUrl + '/home.html';
-        }
-      }, 2000);
-    }
-    
-    // Función para manejar errores
-    function handleError(error, context = '') {
-      console.error(`❌ Error en login ${context}:`, error);
-      
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
       showState('error');
-      document.getElementById('error-message').textContent = 
-        error.message || 'No se pudo completar la autenticación';
     }
     
-    // Inicializar
-    setTimeout(() => {
-      showState('login-buttons');
-    }, 1000);
+    function showSuccess(message) {
+      document.getElementById('success-message').textContent = message;
+      showState('success');
+    }
     
-    // Login con Google
-    document.getElementById('google-login').addEventListener('click', async () => {
-      showState('loading');
+    // Función para volver a la app
+    function returnToApp(userData = null) {
+      console.log('🔄 Regresando a la app...');
+      
+      if (userData) {
+        // Guardar datos del usuario para la app principal
+        localStorage.setItem('external_login_success', JSON.stringify(userData));
+        console.log('💾 Datos guardados para la app principal');
+      }
       
       try {
+        // Múltiples métodos para regresar
+        if (returnUrl && returnUrl !== window.location.origin) {
+          // Regresar a URL específica
+          window.location.href = returnUrl;
+        } else if (window.opener) {
+          // Cerrar popup si existe
+          window.close();
+        } else {
+          // Regresar a la página principal
+          window.location.href = window.location.origin;
+        }
+      } catch (error) {
+        console.error('Error regresando a la app:', error);
+        // Fallback: ir a página principal
+        window.location.href = window.location.origin;
+      }
+    }
+    
+    // Comprobar si hay un resultado de redirección pendiente
+    async function checkRedirectResult() {
+      try {
+        console.log('🔍 Verificando resultado de redirección...');
+        const result = await getRedirectResult(auth);
+        
+        if (result && result.user) {
+          console.log('✅ Usuario autenticado via redirect:', result.user.email);
+          
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+            method: 'redirect'
+          };
+          
+          showSuccess(`¡Hola ${result.user.displayName || result.user.email}!`);
+          
+          setTimeout(() => {
+            returnToApp(userData);
+          }, 2000);
+          
+          return true;
+        }
+      } catch (error) {
+        console.error('Error en redirect result:', error);
+        showError(`Error en autenticación: ${error.message}`);
+        return false;
+      }
+      
+      return false;
+    }
+    
+    // Autenticación con Google
+    async function signInWithGoogle(useRedirect = false) {
+      console.log('🌐 Iniciando autenticación Google...', { useRedirect });
+      
+      try {
+        showState('loading');
+        
         const provider = new GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
         
-        // Configuraciones específicas para WebView
-        provider.setCustomParameters({
-          prompt: 'select_account',
-          // Forzar uso de redirect en lugar de popup para WebViews problemáticos
-          display: 'popup'
-        });
+        let result;
         
-        // Usar signInWithPopup con configuración específica
-        const result = await signInWithPopup(auth, provider);
+        if (useRedirect) {
+          console.log('🔄 Usando signInWithRedirect...');
+          await signInWithRedirect(auth, provider);
+          // La redirección ocurre, no hay resultado inmediato
+          return;
+        } else {
+          console.log('🪟 Usando signInWithPopup...');
+          result = await signInWithPopup(auth, provider);
+        }
         
-        handleLoginSuccess(result.user, 'Google');
+        if (result && result.user) {
+          console.log('✅ Usuario autenticado:', result.user.email);
+          
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+            method: useRedirect ? 'redirect' : 'popup'
+          };
+          
+          showSuccess(`¡Hola ${result.user.displayName || result.user.email}!`);
+          
+          setTimeout(() => {
+            returnToApp(userData);
+          }, 2000);
+        }
         
       } catch (error) {
-        // Si signInWithPopup falla, intentar con configuración alternativa
-        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-          try {
-            // Configurar para redirect como fallback
-            console.log('🔄 Popup bloqueado, intentando método alternativo...');
-            showState('loading');
-            
-            // Guardar estado antes del redirect
-            sessionStorage.setItem('auth_return_url', returnUrl);
-            
-            // Usar signInWithRedirect como último recurso
-            const { signInWithRedirect, getRedirectResult } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-            await signInWithRedirect(auth, provider);
-            
-          } catch (redirectError) {
-            handleError(redirectError, 'redirect fallback');
-          }
+        console.error('❌ Error en Google auth:', error);
+        
+        // Si el popup falla, intentar con redirect
+        if (!useRedirect && (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user')) {
+          console.log('🔄 Popup bloqueado, intentando redirect...');
+          await signInWithGoogle(true);
         } else {
-          handleError(error, 'Google popup');
+          showError(`Error: ${error.message}`);
         }
       }
-    });
+    }
     
-    // Login con email
-    document.getElementById('email-login').addEventListener('click', async () => {
+    // Autenticación con email
+    async function signInWithEmail() {
       const email = document.getElementById('email-input').value.trim();
-      const password = document.getElementById('password-input').value.trim();
+      const password = document.getElementById('password-input').value;
       
       if (!email || !password) {
-        handleError({ message: 'Por favor ingresa email y contraseña' }, 'validación');
+        showError('Por favor ingresa email y contraseña');
         return;
       }
       
-      showState('loading');
-      
       try {
+        showState('loading');
+        
         const result = await signInWithEmailAndPassword(auth, email, password);
-        handleLoginSuccess(result.user, 'Email');
+        
+        if (result && result.user) {
+          console.log('✅ Usuario autenticado con email:', result.user.email);
+          
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            method: 'email'
+          };
+          
+          showSuccess(`¡Bienvenido ${result.user.email}!`);
+          
+          setTimeout(() => {
+            returnToApp(userData);
+          }, 2000);
+        }
+        
       } catch (error) {
-        handleError(error, 'email');
+        console.error('❌ Error en email auth:', error);
+        
+        let errorMessage = 'Error en autenticación';
+        if (error.code === 'auth/user-not-found') {
+          errorMessage = 'Usuario no encontrado';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMessage = 'Contraseña incorrecta';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Email inválido';
+        }
+        
+        showError(errorMessage);
       }
+    }
+    
+    // Event listeners
+    document.getElementById('google-login').addEventListener('click', () => {
+      signInWithGoogle(false); // Intentar popup primero
     });
     
-    // Botón de reintentar
+    document.getElementById('email-login').addEventListener('click', signInWithEmail);
+    
     document.getElementById('retry-button').addEventListener('click', () => {
       showState('login-buttons');
     });
     
-    // Manejar resultado de redirect si existe
-    window.addEventListener('load', async () => {
-      try {
-        const { getRedirectResult } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-        const result = await getRedirectResult(auth);
-        
-        if (result) {
-          console.log('✅ Resultado de redirect obtenido:', result.user.email);
-          handleLoginSuccess(result.user, 'Google Redirect');
-        }
-      } catch (error) {
-        console.log('ℹ️ No hay resultado de redirect o error:', error.message);
-      }
-    });
-    
-    // Permitir login con Enter
-    document.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter' && !loginButtons.classList.contains('hidden')) {
-        const emailInput = document.getElementById('email-input');
-        const passwordInput = document.getElementById('password-input');
-        
-        if (emailInput.value && passwordInput.value) {
-          document.getElementById('email-login').click();
+    // Auto-iniciar según el tipo
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 External login page loaded');
+      
+      // Primero verificar si hay resultado de redirección
+      const hasRedirectResult = await checkRedirectResult();
+      
+      if (!hasRedirectResult) {
+        if (authType === 'google') {
+          console.log('🎯 Auto-iniciando Google auth...');
+          // Dar un momento para que se cargue la UI
+          setTimeout(() => {
+            signInWithGoogle(false);
+          }, 500);
+        } else {
+          showState('login-buttons');
         }
       }
-    });
   </script>
 </body>
 </html>

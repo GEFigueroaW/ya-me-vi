@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔍 Test WebView Detector</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen text-white p-4">
+  
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-center mb-8">🔍 WebView Detector Test</h1>
+    
+    <!-- Información del entorno -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">📱 Información del Entorno</h2>
+      <div id="environment-info" class="space-y-2 text-sm font-mono">
+        <div>Cargando información...</div>
+      </div>
+    </div>
+    
+    <!-- Resultados de detección -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">🎯 Resultados de Detección</h2>
+      <div id="detection-results" class="space-y-2">
+        <div>Ejecutando tests...</div>
+      </div>
+    </div>
+    
+    <!-- Test de autenticación -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">🔐 Test de Autenticación</h2>
+      <div class="space-y-4">
+        <button id="test-google-auth" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+          🌐 Test Google Authentication
+        </button>
+        <button id="test-email-auth" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+          ✉️ Test Email Authentication
+        </button>
+        <div id="auth-results" class="mt-4 p-4 bg-black bg-opacity-30 rounded-lg text-sm font-mono">
+          Haz clic en un botón para probar la autenticación...
+        </div>
+      </div>
+    </div>
+    
+    <!-- Console output -->
+    <div class="bg-black bg-opacity-50 backdrop-blur-lg rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-4">📊 Console Output</h2>
+      <div id="console-output" class="text-xs font-mono bg-gray-900 p-4 rounded max-h-64 overflow-y-auto">
+        <div class="text-green-400">Iniciando tests...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import WebViewDetector from './js/webview-detector.js';
+    
+    const log = (message, type = 'info') => {
+      const colors = {
+        info: 'text-white',
+        success: 'text-green-400',
+        error: 'text-red-400',
+        warning: 'text-yellow-400'
+      };
+      
+      const consoleOutput = document.getElementById('console-output');
+      const logEntry = document.createElement('div');
+      logEntry.className = colors[type];
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      consoleOutput.appendChild(logEntry);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+      
+      // También loggear en console real
+      console.log(message);
+    };
+    
+    // Función para mostrar información del entorno
+    function showEnvironmentInfo() {
+      log('🔍 Obteniendo información del entorno...', 'info');
+      
+      const envInfo = WebViewDetector.getEnvironmentInfo();
+      const container = document.getElementById('environment-info');
+      
+      container.innerHTML = `
+        <div><strong>User Agent:</strong> ${envInfo.userAgent}</div>
+        <div><strong>Viewport:</strong> ${envInfo.viewport.width}x${envInfo.viewport.height}</div>
+        <div><strong>Screen:</strong> ${envInfo.viewport.screenWidth}x${envInfo.viewport.screenHeight}</div>
+        <div><strong>Mobile:</strong> ${envInfo.isMobile ? '✅ Sí' : '❌ No'}</div>
+        <div><strong>WebView:</strong> ${envInfo.isWebView ? '✅ Sí' : '❌ No'}</div>
+        <div><strong>WebIntoApp:</strong> ${envInfo.isWebIntoApp ? '✅ Sí' : '❌ No'}</div>
+        <div><strong>Usar External:</strong> ${envInfo.shouldUseExternal ? '✅ Sí' : '❌ No'}</div>
+        <div><strong>Features:</strong></div>
+        <div class="ml-4">
+          <div>• Webkit: ${envInfo.features.webkitMessageHandlers ? '✅' : '❌'}</div>
+          <div>• React Native: ${envInfo.features.reactNativeWebView ? '✅' : '❌'}</div>
+          <div>• Android: ${envInfo.features.android ? '✅' : '❌'}</div>
+          <div>• Standalone: ${envInfo.features.standalone}</div>
+        </div>
+      `;
+      
+      log('✅ Información del entorno cargada', 'success');
+    }
+    
+    // Función para mostrar resultados de detección
+    function showDetectionResults() {
+      log('🎯 Ejecutando tests de detección...', 'info');
+      
+      const container = document.getElementById('detection-results');
+      
+      const isWebView = WebViewDetector.isWebView();
+      const isWebIntoApp = WebViewDetector.isWebIntoApp();
+      const isMobile = WebViewDetector.isMobile();
+      const shouldUseExternal = WebViewDetector.shouldUseExternalBrowser();
+      
+      container.innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex items-center space-x-2">
+            <span class="${isWebView ? 'text-green-400' : 'text-red-400'}">${isWebView ? '✅' : '❌'}</span>
+            <span>WebView Detectado</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="${isWebIntoApp ? 'text-green-400' : 'text-red-400'}">${isWebIntoApp ? '✅' : '❌'}</span>
+            <span>WebIntoApp Detectado</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="${isMobile ? 'text-green-400' : 'text-red-400'}">${isMobile ? '✅' : '❌'}</span>
+            <span>Dispositivo Móvil</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="${shouldUseExternal ? 'text-yellow-400' : 'text-blue-400'}">${shouldUseExternal ? '🌐' : '🖥️'}</span>
+            <span>Usar Auth Externa</span>
+          </div>
+        </div>
+      `;
+      
+      log(`🎯 Detección completada - WebView: ${isWebView}, External: ${shouldUseExternal}`, 'success');
+    }
+    
+    // Event listeners para tests de autenticación
+    document.getElementById('test-google-auth').addEventListener('click', () => {
+      log('🌐 Iniciando test de Google Auth...', 'info');
+      
+      const authResults = document.getElementById('auth-results');
+      authResults.innerHTML = 'Intentando autenticación con Google...';
+      
+      if (WebViewDetector.shouldUseExternalBrowser()) {
+        log('🔄 WebView detectado - usando autenticación externa', 'warning');
+        authResults.innerHTML = 'WebView detectado - abriendo navegador externo...';
+        
+        const success = WebViewDetector.openExternalLogin('google');
+        if (success) {
+          log('✅ Navegador externo abierto exitosamente', 'success');
+          authResults.innerHTML = '✅ Navegador externo abierto para Google Auth';
+        } else {
+          log('❌ Error abriendo navegador externo', 'error');
+          authResults.innerHTML = '❌ Error abriendo navegador externo';
+        }
+      } else {
+        log('🖥️ Navegador estándar - usando popup normal', 'info');
+        authResults.innerHTML = '🖥️ Navegador estándar detectado - usaría popup normal';
+      }
+    });
+    
+    document.getElementById('test-email-auth').addEventListener('click', () => {
+      log('✉️ Iniciando test de Email Auth...', 'info');
+      
+      const authResults = document.getElementById('auth-results');
+      authResults.innerHTML = 'Intentando autenticación con email...';
+      
+      if (WebViewDetector.shouldUseExternalBrowser()) {
+        log('🔄 WebView detectado - usando autenticación externa', 'warning');
+        authResults.innerHTML = 'WebView detectado - abriendo navegador externo...';
+        
+        const success = WebViewDetector.openExternalLogin('email');
+        if (success) {
+          log('✅ Navegador externo abierto exitosamente', 'success');
+          authResults.innerHTML = '✅ Navegador externo abierto para Email Auth';
+        } else {
+          log('❌ Error abriendo navegador externo', 'error');
+          authResults.innerHTML = '❌ Error abriendo navegador externo';
+        }
+      } else {
+        log('🖥️ Navegador estándar - usando formulario normal', 'info');
+        authResults.innerHTML = '🖥️ Navegador estándar detectado - usaría formulario normal';
+      }
+    });
+    
+    // Inicializar tests
+    document.addEventListener('DOMContentLoaded', () => {
+      log('🚀 Iniciando WebView Detector Test...', 'info');
+      
+      setTimeout(() => {
+        showEnvironmentInfo();
+        showDetectionResults();
+        log('🎉 Tests iniciales completados', 'success');
+      }, 100);
+    });
+    
+    // Capturar errores
+    window.addEventListener('error', (event) => {
+      log(`❌ Error: ${event.error.message}`, 'error');
+    });
+    
+    // Override console.log para capturar en nuestra interfaz
+    const originalLog = console.log;
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      // También mostrar en nuestra interfaz si el mensaje viene del WebViewDetector
+      const message = args.join(' ');
+      if (message.includes('🔍') || message.includes('WebView') || message.includes('WebIntoApp')) {
+        const consoleOutput = document.getElementById('console-output');
+        const logEntry = document.createElement('div');
+        logEntry.className = 'text-blue-400';
+        logEntry.textContent = `[Console] ${message}`;
+        consoleOutput.appendChild(logEntry);
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+      }
+    };
+  </script>
+</body>
+</html>

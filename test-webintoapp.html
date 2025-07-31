@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚀 Test Rápido WebIntoApp</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status {
+      font-size: 3em;
+      margin: 20px 0;
+    }
+    
+    .info {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      font-family: monospace;
+      font-size: 0.9em;
+      text-align: left;
+      overflow-x: auto;
+    }
+    
+    .button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+    
+    .button:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+    }
+    
+    .button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .log {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-family: monospace;
+      font-size: 0.8em;
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Test WebIntoApp</h1>
+    
+    <div id="status" class="status">🔍</div>
+    
+    <div class="info">
+      <div><strong>URL:</strong> <span id="current-url"></span></div>
+      <div><strong>User Agent:</strong> <span id="user-agent"></span></div>
+      <div><strong>Viewport:</strong> <span id="viewport"></span></div>
+      <div><strong>Screen:</strong> <span id="screen"></span></div>
+    </div>
+    
+    <div id="detection-result" class="info">
+      Detectando entorno...
+    </div>
+    
+    <button id="test-auth" class="button">🔐 Test Autenticación Google</button>
+    <button id="open-external" class="button">🌐 Abrir Login Externo</button>
+    
+    <div id="log" class="log">
+      <div>📱 Iniciando tests...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    const log = (message, type = 'info') => {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.style.color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#fff';
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(message);
+    };
+    
+    // Información básica
+    document.getElementById('current-url').textContent = window.location.href;
+    document.getElementById('user-agent').textContent = navigator.userAgent.slice(0, 60) + '...';
+    document.getElementById('viewport').textContent = `${window.innerWidth}x${window.innerHeight}`;
+    document.getElementById('screen').textContent = `${window.screen.width}x${window.screen.height}`;
+    
+    // Detección de WebView
+    function detectWebView() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      
+      const checks = {
+        'WebIntoApp UA': userAgent.includes('webintoapp'),
+        'WebView UA': /webview|android.*version.*chrome|crios|fxios/.test(userAgent),
+        'Mobile': /android|iphone|ipad/.test(userAgent),
+        'Full Screen': window.innerWidth === window.screen.width,
+        'WebKit Handlers': !!(window.webkit && window.webkit.messageHandlers),
+        'React Native': !!window.ReactNativeWebView,
+        'Android Bridge': !!window.Android
+      };
+      
+      const detectedFeatures = Object.entries(checks)
+        .filter(([key, value]) => value)
+        .map(([key]) => key);
+      
+      const isWebView = detectedFeatures.length > 0;
+      
+      log(`🔍 Detección WebView: ${isWebView ? 'SÍ' : 'NO'}`, isWebView ? 'success' : 'info');
+      log(`📋 Características: ${detectedFeatures.join(', ') || 'Ninguna'}`, 'info');
+      
+      return { isWebView, features: detectedFeatures, checks };
+    }
+    
+    // Mostrar resultado de detección
+    const detection = detectWebView();
+    document.getElementById('status').textContent = detection.isWebView ? '✅' : '❌';
+    
+    const resultHTML = `
+      <strong>WebView Detectado:</strong> ${detection.isWebView ? 'SÍ ✅' : 'NO ❌'}<br>
+      <strong>Características:</strong><br>
+      ${Object.entries(detection.checks)
+        .map(([key, value]) => `• ${key}: ${value ? '✅' : '❌'}`)
+        .join('<br>')}
+    `;
+    
+    document.getElementById('detection-result').innerHTML = resultHTML;
+    
+    // Test de autenticación
+    document.getElementById('test-auth').addEventListener('click', async () => {
+      log('🔐 Iniciando test de autenticación...', 'info');
+      
+      if (detection.isWebView) {
+        log('🔄 WebView detectado - debería usar navegador externo', 'success');
+        alert('✅ WebView detectado correctamente!\n\nSe abriría el navegador externo para autenticación.');
+      } else {
+        log('🖥️ Navegador normal - usaría popup estándar', 'info');
+        alert('ℹ️ Navegador normal detectado.\n\nUsaría autenticación popup estándar.');
+      }
+    });
+    
+    // Test de navegador externo
+    document.getElementById('open-external').addEventListener('click', () => {
+      log('🌐 Intentando abrir navegador externo...', 'info');
+      
+      const externalUrl = `${window.location.origin}/external-login.html?type=google&return=${encodeURIComponent(window.location.href)}&webview=true`;
+      
+      log(`🔗 URL: ${externalUrl}`, 'info');
+      
+      try {
+        // Método 1: window.open
+        const popup = window.open(externalUrl, '_blank', 'width=400,height=600');
+        
+        if (popup && !popup.closed) {
+          log('✅ window.open exitoso', 'success');
+        } else {
+          throw new Error('Popup bloqueado');
+        }
+      } catch (error) {
+        log(`⚠️ window.open falló: ${error.message}`, 'error');
+        
+        try {
+          // Método 2: location.href
+          log('🔄 Intentando redirección directa...', 'info');
+          window.location.href = externalUrl;
+        } catch (redirectError) {
+          log(`❌ Redirección falló: ${redirectError.message}`, 'error');
+        }
+      }
+    });
+    
+    // Información adicional del entorno
+    setTimeout(() => {
+      log(`📱 Información del entorno:`, 'info');
+      log(`• URL actual: ${window.location.href}`, 'info');
+      log(`• Protocolo: ${window.location.protocol}`, 'info');
+      log(`• Host: ${window.location.host}`, 'info');
+      log(`• Viewport: ${window.innerWidth}x${window.innerHeight}`, 'info');
+      log(`• Screen: ${window.screen.width}x${window.screen.height}`, 'info');
+      log(`• Device Pixel Ratio: ${window.devicePixelRatio}`, 'info');
+      log(`• Orientation: ${window.orientation || 'No definido'}`, 'info');
+      
+      // Características del navegador
+      const features = {
+        'localStorage': !!window.localStorage,
+        'sessionStorage': !!window.sessionStorage,
+        'History API': !!(window.history && window.history.pushState),
+        'Geolocation': !!navigator.geolocation,
+        'Service Worker': 'serviceWorker' in navigator,
+        'WebGL': !!window.WebGLRenderingContext,
+        'IndexedDB': !!window.indexedDB
+      };
+      
+      log(`🔧 Características del navegador:`, 'info');
+      Object.entries(features).forEach(([key, value]) => {
+        log(`• ${key}: ${value ? '✅' : '❌'}`, 'info');
+      });
+      
+      log('🎉 Tests completados', 'success');
+    }, 1000);
+  </script>
+</body>
+</html>

@@ -145,57 +145,132 @@
     });
 
     document.getElementById("loginWithGoogle").addEventListener("click", async () => {
-      // Detectar si estamos en WebView y usar login externo
-      if (WebViewDetector.shouldUseExternalBrowser()) {
-        console.log('🔄 WebView detectado, usando login externo...');
+      console.log('🔍 Iniciando autenticación Google...');
+      console.log('🌐 User Agent:', navigator.userAgent);
+      console.log('📱 Viewport:', window.innerWidth, 'x', window.innerHeight);
+      console.log('🖥️ Screen:', window.screen.width, 'x', window.screen.height);
+      
+      // DETECCIÓN AGRESIVA DE WEBVIEW
+      const isWebViewEnvironment = 
+        // 1. Detectar por User Agent
+        /webview|webintoapp|android.*version.*chrome/i.test(navigator.userAgent) ||
+        // 2. Detectar por características del entorno
+        (window.navigator.standalone === false && /iPhone|iPad/.test(navigator.userAgent)) ||
+        // 3. Detectar por ausencia de características de navegador normal
+        (typeof window.orientation !== 'undefined' && !window.DeviceMotionEvent) ||
+        // 4. Detectar por proporción de pantalla (app completa)
+        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
+        // 5. Forzar detección en móviles con ciertos patrones
+        (/Android|iPhone/i.test(navigator.userAgent) && window.location.href.includes('webintoapp'));
+      
+      console.log('🔍 WebView detectado:', isWebViewEnvironment);
+      
+      // SIEMPRE usar autenticación externa en entornos móviles sospechosos
+      if (isWebViewEnvironment || WebViewDetector.shouldUseExternalBrowser()) {
+        console.log('🔄 Usando autenticación externa...');
+        
+        // Mostrar mensaje al usuario
+        const button = document.getElementById("loginWithGoogle");
+        const originalText = button.innerHTML;
+        button.innerHTML = 'Abriendo navegador externo...';
+        button.disabled = true;
         
         // Guardar información para después del login
         if (isAdminRedirect) {
           localStorage.setItem('pending_admin_redirect', 'true');
         }
         
-        // Abrir login externo
-        const opened = WebViewDetector.openExternalLogin();
+        // Intentar múltiples métodos para abrir navegador externo
+        const externalUrl = WebViewDetector.generateExternalLoginUrl('google');
+        console.log('🔗 URL externa:', externalUrl);
         
-        if (opened) {
-          // Esperar resultado del login externo
-          const checkExternalLogin = setInterval(() => {
-            const loginData = localStorage.getItem('external_login_success');
-            if (loginData) {
-              clearInterval(checkExternalLogin);
-              localStorage.removeItem('external_login_success');
-              
-              // Procesar resultado del login
-              try {
-                const userData = JSON.parse(loginData);
-                console.log("✅ Login externo exitoso:", userData.email);
-                
-                // Verificar permisos de admin si es necesario
-                const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
-                const isAdmin = adminEmails.includes(userData.email);
-                
-                if (isAdminRedirect && isAdmin) {
-                  window.location.href = "admin.html";
-                } else if (isAdminRedirect && !isAdmin) {
-                  alert(`❌ Sin permisos de administrador\n\nUsuario: ${userData.email}\nContacta al administrador.`);
-                  window.location.href = "index.html";
-                } else {
-                  window.location.href = "home.html";
-                }
-              } catch (error) {
-                console.error('Error procesando login externo:', error);
-                alert("Error al procesar el login. Intenta nuevamente.");
-              }
+        let opened = false;
+        
+        try {
+          // Método 1: window.open con configuración específica para móvil
+          const popup = window.open(externalUrl, '_blank', 'width=400,height=600,scrollbars=yes,resizable=yes');
+          if (popup && !popup.closed) {
+            console.log('✅ Popup abierto');
+            opened = true;
+          } else {
+            throw new Error('Popup bloqueado o falló');
+          }
+        } catch (error) {
+          console.log('⚠️ Popup falló, intentando redirección:', error.message);
+          
+          try {
+            // Método 2: Redirección directa
+            window.location.href = externalUrl;
+            opened = true;
+          } catch (redirectError) {
+            console.error('❌ Error en redirección:', redirectError);
+            
+            // Método 3: location.replace como último recurso
+            try {
+              window.location.replace(externalUrl);
+              opened = true;
+            } catch (replaceError) {
+              console.error('❌ Error en replace:', replaceError);
             }
-          }, 1000);
-          
-          // Timeout después de 2 minutos
-          setTimeout(() => {
-            clearInterval(checkExternalLogin);
-          }, 120000);
-          
+          }
+        }
+        
+        if (!opened) {
+          // Si todo falla, mostrar instrucciones manuales
+          button.innerHTML = originalText;
+          button.disabled = false;
+          alert(`No se pudo abrir el navegador automáticamente.\n\nCopia este enlace en tu navegador:\n\n${externalUrl}`);
           return;
         }
+        
+        // Esperar resultado del login externo con timeout más corto
+        let checkCount = 0;
+        const maxChecks = 60; // 60 segundos
+        
+        const checkExternalLogin = setInterval(() => {
+          checkCount++;
+          
+          const loginData = localStorage.getItem('external_login_success');
+          if (loginData) {
+            clearInterval(checkExternalLogin);
+            localStorage.removeItem('external_login_success');
+            
+            // Procesar resultado del login
+            try {
+              const userData = JSON.parse(loginData);
+              console.log("✅ Login externo exitoso:", userData.email);
+              
+              // Verificar permisos de admin si es necesario
+              const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+              const isAdmin = adminEmails.includes(userData.email);
+              
+              if (isAdminRedirect && isAdmin) {
+                window.location.href = "admin.html";
+              } else if (isAdminRedirect && !isAdmin) {
+                alert(`❌ Sin permisos de administrador\n\nUsuario: ${userData.email}\nContacta al administrador.`);
+                window.location.href = "index.html";
+              } else {
+                window.location.href = "home.html";
+              }
+            } catch (error) {
+              console.error('Error procesando login externo:', error);
+              button.innerHTML = originalText;
+              button.disabled = false;
+              alert("Error al procesar el login. Intenta nuevamente.");
+            }
+            return;
+          }
+          
+          // Timeout
+          if (checkCount >= maxChecks) {
+            clearInterval(checkExternalLogin);
+            button.innerHTML = originalText;
+            button.disabled = false;
+            console.log('⏰ Timeout esperando login externo');
+          }
+        }, 1000);
+        
+        return;
       }
       
       // Login normal para navegadores web
