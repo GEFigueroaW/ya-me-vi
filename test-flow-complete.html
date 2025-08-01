@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Flujo Completo Onboarding</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">🔄 Test - Flujo Completo Onboarding</h1>
+    
+    <!-- Status -->
+    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-4">📊 Estado Actual</h2>
+      <div id="status" class="font-mono text-sm">
+        Cargando...
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-4">⚡ Pruebas de Flujo</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button id="testNewUser" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition">
+          Simular Usuario Nuevo
+        </button>
+        <button id="testOnboardingComplete" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition">
+          Completar Onboarding
+        </button>
+        <button id="testGoHome" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition">
+          Ir a Home (Prueba)
+        </button>
+      </div>
+    </div>
+
+    <!-- Manual Dream Input -->
+    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-4">✍️ Guardar Sueño Manualmente</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Seleccionar Sueño:</label>
+          <select id="dreamSelect" class="w-full px-3 py-2 bg-gray-700 rounded">
+            <option value="">-- Selecciona un sueño --</option>
+            <option value="casa">🏠 Casa Propia</option>
+            <option value="auto">🚗 Auto Nuevo</option>
+            <option value="viaje">✈️ Viaje de Ensueño</option>
+            <option value="negocio">💼 Iniciar Negocio</option>
+            <option value="otro">💭 Otro (personalizado)</option>
+          </select>
+        </div>
+        <div id="customDreamDiv" class="hidden">
+          <label class="block text-sm font-medium mb-2">Sueño Personalizado:</label>
+          <input type="text" id="customDream" class="w-full px-3 py-2 bg-gray-700 rounded" placeholder="Describe tu sueño...">
+        </div>
+        <button id="saveDream" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition" disabled>
+          Guardar Sueño
+        </button>
+      </div>
+    </div>
+
+    <!-- Logs -->
+    <div class="bg-black rounded-lg p-4">
+      <h2 class="text-xl font-semibold mb-4">📋 Logs en Tiempo Real</h2>
+      <div id="logs" class="font-mono text-xs h-64 overflow-y-auto text-green-400">
+        <!-- Logs aparecerán aquí -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBp8tWcJdTaGYxAy2dn1jD0c0d-YZi5b6g",
+      authDomain: "ya-me-vi-app.firebaseapp.com",
+      projectId: "ya-me-vi-app",
+      storageBucket: "ya-me-vi-app.appspot.com",
+      messagingSenderId: "533718394316",
+      appId: "1:533718394316:web:7cd2ff3aedaa5b6d6f5c1d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+
+    // Log function
+    function log(message, type = 'info') {
+      const logs = document.getElementById('logs');
+      const timestamp = new Date().toLocaleTimeString();
+      const emoji = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '🔍';
+      
+      const logEntry = document.createElement('div');
+      logEntry.innerHTML = `<span class="text-gray-400">[${timestamp}]</span> ${emoji} ${message}`;
+      logs.appendChild(logEntry);
+      logs.scrollTop = logs.scrollHeight;
+      
+      console.log(`${emoji} [TEST-FLOW] ${message}`);
+    }
+
+    // Update status
+    async function updateStatus() {
+      if (!currentUser) {
+        document.getElementById('status').innerHTML = '<span class="text-red-400">No hay usuario autenticado</span>';
+        return;
+      }
+
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+
+        let userData = {};
+        if (userSnap.exists()) {
+          userData = userSnap.data();
+        }
+
+        const hasDream = userData.dream && userData.dream.trim() !== '';
+        const hasCompletedOnboarding = userData.onboardingCompleted === true;
+        const needsOnboarding = !hasDream && !hasCompletedOnboarding;
+
+        document.getElementById('status').innerHTML = `
+          <strong>Usuario:</strong> ${currentUser.email}<br>
+          <strong>Documento Existe:</strong> ${userSnap.exists() ? '✅ SÍ' : '❌ NO'}<br>
+          <strong>Sueño:</strong> ${userData.dream || 'N/A'}<br>
+          <strong>Onboarding Completado:</strong> ${hasCompletedOnboarding ? '✅ SÍ' : '❌ NO'}<br>
+          <strong>Necesita Onboarding:</strong> ${needsOnboarding ? '❌ SÍ (CAUSARÁ LOOP)' : '✅ NO'}<br>
+          <strong>Flags localStorage:</strong><br>
+          &nbsp;&nbsp;- just_completed_onboarding: ${localStorage.getItem('just_completed_onboarding') || 'No existe'}<br>
+          &nbsp;&nbsp;- onboarding_in_progress: ${localStorage.getItem('onboarding_in_progress') || 'No existe'}
+        `;
+
+      } catch (error) {
+        log(`Error obteniendo estado: ${error.message}`, 'error');
+      }
+    }
+
+    // Auth listener
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        log(`Usuario autenticado: ${user.email}`, 'success');
+      } else {
+        log('Usuario no autenticado', 'warning');
+      }
+      updateStatus();
+    });
+
+    // Dream select handler
+    document.getElementById('dreamSelect').addEventListener('change', (e) => {
+      const customDiv = document.getElementById('customDreamDiv');
+      const saveBtn = document.getElementById('saveDream');
+      
+      if (e.target.value === 'otro') {
+        customDiv.classList.remove('hidden');
+        saveBtn.disabled = true;
+      } else {
+        customDiv.classList.add('hidden');
+        saveBtn.disabled = !e.target.value;
+      }
+    });
+
+    document.getElementById('customDream').addEventListener('input', (e) => {
+      const saveBtn = document.getElementById('saveDream');
+      saveBtn.disabled = !e.target.value.trim();
+    });
+
+    // Button handlers
+    document.getElementById('testNewUser').addEventListener('click', async () => {
+      if (!currentUser) {
+        alert('No hay usuario autenticado');
+        return;
+      }
+
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        await deleteDoc(userRef);
+        
+        // Clear flags
+        localStorage.removeItem('just_completed_onboarding');
+        localStorage.removeItem('onboarding_in_progress');
+        
+        log('Usuario reseteado como nuevo', 'success');
+        updateStatus();
+      } catch (error) {
+        log(`Error reseteando usuario: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('testOnboardingComplete').addEventListener('click', async () => {
+      if (!currentUser) {
+        alert('No hay usuario autenticado');
+        return;
+      }
+
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        await setDoc(userRef, {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName || '',
+          dream: 'Casa propia para mi familia',
+          dreamCategory: 'casa',
+          dreamCompletedAt: new Date().toISOString(),
+          onboardingCompleted: true,
+          createdAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        });
+
+        localStorage.setItem('just_completed_onboarding', 'true');
+        
+        log('Onboarding marcado como completado con sueño', 'success');
+        updateStatus();
+      } catch (error) {
+        log(`Error completando onboarding: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('saveDream').addEventListener('click', async () => {
+      if (!currentUser) {
+        alert('No hay usuario autenticado');
+        return;
+      }
+
+      const dreamSelect = document.getElementById('dreamSelect');
+      const customDream = document.getElementById('customDream');
+      
+      let dreamText = dreamSelect.value;
+      if (dreamSelect.value === 'otro') {
+        dreamText = customDream.value.trim();
+      }
+
+      if (!dreamText) {
+        alert('Por favor selecciona o escribe un sueño');
+        return;
+      }
+
+      try {
+        log(`Guardando sueño: ${dreamText}`, 'info');
+        
+        const userRef = doc(db, 'users', currentUser.uid);
+        await setDoc(userRef, {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName || '',
+          dream: dreamText,
+          dreamCategory: dreamSelect.value,
+          dreamCompletedAt: new Date().toISOString(),
+          onboardingCompleted: true,
+          createdAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        });
+
+        localStorage.setItem('just_completed_onboarding', 'true');
+        
+        log('Sueño guardado exitosamente', 'success');
+        updateStatus();
+      } catch (error) {
+        log(`Error guardando sueño: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('testGoHome').addEventListener('click', () => {
+      log('Redirigiendo a home.html para prueba...', 'info');
+      window.location.href = 'home.html';
+    });
+
+    // Initial load
+    log('Test de flujo completo cargado', 'success');
+
+  </script>
+</body>
+</html>

@@ -38,18 +38,23 @@ async function mostrarBienvenidaConSueño(user) {
         // Verificar si necesita completar onboarding - LÓGICA FINAL CORREGIDA
         // Necesita onboarding SOLO si NO tiene sueño Y NO ha completado onboarding
         // Si tiene sueño O ya completó onboarding, NO necesita onboarding
-        needsOnboarding = (!userData.dream || userData.dream === '') && 
-                         (userData.onboardingCompleted !== true);
+        const hasDream = userData.dream && userData.dream.trim() !== '';
+        const hasCompletedOnboarding = userData.onboardingCompleted === true;
         
-        // PERO: Si onboardingCompleted es true, nunca necesita onboarding
-        if (userData.onboardingCompleted === true) {
+        needsOnboarding = !hasDream && !hasCompletedOnboarding;
+        
+        // IMPORTANTE: Si ya completó onboarding, nunca necesita onboarding (incluso sin sueño)
+        if (hasCompletedOnboarding) {
           needsOnboarding = false;
         }
         
         console.log('🔍 [MAIN] Verificación onboarding:', {
           hasDream: !!userData.dream,
+          dreamValue: userData.dream,
+          dreamTrimmed: userData.dream ? userData.dream.trim() : 'undefined',
           onboardingCompleted: userData.onboardingCompleted,
-          needsOnboarding: needsOnboarding
+          needsOnboarding: needsOnboarding,
+          userDataComplete: JSON.stringify(userData, null, 2)
         });
       } else {
         // Usuario nuevo sin documento en Firestore
