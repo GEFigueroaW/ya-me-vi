@@ -47,50 +47,6 @@
               <p style="margin: 15px 0; opacity: 0.8;">
                 Se detectó un entorno WebView. Abriendo navegador externo para login con email...
               </p>
-              <div style="
-                margin: 20px 0;
-                padding: 10px;
-                background: rgba(0,0,0,0.2);
-                border-radius: 10px;
-                font-size: 0.9em;
-              ">
-                Si no se abre automáticamente, toca el enlace de abajo
-              </div>
-              <a href="${externalUrl}" style="
-                display: inline-block;
-                background: #4CAF50;
-                color: white;
-                text-decoration: none;
-                padding: 15px 25px;
-                border-radius: 10px;
-                margin: 10px;
-                font-weight: bold;
-              ">📧 Abrir Login Email</a>
-            </div>
-          </div>
-        `);
-        
-        // Intentar redirección automática después de un breve delay
-        setTimeout(() => {
-          try {
-            // Método 1: window.open
-            const popup = window.open(externalUrl, '_blank', 'width=400,height=600');
-            if (!popup || popup.closed) {
-              throw new Error('Popup bloqueado');
-            }
-          } catch (error) {
-            // Método 2: redirección directa
-            window.location.href = externalUrl;
-          }
-        }, 1500);
-        
-        // Detener la carga del resto de la página
-        return;
-      }
-      
-      console.log('🖥️ [LOGIN-EMAIL] Navegador normal detectado - continuando con carga normal');
-    })();
-  </script>
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
