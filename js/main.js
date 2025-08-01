@@ -289,7 +289,7 @@ async function mostrarBienvenidaConSueño(user) {
           <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
             ¡Bienvenido ${userName}!
           </div>
-          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md animate__animated animate__pulse">
+          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md animate__animated animate__pulse" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.6), 1px -1px 2px rgba(0,0,0,0.6), -1px 1px 2px rgba(0,0,0,0.6), 1px 1px 2px rgba(0,0,0,0.6);">
             🌟 Listo para cumplir tu sueño: ${dreamDisplay}
           </div>
         `;

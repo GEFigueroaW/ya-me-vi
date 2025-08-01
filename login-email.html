@@ -214,7 +214,7 @@
           id="emailInput" 
           name="email"
           autocomplete="email"
-          placeholder="Correo electrónico" 
+          placeholder="Email" 
           class="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           required
         />
@@ -322,11 +322,22 @@
 
     // Clear form fields on page load
     function clearFormFields() {
-      emailInput.value = '';
-      passwordInput.value = '';
-      emailInput.defaultValue = '';
-      passwordInput.defaultValue = '';
-      console.log('✅ [LOGIN-EMAIL] Campos de formulario limpiados');
+      if (emailInput && passwordInput) {
+        emailInput.value = '';
+        passwordInput.value = '';
+        emailInput.defaultValue = '';
+        passwordInput.defaultValue = '';
+        
+        // Resetear estilos que pudieran indicar pre-llenado
+        emailInput.style.backgroundColor = '';
+        passwordInput.style.backgroundColor = '';
+        
+        // Forzar re-renderizado de placeholders
+        emailInput.setAttribute('placeholder', 'Email');
+        passwordInput.setAttribute('placeholder', 'Contraseña');
+        
+        console.log('✅ [LOGIN-EMAIL] Campos de formulario limpiados completamente');
+      }
     }
 
     // Initialize form clearing
@@ -534,7 +545,8 @@
           }
         }, 10000);
         
-        // Pre-fill email if available
+        // Pre-fill email if available - DESHABILITADO para mantener campos vacíos
+        /*
         if (user.email && emailInput) {
           emailInput.value = user.email;
           emailInput.style.backgroundColor = 'rgba(59, 130, 246, 0.2)'; // Blue tint to indicate it's pre-filled
@@ -543,6 +555,7 @@
             passwordInput.focus();
           }, 500);
         }
+        */
         
         // Check admin redirect after explicit login, not automatically
         return; // No automatic redirect
