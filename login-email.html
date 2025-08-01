@@ -306,23 +306,38 @@
     setTimeout(clearFormFields, 1000);
 
     // Check for biometric authentication support
-    function checkBiometricSupport() {
+    async function checkBiometricSupport() {
       if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
-        // Check if WebAuthn is supported
-        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-          .then(available => {
-            if (available) {
-              console.log('✅ [LOGIN-EMAIL] Biometría disponible');
+        try {
+          // Check if WebAuthn is supported
+          const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+          
+          if (available) {
+            console.log('✅ [LOGIN-EMAIL] Biometría disponible en dispositivo');
+            
+            // Check if user has registered biometric credentials
+            const storedCredentials = localStorage.getItem('biometric_user_credentials');
+            
+            if (storedCredentials) {
+              // User has biometric credentials - show login button
               biometricLoginBtn.style.display = 'block';
+              console.log('🔐 [LOGIN-EMAIL] Credenciales biométricas encontradas - botón habilitado');
             } else {
-              console.log('ℹ️ [LOGIN-EMAIL] Biometría no disponible en este dispositivo');
+              // User hasn't registered biometrics - hide button initially
+              biometricLoginBtn.style.display = 'none';
+              console.log('ℹ️ [LOGIN-EMAIL] Sin credenciales biométricas - botón oculto');
             }
-          })
-          .catch(err => {
-            console.log('⚠️ [LOGIN-EMAIL] Error verificando biometría:', err);
-          });
+          } else {
+            console.log('ℹ️ [LOGIN-EMAIL] Biometría no disponible en este dispositivo');
+            biometricLoginBtn.style.display = 'none';
+          }
+        } catch (err) {
+          console.log('⚠️ [LOGIN-EMAIL] Error verificando biometría:', err);
+          biometricLoginBtn.style.display = 'none';
+        }
       } else {
         console.log('ℹ️ [LOGIN-EMAIL] WebAuthn no soportado');
+        biometricLoginBtn.style.display = 'none';
       }
     }
 
@@ -331,17 +346,32 @@
 
     // Register biometric credentials
     async function registerBiometricCredentials(email) {
+      // Check if device supports biometrics
+      if (!window.PublicKeyCredential || !navigator.credentials) {
+        console.log('ℹ️ [LOGIN-EMAIL] Dispositivo no soporta biometría');
+        return;
+      }
+
       // Check if already registered
       const storedCredentials = localStorage.getItem('biometric_user_credentials');
       if (storedCredentials) {
         const credentials = JSON.parse(storedCredentials);
         if (credentials.email === email) {
           console.log('✅ [LOGIN-EMAIL] Credenciales biométricas ya registradas para:', email);
+          // Show biometric button since credentials exist
+          biometricLoginBtn.style.display = 'block';
           return;
         }
       }
 
       try {
+        // Check if biometrics are available
+        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        if (!available) {
+          console.log('ℹ️ [LOGIN-EMAIL] Biometría no disponible en este dispositivo');
+          return;
+        }
+
         console.log('🔐 [LOGIN-EMAIL] Registrando credenciales biométricas para:', email);
         
         const challenge = new Uint8Array(32);
@@ -365,7 +395,7 @@
             authenticatorAttachment: "platform",
             userVerification: "preferred"
           },
-          timeout: 60000,
+          timeout: 30000, // Reduced timeout
           attestation: "direct"
         };
 
@@ -385,35 +415,15 @@
           localStorage.setItem('biometric_user_credentials', JSON.stringify(credentialData));
           console.log('✅ [LOGIN-EMAIL] Credenciales biométricas registradas exitosamente');
           
-          // Show success message
-          setTimeout(() => {
-            const biometricSuccessDiv = document.createElement('div');
-            biometricSuccessDiv.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 bg-opacity-90 backdrop-blur-lg text-white px-4 py-3 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown';
-            biometricSuccessDiv.innerHTML = `
-              <div class="flex items-center">
-                <div class="mr-2">🔐</div>
-                <div class="text-sm">
-                  <p class="font-semibold">¡Biometría activada!</p>
-                  <p class="opacity-90">Ahora puedes usar tu huella digital</p>
-                </div>
-              </div>
-            `;
-            document.body.appendChild(biometricSuccessDiv);
-            
-            setTimeout(() => {
-              if (biometricSuccessDiv.parentNode) {
-                biometricSuccessDiv.classList.remove('animate__fadeInDown');
-                biometricSuccessDiv.classList.add('animate__fadeOutUp');
-                setTimeout(() => {
-                  biometricSuccessDiv.remove();
-                }, 500);
-              }
-            }, 4000);
-          }, 1000);
+          // Show and enable biometric button
+          biometricLoginBtn.style.display = 'block';
+          
+          // Show success notification
+          showSuccess('🔐 ¡Biometría configurada! Ahora puedes usar tu huella digital para ingresar.');
         }
       } catch (error) {
         console.log('ℹ️ [LOGIN-EMAIL] Usuario rechazó registro biométrico o no está disponible:', error.message);
-        // No mostrar error, es opcional
+        // No mostrar error, es opcional - el usuario puede preferir no usar biometría
       }
     }
 
@@ -434,6 +444,32 @@
     // Hide loading state
     function hideLoading() {
       loadingState.classList.add('hidden');
+    }
+
+    // Show success message
+    function showSuccess(message) {
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 bg-opacity-90 backdrop-blur-lg text-white px-6 py-4 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown';
+      successDiv.innerHTML = `
+        <div class="flex items-center">
+          <div class="mr-3">✅</div>
+          <div>
+            <p class="font-semibold">${message}</p>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(successDiv);
+      
+      // Auto-hide after 4 seconds
+      setTimeout(() => {
+        if (successDiv.parentNode) {
+          successDiv.classList.remove('animate__fadeInDown');
+          successDiv.classList.add('animate__fadeOutUp');
+          setTimeout(() => {
+            successDiv.remove();
+          }, 500);
+        }
+      }, 4000);
     }
 
     // Function to handle successful authentication redirect
@@ -504,15 +540,10 @@
       console.log('🔐 [LOGIN-EMAIL] Iniciando autenticación biométrica...');
       
       try {
-        showLoading('Verificando biometría...');
+        showLoading('🔐 Verificando tu huella digital...');
         
-        // Check if there are stored credentials
+        // Get stored credentials (we already verified they exist in checkBiometricSupport)
         const storedCredentials = localStorage.getItem('biometric_user_credentials');
-        if (!storedCredentials) {
-          showError('No hay credenciales biométricas registradas. Inicia sesión primero con email/contraseña para registrar tu huella.');
-          return;
-        }
-
         const credentials = JSON.parse(storedCredentials);
         
         // Create authentication challenge
@@ -527,7 +558,7 @@
             transports: ['internal']
           }],
           userVerification: 'preferred',
-          timeout: 60000
+          timeout: 30000 // Reduced timeout for better UX
         };
 
         // Request biometric authentication
@@ -544,33 +575,43 @@
           
           hideLoading();
           
+          // Show success message
+          showSuccess('✅ ¡Login biométrico exitoso!');
+          
           // Check admin status
           const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
           const isAdmin = adminEmails.includes(userEmail.toLowerCase());
           
-          if (isAdminRedirect && isAdmin) {
-            localStorage.setItem('admin_verified', 'true');
-            window.location.href = "admin.html";
-          } else if (isAdminRedirect && !isAdmin) {
-            showError(`Sin permisos de administrador. Usuario: ${userEmail}`);
-          } else {
-            // Store biometric login flag
-            localStorage.setItem('biometric_login', 'true');
-            localStorage.setItem('user_email', userEmail);
-            handleSuccessfulAuth({ email: userEmail });
-          }
+          // Wait a moment before redirect
+          // Wait a moment before redirect
+          setTimeout(() => {
+            if (isAdminRedirect && isAdmin) {
+              localStorage.setItem('admin_verified', 'true');
+              window.location.href = "admin.html";
+            } else if (isAdminRedirect && !isAdmin) {
+              showError(`❌ Sin permisos de administrador para: ${userEmail}`);
+            } else {
+              // Store biometric login flag
+              localStorage.setItem('biometric_login', 'true');
+              localStorage.setItem('user_email', userEmail);
+              window.location.href = "home.html";
+            }
+          }, 1500);
         }
         
       } catch (error) {
         console.error('❌ [LOGIN-EMAIL] Error en autenticación biométrica:', error);
+        hideLoading();
         
-        let errorMsg = 'Error en autenticación biométrica';
+        let errorMsg = '❌ Error en autenticación biométrica';
         if (error.name === 'NotAllowedError') {
-          errorMsg = 'Autenticación biométrica cancelada o no autorizada';
+          errorMsg = '🚫 Autenticación cancelada por el usuario';
         } else if (error.name === 'NotSupportedError') {
-          errorMsg = 'Autenticación biométrica no soportada en este dispositivo';
+          errorMsg = '📱 Biometría no soportada en este dispositivo';
         } else if (error.name === 'SecurityError') {
-          errorMsg = 'Error de seguridad en autenticación biométrica';
+          errorMsg = '🔒 Error de seguridad en biometría';
+        } else if (error.name === 'TimeoutError') {
+          errorMsg = '⏰ Tiempo agotado - intenta de nuevo';
         }
         
         showError(errorMsg);
