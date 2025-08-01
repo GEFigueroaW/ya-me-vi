@@ -34,6 +34,16 @@
       
       console.log('🔍 [LOGIN-EMAIL] WebView detectado:', isWebView);
       console.log('📱 [LOGIN-EMAIL] User Agent:', ua.slice(0, 100));
+      console.log('🔧 [LOGIN-EMAIL] Force Normal Mode:', forceNormalMode);
+      console.log('🔍 [LOGIN-EMAIL] Detalles de detección:', {
+        webintoapp: ua.includes('webintoapp'),
+        webview: ua.includes('webview'), 
+        androidChrome: /android.*version.*chrome/i.test(ua),
+        hasChrome: ua.includes('chrome/'),
+        hasCros: ua.includes('cros'),
+        androidChromeSpecific: (/android.*version.*chrome/i.test(ua) && !ua.includes('chrome/') && !ua.includes('cros')),
+        isWebView: isWebView
+      });
       
       if (isWebView) {
         console.log('🚨 [LOGIN-EMAIL] WebView detectado - redirigiendo a navegador externo INMEDIATAMENTE');
