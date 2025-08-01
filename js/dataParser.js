@@ -487,6 +487,7 @@ export function crearCajaAnalisis(tipo, datos) {
   tarjeta.className = 'caja-interactiva';
   tarjeta.id = `caja-${tipo}`;
   const botonTitulo = document.createElement('button');
+  botonTitulo.className = 'w-full h-full flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50';
   botonTitulo.onclick = () => manejarClicCaja(tipo, datos);
   botonTitulo.innerHTML = `
     <div class="caja-content">

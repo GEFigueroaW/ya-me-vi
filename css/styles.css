@@ -748,3 +748,121 @@ input[type="number"] {
     grid-template-columns: repeat(1, 1fr);
   }
 }
+
+/* ===== ESTILOS PARA CAJAS DE ANÁLISIS ===== */
+
+/* Contenedor principal de cajas de análisis */
+.contenedor-cajas-inicial {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Caja interactiva de análisis */
+.caja-interactiva {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.caja-interactiva:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.caja-interactiva.caja-abierta {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.6);
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.3);
+}
+
+/* Botón de la caja */
+.caja-interactiva button {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 2rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.caja-interactiva button:focus {
+  outline: none;
+}
+
+/* Contenido de la caja */
+.caja-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Emoji de la caja */
+.caja-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+/* Título de la caja */
+.caja-titulo {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  line-height: 1.3;
+  color: white;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .contenedor-cajas-inicial {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+  
+  .caja-interactiva button {
+    padding: 1.5rem;
+  }
+  
+  .caja-emoji {
+    font-size: 2.5rem;
+  }
+  
+  .caja-titulo {
+    font-size: 1.125rem;
+  }
+}
+
+/* Asegurar que las cajas sean visibles en todos los fondos */
+.caja-interactiva {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.caja-interactiva:hover {
+  background: rgba(0, 0, 0, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.caja-interactiva.caja-abierta {
+  background: rgba(34, 197, 94, 0.3) !important;
+  border-color: rgba(34, 197, 94, 0.7) !important;
+}
