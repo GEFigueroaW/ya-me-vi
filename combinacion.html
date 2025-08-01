@@ -344,7 +344,10 @@
       const btnBack = document.getElementById('btn-back');
       if (btnBack) {
         btnBack.addEventListener('click', function() {
-          console.log('🔙 Regresando a home...');
+          console.log('🔙 [COMBINACION] Regresando a home - marcando flag anti-loop');
+          // Marcar que viene de regreso para evitar loop de onboarding
+          localStorage.setItem('returned_from_page', 'true');
+          localStorage.setItem('emergency_no_onboarding', 'true');
           window.location.href = 'home.html';
         });
         console.log('✅ Botón de volver configurado');

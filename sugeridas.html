@@ -332,6 +332,10 @@
       
       // Configurar botón de volver
       document.getElementById('btn-back').addEventListener('click', () => {
+        console.log('🔙 [SUGERIDAS] Regresando a home - marcando flag anti-loop');
+        // Marcar que viene de regreso para evitar loop de onboarding
+        localStorage.setItem('returned_from_page', 'true');
+        localStorage.setItem('emergency_no_onboarding', 'true');
         window.location.href = 'home.html';
       });
       

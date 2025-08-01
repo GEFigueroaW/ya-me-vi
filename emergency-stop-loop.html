@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Parar Loop de Emergencia</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-red-900 text-white min-h-screen flex items-center justify-center">
+  <div class="max-w-md mx-auto text-center p-8 bg-red-800 rounded-lg shadow-2xl">
+    <h1 class="text-3xl font-bold mb-6">🚨 Parar Loop de Emergencia</h1>
+    
+    <p class="mb-6 text-red-100">
+      Si estás experimentando un loop infinito entre páginas, usa este botón para detenerlo:
+    </p>
+    
+    <button id="stopLoop" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-4 px-8 rounded-lg mb-4 w-full">
+      🛑 PARAR LOOP AHORA
+    </button>
+    
+    <div id="status" class="mt-4 p-3 bg-red-700 rounded hidden">
+      <p class="text-sm">Loop detenido. Puedes volver a home ahora.</p>
+    </div>
+    
+    <button id="goHome" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded mt-4 w-full hidden">
+      🏠 Ir a Home
+    </button>
+    
+    <div class="mt-8 text-xs text-red-200">
+      <p><strong>Esto limpiará:</strong></p>
+      <ul class="list-disc text-left ml-4 mt-2">
+        <li>Flags de onboarding</li>
+        <li>Cache de verificación</li>
+        <li>Estados de loop</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('stopLoop').addEventListener('click', function() {
+      console.log('🚨 [EMERGENCY] Deteniendo loop de emergencia...');
+      
+      // Limpiar todos los flags relacionados con onboarding y loops
+      localStorage.removeItem('onboarding_in_progress');
+      localStorage.removeItem('just_completed_onboarding');
+      localStorage.removeItem('registration_in_progress');
+      localStorage.removeItem('from_welcome_google');
+      localStorage.removeItem('force_dream_input');
+      localStorage.removeItem('returned_from_page');
+      localStorage.removeItem('came_from_home');
+      localStorage.removeItem('last_onboarding_attempt');
+      
+      // Establecer flags de emergencia
+      localStorage.setItem('emergency_no_onboarding', 'true');
+      localStorage.setItem('onboarding_completed_cache', 'true');
+      
+      // Marcar que se usó la parada de emergencia
+      localStorage.setItem('emergency_stop_used', 'true');
+      
+      console.log('✅ [EMERGENCY] Loop detenido, flags limpiados');
+      
+      // Mostrar status y botón de home
+      document.getElementById('status').classList.remove('hidden');
+      document.getElementById('goHome').classList.remove('hidden');
+      document.getElementById('stopLoop').style.opacity = '0.5';
+      document.getElementById('stopLoop').disabled = true;
+    });
+    
+    document.getElementById('goHome').addEventListener('click', function() {
+      console.log('🏠 [EMERGENCY] Regresando a home después de parada de emergencia');
+      window.location.href = 'home.html';
+    });
+  </script>
+</body>
+</html>

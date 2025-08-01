@@ -227,6 +227,13 @@
         Saltar por ahora →
       </button>
     </div>
+    
+    <!-- Botón de emergencia anti-loop -->
+    <div class="mt-4 text-center">
+      <button id="emergencySkip" class="text-red-300 text-opacity-70 hover:text-opacity-90 transition duration-300 text-sm">
+        🚨 ¿Atrapado en un loop? Clic aquí
+      </button>
+    </div>
   </div>
 
   <!-- Scripts -->
@@ -450,11 +457,22 @@
         localStorage.removeItem('from_welcome_google');
         localStorage.removeItem('force_dream_input');
         localStorage.removeItem('onboarding_in_progress');
+        localStorage.removeItem('last_onboarding_attempt');
         
         // Set flag to indicate onboarding was just completed
         localStorage.setItem('just_completed_onboarding', 'true');
         
+        // NUEVO: Marcar inmediatamente en cache para evitar loops
+        localStorage.setItem('onboarding_completed_cache', 'true');
+        localStorage.setItem('user_dream_cache', dreamText);
+        if (currentUser.displayName) {
+          localStorage.setItem('user_name_cache', currentUser.displayName.split(' ')[0]);
+        } else if (currentUser.email) {
+          localStorage.setItem('user_name_cache', currentUser.email.split('@')[0]);
+        }
+        
         console.log('🧹 [DREAM-INPUT] Flags de localStorage limpiados y onboarding marcado como completado');
+        console.log('💾 [DREAM-INPUT] Cache actualizado para prevenir loops futuros');
         
         // Show success message
         loadingState.innerHTML = `
@@ -498,9 +516,43 @@
       localStorage.removeItem('registration_in_progress');
       localStorage.removeItem('from_welcome_google');
       localStorage.removeItem('force_dream_input');
+      localStorage.removeItem('onboarding_in_progress');
+      
+      // Marcar que completó el onboarding (aunque haya saltado)
+      localStorage.setItem('onboarding_completed_cache', 'true');
+      localStorage.setItem('emergency_no_onboarding', 'true');
       
       window.location.href = 'home.html';
     });
+    
+    // Emergency skip button for loops
+    const emergencySkip = document.getElementById('emergencySkip');
+    if (emergencySkip) {
+      emergencySkip.addEventListener('click', () => {
+        console.log('🚨 [DREAM-INPUT] Botón de emergencia activado - saltando loop');
+        
+        // Limpiar TODOS los flags relacionados con loops
+        localStorage.removeItem('registration_in_progress');
+        localStorage.removeItem('from_welcome_google');
+        localStorage.removeItem('force_dream_input');
+        localStorage.removeItem('onboarding_in_progress');
+        localStorage.removeItem('just_completed_onboarding');
+        localStorage.removeItem('returned_from_page');
+        localStorage.removeItem('came_from_home');
+        localStorage.removeItem('last_onboarding_attempt');
+        
+        // Establecer flags de emergencia para prevenir futuros loops
+        localStorage.setItem('emergency_no_onboarding', 'true');
+        localStorage.setItem('onboarding_completed_cache', 'true');
+        localStorage.setItem('emergency_stop_used', 'true');
+        
+        alert('🚨 Loop detenido. Serás redirigido a home.');
+        
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 1000);
+      });
+    }
 
     // Handle Enter key in custom input
     customDreamInput.addEventListener('keypress', (e) => {

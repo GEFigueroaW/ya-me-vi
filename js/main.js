@@ -12,68 +12,148 @@ const db = getFirestore(app);
 // === Función para mostrar el sueño guardado del usuario ===
 async function mostrarBienvenidaConSueño(user) {
   try {
-    // Obtener datos del usuario de Firestore
-    const userRef = doc(db, 'users', user.uid);
-    const userSnap = await getDoc(userRef);
+    console.log('🏠 [MAIN] Iniciando verificación de bienvenida para:', user.email);
+    
+    // VERIFICAR CACHE PRIMERO PARA PREVENIR LOOPS
+    const onboardingCached = localStorage.getItem('onboarding_completed_cache');
+    const dreamCached = localStorage.getItem('user_dream_cache');
+    const nameCached = localStorage.getItem('user_name_cache');
+    
+    console.log('💾 [MAIN] Cache disponible:', {
+      onboardingCached: onboardingCached,
+      dreamCached: dreamCached,
+      nameCached: nameCached
+    });
 
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) {
-      // Obtener el nombre del usuario con múltiples fallbacks
+      // Variables principales
       let userName = '';
       let userDream = '';
       let needsOnboarding = false;
       
-      // 1. Intentar desde los datos guardados en Firestore
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        console.log('📋 [MAIN] Datos de usuario desde Firestore:', userData);
+      // VERIFICACIÓN DE EMERGENCIA ANTI-LOOP
+      const emergencyFlag = localStorage.getItem('emergency_no_onboarding');
+      const justCompletedFlag = localStorage.getItem('just_completed_onboarding');
+      const returnedFromPage = localStorage.getItem('returned_from_page');
+      const cameFromHome = localStorage.getItem('came_from_home');
+      const emergencyStopUsed = localStorage.getItem('emergency_stop_used');
+      
+      console.log('🚨 [MAIN] Flags de emergencia:', {
+        emergencyFlag: emergencyFlag,
+        justCompletedFlag: justCompletedFlag,
+        returnedFromPage: returnedFromPage,
+        cameFromHome: cameFromHome,
+        emergencyStopUsed: emergencyStopUsed
+      });
+      
+      // Si se usó parada de emergencia, mostrar mensaje especial
+      if (emergencyStopUsed === 'true') {
+        console.log('🚨 [MAIN] Parada de emergencia detectada - mostrando mensaje especial');
+        localStorage.removeItem('emergency_stop_used');
         
-        if (userData.displayName || userData.name) {
-          userName = (userData.displayName || userData.name).split(' ')[0]; // Solo primer nombre
-        }
-        if (userData.dream) {
-          userDream = userData.dream;
-        }
+        welcomeMsg.innerHTML = `
+          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+            ¡Sistema Restaurado!
+          </div>
+          <div class="text-lg md:text-xl font-normal text-green-300 mt-2 drop-shadow-md">
+            El loop ha sido detenido exitosamente 🛡️
+          </div>
+        `;
         
-        // LÓGICA SIMPLIFICADA ANTI-LOOP
-        // Si el usuario tiene onboardingCompleted = true, NUNCA necesita onboarding
-        if (userData.onboardingCompleted === true) {
-          needsOnboarding = false;
-          console.log('✅ [MAIN] Onboarding ya completado, no redirigir');
-        } else {
-          // Solo necesita onboarding si NO lo ha completado
-          needsOnboarding = true;
-          console.log('⚠️ [MAIN] Onboarding no completado, necesita completar');
-        }
+        // Evitar verificaciones adicionales
+        return;
+      }
+      
+      // Si hay flag de emergencia O si viene de una página secundaria, usar cache y no verificar onboarding
+      if (emergencyFlag === 'true' || returnedFromPage === 'true' || cameFromHome === 'true') {
+        console.log('🛡️ [MAIN] Flag de emergencia activo - usando cache y saltando verificación');
+        needsOnboarding = false;
+        userName = nameCached || (user.displayName ? user.displayName.split(' ')[0] : (user.email ? user.email.split('@')[0] : 'Usuario'));
+        userDream = dreamCached || '';
         
-        console.log('🔍 [MAIN] Verificación onboarding:', {
-          hasDream: !!userData.dream,
-          dreamValue: userData.dream,
-          dreamTrimmed: userData.dream ? userData.dream.trim() : 'undefined',
-          onboardingCompleted: userData.onboardingCompleted,
-          needsOnboarding: needsOnboarding,
-          userDataComplete: JSON.stringify(userData, null, 2)
-        });
+        // Limpiar flags después de usar
+        localStorage.removeItem('emergency_no_onboarding');
+        localStorage.removeItem('returned_from_page');
+        localStorage.removeItem('came_from_home');
+        
+        // Marcar que regresó de una página para futuras referencias
+        if (cameFromHome === 'true') {
+          console.log('🔄 [MAIN] Usuario regresó de una página secundaria - marcando flag');
+          localStorage.setItem('returned_from_page', 'true');
+        }
       } else {
-        // Usuario nuevo sin documento en Firestore
-        needsOnboarding = true;
-        console.log('👤 [MAIN] Usuario nuevo detectado, creando documento base...');
+        // Obtener datos del usuario de Firestore
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
         
-        // Crear documento base para nuevos usuarios de Google
-        try {
-          await setDoc(userRef, {
-            uid: user.uid,
-            email: user.email || '',
-            displayName: user.displayName || '',
-            photoURL: user.photoURL || '',
-            emailVerified: user.emailVerified || false,
-            createdAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString(),
-            onboardingCompleted: false
+        // 1. Intentar desde los datos guardados en Firestore
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          console.log('📋 [MAIN] Datos de usuario desde Firestore:', userData);
+          
+          if (userData.displayName || userData.name) {
+            userName = (userData.displayName || userData.name).split(' ')[0]; // Solo primer nombre
+          }
+          if (userData.dream) {
+            userDream = userData.dream;
+          }
+          
+          // LÓGICA ANTI-LOOP MEJORADA
+          // Si el usuario tiene onboardingCompleted = true O si acabó de completar, NUNCA necesita onboarding
+          if (userData.onboardingCompleted === true || justCompletedFlag === 'true') {
+            needsOnboarding = false;
+            console.log('✅ [MAIN] Onboarding ya completado, no redirigir');
+            
+            // Guardar en cache para futuras visitas
+            localStorage.setItem('onboarding_completed_cache', 'true');
+            if (userData.dream) {
+              localStorage.setItem('user_dream_cache', userData.dream);
+            }
+            if (userName) {
+              localStorage.setItem('user_name_cache', userName);
+            }
+          } else {
+            // Solo necesita onboarding si NO lo ha completado Y no hay cache válido
+            if (onboardingCached === 'true') {
+              console.log('💾 [MAIN] Cache indica onboarding completado - usando cache');
+              needsOnboarding = false;
+              userName = nameCached || userName;
+              userDream = dreamCached || userDream;
+            } else {
+              needsOnboarding = true;
+              console.log('⚠️ [MAIN] Onboarding no completado, necesita completar');
+            }
+          }
+          
+          console.log('🔍 [MAIN] Verificación onboarding:', {
+            hasDream: !!userData.dream,
+            dreamValue: userData.dream,
+            onboardingCompleted: userData.onboardingCompleted,
+            needsOnboarding: needsOnboarding,
+            cacheUsed: onboardingCached === 'true'
           });
-          console.log('✅ [MAIN] Documento base creado para usuario:', user.email);
-        } catch (createError) {
-          console.error('❌ [MAIN] Error creando documento base:', createError);
+        } else {
+          // Usuario nuevo sin documento en Firestore
+          needsOnboarding = true;
+          console.log('👤 [MAIN] Usuario nuevo detectado, creando documento base...');
+          
+          // Crear documento base para nuevos usuarios de Google
+          try {
+            await setDoc(userRef, {
+              uid: user.uid,
+              email: user.email || '',
+              displayName: user.displayName || '',
+              photoURL: user.photoURL || '',
+              emailVerified: user.emailVerified || false,
+              createdAt: new Date().toISOString(),
+              lastLogin: new Date().toISOString(),
+              onboardingCompleted: false
+            });
+            console.log('✅ [MAIN] Documento base creado para usuario:', user.email);
+          } catch (createError) {
+            console.error('❌ [MAIN] Error creando documento base:', createError);
+          }
         }
       }
       
@@ -87,11 +167,11 @@ async function mostrarBienvenidaConSueño(user) {
         userName = user.email.split('@')[0];
       }
       
-      // 4. Verificar si hay datos biométricos y usar fallback
-      const biometricUserInfo = localStorage.getItem('biometric_user_info');
-      if (biometricUserInfo && !userName) {
+      // 4. Verificar si hay datos biométricos y usar fallback (primera instancia)
+      const biometricUserData1 = localStorage.getItem('biometric_user_info');
+      if (biometricUserData1 && !userName) {
         try {
-          const bioData = JSON.parse(biometricUserInfo);
+          const bioData = JSON.parse(biometricUserData1);
           userName = bioData.name || 'Usuario';
         } catch (e) {
           userName = 'Usuario';
@@ -100,72 +180,104 @@ async function mostrarBienvenidaConSueño(user) {
       
       // Si el usuario necesita onboarding, redirigir a dream-input
       if (needsOnboarding) {
-        console.log('🎯 [MAIN] Usuario necesita completar onboarding, redirigiendo...');
+        console.log('🎯 [MAIN] Usuario necesita completar onboarding, verificando condiciones...');
         
-        // VERIFICACIÓN DE EMERGENCIA
-        const emergencyFixed = localStorage.getItem('emergency_fixed');
-        if (emergencyFixed) {
-          console.log('🚨 [MAIN] Flag de emergencia detectado, forzando no-onboarding');
+        // VERIFICACIÓN DE PREVENCIÓN DE LOOPS MEJORADA
+        const currentPage = window.location.pathname.split('/').pop();
+        const onboardingInProgress = localStorage.getItem('onboarding_in_progress');
+        const lastOnboardingAttempt = localStorage.getItem('last_onboarding_attempt');
+        const now = Date.now();
+        
+        // Si el último intento fue hace menos de 30 segundos, no intentar de nuevo
+        if (lastOnboardingAttempt && (now - parseInt(lastOnboardingAttempt)) < 30000) {
+          console.log('🛡️ [MAIN] Último intento de onboarding muy reciente, saltando para evitar loop');
           needsOnboarding = false;
-          localStorage.removeItem('emergency_fixed');
-          // Continuar con flujo normal
-        } else {
-          // Verificar si ya estamos en proceso de onboarding para evitar loops
-          const currentPage = window.location.pathname.split('/').pop();
-          const onboardingInProgress = localStorage.getItem('onboarding_in_progress');
-          const justCompletedOnboarding = localStorage.getItem('just_completed_onboarding');
+          localStorage.setItem('emergency_no_onboarding', 'true');
+        }
+        
+        console.log('🔍 [MAIN] Verificación de flags mejorada:', {
+          currentPage: currentPage,
+          onboardingInProgress: onboardingInProgress,
+          justCompletedOnboarding: justCompletedFlag,
+          needsOnboarding: needsOnboarding,
+          lastAttempt: lastOnboardingAttempt,
+          timeSinceLastAttempt: lastOnboardingAttempt ? (now - parseInt(lastOnboardingAttempt)) : 'nunca'
+        });
+        
+        // Si acaba de completar onboarding, no redirigir
+        if (justCompletedFlag === 'true') {
+          console.log('ℹ️ [MAIN] Usuario acaba de completar onboarding, limpiando flag y permitiendo acceso');
+          localStorage.removeItem('just_completed_onboarding');
+          needsOnboarding = false;
           
-          console.log('🔍 [MAIN] Verificación de flags:', {
-            currentPage: currentPage,
-            onboardingInProgress: onboardingInProgress,
-            justCompletedOnboarding: justCompletedOnboarding,
-            needsOnboarding: needsOnboarding
-          });
+          // Marcar como completado en cache
+          localStorage.setItem('onboarding_completed_cache', 'true');
+          console.log('✅ [MAIN] Flag limpiado, needsOnboarding = false, continuando con flujo normal');
+        } else if (currentPage === 'dream-input.html') {
+          console.log('ℹ️ [MAIN] Ya estamos en dream-input.html, no redirigir');
+          return;
+        } else if (needsOnboarding) {
+          console.log('🚀 [MAIN] Iniciando redirección a dream-input.html...');
           
-          // Si acaba de completar onboarding, no redirigir
-          if (justCompletedOnboarding) {
-            console.log('ℹ️ [MAIN] Usuario acaba de completar onboarding, limpiando flag y permitiendo acceso');
-            localStorage.removeItem('just_completed_onboarding');
-            needsOnboarding = false;
-            console.log('✅ [MAIN] Flag limpiado, needsOnboarding = false, continuando con flujo normal');
-            // Continúa con el flujo normal
-          } else if (currentPage === 'dream-input.html') {
-            console.log('ℹ️ [MAIN] Ya estamos en dream-input.html, no redirigir');
-            return;
-          } else {
-            console.log('🚀 [MAIN] Iniciando redirección a dream-input.html...');
-            // Marcar que estamos en proceso de onboarding
-            localStorage.setItem('onboarding_in_progress', 'true');
-            
-            setTimeout(() => {
-              console.log('🚀 [MAIN] Ejecutando redirección a dream-input.html');
-              window.location.href = 'dream-input.html';
-            }, 2000);
-            
-            welcomeMsg.innerHTML = `
-              <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
-                ¡Bienvenido ${userName}!
-              </div>
-              <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
-                Configurando tu perfil...
-              </div>
-            `;
-            return;
-          }
+          // Marcar intento de onboarding
+          localStorage.setItem('onboarding_in_progress', 'true');
+          localStorage.setItem('last_onboarding_attempt', now.toString());
+          
+          setTimeout(() => {
+            console.log('🚀 [MAIN] Ejecutando redirección a dream-input.html');
+            window.location.href = 'dream-input.html';
+          }, 2000);
+          
+          welcomeMsg.innerHTML = `
+            <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+              ¡Bienvenido ${userName || 'Usuario'}!
+            </div>
+            <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
+              Configurando tu perfil...
+            </div>
+          `;
+          return;
         }
       }
       
       // Limpiar flag de onboarding si ya no es necesario
       localStorage.removeItem('onboarding_in_progress');
       
-      // Crear mensaje de bienvenida personalizado
-      if (userDream && userName) {
+      // 2. Si no hay nombre desde Firestore, usar displayName de Firebase Auth (Google login)
+      if (!userName && user.displayName) {
+        userName = user.displayName.split(' ')[0];
+      }
+      
+      // 3. Si no, usar la parte del email antes del @
+      if (!userName && user.email) {
+        userName = user.email.split('@')[0];
+      }
+      
+      // 4. Verificar si hay datos biométricos y usar fallback (segunda instancia)
+      const biometricUserData2 = localStorage.getItem('biometric_user_info');
+      if (biometricUserData2 && !userName) {
+        try {
+          const bioData = JSON.parse(biometricUserData2);
+          userName = bioData.name || 'Usuario';
+        } catch (e) {
+          userName = 'Usuario';
+        }
+      }
+      
+      // Crear mensaje de bienvenida personalizado MEJORADO
+      console.log('🎨 [MAIN] Creando mensaje de bienvenida:', {
+        userName: userName,
+        userDream: userDream,
+        needsOnboarding: needsOnboarding
+      });
+      
+      if (userDream && userDream.trim() !== '' && userName) {
         // Mapear categorías de sueños a textos más naturales
         const dreamDisplayMap = {
-          'casa': 'comprar tu casa',
-          'auto': 'comprar tu auto',
+          'casa': 'comprar tu casa soñada',
+          'auto': 'comprar tu auto ideal',
           'viaje': 'viajar por el mundo',
-          'negocio': 'iniciar tu negocio',
+          'negocio': 'iniciar tu propio negocio',
           'familia': 'ayudar a tu familia',
           'estudios': 'continuar tus estudios',
           'libertad': 'lograr libertad financiera',
@@ -177,10 +289,11 @@ async function mostrarBienvenidaConSueño(user) {
           <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
             ¡Bienvenido ${userName}!
           </div>
-          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
-            Listo para cumplir tu sueño: ${dreamDisplay}
+          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md animate__animated animate__pulse">
+            🌟 Listo para cumplir tu sueño: ${dreamDisplay}
           </div>
         `;
+        console.log('✨ [MAIN] Mensaje de bienvenida personalizado con sueño mostrado');
       } else if (userName) {
         welcomeMsg.innerHTML = `
           <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
@@ -190,11 +303,20 @@ async function mostrarBienvenidaConSueño(user) {
             ¡Listo para ganar!
           </div>
         `;
+        console.log('✨ [MAIN] Mensaje de bienvenida con nombre mostrado');
       } else {
-        welcomeMsg.textContent = '¡Bienvenido!';
+        welcomeMsg.innerHTML = `
+          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+            ¡Bienvenido!
+          </div>
+          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
+            ¡Listo para cumplir tus sueños!
+          </div>
+        `;
+        console.log('✨ [MAIN] Mensaje de bienvenida genérico mostrado');
       }
       
-      console.log(`✅ Usuario identificado: ${userName || 'Anónimo'}, Sueño: ${userDream || 'No definido'}, Onboarding: ${!needsOnboarding}`);
+      console.log(`✅ [MAIN] Usuario identificado: ${userName || 'Anónimo'}, Sueño: ${userDream || 'No definido'}, Onboarding completado: ${!needsOnboarding}`);
     }
   } catch (error) {
     console.error('❌ Error obteniendo datos del usuario:', error);
@@ -289,6 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnAnalizar.addEventListener('click', (e) => {
       e.preventDefault();
       console.log('🎯 Botón Analizar clickeado');
+      // Marcar que viene de home para evitar loop al regresar
+      localStorage.setItem('came_from_home', 'true');
       // Mostrar feedback visual inmediato
       btnAnalizar.style.opacity = '0.5';
       setTimeout(() => {
@@ -299,6 +423,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCombinacion.addEventListener('click', (e) => {
       e.preventDefault();
       console.log('🎯 Botón Combinación clickeado');
+      // Marcar que viene de home para evitar loop al regresar
+      localStorage.setItem('came_from_home', 'true');
       // Mostrar feedback visual inmediato
       btnCombinacion.style.opacity = '0.5';
       setTimeout(() => {
@@ -309,6 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSugeridas.addEventListener('click', (e) => {
       e.preventDefault();
       console.log('🎯 Botón Sugeridas clickeado');
+      // Marcar que viene de home para evitar loop al regresar
+      localStorage.setItem('came_from_home', 'true');
       // Mostrar feedback visual inmediato
       btnSugeridas.style.opacity = '0.5';
       setTimeout(() => {
