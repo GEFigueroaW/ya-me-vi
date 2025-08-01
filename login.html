@@ -5,50 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YA ME VI - Ingreso</title>
   
-  <!-- DETECCIÓN TEMPRANA DE WEBVIEW -->
+  <!-- DETECCIÓN TEMPRANA DE WEBVIEW - DESACTIVADA TEMPORALMENTE -->
   <script>
-    // Detección inmediata de WebView antes de que se cargue cualquier otra cosa
+    // DETECCIÓN DESACTIVADA PARA PERMITIR LOGIN NORMAL EN MÓVILES
     (function() {
-      console.log('🔍 Detección temprana de WebView iniciada...');
-      
-      const ua = navigator.userAgent.toLowerCase();
-      
-      // VERIFICAR SI EL USUARIO FORZÓ MODO NORMAL
-      const forceNormalMode = localStorage.getItem('force_normal_browser') === 'true';
-      if (forceNormalMode) {
-        console.log('🔧 [LOGIN] Modo normal forzado por usuario - saltando detección WebView');
-        return;
-      }
-      
-      const isWebView = 
-        // Detección específica de WebIntoApp y otros WebViews
-        ua.includes('webintoapp') ||
-        ua.includes('webview') ||
-        // Detección más específica de WebView (no Chrome normal)
-        (/android.*version.*chrome/i.test(ua) && !ua.includes('chrome/') && !ua.includes('cros')) ||
-        /crios|fxios/i.test(ua) ||
-        // Solo iOS WebViews específicos
-        (window.navigator.standalone === false && /iPhone|iPad/.test(ua) && !ua.includes('crios') && !ua.includes('safari')) ||
-        // Solo si explícitamente viene de webintoapp
-        (window.location.href.includes('webintoapp'));
-      
-      console.log('🔍 WebView detectado:', isWebView);
-      console.log('📱 User Agent:', ua.slice(0, 100));
+      console.log('� [DESACTIVADO] Detección de WebView deshabilitada para debug móvil');
+      console.log('� User Agent:', navigator.userAgent.toLowerCase().slice(0, 100));
       console.log('📐 Viewport:', window.innerWidth + 'x' + window.innerHeight);
       console.log('🖥️ Screen:', window.screen.width + 'x' + window.screen.height);
+      console.log('✅ Continuando con login normal...');
       
-      if (isWebView) {
-        console.log('🚨 WebView detectado - redirigiendo a navegador externo INMEDIATAMENTE');
-        
-        // Crear URL de login externo
-        const baseUrl = window.location.origin;
-        const returnUrl = encodeURIComponent(window.location.href);
-        const externalUrl = `${baseUrl}/external-login.html?type=google&return=${returnUrl}&webview=true&immediate=true`;
-        
-        console.log('🔗 Redirigiendo a:', externalUrl);
-        
-        // Mostrar mensaje inmediato al usuario
-        document.write(`
+      // FORZAR MODO NORMAL PARA TODOS
+      localStorage.setItem('force_normal_browser', 'true');
+      
+      return; // Salir sin hacer nada - permitir login normal
+    })();
+  </script>
           <div style="
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -105,21 +77,6 @@
             const popup = window.open(externalUrl, '_blank', 'width=400,height=600');
             if (!popup || popup.closed) {
               throw new Error('Popup bloqueado');
-            }
-          } catch (error) {
-            // Método 2: redirección directa
-            window.location.href = externalUrl;
-          }
-        }, 1500);
-        
-        // Detener la carga del resto de la página
-        return;
-      }
-      
-      console.log('🖥️ Navegador normal detectado - continuando con carga normal');
-    })();
-  </script>
-  
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
