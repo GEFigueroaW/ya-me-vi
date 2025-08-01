@@ -100,21 +100,16 @@ export class MobileAuthOptimizer {
     provider.addScope('email');
     provider.addScope('profile');
     
-    // Estrategia 1: Navegador externo para WebViews problemáticos
-    if (this.shouldUseExternalBrowser()) {
-      console.log('🌐 Usando navegador externo (WebView detectado)');
-      return await this.handleExternalBrowserAuth();
-    }
+    // NUEVA ESTRATEGIA: NO usar external-login.html que causa bucles
+    // Usar siempre redirect directo para móviles, popup para desktop
     
-    // Estrategia 2: Redirect para móviles
     if (this.shouldUseRedirectAuth()) {
-      console.log('📱 Usando signInWithRedirect (móvil/WebView)');
+      console.log('📱 Usando signInWithRedirect directo (móvil/WebView)');
       return await this.handleRedirectAuth(auth, provider);
+    } else {
+      console.log('🖥️ Usando signInWithPopup (desktop)');
+      return await this.handlePopupAuth(auth, provider);
     }
-    
-    // Estrategia 3: Popup para desktop
-    console.log('🖥️ Usando signInWithPopup (desktop)');
-    return await this.handlePopupAuth(auth, provider);
   }
   
   async handleExternalBrowserAuth() {

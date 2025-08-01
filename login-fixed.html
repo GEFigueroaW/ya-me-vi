@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - YA ME VI</title>
+  
+  <!-- Auto-redirect logic para WebView/móviles problemáticos -->
+  <script>
+    // NO redirigir a external-login.html automáticamente
+    // Manejar todo desde esta página
+  </script>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
+     crossorigin="anonymous"></script>
+  
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="fullscreen-bg">
+  <div class="login-container">
+    <h1 class="app-title">YA ME VI</h1>
+    <button id="openAuthModal" class="btn btn-primary">Iniciar sesión</button>
+    <footer id="footer-container"></footer>
+  </div>
+
+  <!-- Modal de autenticación -->
+  <div id="authModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" id="closeAuthModal">&times;</span>
+      <h2 id="modal-title">Elige cómo iniciar sesión</h2>
+      
+      <!-- Loading state -->
+      <div id="loading-state" class="hidden" style="text-align: center; padding: 20px;">
+        <div class="spinner"></div>
+        <p id="loading-text">Iniciando sesión...</p>
+      </div>
+      
+      <!-- Login buttons -->
+      <div id="login-buttons">
+        <button id="loginWithGoogle" class="btn btn-google">Continuar con Google</button>
+        <hr />
+        <input type="email" id="emailInput" placeholder="Correo electrónico" />
+        <input type="password" id="passwordInput" placeholder="Contraseña" />
+        <button id="loginWithEmail" class="btn btn-secondary">Ingresar con correo</button>
+        <p class="forgot"><a href="#">¿Olvidaste tu contraseña?</a></p>
+      </div>
+      
+      <!-- Error message -->
+      <div id="error-message" class="hidden" style="margin-top: 15px; padding: 10px; background: rgba(255,0,0,0.1); border: 1px solid red; border-radius: 5px; color: red; font-size: 14px;"></div>
+      
+      <!-- Success message -->
+      <div id="success-message" class="hidden" style="margin-top: 15px; padding: 10px; background: rgba(0,255,0,0.1); border: 1px solid green; border-radius: 5px; color: green; font-size: 14px;"></div>
+    </div>
+  </div>
+
+  <script src="js/shared.js"></script> 
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { 
+      signInWithEmailAndPassword, 
+      signInWithPopup, 
+      signInWithRedirect, 
+      getRedirectResult,
+      GoogleAuthProvider, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Check if redirecting from admin panel
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdminRedirect = urlParams.get('redirect') === 'admin';
+
+    const openBtn = document.getElementById("openAuthModal");
+    const modal = document.getElementById("authModal");
+    const closeBtn = document.getElementById("closeAuthModal");
+    const loadingState = document.getElementById("loading-state");
+    const loginButtons = document.getElementById("login-buttons");
+    const loadingText = document.getElementById("loading-text");
+    const errorMessage = document.getElementById("error-message");
+    const successMessage = document.getElementById("success-message");
+
+    // Auto-open modal if redirected from admin
+    if (isAdminRedirect) {
+      modal.classList.remove("hidden");
+      document.getElementById('modal-title').textContent = 'Autenticación requerida para Panel Admin';
+    }
+
+    openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+    closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+
+    function showLoading(text = 'Cargando...') {
+      loadingText.textContent = text;
+      loadingState.classList.remove('hidden');
+      loginButtons.classList.add('hidden');
+      hideMessages();
+    }
+
+    function hideLoading() {
+      loadingState.classList.add('hidden');
+      loginButtons.classList.remove('hidden');
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.remove('hidden');
+      successMessage.classList.add('hidden');
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.remove('hidden');
+      errorMessage.classList.add('hidden');
+    }
+
+    function hideMessages() {
+      errorMessage.classList.add('hidden');
+      successMessage.classList.add('hidden');
+    }
+
+    function detectMobileDevice() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      const isWebView = 
+        (/android.*version.*chrome/i.test(userAgent) && !userAgent.includes('chrome/')) ||
+        (/iphone|ipad/i.test(userAgent) && window.navigator.standalone === false && !userAgent.includes('safari/')) ||
+        /webview|webintoapp/i.test(userAgent);
+      
+      console.log('📱 Dispositivo detectado:', { 
+        isMobile, 
+        isWebView, 
+        userAgent: userAgent.substring(0, 100),
+        viewport: `${window.innerWidth}x${window.innerHeight}`
+      });
+      
+      return { isMobile, isWebView };
+    }
+
+    async function handleAuthSuccess(user) {
+      console.log('✅ Usuario autenticado:', user.email);
+      
+      // Lista completa de admins
+      const adminEmails = [
+        'gfigueroa.w@gmail.com', 
+        'admin@yamevi.com.mx', 
+        'eugenfw@gmail.com',
+        'guillermo.figueroaw@totalplay.com.mx'
+      ];
+      
+      const isAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
+      
+      if (isAdminRedirect && isAdmin) {
+        showSuccess('¡Acceso autorizado! Redirigiendo al panel de administración...');
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 1500);
+      } else if (isAdminRedirect && !isAdmin) {
+        showError(`Sin permisos de administrador.\n\nUsuario: ${user.email}\n\nContacta al administrador.`);
+        setTimeout(() => {
+          window.location.href = "home.html";
+        }, 3000);
+      } else {
+        showSuccess(`¡Bienvenido ${user.displayName || user.email}!`);
+        setTimeout(() => {
+          window.location.href = "home.html";
+        }, 1500);
+      }
+    }
+
+    // Check if user is already authenticated
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log('✅ Usuario ya autenticado:', user.email || user.uid);
+        await handleAuthSuccess(user);
+      }
+    });
+
+    // GOOGLE AUTH - SIMPLIFICADO PARA EVITAR BUCLES
+    document.getElementById("loginWithGoogle").addEventListener("click", async () => {
+      console.log('🔍 Iniciando autenticación Google DIRECTA...');
+      
+      // LIMPIAR CUALQUIER ESTADO PROBLEMÁTICO
+      const cleanupKeys = ['external_login_attempts', 'google_auth_errors', 'external_login_success', 'external_login_error'];
+      cleanupKeys.forEach(key => {
+        sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
+      });
+      
+      showLoading('Iniciando sesión con Google...');
+      
+      try {
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+
+        const { isMobile, isWebView } = detectMobileDevice();
+        let result;
+
+        if (isMobile || isWebView || window.innerWidth < 500) {
+          console.log('📱 Usando signInWithRedirect para dispositivo móvil');
+          showLoading('Redirigiendo a Google...');
+          
+          // Limpiar estado de auth
+          try {
+            await auth.signOut();
+          } catch (e) {
+            console.log('No había estado previo que limpiar');
+          }
+          
+          // Usar redirect directamente, SIN external-login.html
+          await signInWithRedirect(auth, provider);
+          // La página se redirige automáticamente, no hay resultado inmediato
+          return;
+          
+        } else {
+          console.log('🖥️ Usando signInWithPopup para desktop');
+          
+          // Limpiar estado de auth
+          try {
+            await auth.signOut();
+          } catch (e) {
+            console.log('No había estado previo que limpiar');
+          }
+          
+          result = await signInWithPopup(auth, provider);
+        }
+
+        if (result && result.user) {
+          await handleAuthSuccess(result.user);
+        }
+
+      } catch (error) {
+        console.error("❌ Error al iniciar sesión con Google:", error);
+        hideLoading();
+
+        let errorMsg = 'Error al iniciar sesión con Google';
+
+        if (error.code === 'auth/popup-blocked') {
+          showLoading('Popup bloqueado, intentando con redirección...');
+          try {
+            const provider = new GoogleAuthProvider();
+            await signInWithRedirect(auth, provider);
+            return;
+          } catch (redirectError) {
+            errorMsg = 'No se pudo abrir Google. Intenta desactivar el bloqueador de ventanas emergentes.';
+          }
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMsg = 'Ventana cerrada. Intenta de nuevo si deseas iniciar sesión.';
+        } else if (error.code === 'auth/unauthorized-domain') {
+          errorMsg = 'Dominio no autorizado. Contacta al administrador.';
+        } else if (error.code === 'auth/operation-not-allowed') {
+          errorMsg = 'Autenticación con Google no habilitada.';
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMsg = 'Error de conexión. Verifica tu internet e intenta nuevamente.';
+        } else if (error.message.includes('missing initial state') || 
+                   error.message.includes('storage-partitioned')) {
+          errorMsg = 'Error de almacenamiento. Intenta desde el navegador principal.';
+        }
+
+        showError(errorMsg);
+      }
+    });
+
+    // EMAIL AUTH
+    document.getElementById("loginWithEmail").addEventListener("click", async () => {
+      const email = document.getElementById("emailInput").value.trim();
+      const password = document.getElementById("passwordInput").value.trim();
+      
+      if (!email || !password) {
+        showError("Por favor ingresa email y contraseña");
+        return;
+      }
+      
+      showLoading('Iniciando sesión...');
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        await handleAuthSuccess(userCredential.user);
+      } catch (error) {
+        console.error("❌ Error al iniciar sesión:", error);
+        hideLoading();
+        
+        let errorMsg = 'Error al iniciar sesión';
+        if (error.code === 'auth/user-not-found') {
+          errorMsg = 'Usuario no encontrado';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMsg = 'Contraseña incorrecta';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMsg = 'Email inválido';
+        }
+        
+        showError(errorMsg);
+      }
+    });
+
+    // Enter key support
+    document.getElementById("passwordInput").addEventListener("keypress", (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById("loginWithEmail").click();
+      }
+    });
+
+    // Verificar si hay resultado de redirect al cargar la página
+    window.addEventListener('load', async () => {
+      console.log('🔍 Verificando resultado de redirect...');
+      
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          console.log('✅ Redirect result encontrado:', result.user.email);
+          await handleAuthSuccess(result.user);
+        } else {
+          console.log('ℹ️ No hay resultado de redirect pendiente');
+        }
+      } catch (error) {
+        console.error('❌ Error verificando redirect result:', error);
+        showError('Error procesando el resultado de Google. Intenta de nuevo.');
+      }
+    });
+  </script>
+</body>
+</html>
