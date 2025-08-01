@@ -123,6 +123,11 @@
         <span class="font-medium">Iniciar con Biometría</span>
       </button>
 
+      <!-- Diagnostic Button (temporary) -->
+      <button id="diagnosticBtn" class="w-full mb-4 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm transition duration-300" onclick="diagnoseBiometricSystem()">
+        🔍 Diagnóstico Biométrico (temporal)
+      </button>
+
       <!-- Divider -->
       <div class="relative my-6">
         <div class="absolute inset-0 flex items-center">
@@ -307,42 +312,48 @@
 
     // Check for biometric authentication support
     async function checkBiometricSupport() {
+      console.log('🔐 [CHECK-BIOMETRIC] Iniciando verificación...');
+      
       if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
         try {
+          console.log('✅ [CHECK-BIOMETRIC] WebAuthn es compatible');
+          
           // Check if WebAuthn is supported
           const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+          console.log('🔍 [CHECK-BIOMETRIC] Autenticador disponible:', available);
           
           if (available) {
-            console.log('✅ [LOGIN-EMAIL] Biometría disponible en dispositivo');
+            console.log('✅ [CHECK-BIOMETRIC] Biometría disponible en dispositivo');
             
             // Check if user has registered biometric credentials
             const storedCredentials = localStorage.getItem('biometric_user_credentials');
+            console.log('🔍 [CHECK-BIOMETRIC] Credenciales guardadas:', !!storedCredentials);
             
             if (storedCredentials) {
               // User has biometric credentials - show login button
               biometricLoginBtn.style.display = 'block';
-              console.log('🔐 [LOGIN-EMAIL] Credenciales biométricas encontradas - botón habilitado');
+              console.log('✅ [CHECK-BIOMETRIC] Credenciales biométricas encontradas - botón habilitado');
             } else {
               // User hasn't registered biometrics - hide button initially
               biometricLoginBtn.style.display = 'none';
-              console.log('ℹ️ [LOGIN-EMAIL] Sin credenciales biométricas - botón oculto');
+              console.log('ℹ️ [CHECK-BIOMETRIC] Sin credenciales biométricas - botón oculto');
+              console.log('💡 [CHECK-BIOMETRIC] Haz login con email/contraseña primero para registrar biometría');
             }
           } else {
-            console.log('ℹ️ [LOGIN-EMAIL] Biometría no disponible en este dispositivo');
+            console.log('❌ [CHECK-BIOMETRIC] Biometría no disponible en este dispositivo');
             biometricLoginBtn.style.display = 'none';
           }
         } catch (err) {
-          console.log('⚠️ [LOGIN-EMAIL] Error verificando biometría:', err);
+          console.log('❌ [CHECK-BIOMETRIC] Error verificando biometría:', err);
           biometricLoginBtn.style.display = 'none';
         }
       } else {
-        console.log('ℹ️ [LOGIN-EMAIL] WebAuthn no soportado');
+        console.log('❌ [CHECK-BIOMETRIC] WebAuthn no soportado en este navegador');
         biometricLoginBtn.style.display = 'none';
       }
+      
+      console.log('🔐 [CHECK-BIOMETRIC] Verificación completada');
     }
-
-    // Initialize biometric check
-    checkBiometricSupport();
 
     // Register biometric credentials
     async function registerBiometricCredentials(email) {
@@ -470,6 +481,57 @@
           }, 500);
         }
       }, 4000);
+    }
+
+    // Diagnostic function for biometric system
+    function diagnoseBiometricSystem() {
+      console.log('🔍 [DIAGNÓSTICO BIOMÉTRICO] Iniciando diagnóstico...');
+      
+      // Check basic WebAuthn support
+      const webAuthnSupported = !!(window.PublicKeyCredential && navigator.credentials);
+      console.log('🔍 WebAuthn soportado:', webAuthnSupported);
+      
+      // Check button element
+      const buttonExists = !!document.getElementById('biometricLoginBtn');
+      console.log('🔍 Botón biométrico existe:', buttonExists);
+      
+      if (buttonExists) {
+        const button = document.getElementById('biometricLoginBtn');
+        console.log('🔍 Estado del botón:', {
+          display: button.style.display,
+          visible: button.style.display !== 'none',
+          className: button.className
+        });
+      }
+      
+      // Check stored credentials
+      const storedCredentials = localStorage.getItem('biometric_user_credentials');
+      console.log('🔍 Credenciales almacenadas:', !!storedCredentials);
+      if (storedCredentials) {
+        try {
+          const creds = JSON.parse(storedCredentials);
+          console.log('🔍 Email registrado:', creds.email);
+          console.log('🔍 Fecha registro:', creds.registeredAt);
+        } catch (e) {
+          console.log('❌ Error parseando credenciales:', e);
+        }
+      }
+      
+      // Check platform authenticator availability
+      if (webAuthnSupported) {
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+          .then(available => {
+            console.log('🔍 Autenticador de plataforma disponible:', available);
+            if (!available) {
+              console.log('❌ Tu dispositivo no tiene biometría disponible (Touch ID, Face ID, huella dactilar)');
+            }
+          })
+          .catch(err => {
+            console.log('❌ Error verificando autenticador:', err);
+          });
+      }
+      
+      console.log('🔍 [DIAGNÓSTICO COMPLETO] Ver resultados arriba ⬆️');
     }
 
     // Function to handle successful authentication redirect
@@ -917,7 +979,8 @@
     
     // Initialize biometric authentication
     document.addEventListener('DOMContentLoaded', () => {
-      initBiometricAuth();
+      console.log('🔐 [LOGIN-EMAIL] Inicializando sistema biométrico...');
+      checkBiometricSupport();
     });
 
     console.log('✅ [LOGIN-EMAIL] Sistema de login mejorado inicializado');
