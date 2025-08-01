@@ -314,20 +314,41 @@
     async function checkBiometricSupport() {
       console.log('🔐 [CHECK-BIOMETRIC] Iniciando verificación...');
       
+      // Force show button on mobile for testing
+      const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase());
+      console.log('📱 [CHECK-BIOMETRIC] Es dispositivo móvil:', isMobile);
+      
       if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
         try {
           console.log('✅ [CHECK-BIOMETRIC] WebAuthn es compatible');
           
           // Check if WebAuthn is supported
-          const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+          const available = await Promise.race([
+            PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
+            new Promise((resolve) => setTimeout(() => resolve(false), 5000)) // 5 second timeout
+          ]);
+          
           console.log('🔍 [CHECK-BIOMETRIC] Autenticador disponible:', available);
+          
+          // Check if user has registered biometric credentials
+          const storedCredentials = localStorage.getItem('biometric_user_credentials');
+          console.log('🔍 [CHECK-BIOMETRIC] Credenciales guardadas:', !!storedCredentials);
+          
+          // MOBILE OVERRIDE: Show button if mobile device has WebAuthn support
+          if (isMobile && window.PublicKeyCredential) {
+            console.log('📱 [CHECK-BIOMETRIC] MÓVIL: Forzando mostrar botón para pruebas');
+            if (storedCredentials) {
+              biometricLoginBtn.style.display = 'block';
+              console.log('✅ [CHECK-BIOMETRIC] MÓVIL: Botón biométrico habilitado');
+            } else {
+              console.log('ℹ️ [CHECK-BIOMETRIC] MÓVIL: Sin credenciales - botón oculto');
+              console.log('💡 [CHECK-BIOMETRIC] MÓVIL: Haz login con email/contraseña primero');
+            }
+            return;
+          }
           
           if (available) {
             console.log('✅ [CHECK-BIOMETRIC] Biometría disponible en dispositivo');
-            
-            // Check if user has registered biometric credentials
-            const storedCredentials = localStorage.getItem('biometric_user_credentials');
-            console.log('🔍 [CHECK-BIOMETRIC] Credenciales guardadas:', !!storedCredentials);
             
             if (storedCredentials) {
               // User has biometric credentials - show login button
@@ -345,10 +366,28 @@
           }
         } catch (err) {
           console.log('❌ [CHECK-BIOMETRIC] Error verificando biometría:', err);
-          biometricLoginBtn.style.display = 'none';
+          
+          // FALLBACK for mobile: if error, still try to show button
+          if (isMobile) {
+            console.log('📱 [CHECK-BIOMETRIC] MÓVIL: Error pero intentando mostrar botón');
+            const storedCredentials = localStorage.getItem('biometric_user_credentials');
+            if (storedCredentials) {
+              biometricLoginBtn.style.display = 'block';
+              console.log('✅ [CHECK-BIOMETRIC] MÓVIL: Botón mostrado pese a error');
+            }
+          } else {
+            biometricLoginBtn.style.display = 'none';
+          }
         }
       } else {
         console.log('❌ [CHECK-BIOMETRIC] WebAuthn no soportado en este navegador');
+        
+        // MOBILE OVERRIDE: Even without full WebAuthn support, show diagnostic info
+        if (isMobile) {
+          console.log('📱 [CHECK-BIOMETRIC] MÓVIL: WebAuthn no soportado pero es móvil');
+          console.log('📱 [CHECK-BIOMETRIC] User Agent:', navigator.userAgent);
+        }
+        
         biometricLoginBtn.style.display = 'none';
       }
       
@@ -487,51 +526,101 @@
     function diagnoseBiometricSystem() {
       console.log('🔍 [DIAGNÓSTICO BIOMÉTRICO] Iniciando diagnóstico...');
       
+      // Device info
+      const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase());
+      const isAndroid = /android/i.test(navigator.userAgent);
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      
+      console.log('📱 [DIAGNÓSTICO] Tipo de dispositivo:', {
+        isMobile,
+        isAndroid,
+        isIOS,
+        userAgent: navigator.userAgent
+      });
+      
       // Check basic WebAuthn support
       const webAuthnSupported = !!(window.PublicKeyCredential && navigator.credentials);
-      console.log('🔍 WebAuthn soportado:', webAuthnSupported);
+      console.log('🔍 [DIAGNÓSTICO] WebAuthn soportado:', webAuthnSupported);
+      console.log('🔍 [DIAGNÓSTICO] PublicKeyCredential:', !!window.PublicKeyCredential);
+      console.log('🔍 [DIAGNÓSTICO] navigator.credentials:', !!navigator.credentials);
       
       // Check button element
       const buttonExists = !!document.getElementById('biometricLoginBtn');
-      console.log('🔍 Botón biométrico existe:', buttonExists);
+      console.log('🔍 [DIAGNÓSTICO] Botón biométrico existe:', buttonExists);
       
       if (buttonExists) {
         const button = document.getElementById('biometricLoginBtn');
-        console.log('🔍 Estado del botón:', {
+        console.log('🔍 [DIAGNÓSTICO] Estado del botón:', {
           display: button.style.display,
           visible: button.style.display !== 'none',
-          className: button.className
+          className: button.className,
+          offsetWidth: button.offsetWidth,
+          offsetHeight: button.offsetHeight
         });
       }
       
       // Check stored credentials
       const storedCredentials = localStorage.getItem('biometric_user_credentials');
-      console.log('🔍 Credenciales almacenadas:', !!storedCredentials);
+      console.log('🔍 [DIAGNÓSTICO] Credenciales almacenadas:', !!storedCredentials);
       if (storedCredentials) {
         try {
           const creds = JSON.parse(storedCredentials);
-          console.log('🔍 Email registrado:', creds.email);
-          console.log('🔍 Fecha registro:', creds.registeredAt);
+          console.log('🔍 [DIAGNÓSTICO] Email registrado:', creds.email);
+          console.log('🔍 [DIAGNÓSTICO] Fecha registro:', creds.registeredAt);
         } catch (e) {
-          console.log('❌ Error parseando credenciales:', e);
+          console.log('❌ [DIAGNÓSTICO] Error parseando credenciales:', e);
         }
       }
       
       // Check platform authenticator availability
       if (webAuthnSupported) {
+        console.log('🔄 [DIAGNÓSTICO] Verificando autenticador de plataforma...');
         PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
           .then(available => {
-            console.log('🔍 Autenticador de plataforma disponible:', available);
+            console.log('🔍 [DIAGNÓSTICO] Autenticador de plataforma disponible:', available);
             if (!available) {
-              console.log('❌ Tu dispositivo no tiene biometría disponible (Touch ID, Face ID, huella dactilar)');
+              if (isMobile) {
+                console.log('📱 [DIAGNÓSTICO MÓVIL] Tu dispositivo móvil no reporta biometría disponible');
+                console.log('📱 [DIAGNÓSTICO MÓVIL] Esto puede ser normal en algunos navegadores móviles');
+              } else {
+                console.log('❌ [DIAGNÓSTICO] Tu dispositivo no tiene biometría disponible');
+              }
+            } else {
+              console.log('✅ [DIAGNÓSTICO] Biometría disponible - debería funcionar');
             }
           })
           .catch(err => {
-            console.log('❌ Error verificando autenticador:', err);
+            console.log('❌ [DIAGNÓSTICO] Error verificando autenticador:', err);
+            if (isMobile) {
+              console.log('📱 [DIAGNÓSTICO MÓVIL] Error típico en móviles - puede ser normal');
+            }
           });
       }
       
-      console.log('🔍 [DIAGNÓSTICO COMPLETO] Ver resultados arriba ⬆️');
+      // Mobile-specific diagnostics
+      if (isMobile) {
+        console.log('� [DIAGNÓSTICO MÓVIL] Información adicional:');
+        console.log('📱 Screen size:', {
+          width: window.screen.width,
+          height: window.screen.height,
+          innerWidth: window.innerWidth,
+          innerHeight: window.innerHeight
+        });
+        console.log('📱 Touch support:', 'ontouchstart' in window);
+        console.log('📱 Standalone mode:', window.navigator.standalone);
+        
+        // Chrome/Android specific
+        if (isAndroid) {
+          console.log('🤖 [ANDROID] Chrome version:', navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[1] || 'unknown');
+        }
+        
+        // iOS specific
+        if (isIOS) {
+          console.log('🍎 [iOS] Safari/WebKit version:', navigator.userAgent.match(/Version\/([0-9.]+)/)?.[1] || 'unknown');
+        }
+      }
+      
+      console.log('🔍 [DIAGNÓSTICO COMPLETO] ===== VER RESULTADOS ARRIBA ===== ⬆️');
     }
 
     // Function to handle successful authentication redirect
