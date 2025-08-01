@@ -104,20 +104,30 @@ async function mostrarBienvenidaConSueño(user) {
         const onboardingInProgress = localStorage.getItem('onboarding_in_progress');
         const justCompletedOnboarding = localStorage.getItem('just_completed_onboarding');
         
+        console.log('🔍 [MAIN] Verificación de flags:', {
+          currentPage: currentPage,
+          onboardingInProgress: onboardingInProgress,
+          justCompletedOnboarding: justCompletedOnboarding,
+          needsOnboarding: needsOnboarding
+        });
+        
         // Si acaba de completar onboarding, no redirigir
         if (justCompletedOnboarding) {
           console.log('ℹ️ [MAIN] Usuario acaba de completar onboarding, limpiando flag y permitiendo acceso');
           localStorage.removeItem('just_completed_onboarding');
           needsOnboarding = false;
+          console.log('✅ [MAIN] Flag limpiado, needsOnboarding = false, continuando con flujo normal');
           // Continúa con el flujo normal
         } else if (currentPage === 'dream-input.html') {
           console.log('ℹ️ [MAIN] Ya estamos en dream-input.html, no redirigir');
           return;
         } else {
+          console.log('🚀 [MAIN] Iniciando redirección a dream-input.html...');
           // Marcar que estamos en proceso de onboarding
           localStorage.setItem('onboarding_in_progress', 'true');
           
           setTimeout(() => {
+            console.log('🚀 [MAIN] Ejecutando redirección a dream-input.html');
             window.location.href = 'dream-input.html';
           }, 2000);
           
@@ -212,9 +222,10 @@ onAuthStateChanged(auth, async (user) => {
     
     await mostrarBienvenidaConSueño(user);
     
-    // Registrar credenciales biométricas si es la primera vez
+    // Registrar credenciales biométricas si es la primera vez - TEMPORALMENTE DESACTIVADO
     try {
-      await BiometricUtils.registerAfterLogin(user);
+      // await BiometricUtils.registerAfterLogin(user);
+      console.log('ℹ️ [MAIN] Registro biométrico temporalmente desactivado');
     } catch (error) {
       console.log('ℹ️ [MAIN] No se pudo registrar biometría (opcional):', error.message);
     }

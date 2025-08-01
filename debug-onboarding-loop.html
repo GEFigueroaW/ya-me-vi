@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug - Loop Onboarding</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">🐛 Debug - Loop de Onboarding</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- User Data -->
+      <div class="bg-gray-800 rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-4">👤 Datos del Usuario</h2>
+        <div id="userData" class="font-mono text-sm">
+          Cargando...
+        </div>
+      </div>
+
+      <!-- Flags -->
+      <div class="bg-gray-800 rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-4">🏷️ LocalStorage Flags</h2>
+        <div id="flags" class="font-mono text-sm">
+          Cargando...
+        </div>
+      </div>
+
+      <!-- Onboarding Logic -->
+      <div class="bg-gray-800 rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-4">🧠 Lógica de Onboarding</h2>
+        <div id="logic" class="font-mono text-sm">
+          Cargando...
+        </div>
+      </div>
+
+      <!-- Console Logs -->
+      <div class="bg-gray-800 rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-4">📝 Console Override</h2>
+        <div id="consoleLogs" class="font-mono text-xs h-64 overflow-y-auto bg-black p-2 rounded">
+          <!-- Logs will appear here -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="bg-gray-800 rounded-lg p-4 mt-6">
+      <h2 class="text-xl font-semibold mb-4">⚡ Acciones Rápidas</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button id="clearAll" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition">
+          Limpiar Todo
+        </button>
+        <button id="setCompleted" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition">
+          Marcar Completado
+        </button>
+        <button id="goHome" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition">
+          Ir a Home
+        </button>
+        <button id="refresh" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition">
+          Refrescar
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBp8tWcJdTaGYxAy2dn1jD0c0d-YZi5b6g",
+      authDomain: "ya-me-vi-app.firebaseapp.com",
+      projectId: "ya-me-vi-app",
+      storageBucket: "ya-me-vi-app.appspot.com",
+      messagingSenderId: "533718394316",
+      appId: "1:533718394316:web:7cd2ff3aedaa5b6d6f5c1d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+
+    // Override console to capture logs
+    const originalConsoleLog = console.log;
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+
+    function addToConsoleDisplay(message, type = 'log') {
+      const consoleLogs = document.getElementById('consoleLogs');
+      const timestamp = new Date().toLocaleTimeString();
+      const color = type === 'error' ? 'text-red-400' : type === 'warn' ? 'text-yellow-400' : 'text-green-400';
+      
+      const logEntry = document.createElement('div');
+      logEntry.className = color;
+      logEntry.innerHTML = `<span class="text-gray-400">[${timestamp}]</span> ${message}`;
+      consoleLogs.appendChild(logEntry);
+      consoleLogs.scrollTop = consoleLogs.scrollHeight;
+    }
+
+    console.log = function(...args) {
+      originalConsoleLog.apply(console, args);
+      addToConsoleDisplay(args.join(' '), 'log');
+    };
+
+    console.error = function(...args) {
+      originalConsoleError.apply(console, args);
+      addToConsoleDisplay(args.join(' '), 'error');
+    };
+
+    console.warn = function(...args) {
+      originalConsoleWarn.apply(console, args);
+      addToConsoleDisplay(args.join(' '), 'warn');
+    };
+
+    // Update displays
+    async function updateDisplays() {
+      if (!currentUser) {
+        document.getElementById('userData').innerHTML = '<span class="text-red-400">No hay usuario autenticado</span>';
+        document.getElementById('logic').innerHTML = '<span class="text-red-400">Requiere autenticación</span>';
+        updateFlags();
+        return;
+      }
+
+      try {
+        // Get user data
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+
+        let userData = {};
+        if (userSnap.exists()) {
+          userData = userSnap.data();
+        }
+
+        // Display user data
+        document.getElementById('userData').innerHTML = `
+          <strong>Email:</strong> ${currentUser.email}<br>
+          <strong>UID:</strong> ${currentUser.uid.substring(0, 12)}...<br>
+          <strong>Display Name:</strong> ${currentUser.displayName || 'N/A'}<br>
+          <strong>Documento Existe:</strong> ${userSnap.exists() ? '✅ SÍ' : '❌ NO'}<br>
+          <strong>Sueño:</strong> ${userData.dream || 'N/A'}<br>
+          <strong>Categoría Sueño:</strong> ${userData.dreamCategory || 'N/A'}<br>
+          <strong>Onboarding Completado:</strong> ${userData.onboardingCompleted ? '✅ SÍ' : '❌ NO'}<br>
+          <strong>Fecha Sueño:</strong> ${userData.dreamCompletedAt || 'N/A'}<br>
+          <strong>Última Actualización:</strong> ${userData.lastUpdated || 'N/A'}
+        `;
+
+        // Test exact logic from main.js
+        let needsOnboarding = false;
+        
+        if (userSnap.exists()) {
+          // Exact logic from main.js
+          needsOnboarding = (!userData.dream || userData.dream === '') && 
+                           (userData.onboardingCompleted !== true);
+          
+          if (userData.onboardingCompleted === true) {
+            needsOnboarding = false;
+          }
+        } else {
+          needsOnboarding = true;
+        }
+
+        // Check flags
+        const justCompletedOnboarding = localStorage.getItem('just_completed_onboarding');
+        const onboardingInProgress = localStorage.getItem('onboarding_in_progress');
+
+        let finalDecision = needsOnboarding;
+        if (justCompletedOnboarding) {
+          finalDecision = false;
+        }
+
+        document.getElementById('logic').innerHTML = `
+          <strong>Tiene Sueño:</strong> ${userData.dream ? '✅ "' + userData.dream + '"' : '❌ NO'}<br>
+          <strong>Sueño NO Vacío:</strong> ${userData.dream && userData.dream !== '' ? '✅ SÍ' : '❌ NO'}<br>
+          <strong>Onboarding Completado:</strong> ${userData.onboardingCompleted === true ? '✅ SÍ' : '❌ NO'}<br>
+          <strong>Condición 1:</strong> (!dream || dream === '') = ${(!userData.dream || userData.dream === '') ? '❌ TRUE' : '✅ FALSE'}<br>
+          <strong>Condición 2:</strong> (onboardingCompleted !== true) = ${(userData.onboardingCompleted !== true) ? '❌ TRUE' : '✅ FALSE'}<br>
+          <strong>Resultado AND:</strong> ${needsOnboarding ? '❌ NECESITA ONBOARDING' : '✅ NO NECESITA'}<br>
+          <strong>Flag "just_completed":</strong> ${justCompletedOnboarding ? '✅ ' + justCompletedOnboarding : '❌ NO'}<br>
+          <strong>DECISIÓN FINAL:</strong> ${finalDecision ? '🔄 LOOP - Redirigir a dream-input' : '✅ PERMITIR - Quedarse en home'}
+        `;
+
+        updateFlags();
+
+      } catch (error) {
+        console.error('Error updating displays:', error);
+      }
+    }
+
+    function updateFlags() {
+      const flags = [
+        'registration_in_progress',
+        'from_welcome_google',
+        'force_dream_input',
+        'onboarding_in_progress',
+        'just_completed_onboarding'
+      ];
+
+      const flagsDisplay = flags.map(flag => {
+        const value = localStorage.getItem(flag);
+        return `<strong>${flag}:</strong> ${value ? '✅ ' + value : '❌ No existe'}`;
+      }).join('<br>');
+
+      document.getElementById('flags').innerHTML = flagsDisplay;
+    }
+
+    // Auth listener
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      console.log('Auth state changed:', user ? user.email : 'No user');
+      updateDisplays();
+    });
+
+    // Button handlers
+    document.getElementById('clearAll').addEventListener('click', () => {
+      const flags = [
+        'registration_in_progress',
+        'from_welcome_google', 
+        'force_dream_input',
+        'onboarding_in_progress',
+        'just_completed_onboarding'
+      ];
+      
+      flags.forEach(flag => localStorage.removeItem(flag));
+      console.log('🧹 Todos los flags limpiados');
+      updateDisplays();
+    });
+
+    document.getElementById('setCompleted').addEventListener('click', async () => {
+      if (!currentUser) {
+        alert('No hay usuario autenticado');
+        return;
+      }
+
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        await updateDoc(userRef, {
+          onboardingCompleted: true,
+          lastUpdated: new Date().toISOString()
+        });
+        console.log('✅ Onboarding marcado como completado en Firestore');
+        
+        localStorage.setItem('just_completed_onboarding', 'true');
+        console.log('✅ Flag just_completed_onboarding establecido');
+        
+        updateDisplays();
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+
+    document.getElementById('goHome').addEventListener('click', () => {
+      window.location.href = 'home.html';
+    });
+
+    document.getElementById('refresh').addEventListener('click', () => {
+      updateDisplays();
+    });
+
+    // Initial load
+    console.log('🐛 Debug page loaded');
+    updateDisplays();
+
+  </script>
+</body>
+</html>
