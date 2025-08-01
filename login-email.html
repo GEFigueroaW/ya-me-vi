@@ -123,11 +123,6 @@
         <span class="font-medium">Iniciar con Biometría</span>
       </button>
 
-      <!-- Diagnostic Button (temporary) -->
-      <button id="diagnosticBtn" class="w-full mb-4 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm transition duration-300" onclick="diagnoseBiometricSystem()">
-        🔍 Diagnóstico Biométrico (temporal)
-      </button>
-
       <!-- Divider -->
       <div class="relative my-6">
         <div class="absolute inset-0 flex items-center">
@@ -394,6 +389,15 @@
       console.log('🔐 [CHECK-BIOMETRIC] Verificación completada');
     }
 
+    // Refresh biometric button state
+    function refreshBiometricButton() {
+      const storedCredentials = localStorage.getItem('biometric_user_credentials');
+      if (storedCredentials && biometricLoginBtn) {
+        biometricLoginBtn.style.display = 'block';
+        console.log('🔐 [REFRESH] Botón biométrico habilitado');
+      }
+    }
+
     // Register biometric credentials
     async function registerBiometricCredentials(email) {
       // Check if device supports biometrics
@@ -409,7 +413,7 @@
         if (credentials.email === email) {
           console.log('✅ [LOGIN-EMAIL] Credenciales biométricas ya registradas para:', email);
           // Show biometric button since credentials exist
-          biometricLoginBtn.style.display = 'block';
+          refreshBiometricButton();
           return;
         }
       }
@@ -466,7 +470,7 @@
           console.log('✅ [LOGIN-EMAIL] Credenciales biométricas registradas exitosamente');
           
           // Show and enable biometric button
-          biometricLoginBtn.style.display = 'block';
+          refreshBiometricButton();
           
           // Show success notification
           showSuccess('🔐 ¡Biometría configurada! Ahora puedes usar tu huella digital para ingresar.');
@@ -843,6 +847,16 @@
         // USAR signInWithPopup DIRECTO (igual que register.js)
         const result = await signInWithPopup(auth, provider);
         console.log("✅ Usuario logueado con Google:", result.user.email);
+        
+        // Register biometric credentials if supported
+        if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
+          try {
+            console.log('🔐 [GOOGLE-LOGIN] Intentando registrar biometría para:', result.user.email);
+            await registerBiometricCredentials(result.user.email);
+          } catch (bioError) {
+            console.log('ℹ️ [GOOGLE-LOGIN] No se pudo registrar biometría:', bioError.message);
+          }
+        }
         
         // Actualizar loading
         const loadingMessage = loadingOverlay.querySelector('p');
