@@ -16,14 +16,13 @@
         // Detección específica de WebIntoApp y otros WebViews
         ua.includes('webintoapp') ||
         ua.includes('webview') ||
-        /android.*version.*chrome/i.test(ua) ||
+        // Detección más específica de WebView (no Chrome normal)
+        (/android.*version.*chrome/i.test(ua) && !ua.includes('chrome/') && !ua.includes('cros')) ||
         /crios|fxios/i.test(ua) ||
-        // Detección por características de entorno
-        (window.navigator.standalone === false && /iPhone|iPad/.test(ua)) ||
-        // Detección por proporciones de pantalla completa
-        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
-        // Forzar en móviles para debug
-        (/Android|iPhone/i.test(ua) && window.location.href.includes('webintoapp'));
+        // Solo iOS WebViews específicos
+        (window.navigator.standalone === false && /iPhone|iPad/.test(ua) && !ua.includes('crios') && !ua.includes('safari')) ||
+        // Solo si explícitamente viene de webintoapp
+        (window.location.href.includes('webintoapp'));
       
       console.log('🔍 WebView detectado:', isWebView);
       console.log('📱 User Agent:', ua.slice(0, 100));
@@ -260,14 +259,13 @@
       
       // DETECCIÓN AGRESIVA DE WEBVIEW
       const isWebViewEnvironment = 
-        // 1. Detectar por User Agent
-        /webview|webintoapp|android.*version.*chrome/i.test(navigator.userAgent) ||
-        // 2. Detectar por características del entorno
-        (window.navigator.standalone === false && /iPhone|iPad/.test(navigator.userAgent)) ||
-        // 3. Detectar por ausencia de características de navegador normal
-        (typeof window.orientation !== 'undefined' && !window.DeviceMotionEvent) ||
-        // 4. Detectar por proporción de pantalla (app completa)
-        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
+        // 1. Detectar por User Agent específico
+        /webview|webintoapp/i.test(navigator.userAgent) ||
+        (/android.*version.*chrome/i.test(navigator.userAgent) && !navigator.userAgent.includes('chrome/') && !navigator.userAgent.includes('cros')) ||
+        // 2. Solo iOS WebViews específicos
+        (window.navigator.standalone === false && /iPhone|iPad/.test(navigator.userAgent) && !navigator.userAgent.includes('crios') && !navigator.userAgent.includes('safari')) ||
+        // 3. Solo si explícitamente viene de webintoapp
+        (window.location.href.includes('webintoapp')) ||
         // 5. Forzar detección en móviles con ciertos patrones
         (/Android|iPhone/i.test(navigator.userAgent) && window.location.href.includes('webintoapp'));
       

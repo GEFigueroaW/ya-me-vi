@@ -16,14 +16,13 @@
         // Detección específica de WebIntoApp y otros WebViews
         ua.includes('webintoapp') ||
         ua.includes('webview') ||
-        /android.*version.*chrome/i.test(ua) ||
+        // Detección más específica de WebView (no Chrome normal)
+        (/android.*version.*chrome/i.test(ua) && !ua.includes('chrome/') && !ua.includes('cros')) ||
         /crios|fxios/i.test(ua) ||
-        // Detección por características de entorno
-        (window.navigator.standalone === false && /iPhone|iPad/.test(ua)) ||
-        // Detección por proporciones de pantalla completa
-        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
-        // Forzar en móviles para debug
-        (/Android|iPhone/i.test(ua) && window.location.href.includes('webintoapp'));
+        // Detección por características de entorno (solo iOS)
+        (window.navigator.standalone === false && /iPhone|iPad/.test(ua) && !ua.includes('crios') && !ua.includes('safari')) ||
+        // Solo si explícitamente viene de webintoapp
+        (window.location.href.includes('webintoapp'));
       
       console.log('🔍 [LOGIN-EMAIL] WebView detectado:', isWebView);
       console.log('📱 [LOGIN-EMAIL] User Agent:', ua.slice(0, 100));
@@ -751,10 +750,12 @@
         ua.includes('webintoapp') ||
         ua.includes('webview') ||
         ua.includes('wv') ||
-        /android.*version.*chrome/i.test(ua) ||
+        // Detección más específica de WebView (no Chrome normal)
+        (/android.*version.*chrome/i.test(ua) && !ua.includes('chrome/') && !ua.includes('cros')) ||
         /crios|fxios/i.test(ua) ||
-        (window.navigator.standalone === false && /iPhone|iPad/.test(ua)) ||
-        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
+        // Solo iOS WebViews específicos
+        (window.navigator.standalone === false && /iPhone|iPad/.test(ua) && !ua.includes('crios') && !ua.includes('safari')) ||
+        // Apps específicas conocidas
         (/Android|iPhone/i.test(ua) && (ua.includes('inapp') || ua.includes('fbav') || ua.includes('instagram'))) ||
         window.WEBVIEW_MODE || 
         localStorage.getItem('webview_detected') === 'true';

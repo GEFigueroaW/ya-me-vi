@@ -15,11 +15,13 @@
       const isWebView = 
         ua.includes('webintoapp') ||
         ua.includes('webview') ||
-        /android.*version.*chrome/i.test(ua) ||
+        // Detección más específica de WebView (no Chrome normal)
+        (/android.*version.*chrome/i.test(ua) && !ua.includes('chrome/') && !ua.includes('cros')) ||
         /crios|fxios/i.test(ua) ||
-        (window.navigator.standalone === false && /iPhone|iPad/.test(ua)) ||
-        (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height) ||
-        (/Android|iPhone/i.test(ua) && window.location.href.includes('webintoapp'));
+        // Solo iOS WebViews específicos
+        (window.navigator.standalone === false && /iPhone|iPad/.test(ua) && !ua.includes('crios') && !ua.includes('safari')) ||
+        // Solo si explícitamente viene de webintoapp
+        (window.location.href.includes('webintoapp'));
       
       if (isWebView) {
         console.log('🚨 [DREAM-INPUT] WebView detectado - página optimizada para WebView');
