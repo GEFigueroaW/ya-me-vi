@@ -177,10 +177,12 @@
     async function checkRedirectResult() {
       try {
         console.log('🔍 Verificando resultado de redirección...');
+        console.log('📱 User Agent:', navigator.userAgent.substring(0, 100));
+        console.log('🌐 URL actual:', window.location.href);
         
-        // Add timeout to prevent hanging
+        // Timeout aumentado para conexiones móviles lentas
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Timeout checking redirect result')), 10000);
+          setTimeout(() => reject(new Error('Timeout checking redirect result')), 15000);
         });
         
         const result = await Promise.race([
@@ -190,6 +192,12 @@
         
         if (result && result.user) {
           console.log('✅ Usuario autenticado via redirect:', result.user.email);
+          console.log('📊 Datos del usuario:', {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            emailVerified: result.user.emailVerified
+          });
           
           const userData = {
             uid: result.user.uid,
@@ -233,11 +241,13 @@
         
         const provider = new GoogleAuthProvider();
         
-        // Configuración avanzada del provider
+        // Configuración avanzada del provider - OPTIMIZADA PARA MÓVILES
         provider.setCustomParameters({
           prompt: 'select_account',
           access_type: 'online',
-          include_granted_scopes: 'true'
+          include_granted_scopes: 'true',
+          // Optimización para móviles
+          display: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'touch' : 'page'
         });
         
         provider.addScope('email');
@@ -245,12 +255,28 @@
         
         let result;
         
-        // En WebView o móvil, usar redirect directamente
+        // DETECCIÓN MEJORADA DE DISPOSITIVOS MÓVILES
         const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const shouldUseRedirect = useRedirect || isWebView || isMobile;
+        const isIOSWebView = /iPhone|iPad/.test(navigator.userAgent) && 
+                           window.navigator.standalone === false && 
+                           !navigator.userAgent.includes('Safari/');
+        const isAndroidWebView = /Android/.test(navigator.userAgent) && 
+                               /Version.*Chrome/.test(navigator.userAgent) && 
+                               !navigator.userAgent.includes('Chrome/');
+        
+        // Usar redirect en más casos para mejor compatibilidad móvil
+        const shouldUseRedirect = useRedirect || isWebView || isMobile || isIOSWebView || isAndroidWebView || window.innerWidth < 500;
         
         if (shouldUseRedirect) {
           console.log('🔄 Usando signInWithRedirect (WebView/móvil/fallback)...');
+          console.log('📱 Detalles del dispositivo:', {
+            isMobile,
+            isIOSWebView,
+            isAndroidWebView,
+            isWebView,
+            userAgent: navigator.userAgent.substring(0, 100),
+            viewport: `${window.innerWidth}x${window.innerHeight}`
+          });
           
           // Clear any existing auth state first
           try {
@@ -260,8 +286,8 @@
             console.log('ℹ️ No había estado previo que limpiar');
           }
           
-          // Wait a moment for cleanup
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Wait a moment for cleanup - tiempo aumentado para móviles
+          await new Promise(resolve => setTimeout(resolve, 1000));
           
           await signInWithRedirect(auth, provider);
           // La redirección ocurre, no hay resultado inmediato

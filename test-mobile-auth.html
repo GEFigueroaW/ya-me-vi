@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Google Auth Móvil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .console-output {
+      background: #000;
+      color: #0f0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 1rem;
+      height: 300px;
+      overflow-y: scroll;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-6 text-center">🔧 Test Google Auth Móvil</h1>
+    
+    <!-- Información del dispositivo -->
+    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-4">📱 Información del Dispositivo</h2>
+      <div id="device-info" class="space-y-2">
+        <!-- Se llenará con JavaScript -->
+      </div>
+    </div>
+    
+    <!-- Botones de prueba -->
+    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-4">🧪 Pruebas de Autenticación</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button id="testOptimizedAuth" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+          🚀 Probar Auth Optimizada
+        </button>
+        <button id="testExternalAuth" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+          🌐 Probar Auth Externa
+        </button>
+        <button id="testRedirectAuth" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded">
+          🔄 Probar Redirect Auth
+        </button>
+        <button id="clearConsole" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+          🗑️ Limpiar Console
+        </button>
+      </div>
+    </div>
+    
+    <!-- Console output -->
+    <div class="bg-gray-800 rounded-lg p-4">
+      <h2 class="text-xl font-semibold mb-4">📋 Console Output</h2>
+      <div id="console-output" class="console-output">
+        Iniciando test de Google Auth...\n
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import MobileAuthOptimizer from './js/mobile-auth-optimizer.js';
+
+    // Elementos del DOM
+    const deviceInfoEl = document.getElementById('device-info');
+    const consoleOutputEl = document.getElementById('console-output');
+    
+    // Inicializar optimizador
+    const authOptimizer = new MobileAuthOptimizer();
+    
+    // Función para mostrar en console personalizada
+    function logToConsole(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const colors = {
+        info: '#0f0',
+        warn: '#ff0',
+        error: '#f00',
+        success: '#0f0'
+      };
+      
+      const line = `[${timestamp}] ${message}\n`;
+      consoleOutputEl.innerHTML += line;
+      consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
+      
+      // También log a console real
+      console.log(message);
+    }
+    
+    // Intercept console.log para mostrar en pantalla
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    
+    console.log = (...args) => {
+      originalLog(...args);
+      logToConsole(args.join(' '), 'info');
+    };
+    
+    console.error = (...args) => {
+      originalError(...args);
+      logToConsole('❌ ' + args.join(' '), 'error');
+    };
+    
+    console.warn = (...args) => {
+      originalWarn(...args);
+      logToConsole('⚠️ ' + args.join(' '), 'warn');
+    };
+    
+    // Mostrar información del dispositivo
+    function displayDeviceInfo() {
+      const info = authOptimizer.getEnvironmentInfo();
+      
+      deviceInfoEl.innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <strong>📱 Móvil:</strong> ${info.isMobileDevice ? 'Sí' : 'No'}
+          </div>
+          <div>
+            <strong>🌐 WebView:</strong> ${info.isWebView ? 'Sí' : 'No'}
+          </div>
+          <div>
+            <strong>🍎 iOS WebView:</strong> ${info.isIOSWebView ? 'Sí' : 'No'}
+          </div>
+          <div>
+            <strong>🤖 Android WebView:</strong> ${info.isAndroidWebView ? 'Sí' : 'No'}
+          </div>
+          <div>
+            <strong>📱 WebIntoApp:</strong> ${info.isWebIntoApp ? 'Sí' : 'No'}
+          </div>
+          <div>
+            <strong>🔄 Usar Redirect:</strong> ${info.shouldUseRedirect ? 'Sí' : 'No'}
+          </div>
+          <div>
+            <strong>🌐 Usar Externo:</strong> ${info.shouldUseExternal ? 'Sí' : 'No'}
+          </div>
+          <div>
+            <strong>📐 Viewport:</strong> ${info.viewport.width}x${info.viewport.height}
+          </div>
+        </div>
+        <div class="mt-4">
+          <strong>🌐 User Agent:</strong>
+          <div class="text-sm bg-gray-700 p-2 rounded mt-1 break-all">
+            ${info.userAgent}
+          </div>
+        </div>
+      `;
+      
+      logToConsole('📊 Información del dispositivo cargada');
+      logToConsole(`📱 Móvil: ${info.isMobileDevice}, WebView: ${info.isWebView}`);
+      logToConsole(`🔄 Estrategia recomendada: ${info.shouldUseExternal ? 'Navegador externo' : info.shouldUseRedirect ? 'Redirect' : 'Popup'}`);
+    }
+    
+    // Event listeners
+    document.getElementById('testOptimizedAuth').addEventListener('click', async () => {
+      logToConsole('🚀 Iniciando prueba de autenticación optimizada...');
+      
+      try {
+        const result = await authOptimizer.optimizedGoogleAuth(auth, GoogleAuthProvider);
+        
+        if (result === null) {
+          logToConsole('🔄 Redirección iniciada (sin resultado inmediato)');
+        } else if (result && (result.user || result.email)) {
+          const user = result.user || result;
+          logToConsole(`✅ Autenticación exitosa: ${user.email}`);
+        } else {
+          logToConsole('⚠️ Resultado inesperado:', JSON.stringify(result));
+        }
+        
+      } catch (error) {
+        logToConsole(`❌ Error en autenticación: ${error.message}`);
+        logToConsole(`📋 Código de error: ${error.code || 'N/A'}`);
+      }
+    });
+    
+    document.getElementById('testExternalAuth').addEventListener('click', async () => {
+      logToConsole('🌐 Probando autenticación externa...');
+      
+      try {
+        const result = await authOptimizer.handleExternalBrowserAuth();
+        logToConsole(`✅ Auth externa exitosa: ${result.email}`);
+      } catch (error) {
+        logToConsole(`❌ Error en auth externa: ${error.message}`);
+      }
+    });
+    
+    document.getElementById('testRedirectAuth').addEventListener('click', async () => {
+      logToConsole('🔄 Probando autenticación con redirect...');
+      
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        access_type: 'online'
+      });
+      
+      try {
+        const result = await authOptimizer.handleRedirectAuth(auth, provider);
+        if (result === null) {
+          logToConsole('🔄 Redirect iniciado...');
+        } else {
+          logToConsole(`✅ Redirect exitoso: ${result.user.email}`);
+        }
+      } catch (error) {
+        logToConsole(`❌ Error en redirect: ${error.message}`);
+      }
+    });
+    
+    document.getElementById('clearConsole').addEventListener('click', () => {
+      consoleOutputEl.innerHTML = 'Console limpiado...\n';
+    });
+    
+    // Verificar resultado de redirect al cargar
+    window.addEventListener('load', async () => {
+      logToConsole('🔍 Verificando resultado de redirect...');
+      
+      try {
+        const result = await authOptimizer.checkRedirectResult(auth);
+        if (result && result.user) {
+          logToConsole(`✅ Redirect result encontrado: ${result.user.email}`);
+        } else {
+          logToConsole('ℹ️ No hay resultado de redirect pendiente');
+        }
+      } catch (error) {
+        logToConsole(`⚠️ Error verificando redirect: ${error.message}`);
+      }
+      
+      // Mostrar info del dispositivo
+      displayDeviceInfo();
+    });
+    
+    // Verificar datos de login externo
+    const externalLoginData = localStorage.getItem('external_login_success');
+    if (externalLoginData) {
+      try {
+        const userData = JSON.parse(externalLoginData);
+        logToConsole(`✅ Datos de login externo encontrados: ${userData.email}`);
+        localStorage.removeItem('external_login_success');
+      } catch (error) {
+        logToConsole('❌ Error parseando datos de login externo');
+      }
+    }
+  </script>
+</body>
+</html>

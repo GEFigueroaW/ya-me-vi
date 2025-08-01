@@ -179,8 +179,15 @@
   <script src="js/shared.js"></script> 
   <script type="module">
     import { auth } from './js/firebase-init.js';
-    import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { signInWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import WebViewDetector from './js/webview-detector.js';
+    import MobileAuthOptimizer from './js/mobile-auth-optimizer.js';
+
+    // Inicializar el optimizador de autenticación móvil
+    const authOptimizer = new MobileAuthOptimizer();
+    
+    // Mostrar información de diagnóstico
+    console.log('📊 Diagnóstico del dispositivo:', authOptimizer.getEnvironmentInfo());
 
     // Check if redirecting from admin panel
     const urlParams = new URLSearchParams(window.location.search);
@@ -260,165 +267,72 @@
     });
 
     document.getElementById("loginWithGoogle").addEventListener("click", async () => {
-      console.log('🔍 Iniciando autenticación Google...');
-      console.log('🌐 User Agent:', navigator.userAgent);
-      console.log('📱 Viewport:', window.innerWidth, 'x', window.innerHeight);
-      console.log('🖥️ Screen:', window.screen.width, 'x', window.screen.height);
+      console.log('🔍 Iniciando autenticación Google optimizada...');
       
-      // DETECCIÓN AGRESIVA DE WEBVIEW
-      const isWebViewEnvironment = 
-        // 1. Detectar por User Agent específico
-        /webview|webintoapp/i.test(navigator.userAgent) ||
-        (/android.*version.*chrome/i.test(navigator.userAgent) && !navigator.userAgent.includes('chrome/') && !navigator.userAgent.includes('cros')) ||
-        // 2. Solo iOS WebViews específicos
-        (window.navigator.standalone === false && /iPhone|iPad/.test(navigator.userAgent) && !navigator.userAgent.includes('crios') && !navigator.userAgent.includes('safari')) ||
-        // 3. Solo si explícitamente viene de webintoapp
-        (window.location.href.includes('webintoapp')) ||
-        // 5. Forzar detección en móviles con ciertos patrones
-        (/Android|iPhone/i.test(navigator.userAgent) && window.location.href.includes('webintoapp'));
+      const button = document.getElementById("loginWithGoogle");
+      const originalText = button.innerHTML;
       
-      console.log('🔍 WebView detectado:', isWebViewEnvironment);
-      
-      // SIEMPRE usar autenticación externa en entornos móviles sospechosos
-      if (isWebViewEnvironment || WebViewDetector.shouldUseExternalBrowser()) {
-        console.log('🔄 Usando autenticación externa...');
+      try {
+        // Usar el optimizador para manejar la autenticación
+        const result = await authOptimizer.optimizedGoogleAuth(auth, GoogleAuthProvider);
         
-        // Mostrar mensaje al usuario
-        const button = document.getElementById("loginWithGoogle");
-        const originalText = button.innerHTML;
-        button.innerHTML = 'Abriendo navegador externo...';
-        button.disabled = true;
-        
-        // Guardar información para después del login
-        if (isAdminRedirect) {
-          localStorage.setItem('pending_admin_redirect', 'true');
-        }
-        
-        // Intentar múltiples métodos para abrir navegador externo
-        const externalUrl = WebViewDetector.generateExternalLoginUrl('google');
-        console.log('🔗 URL externa:', externalUrl);
-        
-        let opened = false;
-        
-        try {
-          // Método 1: window.open con configuración específica para móvil
-          const popup = window.open(externalUrl, '_blank', 'width=400,height=600,scrollbars=yes,resizable=yes');
-          if (popup && !popup.closed) {
-            console.log('✅ Popup abierto');
-            opened = true;
-          } else {
-            throw new Error('Popup bloqueado o falló');
-          }
-        } catch (error) {
-          console.log('⚠️ Popup falló, intentando redirección:', error.message);
-          
-          try {
-            // Método 2: Redirección directa
-            window.location.href = externalUrl;
-            opened = true;
-          } catch (redirectError) {
-            console.error('❌ Error en redirección:', redirectError);
-            
-            // Método 3: location.replace como último recurso
-            try {
-              window.location.replace(externalUrl);
-              opened = true;
-            } catch (replaceError) {
-              console.error('❌ Error en replace:', replaceError);
-            }
-          }
-        }
-        
-        if (!opened) {
-          // Si todo falla, mostrar instrucciones manuales
-          button.innerHTML = originalText;
-          button.disabled = false;
-          alert(`No se pudo abrir el navegador automáticamente.\n\nCopia este enlace en tu navegador:\n\n${externalUrl}`);
+        // Si el resultado es null, significa que se usó redirect y no hay resultado inmediato
+        if (result === null) {
+          console.log('🔄 Redirección iniciada, esperando resultado...');
           return;
         }
         
-        // Esperar resultado del login externo con timeout más corto
-        let checkCount = 0;
-        const maxChecks = 60; // 60 segundos
-        
-        const checkExternalLogin = setInterval(() => {
-          checkCount++;
+        // Si tenemos resultado (de popup o external login)
+        if (result && (result.user || result.email)) {
+          const user = result.user || result;
+          console.log("✅ Usuario logueado con Google:", user.email);
           
-          const loginData = localStorage.getItem('external_login_success');
-          if (loginData) {
-            clearInterval(checkExternalLogin);
-            localStorage.removeItem('external_login_success');
-            
-            // Procesar resultado del login
-            try {
-              const userData = JSON.parse(loginData);
-              console.log("✅ Login externo exitoso:", userData.email);
-              
-              // Verificar permisos de admin si es necesario
-              const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
-              const isAdmin = adminEmails.includes(userData.email);
-              
-              if (isAdminRedirect && isAdmin) {
-                window.location.href = "admin.html";
-              } else if (isAdminRedirect && !isAdmin) {
-                alert(`❌ Sin permisos de administrador\n\nUsuario: ${userData.email}\nContacta al administrador.`);
-                window.location.href = "index.html";
-              } else {
-                window.location.href = "home.html";
-              }
-            } catch (error) {
-              console.error('Error procesando login externo:', error);
-              button.innerHTML = originalText;
-              button.disabled = false;
-              alert("Error al procesar el login. Intenta nuevamente.");
-            }
-            return;
-          }
+          // Check admin permissions
+          const adminEmails = [
+            'gfigueroa.w@gmail.com', 
+            'admin@yamevi.com.mx', 
+            'eugenfw@gmail.com',
+            'guillermo.figueroaw@totalplay.com.mx'
+          ];
+          const isAdmin = adminEmails.includes(user.email);
           
-          // Timeout
-          if (checkCount >= maxChecks) {
-            clearInterval(checkExternalLogin);
-            button.innerHTML = originalText;
-            button.disabled = false;
-            console.log('⏰ Timeout esperando login externo');
+          if (isAdminRedirect && isAdmin) {
+            window.location.href = "admin.html";
+          } else if (isAdminRedirect && !isAdmin) {
+            alert(`❌ Sin permisos de administrador\n\nUsuario: ${user.email}\nContacta al administrador.`);
+            window.location.href = "index.html";
+          } else {
+            window.location.href = "home.html";
           }
-        }, 1000);
-        
-        return;
-      }
-      
-      // Login normal para navegadores web
-      const provider = new GoogleAuthProvider();
-      
-      try {
-        const result = await signInWithPopup(auth, provider);
-        console.log("✅ Usuario logueado con Google:", result.user.email);
-        
-        // Check admin permissions
-        const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
-        const isAdmin = adminEmails.includes(result.user.email);
-        
-        if (isAdminRedirect && isAdmin) {
-          window.location.href = "admin.html";
-        } else if (isAdminRedirect && !isAdmin) {
-          alert(`❌ Sin permisos de administrador\n\nUsuario: ${result.user.email}\nContacta al administrador.`);
-          window.location.href = "index.html";
-        } else {
-          window.location.href = "home.html";
         }
+        
       } catch (error) {
         console.error("❌ Error al iniciar sesión con Google:", error);
         
-        // Manejo específico de errores de WebView
-        if (error.code === 'auth/popup-blocked' || 
-            error.code === 'auth/popup-closed-by-user' ||
-            error.code === 'auth/web-storage-unsupported') {
-          
-          alert("⚠️ Login con popup bloqueado.\n\nSe abrirá en el navegador externo...");
-          WebViewDetector.openExternalLogin();
-        } else {
-          alert("Error al iniciar sesión con Google: " + error.message);
+        // Restaurar botón
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        // Manejo específico de errores
+        let errorMessage = "Error al iniciar sesión con Google";
+        
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage = "Las ventanas emergentes están bloqueadas. Se abrirá en una nueva pestaña...";
+          // Intentar fallback
+          setTimeout(() => {
+            WebViewDetector.openExternalLogin();
+          }, 2000);
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = "Ventana de login cerrada. Intenta nuevamente.";
+        } else if (error.code === 'auth/web-storage-unsupported') {
+          errorMessage = "Tu navegador no soporta el almacenamiento necesario. Intenta con otro navegador.";
+        } else if (error.code === 'auth/unauthorized-domain') {
+          errorMessage = "Dominio no autorizado. Contacta al administrador.";
+        } else if (error.message.includes('Timeout')) {
+          errorMessage = "La conexión tardó demasiado. Verifica tu internet e intenta nuevamente.";
         }
+        
+        alert(errorMessage + "\n\nDetalles técnicos: " + error.message);
       }
     });
 
