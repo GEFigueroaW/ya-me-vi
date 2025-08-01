@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Callback - YA ME VI</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    .loading {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="loading"></div>
+    <h2>Procesando autenticación...</h2>
+    <p id="status">Validando con Google...</p>
+  </div>
+
+  <script>
+    const status = document.getElementById('status');
+    
+    // Obtener código de autorización de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const authCode = urlParams.get('code');
+    const error = urlParams.get('error');
+    
+    if (error) {
+      status.textContent = `Error: ${error}`;
+      setTimeout(() => {
+        window.close();
+        if (window.opener) {
+          window.opener.postMessage({ type: 'auth-error', error }, '*');
+        }
+      }, 2000);
+    } else if (authCode) {
+      status.textContent = 'Código recibido, procesando...';
+      
+      // Aquí normalmente intercambiarías el código por un token
+      // Por simplicidad, simulamos éxito
+      setTimeout(() => {
+        status.textContent = '✅ ¡Autenticación exitosa!';
+        
+        if (window.opener) {
+          window.opener.postMessage({ 
+            type: 'auth-success', 
+            code: authCode 
+          }, '*');
+        }
+        
+        setTimeout(() => window.close(), 1000);
+      }, 1500);
+    } else {
+      status.textContent = 'No se recibió código de autorización';
+      setTimeout(() => window.close(), 3000);
+    }
+    
+    // Auto-cerrar después de 10 segundos
+    setTimeout(() => {
+      window.close();
+    }, 10000);
+  </script>
+</body>
+</html>

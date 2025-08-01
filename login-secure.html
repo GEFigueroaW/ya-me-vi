@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Seguro - YA ME VI</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .slide-in {
+      animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .pulse-ring {
+      animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+    }
+    
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.8);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.2);
+        opacity: 0;
+      }
+    }
+    
+    .input-focus {
+      transition: all 0.3s ease;
+    }
+    
+    .input-focus:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+  
+  <!-- Contenedor principal -->
+  <div class="glass-effect rounded-2xl p-8 w-full max-w-md slide-in">
+    
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="relative inline-block">
+        <div class="absolute inset-0 pulse-ring bg-white rounded-full opacity-20"></div>
+        <div class="relative bg-white bg-opacity-20 rounded-full p-4 mb-4">
+          <span class="text-3xl">🎲</span>
+        </div>
+      </div>
+      <h1 class="text-3xl font-bold text-white mb-2">YA ME VI</h1>
+      <p class="text-white text-opacity-80 text-sm">Acceso Seguro Móvil</p>
+    </div>
+    
+    <!-- Estado de carga -->
+    <div id="loading-container" class="hidden text-center mb-6">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-3"></div>
+      <p class="text-white text-sm" id="loading-message">Procesando...</p>
+    </div>
+    
+    <!-- Formulario de Login -->
+    <div id="login-form">
+      <div class="space-y-4 mb-6">
+        
+        <!-- Email -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-white text-opacity-60">📧</span>
+          </div>
+          <input 
+            type="email" 
+            id="email" 
+            placeholder="Correo electrónico"
+            class="input-focus w-full pl-10 pr-4 py-4 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30 rounded-xl focus:outline-none focus:border-white focus:bg-opacity-30"
+            autocomplete="email"
+            required
+          >
+        </div>
+        
+        <!-- Password -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-white text-opacity-60">🔒</span>
+          </div>
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Contraseña"
+            class="input-focus w-full pl-10 pr-12 py-4 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30 rounded-xl focus:outline-none focus:border-white focus:bg-opacity-30"
+            autocomplete="current-password"
+            required
+          >
+          <button 
+            type="button" 
+            id="toggle-password"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center"
+          >
+            <span class="text-white text-opacity-60 hover:text-opacity-100 transition-all">👁️</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Botón de Login -->
+      <button 
+        id="login-btn"
+        class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg mb-4"
+      >
+        <span id="login-btn-text">🚀 Iniciar Sesión</span>
+      </button>
+      
+      <!-- Separador -->
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-white border-opacity-30"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-3 bg-transparent text-white text-opacity-70">¿No tienes cuenta?</span>
+        </div>
+      </div>
+      
+      <!-- Toggle a Registro -->
+      <button 
+        id="show-register"
+        class="w-full bg-white bg-opacity-10 hover:bg-opacity-20 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105"
+      >
+        ✨ Crear Cuenta Nueva
+      </button>
+    </div>
+    
+    <!-- Formulario de Registro -->
+    <div id="register-form" class="hidden">
+      <div class="space-y-4 mb-6">
+        
+        <!-- Nombre -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-white text-opacity-60">👤</span>
+          </div>
+          <input 
+            type="text" 
+            id="display-name" 
+            placeholder="Nombre completo"
+            class="input-focus w-full pl-10 pr-4 py-4 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30 rounded-xl focus:outline-none focus:border-white focus:bg-opacity-30"
+            autocomplete="name"
+            required
+          >
+        </div>
+        
+        <!-- Email Registro -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-white text-opacity-60">📧</span>
+          </div>
+          <input 
+            type="email" 
+            id="register-email" 
+            placeholder="Correo electrónico"
+            class="input-focus w-full pl-10 pr-4 py-4 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30 rounded-xl focus:outline-none focus:border-white focus:bg-opacity-30"
+            autocomplete="email"
+            required
+          >
+        </div>
+        
+        <!-- Password Registro -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-white text-opacity-60">🔒</span>
+          </div>
+          <input 
+            type="password" 
+            id="register-password" 
+            placeholder="Contraseña (mínimo 6 caracteres)"
+            class="input-focus w-full pl-10 pr-4 py-4 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30 rounded-xl focus:outline-none focus:border-white focus:bg-opacity-30"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+        
+        <!-- Confirmar Password -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-white text-opacity-60">🔑</span>
+          </div>
+          <input 
+            type="password" 
+            id="confirm-password" 
+            placeholder="Confirmar contraseña"
+            class="input-focus w-full pl-10 pr-4 py-4 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30 rounded-xl focus:outline-none focus:border-white focus:bg-opacity-30"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+      </div>
+      
+      <!-- Botón de Registro -->
+      <button 
+        id="register-btn"
+        class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg mb-4"
+      >
+        <span id="register-btn-text">✨ Crear Mi Cuenta</span>
+      </button>
+      
+      <!-- Volver a Login -->
+      <button 
+        id="show-login"
+        class="w-full bg-white bg-opacity-10 hover:bg-opacity-20 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300"
+      >
+        ← Volver al Login
+      </button>
+    </div>
+    
+    <!-- Mensajes -->
+    <div id="message-container" class="hidden mt-6 p-4 rounded-xl text-center text-sm">
+      <p id="message-text"></p>
+    </div>
+    
+    <!-- Footer con diagnóstico -->
+    <div class="mt-8 text-center">
+      <button 
+        id="diagnostic-toggle" 
+        class="text-white text-opacity-50 hover:text-opacity-80 text-xs transition-all"
+      >
+        🔍 Diagnóstico del dispositivo
+      </button>
+    </div>
+    
+    <!-- Panel de diagnóstico -->
+    <div id="diagnostic-panel" class="hidden mt-4 p-4 bg-black bg-opacity-50 rounded-xl text-xs text-white">
+      <div id="diagnostic-content"></div>
+    </div>
+  </div>
+
+  <!-- Firebase y JavaScript -->
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { 
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      updateProfile,
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    
+    // Elementos DOM
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const loadingContainer = document.getElementById('loading-container');
+    const loadingMessage = document.getElementById('loading-message');
+    const messageContainer = document.getElementById('message-container');
+    const messageText = document.getElementById('message-text');
+    
+    // Parámetros URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdminRedirect = urlParams.get('redirect') === 'admin';
+    
+    // Funciones de utilidad
+    function showLoading(text = 'Procesando...') {
+      loadingMessage.textContent = text;
+      loadingContainer.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      registerForm.classList.add('hidden');
+      hideMessage();
+    }
+    
+    function hideLoading() {
+      loadingContainer.classList.add('hidden');
+      showCurrentForm();
+    }
+    
+    function showCurrentForm() {
+      if (registerForm.classList.contains('hidden')) {
+        loginForm.classList.remove('hidden');
+      } else {
+        registerForm.classList.remove('hidden');
+      }
+    }
+    
+    function showMessage(text, type = 'info') {
+      messageText.textContent = text;
+      messageContainer.className = 'mt-6 p-4 rounded-xl text-center text-sm';
+      
+      switch (type) {
+        case 'error':
+          messageContainer.classList.add('bg-red-500', 'bg-opacity-20', 'border', 'border-red-400', 'text-red-200');
+          break;
+        case 'success':
+          messageContainer.classList.add('bg-green-500', 'bg-opacity-20', 'border', 'border-green-400', 'text-green-200');
+          break;
+        case 'warning':
+          messageContainer.classList.add('bg-yellow-500', 'bg-opacity-20', 'border', 'border-yellow-400', 'text-yellow-200');
+          break;
+        default:
+          messageContainer.classList.add('bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-400', 'text-blue-200');
+      }
+      
+      messageContainer.classList.remove('hidden');
+    }
+    
+    function hideMessage() {
+      messageContainer.classList.add('hidden');
+    }
+    
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    
+    function getDeviceInfo() {
+      const userAgent = navigator.userAgent;
+      return {
+        userAgent: userAgent.substring(0, 80) + '...',
+        isMobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent),
+        isWebView: /webview|webintoapp/i.test(userAgent) || 
+                  (/android.*version.*chrome/i.test(userAgent) && !userAgent.includes('Chrome/')),
+        viewport: `${window.innerWidth}x${window.innerHeight}`,
+        screen: `${screen.width}x${screen.height}`,
+        cookiesEnabled: navigator.cookieEnabled,
+        language: navigator.language,
+        platform: navigator.platform,
+        onLine: navigator.onLine
+      };
+    }
+    
+    async function handleAuthSuccess(user) {
+      console.log('✅ Autenticación exitosa:', user.email);
+      
+      // Lista de administradores
+      const adminEmails = [
+        'gfigueroa.w@gmail.com',
+        'admin@yamevi.com.mx', 
+        'eugenfw@gmail.com',
+        'guillermo.figueroaw@totalplay.com.mx'
+      ];
+      
+      const isAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
+      
+      if (isAdminRedirect && isAdmin) {
+        showMessage('✅ ¡Acceso autorizado! Redirigiendo al panel...', 'success');
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 2000);
+      } else if (isAdminRedirect && !isAdmin) {
+        showMessage(`❌ Sin permisos de administrador.\nEmail: ${user.email}`, 'error');
+        setTimeout(() => {
+          window.location.href = "home.html";
+        }, 3000);
+      } else {
+        const displayName = user.displayName || user.email.split('@')[0];
+        showMessage(`✅ ¡Bienvenido ${displayName}!`, 'success');
+        setTimeout(() => {
+          window.location.href = "home.html";
+        }, 2000);
+      }
+    }
+    
+    // Manejadores de eventos
+    
+    // Login
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      
+      if (!email || !password) {
+        showMessage('❌ Por favor completa todos los campos', 'error');
+        return;
+      }
+      
+      if (!validateEmail(email)) {
+        showMessage('❌ Formato de email inválido', 'error');
+        return;
+      }
+      
+      showLoading('Iniciando sesión...');
+      
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        await handleAuthSuccess(result.user);
+      } catch (error) {
+        console.error('Error de login:', error);
+        hideLoading();
+        
+        let errorMessage;
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = '❌ Usuario no encontrado. ¿Necesitas crear una cuenta?';
+            break;
+          case 'auth/wrong-password':
+            errorMessage = '❌ Contraseña incorrecta';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = '❌ Email inválido';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = '❌ Demasiados intentos fallidos. Espera un momento.';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = '❌ Error de conexión. Verifica tu internet.';
+            break;
+          default:
+            errorMessage = `❌ Error: ${error.message}`;
+        }
+        
+        showMessage(errorMessage, 'error');
+      }
+    });
+    
+    // Registro
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const displayName = document.getElementById('display-name').value.trim();
+      const email = document.getElementById('register-email').value.trim();
+      const password = document.getElementById('register-password').value.trim();
+      const confirmPassword = document.getElementById('confirm-password').value.trim();
+      
+      if (!displayName || !email || !password || !confirmPassword) {
+        showMessage('❌ Por favor completa todos los campos', 'error');
+        return;
+      }
+      
+      if (!validateEmail(email)) {
+        showMessage('❌ Formato de email inválido', 'error');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showMessage('❌ La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showMessage('❌ Las contraseñas no coinciden', 'error');
+        return;
+      }
+      
+      showLoading('Creando cuenta...');
+      
+      try {
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Actualizar perfil con nombre
+        await updateProfile(result.user, { displayName });
+        
+        showMessage('✅ ¡Cuenta creada exitosamente!', 'success');
+        
+        setTimeout(async () => {
+          await handleAuthSuccess(result.user);
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Error de registro:', error);
+        hideLoading();
+        
+        let errorMessage;
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = '❌ Este email ya está registrado. ¿Quieres iniciar sesión?';
+            break;
+          case 'auth/weak-password':
+            errorMessage = '❌ La contraseña es muy débil. Usa al menos 6 caracteres.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = '❌ Email inválido';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = '❌ Error de conexión. Verifica tu internet.';
+            break;
+          default:
+            errorMessage = `❌ Error: ${error.message}`;
+        }
+        
+        showMessage(errorMessage, 'error');
+      }
+    });
+    
+    // Toggle formularios
+    document.getElementById('show-register').addEventListener('click', () => {
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      hideMessage();
+    });
+    
+    document.getElementById('show-login').addEventListener('click', () => {
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      hideMessage();
+    });
+    
+    // Toggle password visibility
+    document.getElementById('toggle-password').addEventListener('click', () => {
+      const passwordInput = document.getElementById('password');
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+    });
+    
+    // Enter key support
+    function addEnterKeyListener(inputId, buttonId) {
+      document.getElementById(inputId).addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById(buttonId).click();
+        }
+      });
+    }
+    
+    addEnterKeyListener('password', 'login-btn');
+    addEnterKeyListener('confirm-password', 'register-btn');
+    
+    // Diagnóstico
+    document.getElementById('diagnostic-toggle').addEventListener('click', () => {
+      const panel = document.getElementById('diagnostic-panel');
+      const content = document.getElementById('diagnostic-content');
+      
+      if (panel.classList.contains('hidden')) {
+        const info = getDeviceInfo();
+        content.innerHTML = `
+          <strong>📱 Información del Dispositivo:</strong><br><br>
+          <strong>Tipo:</strong> ${info.isMobile ? 'Móvil' : 'Escritorio'}<br>
+          <strong>WebView:</strong> ${info.isWebView ? 'Sí' : 'No'}<br>
+          <strong>Navegador:</strong> ${info.userAgent}<br>
+          <strong>Resolución:</strong> ${info.viewport} (viewport) / ${info.screen} (pantalla)<br>
+          <strong>Cookies:</strong> ${info.cookiesEnabled ? 'Habilitadas' : 'Deshabilitadas'}<br>
+          <strong>Idioma:</strong> ${info.language}<br>
+          <strong>Plataforma:</strong> ${info.platform}<br>
+          <strong>En línea:</strong> ${info.onLine ? 'Sí' : 'No'}<br>
+          <strong>Timestamp:</strong> ${new Date().toLocaleString()}
+        `;
+        panel.classList.remove('hidden');
+      } else {
+        panel.classList.add('hidden');
+      }
+    });
+    
+    // Verificar autenticación existente
+    onAuthStateChanged(auth, (user) => {
+      if (user && !window.location.search.includes('force-login')) {
+        console.log('ℹ️ Usuario ya autenticado:', user.email);
+        handleAuthSuccess(user);
+      }
+    });
+    
+    // Mensaje de bienvenida
+    setTimeout(() => {
+      showMessage('💡 Login 100% seguro sin problemas de redirección móvil', 'info');
+      setTimeout(hideMessage, 4000);
+    }, 1000);
+    
+    console.log('🔐 Sistema de autenticación seguro inicializado');
+    console.log('📱 Información del dispositivo:', getDeviceInfo());
+  </script>
+</body>
+</html>

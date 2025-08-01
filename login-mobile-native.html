@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Móvil - YA ME VI</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .pulse-button {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+  <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-8 w-full max-w-md fade-in">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">YA ME VI</h1>
+      <p class="text-white text-opacity-80">Versión Móvil Optimizada</p>
+    </div>
+    
+    <!-- Estado de carga -->
+    <div id="loading-state" class="hidden text-center mb-6">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <p class="text-white" id="loading-text">Cargando...</p>
+    </div>
+    
+    <!-- Formulario principal -->
+    <div id="main-form" class="space-y-6">
+      
+      <!-- Google Auth con método alternativo -->
+      <div class="space-y-4">
+        <button id="google-btn" class="w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-4 px-6 rounded-lg flex items-center justify-center space-x-3 transition-all duration-300 transform hover:scale-105">
+          <svg class="w-6 h-6" viewBox="0 0 24 24">
+            <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          <span>Método Alternativo Google</span>
+        </button>
+        
+        <div class="text-center">
+          <p class="text-white text-opacity-60 text-sm">⚠️ Si el método normal falla, este abre Google en una nueva pestaña</p>
+        </div>
+      </div>
+      
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-white border-opacity-30"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-3 bg-transparent text-white text-opacity-70">o usa tu cuenta</span>
+        </div>
+      </div>
+      
+      <!-- Email/Password (más confiable) -->
+      <div class="space-y-4">
+        <input type="email" id="email-input" placeholder="📧 Correo electrónico" 
+               class="w-full px-4 py-4 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:outline-none focus:border-white focus:bg-opacity-30 transition-all">
+        <input type="password" id="password-input" placeholder="🔒 Contraseña"
+               class="w-full px-4 py-4 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:outline-none focus:border-white focus:bg-opacity-30 transition-all">
+        <button id="email-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+          🚀 Iniciar Sesión
+        </button>
+      </div>
+      
+      <!-- Registro rápido -->
+      <div class="text-center">
+        <button id="register-toggle" class="text-white text-opacity-80 hover:text-opacity-100 text-sm underline">
+          ¿No tienes cuenta? Regístrate aquí
+        </button>
+      </div>
+      
+    </div>
+    
+    <!-- Formulario de registro -->
+    <div id="register-form" class="hidden space-y-4">
+      <div class="text-center mb-4">
+        <h2 class="text-xl font-semibold text-white">Crear Cuenta Nueva</h2>
+      </div>
+      
+      <input type="text" id="display-name-input" placeholder="👤 Nombre completo" 
+             class="w-full px-4 py-4 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:outline-none focus:border-white">
+      <input type="email" id="register-email-input" placeholder="📧 Correo electrónico" 
+             class="w-full px-4 py-4 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:outline-none focus:border-white">
+      <input type="password" id="register-password-input" placeholder="🔒 Contraseña (mínimo 6 caracteres)"
+             class="w-full px-4 py-4 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:outline-none focus:border-white">
+      
+      <button id="register-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-all">
+        ✨ Crear Cuenta
+      </button>
+      
+      <div class="text-center">
+        <button id="login-toggle" class="text-white text-opacity-80 hover:text-opacity-100 text-sm underline">
+          ¿Ya tienes cuenta? Inicia sesión
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mensajes -->
+    <div id="message-container" class="hidden mt-6 p-4 rounded-lg text-center">
+      <p id="message-text"></p>
+    </div>
+    
+    <!-- Diagnóstico -->
+    <div class="mt-8 text-center">
+      <button id="diagnostic-btn" class="text-white text-opacity-60 hover:text-opacity-80 text-xs underline">
+        🔍 Ver diagnóstico del dispositivo
+      </button>
+    </div>
+    
+    <!-- Panel de diagnóstico -->
+    <div id="diagnostic-panel" class="hidden mt-4 p-4 bg-black bg-opacity-50 rounded-lg text-xs text-white">
+      <div id="diagnostic-info"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { 
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      updateProfile,
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    
+    // Elementos DOM
+    const loadingState = document.getElementById('loading-state');
+    const mainForm = document.getElementById('main-form');
+    const registerForm = document.getElementById('register-form');
+    const loadingText = document.getElementById('loading-text');
+    const messageContainer = document.getElementById('message-container');
+    const messageText = document.getElementById('message-text');
+    
+    // Parámetros URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdminRedirect = urlParams.get('redirect') === 'admin';
+    
+    // Funciones de UI
+    function showLoading(text = 'Cargando...') {
+      loadingText.textContent = text;
+      loadingState.classList.remove('hidden');
+      mainForm.classList.add('hidden');
+      registerForm.classList.add('hidden');
+      hideMessage();
+    }
+    
+    function hideLoading() {
+      loadingState.classList.add('hidden');
+      mainForm.classList.remove('hidden');
+    }
+    
+    function showMessage(text, type = 'info') {
+      messageText.textContent = text;
+      messageContainer.className = `mt-6 p-4 rounded-lg text-center`;
+      
+      if (type === 'error') {
+        messageContainer.classList.add('bg-red-500', 'bg-opacity-20', 'border', 'border-red-500', 'text-red-200');
+      } else if (type === 'success') {
+        messageContainer.classList.add('bg-green-500', 'bg-opacity-20', 'border', 'border-green-500', 'text-green-200');
+      } else {
+        messageContainer.classList.add('bg-blue-500', 'bg-opacity-20', 'border', 'border-blue-500', 'text-blue-200');
+      }
+      
+      messageContainer.classList.remove('hidden');
+    }
+    
+    function hideMessage() {
+      messageContainer.classList.add('hidden');
+    }
+    
+    function getDeviceInfo() {
+      const userAgent = navigator.userAgent;
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      const isWebView = /webview|webintoapp/i.test(userAgent.toLowerCase()) ||
+                       (/android.*version.*chrome/i.test(userAgent) && !userAgent.includes('Chrome/')) ||
+                       (/iPhone|iPad/.test(userAgent) && window.navigator.standalone === false && !userAgent.includes('Safari/'));
+      
+      return {
+        userAgent: userAgent.substring(0, 100),
+        isMobile,
+        isWebView,
+        viewport: `${window.innerWidth}x${window.innerHeight}`,
+        screen: `${window.screen.width}x${window.screen.height}`,
+        standalone: window.navigator.standalone,
+        cookieEnabled: navigator.cookieEnabled,
+        language: navigator.language
+      };
+    }
+    
+    async function handleAuthSuccess(user) {
+      console.log('✅ Usuario autenticado:', user.email);
+      
+      const adminEmails = [
+        'gfigueroa.w@gmail.com', 
+        'admin@yamevi.com.mx', 
+        'eugenfw@gmail.com',
+        'guillermo.figueroaw@totalplay.com.mx'
+      ];
+      
+      const isAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
+      
+      if (isAdminRedirect && isAdmin) {
+        showMessage('✅ ¡Acceso autorizado! Redirigiendo al panel de administración...', 'success');
+        setTimeout(() => window.location.href = "admin.html", 2000);
+      } else if (isAdminRedirect && !isAdmin) {
+        showMessage(`❌ Sin permisos de administrador.\nUsuario: ${user.email}`, 'error');
+        setTimeout(() => window.location.href = "home.html", 3000);
+      } else {
+        showMessage(`✅ ¡Bienvenido ${user.displayName || user.email}!`, 'success');
+        setTimeout(() => window.location.href = "home.html", 2000);
+      }
+    }
+    
+    // Google Auth método alternativo (abre en nueva pestaña)
+    document.getElementById('google-btn').addEventListener('click', () => {
+      showMessage('🌐 Abriendo Google en nueva pestaña...', 'info');
+      
+      // URL de autenticación Google OAuth directo
+      const clientId = '748876890843-YOUR_CLIENT_ID.apps.googleusercontent.com'; // Necesitas el ID completo
+      const redirectUri = encodeURIComponent(window.location.origin + '/google-callback.html');
+      const scope = encodeURIComponent('email profile');
+      
+      const googleAuthUrl = `https://accounts.google.com/oauth/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${redirectUri}&` +
+        `response_type=code&` +
+        `scope=${scope}&` +
+        `access_type=online&` +
+        `prompt=select_account`;
+      
+      // Abrir en nueva pestaña
+      const popup = window.open(googleAuthUrl, 'google-auth', 'width=500,height=600');
+      
+      if (!popup) {
+        showMessage('❌ No se pudo abrir la ventana. Desactiva el bloqueador de ventanas emergentes.', 'error');
+        return;
+      }
+      
+      // Monitorear la ventana
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          showMessage('ℹ️ Ventana cerrada. Si completaste el login, la página debería actualizarse automáticamente.', 'info');
+        }
+      }, 1000);
+      
+      // Timeout
+      setTimeout(() => {
+        if (!popup.closed) {
+          popup.close();
+          clearInterval(checkClosed);
+          showMessage('⏰ Tiempo agotado. Intenta de nuevo.', 'error');
+        }
+      }, 60000);
+    });
+    
+    // Email login
+    document.getElementById('email-btn').addEventListener('click', async () => {
+      const email = document.getElementById('email-input').value.trim();
+      const password = document.getElementById('password-input').value.trim();
+      
+      if (!email || !password) {
+        showMessage('❌ Por favor ingresa email y contraseña', 'error');
+        return;
+      }
+      
+      showLoading('Iniciando sesión...');
+      
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        await handleAuthSuccess(result.user);
+      } catch (error) {
+        console.error('Error:', error);
+        hideLoading();
+        
+        let errorMsg = 'Error al iniciar sesión';
+        if (error.code === 'auth/user-not-found') {
+          errorMsg = '❌ Usuario no encontrado';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMsg = '❌ Contraseña incorrecta';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMsg = '❌ Email inválido';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMsg = '❌ Demasiados intentos. Espera un momento.';
+        }
+        
+        showMessage(errorMsg, 'error');
+      }
+    });
+    
+    // Registro
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const displayName = document.getElementById('display-name-input').value.trim();
+      const email = document.getElementById('register-email-input').value.trim();
+      const password = document.getElementById('register-password-input').value.trim();
+      
+      if (!displayName || !email || !password) {
+        showMessage('❌ Por favor completa todos los campos', 'error');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showMessage('❌ La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+      }
+      
+      showLoading('Creando cuenta...');
+      
+      try {
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(result.user, { displayName });
+        
+        showMessage('✅ ¡Cuenta creada exitosamente!', 'success');
+        setTimeout(() => handleAuthSuccess(result.user), 2000);
+      } catch (error) {
+        console.error('Error:', error);
+        hideLoading();
+        
+        let errorMsg = 'Error al crear cuenta';
+        if (error.code === 'auth/email-already-in-use') {
+          errorMsg = '❌ Este email ya está registrado';
+        } else if (error.code === 'auth/weak-password') {
+          errorMsg = '❌ La contraseña es muy débil';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMsg = '❌ Email inválido';
+        }
+        
+        showMessage(errorMsg, 'error');
+      }
+    });
+    
+    // Toggle entre login y registro
+    document.getElementById('register-toggle').addEventListener('click', () => {
+      mainForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      hideMessage();
+    });
+    
+    document.getElementById('login-toggle').addEventListener('click', () => {
+      registerForm.classList.add('hidden');
+      mainForm.classList.remove('hidden');
+      hideMessage();
+    });
+    
+    // Enter key support
+    document.getElementById('password-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('email-btn').click();
+    });
+    
+    document.getElementById('register-password-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('register-btn').click();
+    });
+    
+    // Diagnóstico
+    document.getElementById('diagnostic-btn').addEventListener('click', () => {
+      const panel = document.getElementById('diagnostic-panel');
+      const info = document.getElementById('diagnostic-info');
+      
+      if (panel.classList.contains('hidden')) {
+        const deviceInfo = getDeviceInfo();
+        info.innerHTML = `
+          <strong>📱 Información del Dispositivo:</strong><br>
+          User Agent: ${deviceInfo.userAgent}...<br>
+          Móvil: ${deviceInfo.isMobile ? 'Sí' : 'No'}<br>
+          WebView: ${deviceInfo.isWebView ? 'Sí' : 'No'}<br>
+          Viewport: ${deviceInfo.viewport}<br>
+          Pantalla: ${deviceInfo.screen}<br>
+          Standalone: ${deviceInfo.standalone}<br>
+          Cookies: ${deviceInfo.cookieEnabled ? 'Habilitadas' : 'Deshabilitadas'}<br>
+          Idioma: ${deviceInfo.language}
+        `;
+        panel.classList.remove('hidden');
+      } else {
+        panel.classList.add('hidden');
+      }
+    });
+    
+    // Verificar si ya está autenticado
+    onAuthStateChanged(auth, (user) => {
+      if (user && !window.location.search.includes('force-login')) {
+        console.log('✅ Usuario ya autenticado:', user.email);
+        handleAuthSuccess(user);
+      }
+    });
+    
+    // Mostrar mensaje inicial
+    setTimeout(() => {
+      showMessage('💡 Tip: Para mayor compatibilidad móvil, usa tu email y contraseña', 'info');
+      setTimeout(hideMessage, 5000);
+    }, 1000);
+  </script>
+</body>
+</html>
