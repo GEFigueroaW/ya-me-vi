@@ -231,12 +231,16 @@ export class MobileAuthOptimizer {
   generateExternalLoginUrl() {
     const baseUrl = window.location.origin;
     const returnUrl = encodeURIComponent(window.location.href);
+    
+    // EVITAR BUCLES INFINITOS - No agregar parámetros problemáticos
     const params = new URLSearchParams({
       type: 'google',
       return: returnUrl,
       webview: 'true',
       mobile: this.isMobileDevice ? 'true' : 'false',
-      timestamp: Date.now() // Evitar cache
+      timestamp: Date.now(), // Evitar cache
+      // NO agregar immediate=true que causa bucles
+      source: 'mobile_optimizer'
     });
     
     return `${baseUrl}/external-login.html?${params.toString()}`;
@@ -247,6 +251,9 @@ export class MobileAuthOptimizer {
       let checkCount = 0;
       const maxChecks = 120; // 2 minutos
       
+      // Limpiar estados previos que puedan causar bucles
+      const cleanupKeys = ['external_login_attempts', 'google_auth_errors'];
+      
       const checkInterval = setInterval(() => {
         checkCount++;
         
@@ -255,6 +262,9 @@ export class MobileAuthOptimizer {
         if (loginData) {
           clearInterval(checkInterval);
           localStorage.removeItem('external_login_success');
+          
+          // Limpiar contadores de error
+          cleanupKeys.forEach(key => sessionStorage.removeItem(key));
           
           try {
             const userData = JSON.parse(loginData);
@@ -282,6 +292,10 @@ export class MobileAuthOptimizer {
         if (checkCount >= maxChecks) {
           clearInterval(checkInterval);
           this.updateButtonState('Continuar con Google', false);
+          
+          // Limpiar contadores para evitar bloqueos permanentes
+          cleanupKeys.forEach(key => sessionStorage.removeItem(key));
+          
           reject(new Error('Timeout esperando el resultado del login'));
         }
       }, 1000);

@@ -7,30 +7,49 @@
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
-  <link     // Auto-iniciar según el tipo
+  <link     // Auto-iniciar según el tipo - CORREGIDO PARA EVITAR BUCLES
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('🚀 External login page loaded');
       console.log('📋 Parámetros:', { authType, returnUrl, isWebView });
       
+      // PREVENIR BUCLES INFINITOS
+      const sessionKey = 'external_login_attempts';
+      const maxAttempts = 3;
+      let attempts = parseInt(sessionStorage.getItem(sessionKey) || '0');
+      
+      console.log('🔢 Intentos previos:', attempts);
+      
+      if (attempts >= maxAttempts) {
+        console.log('🛑 Máximo de intentos alcanzado, mostrando interfaz manual');
+        showState('login-buttons');
+        sessionStorage.removeItem(sessionKey);
+        return;
+      }
+      
+      // Incrementar contador
+      sessionStorage.setItem(sessionKey, (attempts + 1).toString());
+      
       // Mostrar botones de login mientras cargamos
       showState('login-buttons');
-      
-      // Si es auto-inicio desde detección temprana, intentar Google inmediatamente
-      if (urlParams.get('immediate') === 'true' && authType === 'google') {
-        console.log('🎯 Auto-inicio inmediato de Google auth...');
-        setTimeout(() => {
-          signInWithGoogle(false);
-        }, 1000);
-      }
       
       // Primero verificar si hay resultado de redirección
       const hasRedirectResult = await checkRedirectResult();
       
-      if (!hasRedirectResult && authType === 'google' && !urlParams.get('immediate')) {
-        console.log('🎯 Auto-iniciando Google auth (no inmediato)...');
+      if (hasRedirectResult) {
+        // Si hay resultado, limpiar contador y salir
+        sessionStorage.removeItem(sessionKey);
+        return;
+      }
+      
+      // Solo auto-iniciar si es la primera vez y no viene de un error
+      if (authType === 'google' && attempts === 1 && !urlParams.get('error')) {
+        console.log('🎯 Auto-iniciando Google auth (primer intento)...');
         setTimeout(() => {
           signInWithGoogle(false);
-        }, 500);
+        }, 1000);
+      } else {
+        console.log('ℹ️ Mostrando interfaz manual (intentos:', attempts, ')');
+        showState('login-buttons');
       }
     });on" href="assets/apple-touch-icon.png">
   
@@ -341,8 +360,32 @@
         console.error('❌ Error details:', {
           code: error.code,
           message: error.message,
-          stack: error.stack
+          userAgent: navigator.userAgent.substring(0, 100)
         });
+        
+        // PREVENIR BUCLES INFINITOS EN ERRORES
+        const errorKey = 'google_auth_errors';
+        let errorCount = parseInt(sessionStorage.getItem(errorKey) || '0');
+        errorCount++;
+        sessionStorage.setItem(errorKey, errorCount.toString());
+        
+        console.log('🔢 Errores consecutivos:', errorCount);
+        
+        if (errorCount >= 3) {
+          console.log('🛑 Demasiados errores, deteniendo auto-retry');
+          sessionStorage.removeItem(errorKey);
+          sessionStorage.removeItem('external_login_attempts');
+          
+          showError('Error persistente en autenticación. Intenta desde la página principal.');
+          
+          // Guardar error para debugging
+          localStorage.setItem('external_login_error', `Múltiples errores: ${error.code} - ${error.message}`);
+          
+          setTimeout(() => {
+            returnToApp(null);
+          }, 3000);
+          return;
+        }
         
         let shouldRetry = false;
         let errorMessage = 'Error en autenticación con Google';
@@ -350,40 +393,44 @@
         // Manejo específico de errores
         if (error.code === 'auth/popup-blocked') {
           errorMessage = 'Popup bloqueado. Intentando con redirección...';
-          shouldRetry = true;
+          shouldRetry = !useRedirect; // Solo retry si no estaba usando redirect
         } else if (error.code === 'auth/popup-closed-by-user') {
           errorMessage = 'Ventana cerrada por el usuario';
-          showState('login-buttons'); // Volver a mostrar botones
+          sessionStorage.removeItem(errorKey); // No contar como error real
+          showState('login-buttons');
           return;
         } else if (error.code === 'auth/cancelled-popup-request') {
           errorMessage = 'Solicitud cancelada. Inténtalo de nuevo';
+          sessionStorage.removeItem(errorKey); // No contar como error real
           showState('login-buttons');
           return;
-        } else if (error.code === 'auth/web-storage-unsupported') {
-          errorMessage = 'Almacenamiento web no soportado';
         } else if (error.code === 'auth/unauthorized-domain') {
-          errorMessage = 'Dominio no autorizado para autenticación';
+          errorMessage = 'Dominio no autorizado. Contacta al administrador.';
         } else if (error.code === 'auth/operation-not-allowed') {
           errorMessage = 'Autenticación con Google no habilitada';
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = 'Error de conexión. Verifica tu internet';
+          shouldRetry = !useRedirect && errorCount < 2;
         } else if (error.message.includes('missing initial state') || 
                    error.message.includes('storage-partitioned') ||
                    error.message.includes('third-party')) {
-          errorMessage = 'Error de cookies/almacenamiento. Intentando alternativa...';
-          shouldRetry = true;
-        } else if (error.code === 'auth/network-request-failed') {
-          errorMessage = 'Error de conexión. Verifica tu internet';
+          errorMessage = 'Error de cookies/almacenamiento en WebView';
+          shouldRetry = !useRedirect && errorCount < 2;
         }
         
-        // Auto-retry con redirect si el popup falla
-        if (!useRedirect && shouldRetry) {
+        showError(errorMessage);
+        
+        // Auto-retry solo una vez y solo si no era redirect
+        if (!useRedirect && shouldRetry && errorCount < 2) {
           console.log('🔄 Auto-retry con redirect debido a:', error.code);
           setTimeout(() => {
             signInWithGoogle(true);
           }, 2000);
-          
-          showError(`${errorMessage} Reintentando...`);
         } else {
-          showError(errorMessage);
+          // Si no hay retry, mostrar botones después de un momento
+          setTimeout(() => {
+            showState('login-buttons');
+          }, 3000);
         }
       }
     }
