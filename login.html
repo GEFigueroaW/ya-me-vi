@@ -267,72 +267,107 @@
     });
 
     document.getElementById("loginWithGoogle").addEventListener("click", async () => {
-      console.log('🔍 Iniciando autenticación Google optimizada...');
+      console.log('🔍 Iniciando autenticación Google (MÉTODO REGISTER QUE FUNCIONA)...');
       
       const button = document.getElementById("loginWithGoogle");
       const originalText = button.innerHTML;
       
+      // Mostrar loading igual que en register.js
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.id = 'loading-overlay';
+      loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      loadingOverlay.innerHTML = `
+        <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
+          <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full mb-4"></div>
+          <p>Iniciando sesión con Google...</p>
+        </div>
+      `;
+      document.body.appendChild(loadingOverlay);
+      
       try {
-        // Usar el optimizador para manejar la autenticación
-        const result = await authOptimizer.optimizedGoogleAuth(auth, GoogleAuthProvider);
+        // USAR EXACTAMENTE EL MISMO CÓDIGO QUE FUNCIONA EN REGISTER.JS
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
         
-        // Si el resultado es null, significa que se usó redirect y no hay resultado inmediato
-        if (result === null) {
-          console.log('🔄 Redirección iniciada, esperando resultado...');
-          return;
+        // USAR signInWithPopup DIRECTO (igual que register.js)
+        const { signInWithPopup } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+        const result = await signInWithPopup(auth, provider);
+        
+        console.log("✅ Usuario logueado con Google:", result.user.email);
+        
+        // Actualizar loading
+        const loadingMessage = loadingOverlay.querySelector('p');
+        if (loadingMessage) {
+          loadingMessage.textContent = '¡Autenticación exitosa! Redirigiendo...';
         }
         
-        // Si tenemos resultado (de popup o external login)
-        if (result && (result.user || result.email)) {
-          const user = result.user || result;
-          console.log("✅ Usuario logueado con Google:", user.email);
-          
-          // Check admin permissions
-          const adminEmails = [
-            'gfigueroa.w@gmail.com', 
-            'admin@yamevi.com.mx', 
-            'eugenfw@gmail.com',
-            'guillermo.figueroaw@totalplay.com.mx'
-          ];
-          const isAdmin = adminEmails.includes(user.email);
-          
+        // Check admin permissions
+        const adminEmails = [
+          'gfigueroa.w@gmail.com', 
+          'admin@yamevi.com.mx', 
+          'eugenfw@gmail.com',
+          'guillermo.figueroaw@totalplay.com.mx'
+        ];
+        const isAdmin = adminEmails.includes(result.user.email);
+        
+        setTimeout(() => {
           if (isAdminRedirect && isAdmin) {
             window.location.href = "admin.html";
           } else if (isAdminRedirect && !isAdmin) {
-            alert(`❌ Sin permisos de administrador\n\nUsuario: ${user.email}\nContacta al administrador.`);
+            alert(`❌ Sin permisos de administrador\n\nUsuario: ${result.user.email}\nContacta al administrador.`);
             window.location.href = "index.html";
           } else {
             window.location.href = "home.html";
           }
-        }
+        }, 1500);
         
       } catch (error) {
         console.error("❌ Error al iniciar sesión con Google:", error);
+        
+        // Ocultar loading
+        if (loadingOverlay) {
+          loadingOverlay.remove();
+        }
         
         // Restaurar botón
         button.innerHTML = originalText;
         button.disabled = false;
         
-        // Manejo específico de errores
-        let errorMessage = "Error al iniciar sesión con Google";
-        
-        if (error.code === 'auth/popup-blocked') {
-          errorMessage = "Las ventanas emergentes están bloqueadas. Se abrirá en una nueva pestaña...";
-          // Intentar fallback
-          setTimeout(() => {
-            WebViewDetector.openExternalLogin();
-          }, 2000);
-        } else if (error.code === 'auth/popup-closed-by-user') {
-          errorMessage = "Ventana de login cerrada. Intenta nuevamente.";
-        } else if (error.code === 'auth/web-storage-unsupported') {
-          errorMessage = "Tu navegador no soporta el almacenamiento necesario. Intenta con otro navegador.";
-        } else if (error.code === 'auth/unauthorized-domain') {
-          errorMessage = "Dominio no autorizado. Contacta al administrador.";
-        } else if (error.message.includes('Timeout')) {
-          errorMessage = "La conexión tardó demasiado. Verifica tu internet e intenta nuevamente.";
+        // Manejo específico de errores (igual que register.js)
+        let errorMessage = "Error al iniciar sesión con Google: ";
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage += "Proceso cancelado. Inténtalo de nuevo.";
+            break;
+          case 'auth/popup-blocked':
+            errorMessage += "Popup bloqueado. Por favor permite popups para este sitio.";
+            break;
+          case 'auth/account-exists-with-different-credential':
+            errorMessage += "Ya existe una cuenta con este email usando otro método.";
+            break;
+          case 'auth/web-storage-unsupported':
+            errorMessage += "Tu navegador no soporta el almacenamiento necesario. Intenta con otro navegador.";
+            break;
+          case 'auth/unauthorized-domain':
+            errorMessage += "Dominio no autorizado. Contacta al administrador.";
+            break;
+          default:
+            errorMessage += error.message;
+            break;
         }
         
-        alert(errorMessage + "\n\nDetalles técnicos: " + error.message);
+        // Mostrar error de manera elegante (igual que register.js)
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        errorDiv.textContent = errorMessage;
+        document.body.appendChild(errorDiv);
+        
+        // Auto-ocultar error después de 5 segundos
+        setTimeout(() => {
+          errorDiv.remove();
+        }, 5000);
       }
     });
 
