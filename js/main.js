@@ -35,10 +35,16 @@ async function mostrarBienvenidaConSueño(user) {
           userDream = userData.dream;
         }
         
-        // Verificar si necesita completar onboarding - LÓGICA CORREGIDA
-        // Solo necesita onboarding si NO tiene sueño Y NO ha completado onboarding
+        // Verificar si necesita completar onboarding - LÓGICA FINAL CORREGIDA
+        // Necesita onboarding SOLO si NO tiene sueño Y NO ha completado onboarding
+        // Si tiene sueño O ya completó onboarding, NO necesita onboarding
         needsOnboarding = (!userData.dream || userData.dream === '') && 
                          (userData.onboardingCompleted !== true);
+        
+        // PERO: Si onboardingCompleted es true, nunca necesita onboarding
+        if (userData.onboardingCompleted === true) {
+          needsOnboarding = false;
+        }
         
         console.log('🔍 [MAIN] Verificación onboarding:', {
           hasDream: !!userData.dream,
@@ -96,28 +102,35 @@ async function mostrarBienvenidaConSueño(user) {
         // Verificar si ya estamos en proceso de onboarding para evitar loops
         const currentPage = window.location.pathname.split('/').pop();
         const onboardingInProgress = localStorage.getItem('onboarding_in_progress');
+        const justCompletedOnboarding = localStorage.getItem('just_completed_onboarding');
         
-        if (currentPage === 'dream-input.html') {
+        // Si acaba de completar onboarding, no redirigir
+        if (justCompletedOnboarding) {
+          console.log('ℹ️ [MAIN] Usuario acaba de completar onboarding, limpiando flag y permitiendo acceso');
+          localStorage.removeItem('just_completed_onboarding');
+          needsOnboarding = false;
+          // Continúa con el flujo normal
+        } else if (currentPage === 'dream-input.html') {
           console.log('ℹ️ [MAIN] Ya estamos en dream-input.html, no redirigir');
           return;
+        } else {
+          // Marcar que estamos en proceso de onboarding
+          localStorage.setItem('onboarding_in_progress', 'true');
+          
+          setTimeout(() => {
+            window.location.href = 'dream-input.html';
+          }, 2000);
+          
+          welcomeMsg.innerHTML = `
+            <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+              ¡Bienvenido ${userName}!
+            </div>
+            <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
+              Configurando tu perfil...
+            </div>
+          `;
+          return;
         }
-        
-        // Marcar que estamos en proceso de onboarding
-        localStorage.setItem('onboarding_in_progress', 'true');
-        
-        setTimeout(() => {
-          window.location.href = 'dream-input.html';
-        }, 2000);
-        
-        welcomeMsg.innerHTML = `
-          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
-            ¡Bienvenido ${userName}!
-          </div>
-          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
-            Configurando tu perfil...
-          </div>
-        `;
-        return;
       }
       
       // Limpiar flag de onboarding si ya no es necesario

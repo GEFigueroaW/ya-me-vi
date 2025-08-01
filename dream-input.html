@@ -404,7 +404,10 @@
         localStorage.removeItem('force_dream_input');
         localStorage.removeItem('onboarding_in_progress');
         
-        console.log('🧹 [DREAM-INPUT] Flags de localStorage limpiados');
+        // Set flag to indicate onboarding was just completed
+        localStorage.setItem('just_completed_onboarding', 'true');
+        
+        console.log('🧹 [DREAM-INPUT] Flags de localStorage limpiados y onboarding marcado como completado');
         
         // Show success message
         loadingState.innerHTML = `
