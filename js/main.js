@@ -35,17 +35,15 @@ async function mostrarBienvenidaConSueño(user) {
           userDream = userData.dream;
         }
         
-        // Verificar si necesita completar onboarding - LÓGICA FINAL CORREGIDA
-        // Necesita onboarding SOLO si NO tiene sueño Y NO ha completado onboarding
-        // Si tiene sueño O ya completó onboarding, NO necesita onboarding
-        const hasDream = userData.dream && userData.dream.trim() !== '';
-        const hasCompletedOnboarding = userData.onboardingCompleted === true;
-        
-        needsOnboarding = !hasDream && !hasCompletedOnboarding;
-        
-        // IMPORTANTE: Si ya completó onboarding, nunca necesita onboarding (incluso sin sueño)
-        if (hasCompletedOnboarding) {
+        // LÓGICA SIMPLIFICADA ANTI-LOOP
+        // Si el usuario tiene onboardingCompleted = true, NUNCA necesita onboarding
+        if (userData.onboardingCompleted === true) {
           needsOnboarding = false;
+          console.log('✅ [MAIN] Onboarding ya completado, no redirigir');
+        } else {
+          // Solo necesita onboarding si NO lo ha completado
+          needsOnboarding = true;
+          console.log('⚠️ [MAIN] Onboarding no completado, necesita completar');
         }
         
         console.log('🔍 [MAIN] Verificación onboarding:', {
@@ -104,47 +102,56 @@ async function mostrarBienvenidaConSueño(user) {
       if (needsOnboarding) {
         console.log('🎯 [MAIN] Usuario necesita completar onboarding, redirigiendo...');
         
-        // Verificar si ya estamos en proceso de onboarding para evitar loops
-        const currentPage = window.location.pathname.split('/').pop();
-        const onboardingInProgress = localStorage.getItem('onboarding_in_progress');
-        const justCompletedOnboarding = localStorage.getItem('just_completed_onboarding');
-        
-        console.log('🔍 [MAIN] Verificación de flags:', {
-          currentPage: currentPage,
-          onboardingInProgress: onboardingInProgress,
-          justCompletedOnboarding: justCompletedOnboarding,
-          needsOnboarding: needsOnboarding
-        });
-        
-        // Si acaba de completar onboarding, no redirigir
-        if (justCompletedOnboarding) {
-          console.log('ℹ️ [MAIN] Usuario acaba de completar onboarding, limpiando flag y permitiendo acceso');
-          localStorage.removeItem('just_completed_onboarding');
+        // VERIFICACIÓN DE EMERGENCIA
+        const emergencyFixed = localStorage.getItem('emergency_fixed');
+        if (emergencyFixed) {
+          console.log('🚨 [MAIN] Flag de emergencia detectado, forzando no-onboarding');
           needsOnboarding = false;
-          console.log('✅ [MAIN] Flag limpiado, needsOnboarding = false, continuando con flujo normal');
-          // Continúa con el flujo normal
-        } else if (currentPage === 'dream-input.html') {
-          console.log('ℹ️ [MAIN] Ya estamos en dream-input.html, no redirigir');
-          return;
+          localStorage.removeItem('emergency_fixed');
+          // Continuar con flujo normal
         } else {
-          console.log('🚀 [MAIN] Iniciando redirección a dream-input.html...');
-          // Marcar que estamos en proceso de onboarding
-          localStorage.setItem('onboarding_in_progress', 'true');
+          // Verificar si ya estamos en proceso de onboarding para evitar loops
+          const currentPage = window.location.pathname.split('/').pop();
+          const onboardingInProgress = localStorage.getItem('onboarding_in_progress');
+          const justCompletedOnboarding = localStorage.getItem('just_completed_onboarding');
           
-          setTimeout(() => {
-            console.log('🚀 [MAIN] Ejecutando redirección a dream-input.html');
-            window.location.href = 'dream-input.html';
-          }, 2000);
+          console.log('🔍 [MAIN] Verificación de flags:', {
+            currentPage: currentPage,
+            onboardingInProgress: onboardingInProgress,
+            justCompletedOnboarding: justCompletedOnboarding,
+            needsOnboarding: needsOnboarding
+          });
           
-          welcomeMsg.innerHTML = `
-            <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
-              ¡Bienvenido ${userName}!
-            </div>
-            <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
-              Configurando tu perfil...
-            </div>
-          `;
-          return;
+          // Si acaba de completar onboarding, no redirigir
+          if (justCompletedOnboarding) {
+            console.log('ℹ️ [MAIN] Usuario acaba de completar onboarding, limpiando flag y permitiendo acceso');
+            localStorage.removeItem('just_completed_onboarding');
+            needsOnboarding = false;
+            console.log('✅ [MAIN] Flag limpiado, needsOnboarding = false, continuando con flujo normal');
+            // Continúa con el flujo normal
+          } else if (currentPage === 'dream-input.html') {
+            console.log('ℹ️ [MAIN] Ya estamos en dream-input.html, no redirigir');
+            return;
+          } else {
+            console.log('🚀 [MAIN] Iniciando redirección a dream-input.html...');
+            // Marcar que estamos en proceso de onboarding
+            localStorage.setItem('onboarding_in_progress', 'true');
+            
+            setTimeout(() => {
+              console.log('🚀 [MAIN] Ejecutando redirección a dream-input.html');
+              window.location.href = 'dream-input.html';
+            }, 2000);
+            
+            welcomeMsg.innerHTML = `
+              <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+                ¡Bienvenido ${userName}!
+              </div>
+              <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
+                Configurando tu perfil...
+              </div>
+            `;
+            return;
+          }
         }
       }
       
