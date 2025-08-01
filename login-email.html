@@ -428,6 +428,9 @@
 
         console.log('🔐 [LOGIN-EMAIL] Registrando credenciales biométricas para:', email);
         
+        // Show loading message to user
+        showLoading('🔐 Configurando tu huella digital...');
+        
         const challenge = new Uint8Array(32);
         crypto.getRandomValues(challenge);
         
@@ -469,15 +472,27 @@
           localStorage.setItem('biometric_user_credentials', JSON.stringify(credentialData));
           console.log('✅ [LOGIN-EMAIL] Credenciales biométricas registradas exitosamente');
           
+          // Hide loading
+          hideLoading();
+          
           // Show and enable biometric button
           refreshBiometricButton();
           
           // Show success notification
-          showSuccess('🔐 ¡Biometría configurada! Ahora puedes usar tu huella digital para ingresar.');
+          showSuccess('🔐 ¡Biometría configurada exitosamente! La próxima vez podrás usar tu huella digital para ingresar.');
         }
       } catch (error) {
         console.log('ℹ️ [LOGIN-EMAIL] Usuario rechazó registro biométrico o no está disponible:', error.message);
-        // No mostrar error, es opcional - el usuario puede preferir no usar biometría
+        
+        // Hide loading if there was an error
+        hideLoading();
+        
+        // Don't show error for biometric registration - it's optional
+        if (error.name === 'NotAllowedError') {
+          console.log('ℹ️ [LOGIN-EMAIL] Usuario canceló el registro biométrico');
+        } else if (error.name === 'NotSupportedError') {
+          console.log('ℹ️ [LOGIN-EMAIL] Biometría no soportada en este dispositivo');
+        }
       }
     }
 
@@ -625,6 +640,88 @@
       }
       
       console.log('🔍 [DIAGNÓSTICO COMPLETO] ===== VER RESULTADOS ARRIBA ===== ⬆️');
+    }
+
+    // Ask user for biometric registration permission
+    async function askForBiometricRegistration(email) {
+      return new Promise((resolve) => {
+        // Check if device supports biometrics first
+        if (!window.PublicKeyCredential || !navigator.credentials) {
+          console.log('ℹ️ [BIOMETRIC-ASK] Dispositivo no soporta biometría');
+          resolve(false);
+          return;
+        }
+
+        // Check if already registered
+        const storedCredentials = localStorage.getItem('biometric_user_credentials');
+        if (storedCredentials) {
+          const credentials = JSON.parse(storedCredentials);
+          if (credentials.email === email) {
+            console.log('✅ [BIOMETRIC-ASK] Ya está registrado para:', email);
+            resolve(false);
+            return;
+          }
+        }
+
+        // Create elegant modal dialog
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate__animated animate__fadeIn';
+        modal.innerHTML = `
+          <div class="bg-white bg-opacity-95 backdrop-blur-lg rounded-2xl p-8 text-center text-gray-800 max-w-sm mx-4 animate__animated animate__zoomIn">
+            <div class="text-6xl mb-4">🔐</div>
+            <h3 class="text-xl font-bold mb-4 text-gray-800">¿Configurar Biometría?</h3>
+            <p class="text-gray-600 mb-2">¿Te gustaría usar tu huella digital para ingresar más rápido la próxima vez?</p>
+            <p class="text-sm text-gray-500 mb-6">Tu huella se guardará de forma segura en tu dispositivo</p>
+            
+            <div class="flex gap-3">
+              <button id="biometric-decline" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-lg transition-colors font-medium">
+                No, gracias
+              </button>
+              <button id="biometric-accept" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition-colors font-medium">
+                Sí, configurar
+              </button>
+            </div>
+            
+            <p class="text-xs text-gray-400 mt-4">Podrás cambiar esto después en configuración</p>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle button clicks
+        const acceptBtn = modal.querySelector('#biometric-accept');
+        const declineBtn = modal.querySelector('#biometric-decline');
+        
+        acceptBtn.addEventListener('click', () => {
+          console.log('✅ [BIOMETRIC-ASK] Usuario aceptó configurar biometría');
+          modal.classList.add('animate__fadeOut');
+          setTimeout(() => {
+            modal.remove();
+            resolve(true);
+          }, 300);
+        });
+        
+        declineBtn.addEventListener('click', () => {
+          console.log('❌ [BIOMETRIC-ASK] Usuario rechazó configurar biometría');
+          modal.classList.add('animate__fadeOut');
+          setTimeout(() => {
+            modal.remove();
+            resolve(false);
+          }, 300);
+        });
+        
+        // Auto-decline after 15 seconds
+        setTimeout(() => {
+          if (document.body.contains(modal)) {
+            console.log('⏰ [BIOMETRIC-ASK] Timeout - no response from user');
+            modal.classList.add('animate__fadeOut');
+            setTimeout(() => {
+              modal.remove();
+              resolve(false);
+            }, 300);
+          }
+        }, 15000);
+      });
     }
 
     // Function to handle successful authentication redirect
@@ -792,7 +889,11 @@
         // Register biometric credentials if supported
         if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
           try {
-            await registerBiometricCredentials(result.user.email);
+            // Ask user if they want to register biometric authentication
+            const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
+            if (wantsToRegisterBiometric) {
+              await registerBiometricCredentials(result.user.email);
+            }
           } catch (bioError) {
             console.log('ℹ️ [LOGIN-EMAIL] No se pudo registrar biometría:', bioError.message);
           }
@@ -852,7 +953,11 @@
         if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
           try {
             console.log('🔐 [GOOGLE-LOGIN] Intentando registrar biometría para:', result.user.email);
-            await registerBiometricCredentials(result.user.email);
+            // Ask user if they want to register biometric authentication
+            const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
+            if (wantsToRegisterBiometric) {
+              await registerBiometricCredentials(result.user.email);
+            }
           } catch (bioError) {
             console.log('ℹ️ [GOOGLE-LOGIN] No se pudo registrar biometría:', bioError.message);
           }
