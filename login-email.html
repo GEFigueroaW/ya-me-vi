@@ -295,6 +295,92 @@
       }
     }
 
+    // NUEVA FUNCIÓN: Detectar si se ejecuta en WebView/APK
+    function detectWebView() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      
+      // Detectores específicos de WebView
+      const webViewIndicators = [
+        'wv',                    // Android WebView
+        'webview',               // Genérico
+        'webintoapp',            // WebIntoApp específico
+        'appwebview',            // Apps genéricas
+        '; wv)',                 // Android WebView pattern
+        'version/',              // iOS WebView sin Safari
+        'mobile/',               // Móvil sin navegador específico
+      ];
+      
+      const isWebView = webViewIndicators.some(indicator => userAgent.includes(indicator));
+      
+      // Detectores adicionales
+      const noStandaloneAPI = !window.navigator.standalone && /mobile|android|iphone|ipad/i.test(userAgent);
+      const limitedWindowFeatures = !window.chrome && /android/i.test(userAgent);
+      const hasAndroidSpecificUA = /android.*wv\)/i.test(userAgent);
+      
+      // Log de diagnóstico
+      console.log('🔍 [WEBVIEW-DETECTION] User Agent:', userAgent);
+      console.log('🔍 [WEBVIEW-DETECTION] Indicadores:', {
+        webViewIndicators: isWebView,
+        noStandaloneAPI,
+        limitedWindowFeatures,
+        hasAndroidSpecificUA,
+        chrome: !!window.chrome,
+        standalone: window.navigator.standalone
+      });
+      
+      const finalResult = isWebView || hasAndroidSpecificUA || limitedWindowFeatures;
+      console.log('📱 [WEBVIEW-DETECTION] Es WebView/APK:', finalResult);
+      
+      return finalResult;
+    }
+
+    // NUEVA FUNCIÓN: Procesar resultado de Google Login
+    async function processGoogleLoginResult(result) {
+      console.log("✅ [GOOGLE-LOGIN] Procesando resultado para:", result.user.email);
+      
+      // Register biometric credentials if supported
+      if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
+        try {
+          console.log('🔐 [GOOGLE-LOGIN] Intentando registrar biometría para:', result.user.email);
+          const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
+          if (wantsToRegisterBiometric) {
+            await registerBiometricCredentials(result.user.email);
+          }
+        } catch (bioError) {
+          console.log('ℹ️ [GOOGLE-LOGIN] No se pudo registrar biometría:', bioError.message);
+        }
+      }
+      
+      // Check admin permissions
+      const adminEmails = [
+        'gfigueroa.w@gmail.com', 
+        'admin@yamevi.com.mx', 
+        'eugenfw@gmail.com',
+        'guillermo.figueroaw@totalplay.com.mx'
+      ];
+      const isAdmin = adminEmails.includes(result.user.email);
+      
+      // Verificar si viene de admin redirect
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminRedirect = urlParams.get('redirect') === 'admin';
+      
+      // Limpiar estado de autenticación
+      localStorage.removeItem('google_auth_in_progress');
+      localStorage.removeItem('google_auth_timestamp');
+      
+      if (isAdminRedirect && isAdmin) {
+        console.log('🔄 [GOOGLE-LOGIN] Redirigiendo a admin panel...');
+        window.location.href = "admin.html";
+      } else if (isAdminRedirect && !isAdmin) {
+        console.log('❌ [GOOGLE-LOGIN] Sin permisos de admin:', result.user.email);
+        alert(`❌ Sin permisos de administrador\n\nUsuario: ${result.user.email}\nContacta al administrador.`);
+        window.location.href = "index.html";
+      } else {
+        console.log('✅ [GOOGLE-LOGIN] Redirigiendo a home...');
+        window.location.href = "home.html";
+      }
+    }
+
     // Initialize form clearing IMMEDIATELY and repeatedly
     clearFormFields();
     
@@ -787,6 +873,84 @@
       }
     });
 
+    // NUEVA FUNCIÓN: Verificar resultado de redirect de Google Auth
+    async function checkGoogleRedirectResult() {
+      try {
+        const { getRedirectResult } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+        
+        console.log('🔍 [REDIRECT-CHECK] Verificando resultado de redirect...');
+        const result = await getRedirectResult(auth);
+        
+        if (result) {
+          console.log('✅ [REDIRECT-CHECK] Redirect result encontrado:', result.user.email);
+          
+          // Mostrar loading mientras procesamos
+          const loadingOverlay = document.createElement('div');
+          loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+          loadingOverlay.innerHTML = `
+            <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
+              <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full mb-4"></div>
+              <p>¡Autenticación exitosa! Redirigiendo...</p>
+            </div>
+          `;
+          document.body.appendChild(loadingOverlay);
+          
+          // Procesar resultado
+          setTimeout(async () => {
+            await processGoogleLoginResult(result);
+          }, 1500);
+          
+        } else {
+          console.log('ℹ️ [REDIRECT-CHECK] Sin resultado de redirect');
+          
+          // Verificar si había un auth en progreso que se perdió
+          const authInProgress = localStorage.getItem('google_auth_in_progress');
+          const authTimestamp = localStorage.getItem('google_auth_timestamp');
+          
+          if (authInProgress && authTimestamp) {
+            const elapsed = Date.now() - parseInt(authTimestamp);
+            console.log('⚠️ [REDIRECT-CHECK] Auth en progreso perdido hace:', elapsed, 'ms');
+            
+            // Limpiar estado si es muy viejo (>5 minutos)
+            if (elapsed > 300000) {
+              localStorage.removeItem('google_auth_in_progress');
+              localStorage.removeItem('google_auth_timestamp');
+              console.log('🧹 [REDIRECT-CHECK] Estado de auth expirado limpiado');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('❌ [REDIRECT-CHECK] Error verificando redirect:', error);
+        
+        // Limpiar estado en caso de error
+        localStorage.removeItem('google_auth_in_progress');
+        localStorage.removeItem('google_auth_timestamp');
+        
+        // Mostrar error solo si es relevante
+        if (error.code && error.code !== 'auth/null-user') {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
+          errorDiv.textContent = `Error en autenticación Google: ${error.message}`;
+          document.body.appendChild(errorDiv);
+          
+          setTimeout(() => {
+            errorDiv.remove();
+          }, 5000);
+        }
+      }
+    }
+
+    // Verificar resultado de redirect al cargar la página
+    window.addEventListener('load', () => {
+      // Pequeño delay para asegurar que Firebase esté inicializado
+      setTimeout(checkGoogleRedirectResult, 1000);
+    });
+
+    // También verificar cuando el documento esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(checkGoogleRedirectResult, 1000);
+    });
+
     // Biometric Login
     biometricLoginBtn.addEventListener('click', async () => {
       console.log('🔐 [LOGIN-EMAIL] Iniciando autenticación biométrica...');
@@ -922,32 +1086,113 @@
       }
     });
 
-    // Google Login - USANDO CÓDIGO QUE FUNCIONA (igual que register.js)
+    // Google Login - CON DETECCIÓN DE APK/WEBVIEW
     googleLoginBtn.addEventListener('click', async () => {
-      console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google (MÉTODO QUE FUNCIONA)...');
+      console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google...');
       
-      // Mostrar loading igual que en register.js
+      // DETECCIÓN DE WEBVIEW/APK
+      const isWebView = detectWebView();
+      console.log('📱 [LOGIN-EMAIL] Ejecutándose en WebView/APK:', isWebView);
+      
+      // Mostrar loading
       const loadingOverlay = document.createElement('div');
       loadingOverlay.id = 'loading-overlay-google';
       loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
       loadingOverlay.innerHTML = `
         <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
           <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full mb-4"></div>
-          <p>Iniciando sesión con Google...</p>
+          <p>${isWebView ? 'Redirigiendo a Google...' : 'Iniciando sesión con Google...'}</p>
         </div>
       `;
       document.body.appendChild(loadingOverlay);
       
       try {
-        // USAR EXACTAMENTE EL MISMO CÓDIGO QUE FUNCIONA EN REGISTER.JS
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({
           prompt: 'select_account'
         });
         
-        // USAR signInWithPopup DIRECTO (igual que register.js)
-        const result = await signInWithPopup(auth, provider);
-        console.log("✅ Usuario logueado con Google:", result.user.email);
+        if (isWebView) {
+          // PARA APK/WEBVIEW: Usar signInWithRedirect
+          console.log('📱 [LOGIN-EMAIL] WEBVIEW/APK: Usando signInWithRedirect');
+          
+          // Guardar estado para cuando regrese del redirect
+          localStorage.setItem('google_auth_in_progress', 'true');
+          localStorage.setItem('google_auth_timestamp', Date.now().toString());
+          
+          // Usar redirect en lugar de popup
+          const { signInWithRedirect } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+          await signInWithRedirect(auth, provider);
+          
+          // El código continuará en getRedirectResult al cargar la página
+          console.log('🔄 [LOGIN-EMAIL] Redirección iniciada...');
+          return;
+          
+        } else {
+          // PARA NAVEGADORES NORMALES: Usar signInWithPopup
+          console.log('💻 [LOGIN-EMAIL] NAVEGADOR: Usando signInWithPopup');
+          const { signInWithPopup } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+          const result = await signInWithPopup(auth, provider);
+          console.log("✅ Usuario logueado con Google:", result.user.email);
+          
+          // Procesar resultado inmediatamente para popup
+          await processGoogleLoginResult(result);
+          
+          // Ocultar loading después del procesamiento
+          if (loadingOverlay && loadingOverlay.parentNode) {
+            loadingOverlay.remove();
+          }
+        }
+        
+      } catch (error) {
+        console.error("❌ Error al iniciar sesión con Google:", error);
+        
+        // Ocultar loading
+        if (loadingOverlay && loadingOverlay.parentNode) {
+          loadingOverlay.remove();
+        }
+        
+        // Manejo específico de errores
+        let errorMessage = "Error al iniciar sesión con Google: ";
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage += "Proceso cancelado. Inténtalo de nuevo.";
+            break;
+          case 'auth/popup-blocked':
+            errorMessage += "Popup bloqueado. Por favor permite popups para este sitio.";
+            break;
+          case 'auth/account-exists-with-different-credential':
+            errorMessage += "Ya existe una cuenta con este email usando otro método.";
+            break;
+          case 'auth/web-storage-unsupported':
+            errorMessage += "Tu navegador no soporta el almacenamiento necesario. Intenta con otro navegador.";
+            break;
+          case 'auth/unauthorized-domain':
+            errorMessage += "Dominio no autorizado. Contacta al administrador.";
+            break;
+          case 'auth/network-request-failed':
+            errorMessage += "Error de conexión. Verifica tu internet e inténtalo de nuevo.";
+            break;
+          default:
+            errorMessage += error.message;
+            break;
+        }
+        
+        // Mostrar error de manera elegante
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        errorDiv.textContent = errorMessage;
+        document.body.appendChild(errorDiv);
+        
+        // Auto-ocultar error después de 5 segundos
+        setTimeout(() => {
+          if (errorDiv.parentNode) {
+            errorDiv.remove();
+          }
+        }, 5000);
+      }
+    });
+        }
         
         // Register biometric credentials if supported
         if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {

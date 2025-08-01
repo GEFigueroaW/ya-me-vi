@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test WebView Detection - YA ME VI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+  
+  <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+    <h1 class="text-2xl font-bold mb-6 text-center">🔍 Test Detección WebView/APK</h1>
+    
+    <!-- Información del Dispositivo -->
+    <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+      <h2 class="font-semibold mb-2">📱 Información del Dispositivo</h2>
+      <div id="deviceInfo"></div>
+    </div>
+    
+    <!-- Detección WebView -->
+    <div class="mb-6 p-4 bg-green-50 rounded-lg">
+      <h2 class="font-semibold mb-2">🔍 Detección WebView</h2>
+      <div id="webviewDetection"></div>
+    </div>
+    
+    <!-- User Agent -->
+    <div class="mb-6 p-4 bg-yellow-50 rounded-lg">
+      <h2 class="font-semibold mb-2">🌐 User Agent</h2>
+      <div id="userAgent" class="text-sm break-all"></div>
+    </div>
+    
+    <!-- Capacidades -->
+    <div class="mb-6 p-4 bg-purple-50 rounded-lg">
+      <h2 class="font-semibold mb-2">⚡ Capacidades</h2>
+      <div id="capabilities"></div>
+    </div>
+    
+    <!-- Botón de Prueba -->
+    <div class="text-center">
+      <button id="testGoogleAuth" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+        🧪 Probar Detección Google Auth
+      </button>
+    </div>
+    
+    <!-- Resultado -->
+    <div id="result" class="mt-6 p-4 rounded-lg hidden"></div>
+  </div>
+
+  <script>
+    // Función de detección WebView (igual que en login-email.html)
+    function detectWebView() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      
+      // Detectores específicos de WebView
+      const webViewIndicators = [
+        'wv',                    // Android WebView
+        'webview',               // Genérico
+        'webintoapp',            // WebIntoApp específico
+        'appwebview',            // Apps genéricas
+        '; wv)',                 // Android WebView pattern
+        'version/',              // iOS WebView sin Safari
+        'mobile/',               // Móvil sin navegador específico
+      ];
+      
+      const isWebView = webViewIndicators.some(indicator => userAgent.includes(indicator));
+      
+      // Detectores adicionales
+      const noStandaloneAPI = !window.navigator.standalone && /mobile|android|iphone|ipad/i.test(userAgent);
+      const limitedWindowFeatures = !window.chrome && /android/i.test(userAgent);
+      const hasAndroidSpecificUA = /android.*wv\)/i.test(userAgent);
+      
+      return {
+        isWebView: isWebView || hasAndroidSpecificUA || limitedWindowFeatures,
+        indicators: {
+          webViewIndicators: isWebView,
+          noStandaloneAPI,
+          limitedWindowFeatures,
+          hasAndroidSpecificUA,
+          chrome: !!window.chrome,
+          standalone: window.navigator.standalone
+        }
+      };
+    }
+
+    // Cargar información al iniciar
+    document.addEventListener('DOMContentLoaded', () => {
+      const userAgent = navigator.userAgent;
+      const detection = detectWebView();
+      
+      // Información del dispositivo
+      document.getElementById('deviceInfo').innerHTML = `
+        <p><strong>Plataforma:</strong> ${navigator.platform}</p>
+        <p><strong>Ancho de pantalla:</strong> ${window.screen.width}x${window.screen.height}</p>
+        <p><strong>Viewport:</strong> ${window.innerWidth}x${window.innerHeight}</p>
+        <p><strong>Touch Support:</strong> ${'ontouchstart' in window ? '✅ Sí' : '❌ No'}</p>
+        <p><strong>Standalone:</strong> ${window.navigator.standalone ? '✅ Sí' : '❌ No'}</p>
+      `;
+      
+      // Detección WebView
+      const webviewDiv = document.getElementById('webviewDetection');
+      webviewDiv.innerHTML = `
+        <div class="text-2xl mb-2">
+          ${detection.isWebView ? '📱 WEBVIEW/APK DETECTADO' : '💻 NAVEGADOR NORMAL'}
+        </div>
+        <div class="text-sm">
+          <p><strong>WebView Indicators:</strong> ${detection.indicators.webViewIndicators ? '✅' : '❌'}</p>
+          <p><strong>No Standalone API:</strong> ${detection.indicators.noStandaloneAPI ? '✅' : '❌'}</p>
+          <p><strong>Limited Window Features:</strong> ${detection.indicators.limitedWindowFeatures ? '✅' : '❌'}</p>
+          <p><strong>Android WebView UA:</strong> ${detection.indicators.hasAndroidSpecificUA ? '✅' : '❌'}</p>
+          <p><strong>Chrome Available:</strong> ${detection.indicators.chrome ? '✅' : '❌'}</p>
+        </div>
+      `;
+      
+      // User Agent
+      document.getElementById('userAgent').textContent = userAgent;
+      
+      // Capacidades
+      document.getElementById('capabilities').innerHTML = `
+        <p><strong>Local Storage:</strong> ${typeof(Storage) !== "undefined" ? '✅ Disponible' : '❌ No disponible'}</p>
+        <p><strong>Geolocation:</strong> ${navigator.geolocation ? '✅ Disponible' : '❌ No disponible'}</p>
+        <p><strong>Camera:</strong> ${navigator.mediaDevices ? '✅ Disponible' : '❌ No disponible'}</p>
+        <p><strong>Notifications:</strong> ${'Notification' in window ? '✅ Disponible' : '❌ No disponible'}</p>
+        <p><strong>Service Worker:</strong> ${'serviceWorker' in navigator ? '✅ Disponible' : '❌ No disponible'}</p>
+        <p><strong>WebAuthn:</strong> ${window.PublicKeyCredential ? '✅ Disponible' : '❌ No disponible'}</p>
+      `;
+    });
+
+    // Botón de prueba
+    document.getElementById('testGoogleAuth').addEventListener('click', () => {
+      const detection = detectWebView();
+      const resultDiv = document.getElementById('result');
+      
+      resultDiv.className = `mt-6 p-4 rounded-lg ${detection.isWebView ? 'bg-blue-100 border border-blue-300' : 'bg-green-100 border border-green-300'}`;
+      resultDiv.classList.remove('hidden');
+      
+      resultDiv.innerHTML = `
+        <h3 class="font-semibold mb-2">🧪 Resultado de la Prueba</h3>
+        <div class="text-lg mb-2">
+          <strong>Método a usar:</strong> 
+          ${detection.isWebView ? 
+            '📱 signInWithRedirect() - Para APK/WebView' : 
+            '💻 signInWithPopup() - Para navegador normal'
+          }
+        </div>
+        <div class="text-sm text-gray-600">
+          ${detection.isWebView ? 
+            'Se detectó WebView/APK. El login con Google usará redirect para evitar problemas de popup.' :
+            'Se detectó navegador normal. El login con Google usará popup como es habitual.'
+          }
+        </div>
+      `;
+      
+      // Log para debugging
+      console.log('🧪 Test Results:', {
+        isWebView: detection.isWebView,
+        method: detection.isWebView ? 'signInWithRedirect' : 'signInWithPopup',
+        userAgent: navigator.userAgent,
+        indicators: detection.indicators
+      });
+    });
+  </script>
+  
+</body>
+</html>
