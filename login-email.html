@@ -152,6 +152,23 @@
       width: 96px !important;
       height: 96px !important;
     }
+    
+    /* Anti-autofill styles */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: white !important;
+      transition: background-color 5000s ease-in-out 0s !important;
+      background-color: transparent !important;
+    }
+    
+    /* Force empty state */
+    #emailInput,
+    #passwordInput {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+    }
   </style>
 </head>
 
@@ -215,6 +232,7 @@
           name="email"
           autocomplete="email"
           placeholder="Email" 
+          value=""
           class="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           required
         />
@@ -228,6 +246,7 @@
           name="password"
           autocomplete="current-password"
           placeholder="Contraseña" 
+          value=""
           class="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           required
         />
@@ -320,28 +339,62 @@
     const errorMessage = document.getElementById('errorMessage');
     const loadingState = document.getElementById('loadingState');
 
-    // Clear form fields on page load
+    // Clear form fields on page load - AGGRESSIVE CLEARING
     function clearFormFields() {
       if (emailInput && passwordInput) {
+        // Limpiar valores múltiples veces
         emailInput.value = '';
         passwordInput.value = '';
         emailInput.defaultValue = '';
         passwordInput.defaultValue = '';
         
+        // Remover atributos que puedan mantener valores
+        emailInput.removeAttribute('value');
+        passwordInput.removeAttribute('value');
+        
         // Resetear estilos que pudieran indicar pre-llenado
         emailInput.style.backgroundColor = '';
         passwordInput.style.backgroundColor = '';
+        emailInput.style.removeProperty('background-color');
+        passwordInput.style.removeProperty('background-color');
         
         // Forzar re-renderizado de placeholders
         emailInput.setAttribute('placeholder', 'Email');
         passwordInput.setAttribute('placeholder', 'Contraseña');
         
-        console.log('✅ [LOGIN-EMAIL] Campos de formulario limpiados completamente');
+        // Forzar blur y focus para resetear estado interno
+        emailInput.blur();
+        passwordInput.blur();
+        
+        // Usar setTimeout para limpiar después del autofill del navegador
+        setTimeout(() => {
+          emailInput.value = '';
+          passwordInput.value = '';
+        }, 100);
+        
+        setTimeout(() => {
+          emailInput.value = '';
+          passwordInput.value = '';
+        }, 500);
+        
+        setTimeout(() => {
+          emailInput.value = '';
+          passwordInput.value = '';
+        }, 1000);
+        
+        console.log('✅ [LOGIN-EMAIL] Campos de formulario limpiados agresivamente');
       }
     }
 
-    // Initialize form clearing
+    // Initialize form clearing IMMEDIATELY and repeatedly
     clearFormFields();
+    
+    // Clear again after a short delay
+    setTimeout(clearFormFields, 50);
+    setTimeout(clearFormFields, 100);
+    setTimeout(clearFormFields, 200);
+    setTimeout(clearFormFields, 500);
+    setTimeout(clearFormFields, 1000);
 
     // Check for biometric authentication support
     function checkBiometricSupport() {
@@ -905,9 +958,10 @@
       }
     });
 
-    // Additional form clearing events
+    // Additional form clearing events - AGGRESSIVE CLEARING
     window.addEventListener('focus', clearFormFields);
     window.addEventListener('pageshow', (event) => {
+      clearFormFields();
       if (event.persisted) {
         clearFormFields();
       }
@@ -915,6 +969,27 @@
 
     // Clear on browser back/forward
     window.addEventListener('popstate', clearFormFields);
+    
+    // Clear on load events
+    window.addEventListener('load', clearFormFields);
+    document.addEventListener('DOMContentLoaded', clearFormFields);
+    
+    // Clear with intervals to fight aggressive autofill
+    const clearingInterval = setInterval(() => {
+      if (emailInput && passwordInput) {
+        if (emailInput.value !== '' || passwordInput.value !== '') {
+          console.log('🧹 [LOGIN-EMAIL] Detectado autofill - limpiando campos...');
+          emailInput.value = '';
+          passwordInput.value = '';
+        }
+      }
+    }, 100);
+    
+    // Stop clearing after 5 seconds
+    setTimeout(() => {
+      clearInterval(clearingInterval);
+      console.log('✅ [LOGIN-EMAIL] Limpieza automática finalizada');
+    }, 5000);
 
     // Verificar si regresamos de autenticación externa
     function checkExternalAuthReturn() {
