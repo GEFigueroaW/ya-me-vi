@@ -12,6 +12,14 @@
       console.log('🔍 [WELCOME] Detección temprana de WebView iniciada...');
       
       const ua = navigator.userAgent.toLowerCase();
+      
+      // VERIFICAR SI EL USUARIO FORZÓ MODO NORMAL
+      const forceNormalMode = localStorage.getItem('force_normal_browser') === 'true';
+      if (forceNormalMode) {
+        console.log('🔧 [WELCOME] Modo normal forzado por usuario - saltando detección WebView');
+        return;
+      }
+      
       const isWebView = 
         // Detección específica de WebIntoApp y otros WebViews
         ua.includes('webintoapp') ||

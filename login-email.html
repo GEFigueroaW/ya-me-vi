@@ -12,6 +12,14 @@
       console.log('🔍 [LOGIN-EMAIL] Detección temprana de WebView iniciada...');
       
       const ua = navigator.userAgent.toLowerCase();
+      
+      // VERIFICAR SI EL USUARIO FORZÓ MODO NORMAL
+      const forceNormalMode = localStorage.getItem('force_normal_browser') === 'true';
+      if (forceNormalMode) {
+        console.log('🔧 [LOGIN-EMAIL] Modo normal forzado por usuario - saltando detección WebView');
+        return;
+      }
+      
       const isWebView = 
         // Detección específica de WebIntoApp y otros WebViews
         ua.includes('webintoapp') ||
@@ -744,9 +752,15 @@
     googleLoginBtn.addEventListener('click', async () => {
       console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google...');
       
+      // VERIFICAR SI EL USUARIO FORZÓ MODO NORMAL
+      const forceNormalMode = localStorage.getItem('force_normal_browser') === 'true';
+      if (forceNormalMode) {
+        console.log('🔧 [LOGIN-EMAIL] Modo normal forzado - usando popup estándar');
+      }
+      
       // Detectar WebView de manera más agresiva
       const ua = navigator.userAgent.toLowerCase();
-      const isWebView = 
+      const isWebView = !forceNormalMode && (
         ua.includes('webintoapp') ||
         ua.includes('webview') ||
         ua.includes('wv') ||
@@ -758,7 +772,8 @@
         // Apps específicas conocidas
         (/Android|iPhone/i.test(ua) && (ua.includes('inapp') || ua.includes('fbav') || ua.includes('instagram'))) ||
         window.WEBVIEW_MODE || 
-        localStorage.getItem('webview_detected') === 'true';
+        localStorage.getItem('webview_detected') === 'true'
+      );
       
       // FORCE WebView detection for debugging
       console.log('🔍 [LOGIN-EMAIL] User Agent Check:', {
