@@ -482,31 +482,6 @@
         // IMPORTANTE: No redirigir automáticamente - requerir confirmación explícita
         console.log('🔐 Usuario debe confirmar su identidad antes de continuar');
         
-        // Mostrar mensaje de usuario ya autenticado
-        const authNotificationDiv = document.createElement('div');
-        authNotificationDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 bg-opacity-90 backdrop-blur-lg text-white px-6 py-4 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown';
-        authNotificationDiv.innerHTML = `
-          <div class="flex items-center">
-            <div class="mr-3">ℹ️</div>
-            <div>
-              <p class="font-semibold">Sesión activa detectada</p>
-              <p class="text-sm opacity-90">Confirma tu identidad para continuar como: ${user.email || user.displayName || 'Usuario'}</p>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(authNotificationDiv);
-        
-        // Auto-hide notification after 10 seconds
-        setTimeout(() => {
-          if (authNotificationDiv.parentNode) {
-            authNotificationDiv.classList.remove('animate__fadeInDown');
-            authNotificationDiv.classList.add('animate__fadeOutUp');
-            setTimeout(() => {
-              authNotificationDiv.remove();
-            }, 500);
-          }
-        }, 10000);
-        
         // Pre-fill email if available - DESHABILITADO para mantener campos vacíos
         /*
         if (user.email && emailInput) {
