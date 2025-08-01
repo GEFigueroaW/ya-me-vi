@@ -21,32 +21,6 @@
       return; // Salir sin hacer nada - permitir login normal
     })();
   </script>
-          <div style="
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-          ">
-            <div style="
-              background: rgba(255, 255, 255, 0.1);
-              backdrop-filter: blur(10px);
-              border-radius: 20px;
-              padding: 30px;
-              max-width: 400px;
-              width: 100%;
-            ">
-              <div style="font-size: 3em; margin: 20px 0;">📧</div>
-              <h2 style="margin: 20px 0;">Abriendo Login de Email</h2>
-              <p style="margin: 15px 0; opacity: 0.8;">
-                Se detectó un entorno WebView. Abriendo navegador externo para login con email...
-              </p>
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
@@ -109,13 +83,11 @@
   </style>
 </head>
 
-<body class="min-h-screen text-white bg-cover bg-center bg-no-repeat relative" style="background-image: url('assets/vg1.jpg');">
+<body class="overflow-hidden">
 
-  <!-- Overlay oscuro para mejor legibilidad -->
-  <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
 
-  <!-- Contenido principal -->
-  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
     
     <!-- Logo -->
     <div class="mb-8">
@@ -934,5 +906,8 @@
 
     console.log('✅ [LOGIN-EMAIL] Sistema de login mejorado inicializado');
   </script>
+
+  <!-- Fondo dinámico -->
+  <script src="js/shared.js"></script>
 </body>
 </html>
