@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Externo - YA ME VI</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link     // Auto-iniciar según el tipo - CORREGIDO PARA EVITAR BUCLES
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 External login page loaded');
+      console.log('📋 Parámetros:', { authType, returnUrl, isWebView });
+      
+      // PREVENIR BUCLES INFINITOS
+      const sessionKey = 'external_login_attempts';
+      const maxAttempts = 3;
+      let attempts = parseInt(sessionStorage.getItem(sessionKey) || '0');
+      
+      console.log('🔢 Intentos previos:', attempts);
+      
+      if (attempts >= maxAttempts) {
+        console.log('🛑 Máximo de intentos alcanzado, mostrando interfaz manual');
+        showState('login-buttons');
+        sessionStorage.removeItem(sessionKey);
+        return;
+      }
+      
+      // Incrementar contador
+      sessionStorage.setItem(sessionKey, (attempts + 1).toString());
+      
+      // Mostrar botones de login mientras cargamos
+      showState('login-buttons');
+      
+      // Primero verificar si hay resultado de redirección
+      const hasRedirectResult = await checkRedirectResult();
+      
+      if (hasRedirectResult) {
+        // Si hay resultado, limpiar contador y salir
+        sessionStorage.removeItem(sessionKey);
+        return;
+      }
+      
+      // Solo auto-iniciar si es la primera vez y no viene de un error
+      if (authType === 'google' && attempts === 1 && !urlParams.get('error')) {
+        console.log('🎯 Auto-iniciando Google auth (primer intento)...');
+        setTimeout(() => {
+          signInWithGoogle(false);
+        }, 1000);
+      } else {
+        console.log('ℹ️ Mostrando interfaz manual (intentos:', attempts, ')');
+        showState('login-buttons');
+      }
+    });on" href="assets/apple-touch-icon.png">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  
+  <div class="glass-effect rounded-2xl p-8 max-w-md w-full animate__animated animate__fadeIn">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <img src="assets/apple-touch-icon.png" alt="YA ME VI" class="w-16 h-16 mx-auto rounded-full mb-4">
+      <h1 class="text-2xl font-bold text-white">YA ME VI</h1>
+      <p class="text-white/80 text-sm">Iniciar Sesión</p>
+    </div>
+    
+    <!-- Estado de carga -->
+    <div id="loading-state" class="text-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <p class="text-white">Preparando autenticación...</p>
+    </div>
+    
+    <!-- Botones de login -->
+    <div id="login-buttons" class="space-y-4 hidden">
+      <!-- Google Login -->
+      <button id="google-login" class="w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-3 transition duration-300">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span>Continuar con Google</span>
+      </button>
+      
+      <!-- Email Login -->
+      <div class="space-y-3">
+        <input type="email" id="email-input" placeholder="Correo electrónico" 
+               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="password" id="password-input" placeholder="Contraseña" 
+               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button id="email-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300">
+          Iniciar Sesión
+        </button>
+      </div>
+    </div>
+    
+    <!-- Estado de éxito -->
+    <div id="success-state" class="text-center py-8 hidden">
+      <div class="text-green-400 text-5xl mb-4">✓</div>
+      <h3 class="text-xl font-bold text-white mb-2">¡Éxito!</h3>
+      <p class="text-white/80" id="success-message">Autenticación completada</p>
+      <p class="text-white/60 text-sm mt-4">Serás redirigido automáticamente...</p>
+    </div>
+    
+    <!-- Estado de error -->
+    <div id="error-state" class="text-center py-8 hidden">
+      <div class="text-red-400 text-5xl mb-4">✗</div>
+      <h3 class="text-xl font-bold text-white mb-2">Error</h3>
+      <p class="text-white/80" id="error-message">Ocurrió un error</p>
+      <button id="retry-button" class="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
+        Reintentar
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { signInWithPopup, signInWithRedirect, signInWithEmailAndPassword, GoogleAuthProvider, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    
+    // Estados de la UI
+    const loadingState = document.getElementById('loading-state');
+    const loginButtons = document.getElementById('login-buttons');
+    const successState = document.getElementById('success-state');
+    const errorState = document.getElementById('error-state');
+    
+    // Obtener parámetros de URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const authType = urlParams.get('type') || 'google';
+    const returnUrl = urlParams.get('return') || window.location.origin;
+    const isWebView = urlParams.get('webview') === 'true';
+    
+    console.log('🔗 External login iniciado:', { authType, returnUrl, isWebView });
+    
+    function showState(state) {
+      [loadingState, loginButtons, successState, errorState].forEach(el => el.classList.add('hidden'));
+      document.getElementById(state + '-state').classList.remove('hidden');
+    }
+    
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
+      showState('error');
+    }
+    
+    function showSuccess(message) {
+      document.getElementById('success-message').textContent = message;
+      showState('success');
+    }
+    
+    // Función para volver a la app
+    function returnToApp(userData = null) {
+      console.log('🔄 Regresando a la app...');
+      
+      if (userData) {
+        // Guardar datos del usuario para la app principal
+        localStorage.setItem('external_login_success', JSON.stringify(userData));
+        console.log('💾 Datos guardados para la app principal');
+      }
+      
+      try {
+        // Múltiples métodos para regresar
+        if (returnUrl && returnUrl !== window.location.origin) {
+          // Regresar a URL específica
+          window.location.href = returnUrl;
+        } else if (window.opener) {
+          // Cerrar popup si existe
+          window.close();
+        } else {
+          // Regresar a la página principal
+          window.location.href = window.location.origin;
+        }
+      } catch (error) {
+        console.error('Error regresando a la app:', error);
+        // Fallback: ir a página principal
+        window.location.href = window.location.origin;
+      }
+    }
+    
+    // Comprobar si hay un resultado de redirección pendiente
+    async function checkRedirectResult() {
+      try {
+        console.log('🔍 Verificando resultado de redirección...');
+        console.log('📱 User Agent:', navigator.userAgent.substring(0, 100));
+        console.log('🌐 URL actual:', window.location.href);
+        
+        // Timeout aumentado para conexiones móviles lentas
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout checking redirect result')), 15000);
+        });
+        
+        const result = await Promise.race([
+          getRedirectResult(auth),
+          timeoutPromise
+        ]);
+        
+        if (result && result.user) {
+          console.log('✅ Usuario autenticado via redirect:', result.user.email);
+          console.log('📊 Datos del usuario:', {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            emailVerified: result.user.emailVerified
+          });
+          
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+            emailVerified: result.user.emailVerified,
+            method: 'redirect',
+            timestamp: Date.now()
+          };
+          
+          showSuccess(`¡Hola ${result.user.displayName || result.user.email}!`);
+          
+          setTimeout(() => {
+            returnToApp(userData);
+          }, 2000);
+          
+          return true;
+        }
+        
+      } catch (error) {
+        console.error('Error en redirect result:', error);
+        
+        // Don't show error immediately, might be normal if no redirect occurred
+        if (!error.message.includes('Timeout')) {
+          console.warn('🔄 Redirect result check failed, probably no redirect occurred');
+        }
+        
+        return false;
+      }
+      
+      return false;
+    }
+    
+    // Autenticación con Google
+    async function signInWithGoogle(useRedirect = false) {
+      console.log('🌐 Iniciando autenticación Google...', { useRedirect, isWebView, userAgent: navigator.userAgent.slice(0, 50) });
+      
+      try {
+        showState('loading');
+        
+        const provider = new GoogleAuthProvider();
+        
+        // Configuración avanzada del provider - OPTIMIZADA PARA MÓVILES
+        provider.setCustomParameters({
+          prompt: 'select_account',
+          access_type: 'online',
+          include_granted_scopes: 'true',
+          // Optimización para móviles
+          display: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'touch' : 'page'
+        });
+        
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        let result;
+        
+        // DETECCIÓN MEJORADA DE DISPOSITIVOS MÓVILES
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isIOSWebView = /iPhone|iPad/.test(navigator.userAgent) && 
+                           window.navigator.standalone === false && 
+                           !navigator.userAgent.includes('Safari/');
+        const isAndroidWebView = /Android/.test(navigator.userAgent) && 
+                               /Version.*Chrome/.test(navigator.userAgent) && 
+                               !navigator.userAgent.includes('Chrome/');
+        
+        // Usar redirect en más casos para mejor compatibilidad móvil
+        const shouldUseRedirect = useRedirect || isWebView || isMobile || isIOSWebView || isAndroidWebView || window.innerWidth < 500;
+        
+        if (shouldUseRedirect) {
+          console.log('🔄 Usando signInWithRedirect (WebView/móvil/fallback)...');
+          console.log('📱 Detalles del dispositivo:', {
+            isMobile,
+            isIOSWebView,
+            isAndroidWebView,
+            isWebView,
+            userAgent: navigator.userAgent.substring(0, 100),
+            viewport: `${window.innerWidth}x${window.innerHeight}`
+          });
+          
+          // Clear any existing auth state first
+          try {
+            await auth.signOut();
+            console.log('🧹 Estado de auth limpiado antes de redirect');
+          } catch (signOutError) {
+            console.log('ℹ️ No había estado previo que limpiar');
+          }
+          
+          // Wait a moment for cleanup - tiempo aumentado para móviles
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          await signInWithRedirect(auth, provider);
+          // La redirección ocurre, no hay resultado inmediato
+          return;
+        } else {
+          console.log('🪟 Usando signInWithPopup (escritorio)...');
+          
+          // Clear any existing auth state first
+          try {
+            await auth.signOut();
+            console.log('🧹 Estado de auth limpiado antes de popup');
+          } catch (signOutError) {
+            console.log('ℹ️ No había estado previo que limpiar');
+          }
+          
+          // Wait a moment for cleanup
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          result = await signInWithPopup(auth, provider);
+        }
+        
+        if (result && result.user) {
+          console.log('✅ Usuario autenticado:', result.user.email);
+          console.log('📊 User data:', {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            emailVerified: result.user.emailVerified,
+            providerId: result.providerId
+          });
+          
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+            emailVerified: result.user.emailVerified,
+            method: shouldUseRedirect ? 'redirect' : 'popup',
+            timestamp: Date.now()
+          };
+          
+          showSuccess(`¡Hola ${result.user.displayName || result.user.email}!`);
+          
+          setTimeout(() => {
+            returnToApp(userData);
+          }, 2000);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error en Google auth:', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          userAgent: navigator.userAgent.substring(0, 100)
+        });
+        
+        // PREVENIR BUCLES INFINITOS EN ERRORES
+        const errorKey = 'google_auth_errors';
+        let errorCount = parseInt(sessionStorage.getItem(errorKey) || '0');
+        errorCount++;
+        sessionStorage.setItem(errorKey, errorCount.toString());
+        
+        console.log('🔢 Errores consecutivos:', errorCount);
+        
+        if (errorCount >= 3) {
+          console.log('🛑 Demasiados errores, deteniendo auto-retry');
+          sessionStorage.removeItem(errorKey);
+          sessionStorage.removeItem('external_login_attempts');
+          
+          showError('Error persistente en autenticación. Intenta desde la página principal.');
+          
+          // Guardar error para debugging
+          localStorage.setItem('external_login_error', `Múltiples errores: ${error.code} - ${error.message}`);
+          
+          setTimeout(() => {
+            returnToApp(null);
+          }, 3000);
+          return;
+        }
+        
+        let shouldRetry = false;
+        let errorMessage = 'Error en autenticación con Google';
+        
+        // Manejo específico de errores
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage = 'Popup bloqueado. Intentando con redirección...';
+          shouldRetry = !useRedirect; // Solo retry si no estaba usando redirect
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = 'Ventana cerrada por el usuario';
+          sessionStorage.removeItem(errorKey); // No contar como error real
+          showState('login-buttons');
+          return;
+        } else if (error.code === 'auth/cancelled-popup-request') {
+          errorMessage = 'Solicitud cancelada. Inténtalo de nuevo';
+          sessionStorage.removeItem(errorKey); // No contar como error real
+          showState('login-buttons');
+          return;
+        } else if (error.code === 'auth/unauthorized-domain') {
+          errorMessage = 'Dominio no autorizado. Contacta al administrador.';
+        } else if (error.code === 'auth/operation-not-allowed') {
+          errorMessage = 'Autenticación con Google no habilitada';
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = 'Error de conexión. Verifica tu internet';
+          shouldRetry = !useRedirect && errorCount < 2;
+        } else if (error.message.includes('missing initial state') || 
+                   error.message.includes('storage-partitioned') ||
+                   error.message.includes('third-party')) {
+          errorMessage = 'Error de cookies/almacenamiento en WebView';
+          shouldRetry = !useRedirect && errorCount < 2;
+        }
+        
+        showError(errorMessage);
+        
+        // Auto-retry solo una vez y solo si no era redirect
+        if (!useRedirect && shouldRetry && errorCount < 2) {
+          console.log('🔄 Auto-retry con redirect debido a:', error.code);
+          setTimeout(() => {
+            signInWithGoogle(true);
+          }, 2000);
+        } else {
+          // Si no hay retry, mostrar botones después de un momento
+          setTimeout(() => {
+            showState('login-buttons');
+          }, 3000);
+        }
+      }
+    }
+    
+    // Autenticación con email
+    async function signInWithEmail() {
+      const email = document.getElementById('email-input').value.trim();
+      const password = document.getElementById('password-input').value;
+      
+      if (!email || !password) {
+        showError('Por favor ingresa email y contraseña');
+        return;
+      }
+      
+      try {
+        showState('loading');
+        
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        
+        if (result && result.user) {
+          console.log('✅ Usuario autenticado con email:', result.user.email);
+          
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            method: 'email'
+          };
+          
+          showSuccess(`¡Bienvenido ${result.user.email}!`);
+          
+          setTimeout(() => {
+            returnToApp(userData);
+          }, 2000);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error en email auth:', error);
+        
+        let errorMessage = 'Error en autenticación';
+        if (error.code === 'auth/user-not-found') {
+          errorMessage = 'Usuario no encontrado';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMessage = 'Contraseña incorrecta';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Email inválido';
+        }
+        
+        showError(errorMessage);
+      }
+    }
+    
+    // Event listeners
+    document.getElementById('google-login').addEventListener('click', () => {
+      signInWithGoogle(false); // Intentar popup primero
+    });
+    
+    document.getElementById('email-login').addEventListener('click', signInWithEmail);
+    
+    document.getElementById('retry-button').addEventListener('click', () => {
+      showState('login-buttons');
+    });
+    
+    // Auto-iniciar según el tipo
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 External login page loaded');
+      console.log('📋 Parámetros recibidos:', { 
+        authType, 
+        returnUrl, 
+        isWebView,
+        userAgent: navigator.userAgent.slice(0, 50)
+      });
+      
+      // Verificar si es un fallback por error
+      const isFallback = urlParams.get('fallback') === 'true';
+      const originalError = urlParams.get('error');
+      
+      if (isFallback && originalError) {
+        console.log('🔄 Esta es una sesión de fallback por error:', originalError);
+        showError(`Error anterior: ${originalError}. Reintentando...`);
+        
+        // Wait longer for fallback attempts
+        setTimeout(async () => {
+          const hasRedirectResult = await checkRedirectResult();
+          if (!hasRedirectResult && authType === 'google') {
+            console.log('🎯 Auto-iniciando Google auth (fallback)...');
+            signInWithGoogle(true); // Force redirect for fallback
+          }
+        }, 2000);
+        
+      } else {
+        // Normal flow
+        try {
+          // Primero verificar si hay resultado de redirección
+          const hasRedirectResult = await checkRedirectResult();
+          
+          if (!hasRedirectResult) {
+            if (authType === 'google') {
+              console.log('🎯 Auto-iniciando Google auth...');
+              
+              // Check if should use redirect immediately (mobile/WebView)
+              const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+              
+              setTimeout(() => {
+                if (isWebView || isMobile) {
+                  console.log('📱 Usando redirect para móvil/WebView');
+                  signInWithGoogle(true); // Use redirect
+                } else {
+                  console.log('🖥️ Usando popup para desktop');
+                  signInWithGoogle(false); // Try popup first
+                }
+              }, 1000);
+              
+            } else {
+              showState('login-buttons');
+            }
+          }
+        } catch (initError) {
+          console.error('❌ Error en inicialización:', initError);
+          showError('Error de inicialización. Inténtalo manualmente.');
+          showState('login-buttons');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
