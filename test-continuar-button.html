@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Botón Continuar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-white bg-opacity-20 backdrop-blur-lg rounded-3xl shadow-2xl p-8">
+      
+      <h1 class="text-3xl font-bold text-white text-center mb-8">
+        🔧 Test - Botón Continuar con Mi Sueño
+      </h1>
+
+      <!-- Status Panel -->
+      <div id="statusPanel" class="bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 text-white font-mono text-sm">
+        <div class="text-lg font-bold mb-2">📊 Estado del Sistema:</div>
+        <div id="statusInfo">Cargando...</div>
+      </div>
+
+      <!-- Dream Selection Cards -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-white mb-4">Selecciona tu sueño:</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          
+          <div class="dream-card p-4 rounded-lg border-2 border-transparent cursor-pointer transition duration-300 bg-white bg-opacity-10 hover:bg-opacity-20" data-dream="casa">
+            <div class="text-4xl mb-2">🏠</div>
+            <h3 class="text-lg font-semibold text-white">Casa Propia</h3>
+            <p class="text-gray-200 text-sm">Tener mi propia casa</p>
+          </div>
+
+          <div class="dream-card p-4 rounded-lg border-2 border-transparent cursor-pointer transition duration-300 bg-white bg-opacity-10 hover:bg-opacity-20" data-dream="viaje">
+            <div class="text-4xl mb-2">✈️</div>
+            <h3 class="text-lg font-semibold text-white">Viaje de Ensueño</h3>
+            <p class="text-gray-200 text-sm">Conocer el mundo</p>
+          </div>
+
+          <div class="dream-card p-4 rounded-lg border-2 border-transparent cursor-pointer transition duration-300 bg-white bg-opacity-10 hover:bg-opacity-20" data-dream="auto">
+            <div class="text-4xl mb-2">🚗</div>
+            <h3 class="text-lg font-semibold text-white">Auto Nuevo</h3>
+            <p class="text-gray-200 text-sm">El auto de mis sueños</p>
+          </div>
+
+          <div class="dream-card p-4 rounded-lg border-2 border-transparent cursor-pointer transition duration-300 bg-white bg-opacity-10 hover:bg-opacity-20" data-dream="otro">
+            <div class="text-4xl mb-2">💭</div>
+            <h3 class="text-lg font-semibold text-white">Otro Sueño</h3>
+            <p class="text-gray-200 text-sm">Personalizar mi meta</p>
+          </div>
+
+        </div>
+
+        <!-- Custom Dream Input -->
+        <div id="customDreamSection" class="hidden mb-6">
+          <label for="customDream" class="block text-white font-semibold mb-2">
+            Describe tu sueño personalizado:
+          </label>
+          <textarea
+            id="customDream"
+            placeholder="Ejemplo: Comprar una motocicleta para viajar por el país..."
+            class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent resize-none"
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Continue Button -->
+      <div class="text-center">
+        <button id="continueBtn" class="w-full max-w-md bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          Continuar con mi sueño ✨
+        </button>
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden mt-4 text-white text-lg">
+          <div class="flex items-center justify-center space-x-2">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+            <span>Guardando tu sueño...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Debug Logs -->
+      <div class="mt-8">
+        <h3 class="text-lg font-semibold text-white mb-2">📋 Logs de Debug:</h3>
+        <div id="debugLogs" class="bg-black bg-opacity-50 rounded-lg p-4 h-64 overflow-y-auto font-mono text-sm text-green-400">
+          <!-- Logs will appear here -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBp8tWcJdTaGYxAy2dn1jD0c0d-YZi5b6g",
+      authDomain: "ya-me-vi-app.firebaseapp.com",
+      projectId: "ya-me-vi-app",
+      storageBucket: "ya-me-vi-app.appspot.com",
+      messagingSenderId: "533718394316",
+      appId: "1:533718394316:web:7cd2ff3aedaa5b6d6f5c1d"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Debug logging function
+    function debugLog(message, type = 'info') {
+      const debugLogs = document.getElementById('debugLogs');
+      const timestamp = new Date().toLocaleTimeString();
+      const emoji = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '🔍';
+      
+      const logEntry = document.createElement('div');
+      logEntry.innerHTML = `<span class="text-gray-400">[${timestamp}]</span> ${emoji} ${message}`;
+      debugLogs.appendChild(logEntry);
+      debugLogs.scrollTop = debugLogs.scrollHeight;
+      
+      // Also log to console
+      console.log(`${emoji} [TEST-CONTINUAR] ${message}`);
+    }
+
+    // UI Elements
+    const dreamCards = document.querySelectorAll('.dream-card');
+    const customDreamSection = document.getElementById('customDreamSection');
+    const customDreamInput = document.getElementById('customDream');
+    const continueBtn = document.getElementById('continueBtn');
+    const loadingState = document.getElementById('loadingState');
+    const statusInfo = document.getElementById('statusInfo');
+
+    // State
+    let selectedDream = null;
+    let currentUser = null;
+
+    // Update status panel
+    function updateStatus() {
+      const status = {
+        user: currentUser ? `${currentUser.email} (${currentUser.uid.substring(0, 8)}...)` : 'No autenticado',
+        selectedDream: selectedDream || 'Ninguno',
+        customText: customDreamInput.value.trim() || 'Vacío',
+        buttonEnabled: !continueBtn.disabled,
+        timestamp: new Date().toLocaleTimeString()
+      };
+
+      statusInfo.innerHTML = `
+        <strong>Usuario:</strong> ${status.user}<br>
+        <strong>Sueño Seleccionado:</strong> ${status.selectedDream}<br>
+        <strong>Texto Personalizado:</strong> ${status.customText}<br>
+        <strong>Botón Habilitado:</strong> ${status.buttonEnabled ? '✅ SÍ' : '❌ NO'}<br>
+        <strong>Última Actualización:</strong> ${status.timestamp}
+      `;
+    }
+
+    // Initialize
+    debugLog('Inicializando test del botón continuar...');
+
+    // Auth state observer
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      debugLog(user ? `Usuario autenticado: ${user.email}` : 'Usuario no autenticado', user ? 'success' : 'warning');
+      updateStatus();
+    });
+
+    // Dream card selection
+    dreamCards.forEach(card => {
+      card.addEventListener('click', () => {
+        debugLog(`Tarjeta clickeada: ${card.dataset.dream}`);
+        
+        // Remove selection from all cards
+        dreamCards.forEach(c => {
+          c.classList.remove('border-green-400', 'bg-green-500', 'bg-opacity-30');
+          c.classList.add('border-transparent');
+        });
+        
+        // Add selection to clicked card
+        card.classList.remove('border-transparent');
+        card.classList.add('border-green-400', 'bg-green-500', 'bg-opacity-30');
+        
+        selectedDream = card.dataset.dream;
+        debugLog(`Sueño seleccionado: ${selectedDream}`, 'success');
+        
+        // Show/hide custom dream section
+        if (selectedDream === 'otro') {
+          customDreamSection.classList.remove('hidden');
+          debugLog('Mostrando sección de sueño personalizado');
+        } else {
+          customDreamSection.classList.add('hidden');
+          debugLog('Ocultando sección de sueño personalizado');
+        }
+        
+        updateButtonState();
+        updateStatus();
+      });
+    });
+
+    // Custom dream input
+    customDreamInput.addEventListener('input', () => {
+      debugLog(`Texto personalizado: "${customDreamInput.value.trim()}"`);
+      updateButtonState();
+      updateStatus();
+    });
+
+    // Button state management
+    function updateButtonState() {
+      const shouldEnable = selectedDream && (selectedDream !== 'otro' || customDreamInput.value.trim());
+      continueBtn.disabled = !shouldEnable;
+      
+      debugLog(`Estado del botón: ${shouldEnable ? 'HABILITADO' : 'DESHABILITADO'}`, shouldEnable ? 'success' : 'warning');
+    }
+
+    // Continue button click handler
+    continueBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      debugLog('🎯 BOTÓN CONTINUAR CLICKEADO', 'success');
+      debugLog(`Estado al hacer click: Usuario=${!!currentUser}, Sueño=${selectedDream}, Deshabilitado=${continueBtn.disabled}`);
+      
+      if (!currentUser) {
+        debugLog('ERROR: No hay usuario autenticado', 'error');
+        alert('Error: No hay usuario autenticado');
+        return;
+      }
+      
+      if (!selectedDream) {
+        debugLog('ERROR: No hay sueño seleccionado', 'error');
+        alert('Por favor selecciona un sueño antes de continuar');
+        return;
+      }
+      
+      try {
+        debugLog('Iniciando proceso de guardado...', 'info');
+        
+        // Show loading state
+        loadingState.classList.remove('hidden');
+        continueBtn.disabled = true;
+        continueBtn.style.opacity = '0.5';
+        
+        let dreamText = selectedDream;
+        if (selectedDream === 'otro' && customDreamInput.value.trim()) {
+          dreamText = customDreamInput.value.trim();
+        }
+        
+        debugLog(`Guardando sueño: "${dreamText}" (categoría: ${selectedDream})`);
+        
+        // Save to Firestore
+        const userRef = doc(db, 'users', currentUser.uid);
+        
+        try {
+          await updateDoc(userRef, {
+            dream: dreamText,
+            dreamCategory: selectedDream,
+            dreamCompletedAt: new Date().toISOString(),
+            onboardingCompleted: true,
+            lastUpdated: new Date().toISOString()
+          });
+          debugLog('Documento actualizado con updateDoc', 'success');
+        } catch (updateError) {
+          debugLog(`updateDoc falló (${updateError.code}), intentando setDoc...`, 'warning');
+          
+          if (updateError.code === 'not-found') {
+            await setDoc(userRef, {
+              uid: currentUser.uid,
+              email: currentUser.email || '',
+              displayName: currentUser.displayName || '',
+              dream: dreamText,
+              dreamCategory: selectedDream,
+              dreamCompletedAt: new Date().toISOString(),
+              onboardingCompleted: true,
+              createdAt: new Date().toISOString(),
+              lastUpdated: new Date().toISOString()
+            });
+            debugLog('Documento creado con setDoc', 'success');
+          } else {
+            throw updateError;
+          }
+        }
+        
+        // Verify save
+        debugLog('Verificando que se guardó correctamente...');
+        const verifyDoc = await getDoc(userRef);
+        
+        if (verifyDoc.exists()) {
+          const verifyData = verifyDoc.data();
+          debugLog(`Verificación exitosa: ${verifyData.dream} | ${verifyData.onboardingCompleted}`, 'success');
+        } else {
+          debugLog('ERROR: documento no existe después de guardar', 'error');
+        }
+        
+        // Success message
+        loadingState.innerHTML = `
+          <div class="flex items-center justify-center space-x-2">
+            <div class="text-green-400">✅</div>
+            <span>¡Sueño guardado! Proceso completado.</span>
+          </div>
+        `;
+        
+        debugLog('✅ PROCESO COMPLETADO EXITOSAMENTE', 'success');
+        
+        // Reset after 3 seconds
+        setTimeout(() => {
+          loadingState.classList.add('hidden');
+          loadingState.innerHTML = `
+            <div class="flex items-center justify-center space-x-2">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              <span>Guardando tu sueño...</span>
+            </div>
+          `;
+          continueBtn.disabled = false;
+          continueBtn.style.opacity = '1';
+          updateButtonState();
+          debugLog('UI reseteada para nueva prueba');
+        }, 3000);
+        
+      } catch (error) {
+        debugLog(`ERROR guardando sueño: ${error.message}`, 'error');
+        console.error('Error completo:', error);
+        
+        // Reset UI
+        loadingState.classList.add('hidden');
+        continueBtn.disabled = false;
+        continueBtn.style.opacity = '1';
+        updateButtonState();
+        
+        alert(`Error guardando tu sueño: ${error.message}`);
+      }
+    });
+
+    // Initial status update
+    updateStatus();
+    debugLog('Test inicializado correctamente', 'success');
+
+  </script>
+</body>
+</html>

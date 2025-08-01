@@ -294,41 +294,76 @@
     });
 
     // Save dream and continue
-    continueBtn.addEventListener('click', async () => {
-      if (!currentUser || !selectedDream) return;
+    continueBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      console.log('🎯 [DREAM-INPUT] Botón Continuar clickeado');
+      console.log('🔍 [DREAM-INPUT] Estado actual:', {
+        currentUser: !!currentUser,
+        selectedDream: selectedDream,
+        customText: customDreamInput.value.trim(),
+        isDisabled: continueBtn.disabled
+      });
+      
+      if (!currentUser) {
+        console.error('❌ [DREAM-INPUT] No hay usuario autenticado');
+        alert('Error: No hay usuario autenticado. Redirigiendo al login...');
+        window.location.href = 'login-email.html';
+        return;
+      }
+      
+      if (!selectedDream) {
+        console.error('❌ [DREAM-INPUT] No hay sueño seleccionado');
+        alert('Por favor selecciona un sueño antes de continuar');
+        return;
+      }
       
       try {
+        console.log('💾 [DREAM-INPUT] Iniciando proceso de guardado...');
+        
+        // Mostrar estado de carga inmediatamente
         loadingState.classList.remove('hidden');
         continueBtn.disabled = true;
+        continueBtn.style.opacity = '0.5';
         
         let dreamText = selectedDream;
         if (selectedDream === 'otro' && customDreamInput.value.trim()) {
           dreamText = customDreamInput.value.trim();
         }
         
-        // Save dream to Firestore
-        const userRef = doc(db, 'users', currentUser.uid);
-        
         console.log('💾 [DREAM-INPUT] Guardando sueño:', {
           dreamText: dreamText,
           dreamCategory: selectedDream,
-          userId: currentUser.uid
+          userId: currentUser.uid,
+          userEmail: currentUser.email
         });
         
-        await updateDoc(userRef, {
-          dream: dreamText,
-          dreamCategory: selectedDream,
-          dreamCompletedAt: new Date().toISOString(),
-          onboardingCompleted: true,
-          lastUpdated: new Date().toISOString()
-        }).catch(async (error) => {
-          console.log('⚠️ [DREAM-INPUT] Documento no existe, creando nuevo...', error.code);
-          if (error.code === 'not-found') {
+        // Save dream to Firestore
+        const userRef = doc(db, 'users', currentUser.uid);
+        
+        let saveSuccessful = false;
+        
+        try {
+          await updateDoc(userRef, {
+            dream: dreamText,
+            dreamCategory: selectedDream,
+            dreamCompletedAt: new Date().toISOString(),
+            onboardingCompleted: true,
+            lastUpdated: new Date().toISOString()
+          });
+          console.log('✅ [DREAM-INPUT] Documento actualizado con updateDoc');
+          saveSuccessful = true;
+        } catch (updateError) {
+          console.log('⚠️ [DREAM-INPUT] updateDoc falló, intentando con setDoc...', updateError.code);
+          
+          if (updateError.code === 'not-found') {
             // Create document if it doesn't exist
             await setDoc(userRef, {
               uid: currentUser.uid,
               email: currentUser.email || '',
               displayName: currentUser.displayName || '',
+              photoURL: currentUser.photoURL || '',
+              emailVerified: currentUser.emailVerified || false,
               dream: dreamText,
               dreamCategory: selectedDream,
               dreamCompletedAt: new Date().toISOString(),
@@ -337,33 +372,39 @@
               lastUpdated: new Date().toISOString()
             });
             console.log('✅ [DREAM-INPUT] Documento creado con setDoc');
+            saveSuccessful = true;
           } else {
-            throw error;
+            throw updateError;
           }
-        });
-        
-        // Verificar que se guardó correctamente
-        console.log('🔍 [DREAM-INPUT] Verificando que se guardó correctamente...');
-        const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        const verifyDoc = await getDoc(userRef);
-        
-        if (verifyDoc.exists()) {
-          const verifyData = verifyDoc.data();
-          console.log('✅ [DREAM-INPUT] Verificación exitosa:', {
-            dream: verifyData.dream,
-            onboardingCompleted: verifyData.onboardingCompleted
-          });
-        } else {
-          console.error('❌ [DREAM-INPUT] Error: documento no existe después de guardar');
         }
         
-        console.log('✅ [DREAM-INPUT] Sueño guardado:', dreamText);
+        if (saveSuccessful) {
+          // Verificar que se guardó correctamente
+          console.log('🔍 [DREAM-INPUT] Verificando que se guardó correctamente...');
+          const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          const verifyDoc = await getDoc(userRef);
+          
+          if (verifyDoc.exists()) {
+            const verifyData = verifyDoc.data();
+            console.log('✅ [DREAM-INPUT] Verificación exitosa:', {
+              dream: verifyData.dream,
+              onboardingCompleted: verifyData.onboardingCompleted,
+              lastUpdated: verifyData.lastUpdated
+            });
+          } else {
+            console.error('❌ [DREAM-INPUT] Error: documento no existe después de guardar');
+          }
+        }
+        
+        console.log('✅ [DREAM-INPUT] Sueño guardado exitosamente:', dreamText);
         
         // Clean up all onboarding flags
         localStorage.removeItem('registration_in_progress');
         localStorage.removeItem('from_welcome_google');
         localStorage.removeItem('force_dream_input');
         localStorage.removeItem('onboarding_in_progress');
+        
+        console.log('🧹 [DREAM-INPUT] Flags de localStorage limpiados');
         
         // Show success message
         loadingState.innerHTML = `
@@ -377,19 +418,25 @@
         setTimeout(() => {
           console.log('🏠 [DREAM-INPUT] Redirigiendo a home.html...');
           window.location.href = 'home.html';
-        }, 1500);
+        }, 2000);
         
       } catch (error) {
         console.error('❌ [DREAM-INPUT] Error guardando sueño:', error);
+        console.error('❌ [DREAM-INPUT] Error details:', error.code, error.message);
         
+        // Reset UI
         loadingState.classList.add('hidden');
         continueBtn.disabled = false;
+        continueBtn.style.opacity = '1';
         
-        // Show error but still allow to continue
-        alert('No se pudo guardar tu sueño, pero puedes continuar. Lo configuraremos más tarde.');
+        // Show error alert with details
+        alert(`Error guardando tu sueño: ${error.message}\n\nPero puedes continuar, lo configuraremos más tarde.`);
+        
+        // Still redirect to home after error
         setTimeout(() => {
+          console.log('🏠 [DREAM-INPUT] Redirigiendo a home.html después de error...');
           window.location.href = 'home.html';
-        }, 500);
+        }, 1000);
       }
     });
 
