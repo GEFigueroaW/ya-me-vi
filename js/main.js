@@ -476,8 +476,10 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn('❌ No se encontró el botón de administración');
   }
 
-  // Cargar último sorteo
-  cargarUltimoSorteo();
+  // Cargar último sorteo con un pequeño delay para asegurar que el DOM esté listo
+  setTimeout(() => {
+    cargarUltimoSorteo();
+  }, 500);
 });
 
 // === Función para cargar y mostrar el último sorteo ===
@@ -512,7 +514,7 @@ async function cargarUltimoSorteo() {
     // Actualizar el elemento en la página
     const ultimoSorteoElemento = document.getElementById('ultimo-sorteo-numero');
     if (ultimoSorteoElemento) {
-      ultimoSorteoElemento.textContent = `ULTIMO SORTEO ${ultimoSorteo}`;
+      ultimoSorteoElemento.textContent = `🎯 ULTIMO SORTEO ${ultimoSorteo}`;
     }
     
     console.log(`✅ Último sorteo cargado: ${ultimoSorteo}`);
@@ -523,7 +525,7 @@ async function cargarUltimoSorteo() {
     // Fallback con número aproximado
     const ultimoSorteoElemento = document.getElementById('ultimo-sorteo-numero');
     if (ultimoSorteoElemento) {
-      ultimoSorteoElemento.textContent = 'ULTIMO SORTEO 4090';
+      ultimoSorteoElemento.textContent = '🎯 ULTIMO SORTEO 4090';
     }
     
     console.log('⚠️ Usando fallback para último sorteo: 4090');
