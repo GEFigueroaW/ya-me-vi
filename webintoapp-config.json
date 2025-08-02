@@ -1,0 +1,45 @@
+{
+  "webintoapp_config": {
+    "app_name": "YA ME VI",
+    "company_name": "GEFiguW",
+    "package_name": "com.gefiguw.yamevi",
+    "url": "https://yamevi.com.mx/login.html",
+    "settings": {
+      "general": {
+        "enable_javascript": true,
+        "enable_swipe_to_refresh": true,
+        "display_navigation_progress_bar": true,
+        "enable_system_user_agent": true
+      },
+      "advanced": {
+        "load_cache_else_network": false,
+        "clear_cache_on_exit": false,
+        "allow_http_requests": true,
+        "enable_zoom_control": false,
+        "screen_on": false
+      },
+      "permissions": {
+        "add_internet_permission": true,
+        "add_storage_permissions": true,
+        "add_gps_permissions": false,
+        "add_camera_permissions": false,
+        "add_audio_permissions": false,
+        "add_video_permissions": false
+      }
+    },
+    "firebase_domains": [
+      "ya-me-vi.firebaseapp.com",
+      "yamevi.com.mx",
+      "gfigueroa.github.io",
+      "localhost",
+      "127.0.0.1",
+      "webintoapp.com"
+    ],
+    "oauth_redirect_uris": [
+      "https://ya-me-vi.firebaseapp.com/__/auth/handler",
+      "https://yamevi.com.mx/__/auth/handler",
+      "https://yamevi.com.mx/auth-external.html",
+      "https://yamevi.com.mx/login.html"
+    ]
+  }
+}
