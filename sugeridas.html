@@ -345,10 +345,10 @@
         
         // Actualizar el título del sorteo con la información del usuario
         if (window.actualizarTituloSorteo) {
-          window.actualizarTituloSorteo();
+          await window.actualizarTituloSorteo();
         } else {
           // Fallback: llamar a la función local
-          actualizarNumeroSorteo();
+          await actualizarNumeroSorteo();
         }
         
         console.log('✅ Usuario configurado correctamente');
@@ -369,6 +369,15 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         await configurarUsuarioAutenticado(user);
+        
+        // Pequeño retraso para asegurar que todo esté configurado
+        setTimeout(async () => {
+          // Llamar actualización del título después de configurar usuario
+          if (window.actualizarTituloSorteo) {
+            await window.actualizarTituloSorteo();
+          }
+        }, 500);
+        
       } else {
         console.log('❌ Usuario no autenticado, redirigiendo a login');
         window.location.href = 'index.html';
@@ -1129,26 +1138,12 @@
     
     // Función para obtener sorteo único por usuario basado en hash CSV
     function obtenerSorteoParaUsuario(usuario, ultimoSorteoCSV, hashCSV) {
-      const claveUsuario = `${usuario}_${hashCSV}`;
+      // El próximo sorteo es simplemente el último + 1
+      // Todos los usuarios deben ver el mismo próximo número de sorteo oficial
+      const proximoSorteo = ultimoSorteoCSV + 1;
       
-      // Si ya existe un sorteo para este usuario con este hash, devolverlo
-      if (sorteosPorUsuario[claveUsuario]) {
-        return sorteosPorUsuario[claveUsuario];
-      }
-      
-      // Generar sorteo único para este usuario con mayor rango de diferenciación
-      const hashUsuario = generarHashSimple(usuario + "_sorteo_" + hashCSV);
-      
-      // Usar un rango más amplio para evitar duplicados entre usuarios cercanos
-      // Rango de 1 a 100 para mayor diferenciación
-      const offset = (hashUsuario % 100) + 1;
-      const sorteoUsuario = ultimoSorteoCSV + offset;
-      
-      // Guardar en caché
-      sorteosPorUsuario[claveUsuario] = sorteoUsuario;
-      
-      console.log(`🎯 Sorteo generado para ${usuario}: ${sorteoUsuario} (base: ${ultimoSorteoCSV}, offset: ${offset})`);
-      return sorteoUsuario;
+      console.log(`🎯 Próximo sorteo oficial: ${proximoSorteo} (último CSV: ${ultimoSorteoCSV})`);
+      return proximoSorteo;
     }
     
     async function actualizarNumeroSorteo() {
@@ -1158,7 +1153,7 @@
         // Usar la función especializada de actualizarTituloSorteo.js si está disponible
         if (window.actualizarTituloSorteo) {
           console.log('📋 Usando función especializada de actualizarTituloSorteo.js');
-          window.actualizarTituloSorteo();
+          await window.actualizarTituloSorteo();
           return;
         }
         

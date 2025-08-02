@@ -6,12 +6,12 @@
  * Actualiza el título de la página con el próximo número de sorteo.
  * Calcula dinámicamente el próximo sorteo basado en los datos del CSV Melate.
  */
-window.actualizarTituloSorteo = function() {
+window.actualizarTituloSorteo = async function() {
   try {
     console.log('🎯 Actualizando título con el número del próximo sorteo...');
     
     // Calcular el próximo sorteo basado en los datos históricos
-    let proximoSorteo = calcularProximoSorteo();
+    let proximoSorteo = await calcularProximoSorteo();
     
     // Obtener solo el primer nombre del usuario (sin apellidos)
     let nombreUsuario = obtenerPrimerNombre();
@@ -94,11 +94,35 @@ function obtenerPrimerNombre() {
 /**
  * Calcula el próximo número de sorteo basado en el último sorteo del archivo Melate.csv
  */
-function calcularProximoSorteo() {
+async function calcularProximoSorteo() {
   try {
     console.log('🔢 Calculando próximo sorteo desde datos históricos...');
     
-    // Verificar si tenemos datos históricos cargados
+    // Primero intentar leer directamente el CSV
+    try {
+      const response = await fetch('assets/Melate.csv');
+      if (response.ok) {
+        const csvText = await response.text();
+        const lineas = csvText.trim().split('\n');
+        
+        if (lineas.length >= 2) {
+          // La primera línea después del header tiene el último sorteo
+          const primeraLinea = lineas[1].trim();
+          const columnas = primeraLinea.split(',');
+          const ultimoSorteoNum = parseInt(columnas[1]) || 0;
+          
+          if (ultimoSorteoNum > 0) {
+            const proximoSorteo = ultimoSorteoNum + 1;
+            console.log(`✅ Próximo sorteo calculado desde CSV directo: ${proximoSorteo} (último: ${ultimoSorteoNum})`);
+            return proximoSorteo;
+          }
+        }
+      }
+    } catch (csvError) {
+      console.warn('⚠️ No se pudo leer CSV directamente:', csvError.message);
+    }
+    
+    // Verificar si tenemos datos históricos cargados como fallback
     if (window.datosHistoricos && window.datosHistoricos.melate && window.datosHistoricos.melate.sorteos) {
       const sorteosMelate = window.datosHistoricos.melate.sorteos;
       
@@ -115,7 +139,7 @@ function calcularProximoSorteo() {
         
         if (ultimoSorteoNum > 0) {
           const proximoSorteo = ultimoSorteoNum + 1;
-          console.log(`✅ Próximo sorteo calculado desde CSV: ${proximoSorteo} (último: ${ultimoSorteoNum})`);
+          console.log(`✅ Próximo sorteo calculado desde datosHistoricos: ${proximoSorteo} (último: ${ultimoSorteoNum})`);
           return proximoSorteo;
         }
       }
@@ -152,3 +176,4 @@ function calcularProximoSorteo() {
 
 // Confirmar que la función está disponible globalmente
 console.log('✅ Función actualizarTituloSorteo disponible globalmente');
+console.log('🔧 actualizarTituloSorteo.js cargado correctamente');

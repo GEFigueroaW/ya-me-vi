@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Hacer funciones disponibles globalmente
   window.datosHistoricos = DATOS_HISTORICOS_COMPLETOS;
-  window.usuarioActualID = 'Guillermo';
+  // REMOVIDO: window.usuarioActualID = 'Guillermo'; - Esto interferí­a con la autenticación real
   
   console.log('✅ SISTEMA DEFINITIVO INICIALIZADO CORRECTAMENTE');
 });
