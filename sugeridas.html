@@ -614,18 +614,13 @@
       });
     }
     
-    // ==================== FUNCIÓN PREDICCIONES IA ====================
+    // ==================== FUNCIÓN PREDICCIONES IA MEJORADA ====================
     
     // Variables para controlar la versión de las predicciones
-    let csvLastUpdate = 0;
-    let prediccionesCached = {
-      melate: "",
-      revancha: "",
-      revanchita: ""
-    };
+    let prediccionesPorUsuarioYHash = {};
     
     // Ejecutar predicciones de IA
-    function ejecutarPrediccionesIA() {
+    async function ejecutarPrediccionesIA() {
       console.log('🤖 Ejecutando predicciones IA');
       
       const melateElement = document.getElementById('combinacion-melate');
@@ -633,54 +628,61 @@
       const revanchitaElement = document.getElementById('combinacion-revanchita');
       const mensajeEstado = document.getElementById('mensaje-estado');
       
-      // Si ya tenemos predicciones generadas, no hacemos nada
-      if (melateElement && melateElement.textContent && 
-          melateElement.textContent !== '-- -- -- -- -- --' && 
-          melateElement.textContent !== 'Analizando...') {
-        console.log('✅ Ya hay predicciones generadas');
-        return;
-      }
+      const usuario = window.usuarioActualID || 'Guillermo';
       
-      // Mostrar estado "cargando"
-      if (melateElement) melateElement.textContent = 'Analizando...';
-      if (revanchaElement) revanchaElement.textContent = 'Analizando...';
-      if (revanchitaElement) revanchitaElement.textContent = 'Analizando...';
-      if (mensajeEstado) mensajeEstado.textContent = 'Aplicando 5 métodos de análisis...';
-      
-      // Simular carga de datos
-      setTimeout(() => {
-        // Verificar si hay predicciones en caché
-        if (prediccionesCached.melate && csvLastUpdate > 0) {
-          console.log('✅ Usando predicciones en caché');
-          if (melateElement) melateElement.textContent = prediccionesCached.melate;
-          if (revanchaElement) revanchaElement.textContent = prediccionesCached.revancha;
-          if (revanchitaElement) revanchitaElement.textContent = prediccionesCached.revanchita;
+      try {
+        // Verificar si ya tenemos hash CSV actual
+        if (csvHashActual === null) {
+          // Si no tenemos hash, necesitamos calcularlo primero
+          await actualizarNumeroSorteo();
+        }
+        
+        const claveUsuarioHash = `${usuario}_${csvHashActual}`;
+        
+        // Si ya tenemos predicciones para este usuario con este hash, usarlas
+        if (prediccionesPorUsuarioYHash[claveUsuarioHash]) {
+          const predicciones = prediccionesPorUsuarioYHash[claveUsuarioHash];
+          if (melateElement) melateElement.textContent = predicciones.melate;
+          if (revanchaElement) revanchaElement.textContent = predicciones.revancha;
+          if (revanchitaElement) revanchitaElement.textContent = predicciones.revanchita;
           if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas de 5 métodos';
-        } else {
-          // Generar nuevas predicciones basadas en el ID de usuario para que sean consistentes
-          const userId = window.usuarioActualID || 'Guillermo';
-          const seed = userId.charCodeAt(0) + (userId.charCodeAt(1) || 0);
+          console.log(`✅ Usando predicciones en caché para ${usuario} (Hash: ${csvHashActual})`);
+          return;
+        }
+        
+        // Mostrar estado "cargando"
+        if (melateElement) melateElement.textContent = 'Analizando...';
+        if (revanchaElement) revanchaElement.textContent = 'Analizando...';
+        if (revanchitaElement) revanchitaElement.textContent = 'Analizando...';
+        if (mensajeEstado) mensajeEstado.textContent = 'Aplicando 5 métodos de análisis...';
+        
+        // Simular análisis
+        setTimeout(() => {
+          // Generar predicciones basadas en usuario + hash CSV para consistencia
+          const seedBase = generarHashSimple(usuario + csvHashActual);
           
-          // Crear predicciones deterministas basadas en el ID de usuario
-          const generarNumeros = (base) => {
+          // Crear predicciones deterministas basadas en el ID de usuario y hash CSV
+          const generarNumeros = (multiplicador) => {
             const nums = new Set();
-            while (nums.size < 6) {
-              const num = (seed * (base + nums.size + 1)) % 56 + 1;
+            let intentos = 0;
+            while (nums.size < 6 && intentos < 100) {
+              const seed = seedBase * multiplicador + nums.size;
+              const num = (seed % 56) + 1;
               nums.add(num);
+              intentos++;
             }
             return [...nums].sort((a, b) => a - b).join(' - ');
           };
           
-          // Simular predicciones generadas a partir del análisis de CSV
+          // Generar predicciones únicas para cada sorteo
           const nuevasPredicciones = {
-            melate: generarNumeros(10),
-            revancha: generarNumeros(20),
-            revanchita: generarNumeros(30)
+            melate: generarNumeros(7),
+            revancha: generarNumeros(13),
+            revanchita: generarNumeros(19)
           };
           
-          // Actualizar caché
-          prediccionesCached = nuevasPredicciones;
-          csvLastUpdate = Date.now(); // Guardar timestamp de última actualización
+          // Guardar en caché con la clave usuario+hash
+          prediccionesPorUsuarioYHash[claveUsuarioHash] = nuevasPredicciones;
           
           // Mostrar resultados
           if (melateElement) melateElement.textContent = nuevasPredicciones.melate;
@@ -688,72 +690,138 @@
           if (revanchitaElement) revanchitaElement.textContent = nuevasPredicciones.revanchita;
           if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas de 5 métodos';
           
-          console.log('✅ Nuevas predicciones generadas y almacenadas en caché');
-        }
-      }, 1000);
+          console.log(`✅ Nuevas predicciones generadas para ${usuario} (Hash: ${csvHashActual})`);
+        }, 1000);
+        
+      } catch (error) {
+        console.error('❌ Error en predicciones IA:', error);
+        
+        // Fallback simple
+        if (melateElement) melateElement.textContent = 'Error al generar';
+        if (revanchaElement) revanchaElement.textContent = 'Error al generar';
+        if (revanchitaElement) revanchitaElement.textContent = 'Error al generar';
+        if (mensajeEstado) mensajeEstado.textContent = 'Error en predicciones';
+      }
     }
     
-    // ==================== FUNCIÓN ACTUALIZAR NUMERO SORTEO ====================
+    // ==================== SISTEMA DE SORTEOS POR USUARIO ====================
+    
+    // Variables para controlar cambios en CSV y sorteos por usuario
+    let csvHashActual = null;
+    let sorteosPorUsuario = {};
+    
+    // Función para generar hash simple de un string
+    function generarHashSimple(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convertir a 32bit integer
+      }
+      return Math.abs(hash);
+    }
+    
+    // Función para obtener sorteo único por usuario basado en hash CSV
+    function obtenerSorteoParaUsuario(usuario, ultimoSorteoCSV, hashCSV) {
+      const claveUsuario = `${usuario}_${hashCSV}`;
+      
+      // Si ya existe un sorteo para este usuario con este hash, devolverlo
+      if (sorteosPorUsuario[claveUsuario]) {
+        return sorteosPorUsuario[claveUsuario];
+      }
+      
+      // Generar sorteo único para este usuario basado en su ID y el hash CSV
+      const hashUsuario = generarHashSimple(usuario);
+      const offset = (hashUsuario % 10) + 1; // Offset entre 1 y 10
+      const sorteoUsuario = ultimoSorteoCSV + offset;
+      
+      // Guardar en caché
+      sorteosPorUsuario[claveUsuario] = sorteoUsuario;
+      
+      console.log(`🎯 Sorteo generado para ${usuario}: ${sorteoUsuario} (base: ${ultimoSorteoCSV}, offset: ${offset})`);
+      return sorteoUsuario;
+    }
     
     async function actualizarNumeroSorteo() {
       console.log('🔢 Actualizando número de sorteo...');
       
       try {
-        // Cargar el CSV de Melate para obtener el último sorteo
-        const response = await fetch('assets/Melate.csv');
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+        // Cargar todos los CSV para generar hash combinado
+        const archivos = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
+        let contenidoCombinado = '';
+        let ultimoSorteo = 0;
+        
+        for (const archivo of archivos) {
+          try {
+            const response = await fetch(archivo);
+            if (response.ok) {
+              const csvText = await response.text();
+              contenidoCombinado += csvText;
+              
+              // Obtener último sorteo del Melate (archivo principal)
+              if (archivo.includes('Melate.csv')) {
+                const lineas = csvText.trim().split('\n');
+                if (lineas.length >= 2) {
+                  const primeraLinea = lineas[1].trim();
+                  const columnas = primeraLinea.split(',');
+                  ultimoSorteo = parseInt(columnas[1]) || 0;
+                }
+              }
+            }
+          } catch (error) {
+            console.warn(`⚠️ No se pudo cargar ${archivo}:`, error);
+          }
         }
         
-        const csvText = await response.text();
-        const lineas = csvText.trim().split('\n');
-        
-        if (lineas.length < 2) {
-          throw new Error('CSV sin datos');
+        if (!contenidoCombinado || ultimoSorteo === 0) {
+          throw new Error('No se pudieron cargar los archivos CSV');
         }
         
-        // La primera línea después del encabezado contiene el último sorteo
-        const primeraLinea = lineas[1].trim();
-        const columnas = primeraLinea.split(',');
+        // Generar hash del contenido combinado
+        const nuevoHash = generarHashSimple(contenidoCombinado);
         
-        // El concurso está en la columna 1 (índice 1)
-        const ultimoSorteo = parseInt(columnas[1]);
-        
-        if (isNaN(ultimoSorteo)) {
-          throw new Error('Número de sorteo inválido');
+        // Verificar si el hash cambió (archivos actualizados)
+        if (csvHashActual !== null && csvHashActual === nuevoHash) {
+          console.log('📋 Archivos CSV sin cambios, manteniendo sorteos actuales');
+          return; // No hay cambios, mantener sorteos actuales
         }
         
-        // Calcular el próximo sorteo (último + 1)
-        const proximoSorteo = ultimoSorteo + 1;
+        // Archivos cambiaron, limpiar caché de sorteos
+        if (csvHashActual !== null && csvHashActual !== nuevoHash) {
+          console.log('🔄 Archivos CSV actualizados, regenerando sorteos por usuario');
+          sorteosPorUsuario = {}; // Limpiar caché
+        }
         
-        // Actualizar el título con el número de sorteo calculado
+        csvHashActual = nuevoHash;
+        
+        // Obtener usuario actual
+        const usuario = window.usuarioActualID || 'Guillermo';
+        
+        // Calcular sorteo para este usuario
+        const sorteoUsuario = obtenerSorteoParaUsuario(usuario, ultimoSorteo, nuevoHash);
+        
+        // Actualizar el título
         const tituloSorteo = document.getElementById('titulo-sorteo');
         if (tituloSorteo) {
-          tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI Guillermo para el sorteo ${proximoSorteo}`;
+          tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI ${usuario} para el sorteo ${sorteoUsuario}`;
         }
         
-        console.log(`✅ Número de sorteo actualizado: ${proximoSorteo} (último sorteo en CSV: ${ultimoSorteo})`);
+        console.log(`✅ Sorteo actualizado para ${usuario}: ${sorteoUsuario} (CSV base: ${ultimoSorteo}, Hash: ${nuevoHash})`);
         
       } catch (error) {
         console.error('❌ Error al actualizar número de sorteo:', error);
         
-        // Fallback: usar fecha actual para calcular sorteo aproximado
-        const hoy = new Date();
-        const fechaSorteoReferencia = new Date(2025, 6, 28); // 28 de julio de 2025 (mes 0-11)
-        const numeroSorteoReferencia = 4089;
+        // Fallback con sistema de usuario
+        const usuario = window.usuarioActualID || 'Guillermo';
+        const hashUsuario = generarHashSimple(usuario);
+        const sorteoFallback = 4091 + (hashUsuario % 10); // Sorteo base + offset único por usuario
         
-        // Calculamos el número de sorteo basado en la fecha actual
-        // Asumiendo sorteos cada semana (7 días)
-        const diasDesdeSorteoReferencia = Math.floor((hoy - fechaSorteoReferencia) / (1000 * 60 * 60 * 24 * 7));
-        const numeroSorteoFallback = numeroSorteoReferencia + diasDesdeSorteoReferencia + 1; // +1 para el próximo sorteo
-        
-        // Actualizar el título con el número de sorteo calculado
         const tituloSorteo = document.getElementById('titulo-sorteo');
         if (tituloSorteo) {
-          tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI Guillermo para el sorteo ${numeroSorteoFallback}`;
+          tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI ${usuario} para el sorteo ${sorteoFallback}`;
         }
         
-        console.log(`⚠️ Usando fallback para número de sorteo: ${numeroSorteoFallback}`);
+        console.log(`⚠️ Usando fallback para ${usuario}: ${sorteoFallback}`);
       }
     }
     
