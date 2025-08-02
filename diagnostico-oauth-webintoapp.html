@@ -178,9 +178,29 @@
     </div>
 
     <script type="module">
-        // Importar Firebase
-        import { auth } from './js/firebase-init-apk.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        // Importar Firebase con manejo de errores
+        let auth, signInWithGoogleAPK;
+        
+        try {
+            const firebaseModule = await import('./js/firebase-init-apk.js');
+            auth = firebaseModule.auth;
+            signInWithGoogleAPK = firebaseModule.signInWithGoogleAPK;
+            
+            const authModule = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+            const { onAuthStateChanged } = authModule;
+            
+            // Auth state listener
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    addLog(`👤 Usuario detectado: ${user.email}`);
+                    updateCheck('check-oauth', '✅ Conectado', 'check-ok');
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error cargando Firebase:', error);
+            addLog(`❌ Error cargando Firebase: ${error.message}`);
+        }
 
         let logArea = document.getElementById('testResults');
 
@@ -253,8 +273,11 @@
         window.testOAuthFlow = async function() {
             addLog('🔐 Probando flujo OAuth...');
             try {
-                // Importar función de Google Auth
-                const { signInWithGoogleAPK } = await import('./js/firebase-init-apk.js');
+                if (!signInWithGoogleAPK) {
+                    addLog('❌ signInWithGoogleAPK no está disponible');
+                    return;
+                }
+                
                 addLog('🔄 Iniciando Google Sign-In...');
                 
                 const user = await signInWithGoogleAPK();
@@ -278,6 +301,9 @@
                 } else if (error.message.includes('missing initial state')) {
                     addLog('🚨 PROBLEMA: Missing initial state');
                     addLog('📋 Verificar package name en WebIntoApp');
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    addLog('🚨 PROBLEMA: Dominio no autorizado');
+                    addLog('📋 Verificar dominios en Google Cloud Console');
                 }
             }
         };
