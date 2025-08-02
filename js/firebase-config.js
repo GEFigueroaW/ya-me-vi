@@ -1,27 +1,32 @@
 // Configuración maestra de Firebase para YA ME VI
 // Este archivo centraliza todas las configuraciones para evitar inconsistencias
 
-// Configuración Firebase principal (basada en las credenciales de Google Console)
+// Configuración Firebase principal WEB (basada en las credenciales de Google Console)
 export const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBak3-l2c4nqltw-BPE04GYAaxS2gJo2Xo",
+  apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
   authDomain: "ya-me-vi.firebaseapp.com",
   projectId: "ya-me-vi",
-  storageBucket: "ya-me-vi.appspot.com",
+  storageBucket: "ya-me-vi.firebasestorage.app",
   messagingSenderId: "748876890843",
-  appId: "1:748876890843:web:ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+  appId: "1:748876890843:web:07bd1eb476d38594d002fe",
   measurementId: "G-D7R797S5BC"
 };
 
-// Configuración específica para APK/Android (usando el App ID de Android)
+// Configuración específica para APK/Android (basada en google-services.json)
 export const FIREBASE_CONFIG_APK = {
-  ...FIREBASE_CONFIG,
-  appId: "1:748876890843:android:315d26696c8142eed002fe" // App ID específico para Android
+  apiKey: "AIzaSyAJYWSNUMj5aej7O9u5BwJQts7L2F6Poqw", // Android API Key del google-services.json
+  authDomain: "ya-me-vi.firebaseapp.com",
+  projectId: "ya-me-vi",
+  storageBucket: "ya-me-vi.firebasestorage.app",
+  messagingSenderId: "748876890843",
+  appId: "1:748876890843:android:315d26696c8142e4d002fe", // Android App ID del google-services.json
+  measurementId: "G-D7R797S5BC"
 };
 
-// OAuth Client IDs para diferentes entornos
+// OAuth Client IDs para diferentes entornos (basados en google-services.json)
 export const OAUTH_CLIENT_IDS = {
-  web: "748876890843-ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
-  android: "748876890843-ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com"
+  web: "748876890843-jiu4cfl2ioqgjomna6fa8r4pqogl3q7l.apps.googleusercontent.com", // Del google-services.json
+  android: "748876890843-jiu4cfl2ioqgjomna6fa8r4pqogl3q7l.apps.googleusercontent.com" // Del google-services.json
 };
 
 // Dominios autorizados para Firebase Auth

@@ -18,14 +18,14 @@ import {
   serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Configuración Firebase UNIFICADA - basada en las imágenes de Google Console
+// Configuración Firebase ANDROID/APK - basada en google-services.json
 const firebaseConfig = {
-  apiKey: "AIzaSyBak3-l2c4nqltw-BPE04GYAaxS2gJo2Xo",
+  apiKey: "AIzaSyAJYWSNUMj5aej7O9u5BwJQts7L2F6Poqw", // Android API Key del google-services.json
   authDomain: "ya-me-vi.firebaseapp.com", 
   projectId: "ya-me-vi",
-  storageBucket: "ya-me-vi.appspot.com",
+  storageBucket: "ya-me-vi.firebasestorage.app",
   messagingSenderId: "748876890843",
-  appId: "1:748876890843:android:315d26696c8142eed002fe", // APK specific
+  appId: "1:748876890843:android:315d26696c8142e4d002fe", // Android App ID del google-services.json
   measurementId: "G-D7R797S5BC"
 };
 
