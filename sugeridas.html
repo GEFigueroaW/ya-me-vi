@@ -185,7 +185,7 @@
       <div id="prediccion-container" class="box-container bg-white bg-opacity-20 rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-300 backdrop-blur-sm border border-white border-opacity-20" style="opacity: 0.8;" onclick="togglePrediccionIA()">
         
         <div class="text-center">
-          <h2 id="titulo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">🎯 Combinaciones sugeridas por IA para TI Guillermo para el sorteo 4089</h2>
+          <h2 id="titulo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">🎯 Combinaciones sugeridas por IA para TI Usuario para el sorteo 4091</h2>
           <div class="flex items-center justify-center">
             <span class="text-white text-lg mr-2">Haz clic para ver</span>
             <div id="arrow-icon" class="arrow-rotation">▼</div>
@@ -299,6 +299,82 @@
   <!-- Scripts -->
   <script src="js/shared.js"></script>
   <script src="js/sistema-definitivo.js"></script>
+  <script src="js/actualizarTituloSorteo.js"></script>
+  
+  <script type="module">
+    // === Importaciones de Firebase ===
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { app } from './js/firebase-init.js';
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Variables globales para datos del usuario
+    window.usuarioActualID = null;
+    window.usuarioActualNombre = null;
+    window.usuarioActualEmail = null;
+
+    // === Función para obtener datos del usuario autenticado ===
+    async function configurarUsuarioAutenticado(user) {
+      try {
+        console.log('👤 Configurando usuario autenticado:', user.email);
+        
+        // Configurar variables globales básicas
+        window.usuarioActualID = user.uid;
+        window.usuarioActualEmail = user.email;
+        window.usuarioActualNombre = user.displayName || null;
+        
+        // Intentar obtener información adicional de Firestore
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            console.log('📋 Datos adicionales del usuario desde Firestore:', userData);
+            
+            // Actualizar con información de Firestore si está disponible
+            if (userData.displayName || userData.name) {
+              window.usuarioActualNombre = userData.displayName || userData.name;
+            }
+          }
+        } catch (firestoreError) {
+          console.log('⚠️ No se pudieron cargar datos adicionales de Firestore:', firestoreError.message);
+        }
+        
+        // Actualizar el título del sorteo con la información del usuario
+        if (window.actualizarTituloSorteo) {
+          window.actualizarTituloSorteo();
+        } else {
+          // Fallback: llamar a la función local
+          actualizarNumeroSorteo();
+        }
+        
+        console.log('✅ Usuario configurado correctamente');
+        console.log('- ID:', window.usuarioActualID);
+        console.log('- Nombre:', window.usuarioActualNombre);
+        console.log('- Email:', window.usuarioActualEmail);
+        
+      } catch (error) {
+        console.error('❌ Error configurando usuario:', error);
+        // Fallback con datos básicos
+        window.usuarioActualID = user.uid;
+        window.usuarioActualEmail = user.email;
+        window.usuarioActualNombre = user.displayName || null;
+      }
+    }
+
+    // === Verificación de autenticación ===
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await configurarUsuarioAutenticado(user);
+      } else {
+        console.log('❌ Usuario no autenticado, redirigiendo a login');
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
   
   <script>
     // ==================== SISTEMA PRINCIPAL FUNCIONAL ====================
@@ -324,11 +400,8 @@
       const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
       document.getElementById('background').style.backgroundImage = `url('${randomBg}')`;
       
-      // Configurar usuario
-      window.usuarioActualID = 'Guillermo';
-      
-      // Actualizar número de sorteo (último + 1)
-      actualizarNumeroSorteo();
+      // Actualizar número de sorteo cuando el usuario esté disponible
+      // La función actualizarNumeroSorteo será llamada desde configurarUsuarioAutenticado
       
       // Configurar botón de volver
       document.getElementById('btn-back').addEventListener('click', () => {
@@ -629,7 +702,20 @@
       const revanchitaElement = document.getElementById('combinacion-revanchita');
       const mensajeEstado = document.getElementById('mensaje-estado');
       
-      const usuario = window.usuarioActualID || 'Guillermo';
+      // Obtener identificador del usuario para las predicciones
+      let usuarioId = window.usuarioActualID || 'usuario-anonimo';
+      
+      // Para mostrar en el título, usar el nombre real del usuario
+      let nombreUsuario = 'TI';
+      if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
+        nombreUsuario = window.usuarioActualNombre.trim().split(' ')[0];
+      } else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
+        const emailPart = window.usuarioActualEmail.trim().split('@')[0];
+        nombreUsuario = emailPart.replace(/[._\d]/g, '');
+        nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
+      } else if (window.usuarioActualID && window.usuarioActualID.trim()) {
+        nombreUsuario = `Usuario${window.usuarioActualID.substring(0, 4)}`;
+      }
       
       try {
         // Verificar si ya tenemos hash CSV actual
@@ -637,7 +723,7 @@
           await actualizarNumeroSorteo();
         }
         
-        const claveUsuarioHash = `${usuario}_${csvHashActual}`;
+        const claveUsuarioHash = `${usuarioId}_${csvHashActual}`;
         
         // Si ya tenemos predicciones para este usuario con este hash, usarlas
         if (prediccionesPorUsuarioYHash[claveUsuarioHash]) {
@@ -646,7 +732,7 @@
           if (revanchaElement) revanchaElement.textContent = predicciones.revancha;
           if (revanchitaElement) revanchitaElement.textContent = predicciones.revanchita;
           if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas de 5 métodos';
-          console.log(`✅ Usando predicciones en caché para ${usuario} (Hash: ${csvHashActual})`);
+          console.log(`✅ Usando predicciones en caché para ${nombreUsuario} (Hash: ${csvHashActual})`);
           return;
         }
         
@@ -661,7 +747,7 @@
         
         setTimeout(() => {
           // Generar predicciones usando análisis estadístico real
-          const nuevasPredicciones = generarPrediccionesConIA(datosReales, usuario, csvHashActual);
+          const nuevasPredicciones = generarPrediccionesConIA(datosReales, usuarioId, csvHashActual);
           
           // Guardar en caché con la clave usuario+hash
           prediccionesPorUsuarioYHash[claveUsuarioHash] = nuevasPredicciones;
@@ -672,14 +758,14 @@
           if (revanchitaElement) revanchitaElement.textContent = nuevasPredicciones.revanchita;
           if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas: análisis estadístico + IA';
           
-          console.log(`✅ Nuevas predicciones IA generadas para ${usuario} (Hash: ${csvHashActual})`);
+          console.log(`✅ Nuevas predicciones IA generadas para ${nombreUsuario} (Hash: ${csvHashActual})`);
         }, 1500);
         
       } catch (error) {
         console.error('❌ Error en predicciones IA:', error);
         
         // Fallback usando el sistema existente pero mejorado
-        const prediccionesFallback = generarPrediccionesFallback(usuario, csvHashActual);
+        const prediccionesFallback = generarPrediccionesFallback(usuarioId, csvHashActual);
         
         if (melateElement) melateElement.textContent = prediccionesFallback.melate;
         if (revanchaElement) revanchaElement.textContent = prediccionesFallback.revancha;
@@ -1069,82 +1155,90 @@
       console.log('🔢 Actualizando número de sorteo...');
       
       try {
-        // Cargar todos los CSV para generar hash combinado
-        const archivos = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
-        let contenidoCombinado = '';
-        let ultimoSorteo = 0;
-        
-        for (const archivo of archivos) {
-          try {
-            const response = await fetch(archivo);
-            if (response.ok) {
-              const csvText = await response.text();
-              contenidoCombinado += csvText;
-              
-              // Obtener último sorteo del Melate (archivo principal)
-              if (archivo.includes('Melate.csv')) {
-                const lineas = csvText.trim().split('\n');
-                if (lineas.length >= 2) {
-                  const primeraLinea = lineas[1].trim();
-                  const columnas = primeraLinea.split(',');
-                  ultimoSorteo = parseInt(columnas[1]) || 0;
-                }
-              }
-            }
-          } catch (error) {
-            console.warn(`⚠️ No se pudo cargar ${archivo}:`, error);
-          }
+        // Usar la función especializada de actualizarTituloSorteo.js si está disponible
+        if (window.actualizarTituloSorteo) {
+          console.log('📋 Usando función especializada de actualizarTituloSorteo.js');
+          window.actualizarTituloSorteo();
+          return;
         }
         
-        if (!contenidoCombinado || ultimoSorteo === 0) {
-          throw new Error('No se pudieron cargar los archivos CSV');
+        // Fallback: cargar CSV para obtener último sorteo
+        const response = await fetch('assets/Melate.csv');
+        if (!response.ok) {
+          throw new Error('No se pudo cargar Melate.csv');
         }
         
-        // Generar hash del contenido combinado
-        const nuevoHash = generarHashSimple(contenidoCombinado);
+        const csvText = await response.text();
+        const lineas = csvText.trim().split('\n');
         
-        // Verificar si el hash cambió (archivos actualizados)
-        if (csvHashActual !== null && csvHashActual === nuevoHash) {
-          console.log('📋 Archivos CSV sin cambios, manteniendo sorteos actuales');
-          return; // No hay cambios, mantener sorteos actuales
+        if (lineas.length < 2) {
+          throw new Error('El archivo CSV no tiene datos suficientes');
         }
         
-        // Archivos cambiaron, limpiar caché de sorteos
-        if (csvHashActual !== null && csvHashActual !== nuevoHash) {
-          console.log('🔄 Archivos CSV actualizados, regenerando sorteos por usuario');
-          sorteosPorUsuario = {}; // Limpiar caché
+        // Obtener último sorteo (segunda línea del CSV)
+        const primeraLinea = lineas[1].trim();
+        const columnas = primeraLinea.split(',');
+        const ultimoSorteo = parseInt(columnas[1]) || 0;
+        
+        if (ultimoSorteo === 0) {
+          throw new Error('No se pudo obtener el último número de sorteo');
         }
         
-        csvHashActual = nuevoHash;
+        // Calcular próximo sorteo
+        const proximoSorteo = ultimoSorteo + 1;
         
-        // Obtener usuario actual
-        const usuario = window.usuarioActualID || 'Guillermo';
+        // Obtener nombre del usuario
+        let nombreUsuario = 'TI';
         
-        // Calcular sorteo para este usuario
-        const sorteoUsuario = obtenerSorteoParaUsuario(usuario, ultimoSorteo, nuevoHash);
+        if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
+          // Usar solo el primer nombre (sin apellidos)
+          nombreUsuario = window.usuarioActualNombre.trim().split(' ')[0];
+        } else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
+          // Usar parte del email antes del @
+          const emailPart = window.usuarioActualEmail.trim().split('@')[0];
+          nombreUsuario = emailPart.replace(/[._\d]/g, '');
+          nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
+        } else if (window.usuarioActualID && window.usuarioActualID.trim()) {
+          nombreUsuario = `Usuario${window.usuarioActualID.substring(0, 4)}`;
+        }
+        
+        // Limitar longitud del nombre
+        if (nombreUsuario.length > 15) {
+          nombreUsuario = nombreUsuario.substring(0, 15);
+        }
         
         // Actualizar el título
         const tituloSorteo = document.getElementById('titulo-sorteo');
         if (tituloSorteo) {
-          tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI ${usuario} para el sorteo ${sorteoUsuario}`;
+          const nuevoTitulo = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${proximoSorteo}`;
+          tituloSorteo.textContent = nuevoTitulo;
+          console.log(`✅ Título actualizado: ${nuevoTitulo}`);
         }
         
-        console.log(`✅ Sorteo actualizado para ${usuario}: ${sorteoUsuario} (CSV base: ${ultimoSorteo}, Hash: ${nuevoHash})`);
+        console.log(`✅ Sorteo actualizado: ${proximoSorteo} (último CSV: ${ultimoSorteo}) para usuario: ${nombreUsuario}`);
         
       } catch (error) {
         console.error('❌ Error al actualizar número de sorteo:', error);
         
-        // Fallback con sistema de usuario mejorado
-        const usuario = window.usuarioActualID || 'Guillermo';
-        const hashUsuario = generarHashSimple(usuario + "_fallback_emergency");
-        const sorteoFallback = 4091 + (hashUsuario % 100); // Rango ampliado para mayor diferenciación
+        // Fallback con valores predeterminados
+        let nombreUsuario = 'TI';
+        
+        if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
+          nombreUsuario = window.usuarioActualNombre.trim().split(' ')[0];
+        } else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
+          const emailPart = window.usuarioActualEmail.trim().split('@')[0];
+          nombreUsuario = emailPart.replace(/[._\d]/g, '');
+          nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
+        }
+        
+        const sorteoFallback = 4091; // Próximo después del último conocido (4090)
         
         const tituloSorteo = document.getElementById('titulo-sorteo');
         if (tituloSorteo) {
-          tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI ${usuario} para el sorteo ${sorteoFallback}`;
+          const tituloFallback = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${sorteoFallback}`;
+          tituloSorteo.textContent = tituloFallback;
+          console.log(`⚠️ Usando título de fallback: ${tituloFallback}`);
         }
-        
-        console.log(`⚠️ Usando fallback para ${usuario}: ${sorteoFallback}`);
       }
     }
     

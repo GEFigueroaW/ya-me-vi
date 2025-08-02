@@ -38,7 +38,7 @@ window.actualizarTituloSorteo = function() {
     const tituloElement = document.getElementById('titulo-sorteo');
     if (tituloElement) {
       const nombreFallback = obtenerPrimerNombre();
-      const sorteoFallback = 4088; // Valor más actualizado
+      const sorteoFallback = 4091; // Próximo después del último conocido (4090)
       const tituloFallback = `🎯 Combinaciones sugeridas por IA para TI ${nombreFallback} para el sorteo ${sorteoFallback}`;
       tituloElement.textContent = tituloFallback;
       console.log(`⚠️ Usando título de fallback: "${tituloFallback}"`);
@@ -125,8 +125,8 @@ function calcularProximoSorteo() {
     console.log('⚠️ Datos históricos no disponibles, usando cálculo estimado...');
     
     const fecha = new Date();
-    const fechaReferencia = new Date(2025, 6, 18); // 18 de julio de 2025 (mes 6 = julio)
-    const sorteoReferencia = 4082; // Último sorteo conocido
+    const fechaReferencia = new Date(2025, 7, 1); // 1 de agosto de 2025 (mes 7 = agosto)
+    const sorteoReferencia = 4090; // Último sorteo conocido
     
     // Calcular diferencia en días
     const diferenciaMilisegundos = fecha - fechaReferencia;
@@ -141,12 +141,12 @@ function calcularProximoSorteo() {
     console.log(`📊 Próximo sorteo estimado: ${proximoSorteoEstimado} (${sorteosAdicionales} sorteos desde referencia)`);
     
     // Asegurar un valor mínimo razonable
-    return Math.max(proximoSorteoEstimado, 4083);
+    return Math.max(proximoSorteoEstimado, 4091);
     
   } catch (error) {
     console.error('❌ Error calculando próximo sorteo:', error);
     // Fallback final
-    return 4083;
+    return 4091;
   }
 }
 
