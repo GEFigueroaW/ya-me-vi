@@ -951,18 +951,32 @@
       setTimeout(checkGoogleRedirectResult, 1000);
     });
 
-    // Biometric Login
+    // Biometric Login - CORREGIDO Y SIMPLIFICADO
     biometricLoginBtn.addEventListener('click', async () => {
       console.log('🔐 [LOGIN-EMAIL] Iniciando autenticación biométrica...');
       
       try {
         showLoading('🔐 Verificando tu huella digital...');
         
-        // Get stored credentials (we already verified they exist in checkBiometricSupport)
+        // Verificar soporte biométrico
+        const isSupported = await biometricSupport.isSupported();
+        if (!isSupported.supported) {
+          hideLoading();
+          showError('Tu dispositivo no soporta autenticación biométrica');
+          return;
+        }
+        
+        // Obtener credenciales almacenadas
         const storedCredentials = localStorage.getItem('biometric_user_credentials');
+        if (!storedCredentials) {
+          hideLoading();
+          showError('No hay credenciales biométricas registradas. Regístrate primero.');
+          return;
+        }
+        
         const credentials = JSON.parse(storedCredentials);
         
-        // Create authentication challenge
+        // Crear desafío de autenticación
         const challenge = new Uint8Array(32);
         crypto.getRandomValues(challenge);
         
@@ -974,10 +988,10 @@
             transports: ['internal']
           }],
           userVerification: 'preferred',
-          timeout: 30000 // Reduced timeout for better UX
+          timeout: 30000
         };
 
-        // Request biometric authentication
+        // Solicitar autenticación biométrica
         const assertion = await navigator.credentials.get({
           publicKey: publicKeyCredentialRequestOptions
         });
@@ -985,21 +999,17 @@
         if (assertion) {
           console.log('✅ [LOGIN-EMAIL] Autenticación biométrica exitosa');
           
-          // Simulate Firebase auth with stored email
           const userEmail = credentials.email;
           console.log('✅ [LOGIN-EMAIL] Login biométrico exitoso para:', userEmail);
           
           hideLoading();
-          
-          // Show success message
           showSuccess('✅ ¡Login biométrico exitoso!');
           
-          // Check admin status
+          // Verificar permisos de administrador
           const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
           const isAdmin = adminEmails.includes(userEmail.toLowerCase());
           
-          // Wait a moment before redirect
-          // Wait a moment before redirect
+          // Redirigir después de un momento
           setTimeout(() => {
             if (isAdminRedirect && isAdmin) {
               localStorage.setItem('admin_verified', 'true');
@@ -1007,7 +1017,6 @@
             } else if (isAdminRedirect && !isAdmin) {
               showError(`❌ Sin permisos de administrador para: ${userEmail}`);
             } else {
-              // Store biometric login flag
               localStorage.setItem('biometric_login', 'true');
               localStorage.setItem('user_email', userEmail);
               window.location.href = "home.html";
@@ -1034,7 +1043,7 @@
       }
     });
 
-    // Email/Password Login
+    // Email/Password Login - CORREGIDO Y SIMPLIFICADO
     loginBtn.addEventListener('click', async () => {
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
@@ -1050,10 +1059,9 @@
         const result = await signInWithEmailAndPassword(auth, email, password);
         console.log('✅ Login exitoso:', result.user.email);
         
-        // Register biometric credentials if supported
+        // Verificar soporte biométrico y ofrecer registro si está disponible
         if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
           try {
-            // Ask user if they want to register biometric authentication
             const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
             if (wantsToRegisterBiometric) {
               await registerBiometricCredentials(result.user.email);
@@ -1064,12 +1072,11 @@
         }
         
         hideLoading();
-        
-        // Redirect using new function
         handleSuccessfulAuth(result.user);
         
       } catch (error) {
         console.error('❌ Error en login:', error);
+        hideLoading();
         
         let errorMsg = 'Error al iniciar sesión';
         if (error.code === 'auth/user-not-found') {
@@ -1086,110 +1093,76 @@
       }
     });
 
-    // Google Login - CON DETECCIÓN DE APK/WEBVIEW
+    // Google Login - SIMPLIFICADO Y CORREGIDO
     googleLoginBtn.addEventListener('click', async () => {
       console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google...');
       
-      // DETECCIÓN DE WEBVIEW/APK
-      const isWebView = detectWebView();
-      console.log('📱 [LOGIN-EMAIL] Ejecutándose en WebView/APK:', isWebView);
-      
-      // Mostrar loading
-      const loadingOverlay = document.createElement('div');
-      loadingOverlay.id = 'loading-overlay-google';
-      loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-      loadingOverlay.innerHTML = `
-        <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
-          <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full mb-4"></div>
-          <p>${isWebView ? 'Redirigiendo a Google...' : 'Iniciando sesión con Google...'}</p>
-        </div>
-      `;
-      document.body.appendChild(loadingOverlay);
-      
       try {
+        showLoading('Iniciando sesión con Google...');
+        
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({
           prompt: 'select_account'
         });
         
-        if (isWebView) {
-          // PARA APK/WEBVIEW: Usar signInWithRedirect
-          console.log('📱 [LOGIN-EMAIL] WEBVIEW/APK: Usando signInWithRedirect');
+        // Intentar popup primero, luego redirect como fallback
+        let result;
+        try {
+          console.log('💻 [LOGIN-EMAIL] Intentando signInWithPopup');
+          result = await signInWithPopup(auth, provider);
+        } catch (popupError) {
+          console.log('❌ [LOGIN-EMAIL] Popup falló, intentando redirect:', popupError.code);
           
-          // Guardar estado para cuando regrese del redirect
-          localStorage.setItem('google_auth_in_progress', 'true');
-          localStorage.setItem('google_auth_timestamp', Date.now().toString());
-          
-          // Usar redirect en lugar de popup
-          const { signInWithRedirect } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-          await signInWithRedirect(auth, provider);
-          
-          // El código continuará en getRedirectResult al cargar la página
-          console.log('🔄 [LOGIN-EMAIL] Redirección iniciada...');
-          return;
-          
-        } else {
-          // PARA NAVEGADORES NORMALES: Usar signInWithPopup
-          console.log('💻 [LOGIN-EMAIL] NAVEGADOR: Usando signInWithPopup');
-          const { signInWithPopup } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-          const result = await signInWithPopup(auth, provider);
-          console.log("✅ Usuario logueado con Google:", result.user.email);
-          
-          // Procesar resultado inmediatamente para popup
-          await processGoogleLoginResult(result);
-          
-          // Ocultar loading después del procesamiento
-          if (loadingOverlay && loadingOverlay.parentNode) {
-            loadingOverlay.remove();
+          if (popupError.code === 'auth/popup-blocked' || 
+              popupError.code === 'auth/popup-closed-by-user') {
+            // Usar redirect como fallback
+            const { signInWithRedirect } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+            
+            // Guardar estado para el redirect
+            localStorage.setItem('google_auth_in_progress', 'true');
+            localStorage.setItem('google_auth_timestamp', Date.now().toString());
+            
+            await signInWithRedirect(auth, provider);
+            return; // La página se recargará después del redirect
+          } else {
+            throw popupError; // Re-lanzar otros errores
           }
         }
         
-      } catch (error) {
-        console.error("❌ Error al iniciar sesión con Google:", error);
-        
-        // Ocultar loading
-        if (loadingOverlay && loadingOverlay.parentNode) {
-          loadingOverlay.remove();
+        if (result && result.user) {
+          console.log("✅ Usuario logueado con Google:", result.user.email);
+          await processGoogleLoginResult(result);
         }
         
-        // Manejo específico de errores
+        hideLoading();
+        
+      } catch (error) {
+        console.error("❌ Error al iniciar sesión con Google:", error);
+        hideLoading();
+        
         let errorMessage = "Error al iniciar sesión con Google: ";
         switch (error.code) {
           case 'auth/popup-closed-by-user':
-            errorMessage += "Proceso cancelado. Inténtalo de nuevo.";
+            errorMessage = "Proceso cancelado. Inténtalo de nuevo.";
             break;
           case 'auth/popup-blocked':
-            errorMessage += "Popup bloqueado. Por favor permite popups para este sitio.";
+            errorMessage = "Popup bloqueado. Permite popups para este sitio.";
             break;
           case 'auth/account-exists-with-different-credential':
-            errorMessage += "Ya existe una cuenta con este email usando otro método.";
-            break;
-          case 'auth/web-storage-unsupported':
-            errorMessage += "Tu navegador no soporta el almacenamiento necesario. Intenta con otro navegador.";
-            break;
-          case 'auth/unauthorized-domain':
-            errorMessage += "Dominio no autorizado. Contacta al administrador.";
+            errorMessage = "Ya existe una cuenta con este email.";
             break;
           case 'auth/network-request-failed':
-            errorMessage += "Error de conexión. Verifica tu internet e inténtalo de nuevo.";
+            errorMessage = "Error de conexión. Verifica tu internet.";
+            break;
+          case 'auth/unauthorized-domain':
+            errorMessage = "Dominio no autorizado. Contacta soporte.";
             break;
           default:
             errorMessage += error.message;
             break;
         }
         
-        // Mostrar error de manera elegante
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
-        errorDiv.textContent = errorMessage;
-        document.body.appendChild(errorDiv);
-        
-        // Auto-ocultar error después de 5 segundos
-        setTimeout(() => {
-          if (errorDiv.parentNode) {
-            errorDiv.remove();
-          }
-        }, 5000);
+        showError(errorMessage);
       }
     });
         }
@@ -1424,6 +1397,191 @@
         if (biometricLoginBtn) {
           biometricLoginBtn.style.display = 'none';
         }
+      }
+    }
+
+    // Sistema de soporte biométrico
+    const biometricSupport = {
+      async isSupported() {
+        try {
+          if (!window.PublicKeyCredential || !navigator.credentials || !navigator.credentials.create) {
+            return { supported: false, reason: 'WebAuthn no soportado' };
+          }
+          
+          const available = await Promise.race([
+            PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
+            new Promise((resolve) => setTimeout(() => resolve(false), 5000))
+          ]);
+          
+          if (!available) {
+            return { supported: false, reason: 'Autenticador no disponible' };
+          }
+          
+          return { supported: true, reason: 'Biometría disponible' };
+        } catch (error) {
+          return { supported: false, reason: error.message };
+        }
+      }
+    };
+
+    // Funciones auxiliares para manejo de UI y autenticación
+    function showLoading(message = 'Cargando...') {
+      const existingLoading = document.getElementById('loading-overlay');
+      if (existingLoading) {
+        existingLoading.remove();
+      }
+      
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.id = 'loading-overlay';
+      loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      loadingOverlay.innerHTML = `
+        <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
+          <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full mb-4"></div>
+          <p>${message}</p>
+        </div>
+      `;
+      document.body.appendChild(loadingOverlay);
+    }
+    
+    function hideLoading() {
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) {
+        loadingOverlay.remove();
+      }
+    }
+    
+    function showError(message) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      errorDiv.textContent = message;
+      document.body.appendChild(errorDiv);
+      
+      setTimeout(() => {
+        if (errorDiv.parentNode) {
+          errorDiv.remove();
+        }
+      }, 5000);
+    }
+    
+    function showSuccess(message) {
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      successDiv.textContent = message;
+      document.body.appendChild(successDiv);
+      
+      setTimeout(() => {
+        if (successDiv.parentNode) {
+          successDiv.remove();
+        }
+      }, 3000);
+    }
+    
+    async function askForBiometricRegistration(userEmail) {
+      return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+          <div class="bg-white rounded-xl p-6 max-w-md mx-4 text-center">
+            <div class="text-4xl mb-4">🔐</div>
+            <h3 class="text-xl font-bold mb-4">¿Activar Login Biométrico?</h3>
+            <p class="text-gray-600 mb-6">Usa tu huella dactilar o reconocimiento facial para iniciar sesión de forma más rápida y segura.</p>
+            <div class="flex space-x-3">
+              <button id="biometric-yes" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg">Sí, activar</button>
+              <button id="biometric-no" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">Ahora no</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('biometric-yes').onclick = () => {
+          modal.remove();
+          resolve(true);
+        };
+        
+        document.getElementById('biometric-no').onclick = () => {
+          modal.remove();
+          resolve(false);
+        };
+      });
+    }
+    
+    async function registerBiometricCredentials(userEmail) {
+      try {
+        const challenge = new Uint8Array(32);
+        crypto.getRandomValues(challenge);
+        
+        const userId = new Uint8Array(16);
+        crypto.getRandomValues(userId);
+        
+        const publicKeyCredentialCreationOptions = {
+          challenge: challenge,
+          rp: {
+            name: "YA ME VI",
+            id: "yamevi.com.mx",
+          },
+          user: {
+            id: userId,
+            name: userEmail,
+            displayName: userEmail,
+          },
+          pubKeyCredParams: [{alg: -7, type: "public-key"}],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "preferred"
+          },
+          timeout: 60000,
+          attestation: "direct"
+        };
+        
+        const credential = await navigator.credentials.create({
+          publicKey: publicKeyCredentialCreationOptions
+        });
+        
+        if (credential) {
+          const credentialData = {
+            id: credential.id,
+            credentialId: Array.from(new Uint8Array(credential.rawId)),
+            email: userEmail,
+            displayName: userEmail,
+            userId: Array.from(userId),
+            registrationTime: new Date().toISOString()
+          };
+          
+          localStorage.setItem('biometric_user_credentials', JSON.stringify(credentialData));
+          
+          showSuccess('✅ ¡Autenticación biométrica activada!');
+          
+          // Show biometric login button
+          if (biometricLoginBtn) {
+            biometricLoginBtn.style.display = 'block';
+          }
+          
+          console.log('✅ [BIOMETRIC] Credenciales registradas para:', userEmail);
+        }
+      } catch (error) {
+        console.error('❌ [BIOMETRIC] Error registrando credenciales:', error);
+        showError('No se pudo activar la autenticación biométrica');
+      }
+    }
+    
+    function handleSuccessfulAuth(user) {
+      console.log('✅ [LOGIN-EMAIL] Autenticación exitosa:', user.email);
+      
+      const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+      const isAdmin = adminEmails.includes(user.email.toLowerCase());
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminRedirect = urlParams.get('redirect') === 'admin';
+      
+      if (isAdminRedirect && isAdmin) {
+        localStorage.setItem('admin_verified', 'true');
+        window.location.href = "admin.html";
+      } else if (isAdminRedirect && !isAdmin) {
+        showError(`❌ Sin permisos de administrador para: ${user.email}`);
+      } else {
+        localStorage.setItem('user_email', user.email);
+        window.location.href = "home.html";
       }
     }
 
