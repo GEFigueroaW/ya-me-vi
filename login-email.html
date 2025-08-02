@@ -239,17 +239,11 @@
       }, 500);
     }
 
-    // Elements
-    const emailInput = document.getElementById('emailInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginBtn = document.getElementById('loginBtn');
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
-    const biometricLoginBtn = document.getElementById('biometricLoginBtn');
-    const errorMessage = document.getElementById('errorMessage');
-    const loadingState = document.getElementById('loadingState');
-
     // Clear form fields on page load - AGGRESSIVE CLEARING
     function clearFormFields() {
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
+      
       if (emailInput && passwordInput) {
         // Limpiar valores múltiples veces
         emailInput.value = '';
@@ -584,21 +578,35 @@
 
     // Show error message
     function showError(message) {
-      errorMessage.textContent = message;
-      errorMessage.classList.remove('hidden');
-      loadingState.classList.add('hidden');
+      const errorMessage = document.getElementById('errorMessage');
+      const loadingState = document.getElementById('loadingState');
+      if (errorMessage && loadingState) {
+        errorMessage.textContent = message;
+        errorMessage.classList.remove('hidden');
+        loadingState.classList.add('hidden');
+      }
     }
 
     // Show loading state
     function showLoading(message = 'Iniciando sesión...') {
-      loadingState.querySelector('span').textContent = message;
-      loadingState.classList.remove('hidden');
-      errorMessage.classList.add('hidden');
+      const loadingState = document.getElementById('loadingState');
+      const errorMessage = document.getElementById('errorMessage');
+      if (loadingState && errorMessage) {
+        const loadingSpan = loadingState.querySelector('span');
+        if (loadingSpan) {
+          loadingSpan.textContent = message;
+        }
+        loadingState.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+      }
     }
 
     // Hide loading state
     function hideLoading() {
-      loadingState.classList.add('hidden');
+      const loadingState = document.getElementById('loadingState');
+      if (loadingState) {
+        loadingState.classList.add('hidden');
+      }
     }
 
     // Show success message
@@ -946,14 +954,25 @@
       setTimeout(checkGoogleRedirectResult, 1000);
     });
 
-    // También verificar cuando el documento esté listo
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(checkGoogleRedirectResult, 1000);
-    });
-
     // Initialize event listeners when DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
       console.log('🔧 [LOGIN-EMAIL] Inicializando event listeners...');
+      
+      // También verificar resultado de redirect
+      setTimeout(checkGoogleRedirectResult, 1000);
+      
+      // Obtener parámetros de URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminRedirect = urlParams.get('redirect') === 'admin';
+      
+      // Obtener elementos del DOM una vez que estén disponibles
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
+      const loginBtn = document.getElementById('loginBtn');
+      const googleLoginBtn = document.getElementById('googleLoginBtn');
+      const biometricLoginBtn = document.getElementById('biometricLoginBtn');
+      const errorMessage = document.getElementById('errorMessage');
+      const loadingState = document.getElementById('loadingState');
       
       // Verificar que todos los elementos existen
       console.log('🔍 [LOGIN-EMAIL] Verificando elementos del DOM:');
@@ -1366,58 +1385,6 @@
       }
     };
 
-    // Funciones auxiliares para manejo de UI y autenticación
-    function showLoading(message = 'Cargando...') {
-      const existingLoading = document.getElementById('loading-overlay');
-      if (existingLoading) {
-        existingLoading.remove();
-      }
-      
-      const loadingOverlay = document.createElement('div');
-      loadingOverlay.id = 'loading-overlay';
-      loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-      loadingOverlay.innerHTML = `
-        <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
-          <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full mb-4"></div>
-          <p>${message}</p>
-        </div>
-      `;
-      document.body.appendChild(loadingOverlay);
-    }
-    
-    function hideLoading() {
-      const loadingOverlay = document.getElementById('loading-overlay');
-      if (loadingOverlay) {
-        loadingOverlay.remove();
-      }
-    }
-    
-    function showError(message) {
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      errorDiv.textContent = message;
-      document.body.appendChild(errorDiv);
-      
-      setTimeout(() => {
-        if (errorDiv.parentNode) {
-          errorDiv.remove();
-        }
-      }, 5000);
-    }
-    
-    function showSuccess(message) {
-      const successDiv = document.createElement('div');
-      successDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      successDiv.textContent = message;
-      document.body.appendChild(successDiv);
-      
-      setTimeout(() => {
-        if (successDiv.parentNode) {
-          successDiv.remove();
-        }
-      }, 3000);
-    }
-    
     async function askForBiometricRegistration(userEmail) {
       return new Promise((resolve) => {
         const modal = document.createElement('div');
