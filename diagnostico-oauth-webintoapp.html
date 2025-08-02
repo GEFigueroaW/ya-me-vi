@@ -232,23 +232,30 @@
 
             // Verificar Firebase config
             try {
-                const config = auth.app.options;
-                addLog(`🔥 Firebase Project ID: ${config.projectId}`);
-                addLog(`🔥 Firebase App ID: ${config.appId}`);
-                addLog(`🔥 Firebase API Key: ${config.apiKey.substring(0, 20)}...`);
-                
-                if (config.projectId === 'ya-me-vi') {
-                    updateCheck('check-firebase', '✅', 'check-ok');
-                } else {
-                    updateCheck('check-firebase', '❌', 'check-error');
-                }
+                if (auth && auth.app && auth.app.options) {
+                    const config = auth.app.options;
+                    addLog(`🔥 Firebase Project ID: ${config.projectId}`);
+                    addLog(`🔥 Firebase App ID: ${config.appId}`);
+                    addLog(`🔥 Firebase API Key: ${config.apiKey.substring(0, 20)}...`);
+                    
+                    if (config.projectId === 'ya-me-vi') {
+                        updateCheck('check-firebase', '✅', 'check-ok');
+                    } else {
+                        updateCheck('check-firebase', '❌', 'check-error');
+                    }
 
-                // Mostrar configuración actual
-                document.getElementById('currentConfig').textContent = JSON.stringify(config, null, 2);
+                    // Mostrar configuración actual
+                    document.getElementById('currentConfig').textContent = JSON.stringify(config, null, 2);
+                } else {
+                    addLog('⚠️ Firebase auth no está disponible');
+                    updateCheck('check-firebase', '⚠️', 'check-warning');
+                    document.getElementById('currentConfig').textContent = 'Firebase no inicializado';
+                }
 
             } catch (error) {
                 addLog(`❌ Error verificando Firebase: ${error.message}`);
                 updateCheck('check-firebase', '❌', 'check-error');
+                document.getElementById('currentConfig').textContent = `Error: ${error.message}`;
             }
 
             // Verificar OAuth
