@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Iniciar Sesión</title>
+  
+  <!-- DETECCIÓN TEMPRANA DE WEBVIEW - DESACTIVADA PARA PERMITIR LOGIN MÓVIL -->
+  <script>
+    // DETECCIÓN DESACTIVADA PARA PERMITIR LOGIN NORMAL EN MÓVILES
+    (function() {
+      console.log('� [LOGIN-EMAIL] Detección de WebView DESHABILITADA para permitir login móvil');
+      console.log('� [LOGIN-EMAIL] User Agent:', navigator.userAgent.toLowerCase().slice(0, 100));
+      console.log('� [LOGIN-EMAIL] Viewport:', window.innerWidth + 'x' + window.innerHeight);
+      console.log('�️ [LOGIN-EMAIL] Screen:', window.screen.width + 'x' + window.screen.height);
+      console.log('✅ [LOGIN-EMAIL] Continuando con login normal...');
+      
+      // FORZAR MODO NORMAL PARA TODOS
+      localStorage.setItem('force_normal_browser', 'true');
+      
+      return; // Salir sin hacer nada - permitir login normal
+    })();
+  </script>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="css/styles.css" />
+  
+  <!-- Custom styles for floating animation and logo -->
+  <style>
+    .floating-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .logo-redondo {
+      border-radius: 50% !important;
+      object-fit: cover !important;
+    }
+    
+    .logo-hero {
+      width: 96px !important;
+      height: 96px !important;
+    }
+    
+    /* Anti-autofill styles */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: white !important;
+      transition: background-color 5000s ease-in-out 0s !important;
+      background-color: transparent !important;
+    }
+    
+    /* Force empty state */
+    #emailInput,
+    #passwordInput {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+    }
+  </style>
+</head>
+
+<body class="overflow-hidden">
+
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
+    
+    <!-- Logo -->
+    <div class="mb-8">
+      <div class="floating-animation">
+        <img src="assets/apple-touch-icon.png" alt="YA ME VI Logo" class="logo-redondo logo-hero rounded-full shadow-2xl object-cover mx-auto" style="width: 96px !important; height: 96px !important; border-radius: 50% !important; object-fit: cover !important;">
+      </div>
+    </div>
+
+    <!-- Título -->
+    <h1 class="text-3xl font-bold mb-2 text-center">Iniciar Sesión</h1>
+    <p class="text-white text-opacity-80 mb-8 text-center">Ingresa con tu cuenta</p>
+
+    <!-- Formulario de login -->
+    <div class="w-full max-w-sm">
+      
+      <!-- Google Login Button -->
+      <button id="googleLoginBtn" class="w-full mb-4 bg-white text-gray-700 py-3 px-4 rounded-lg flex items-center justify-center space-x-3 hover:bg-gray-100 transition duration-300 shadow-lg">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span class="font-medium">Continuar con Google</span>
+      </button>
+
+      <!-- Biometric Login Button -->
+      <button id="biometricLoginBtn" class="w-full mb-4 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg flex items-center justify-center space-x-3 transition duration-300 shadow-lg" style="display: none;">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.81 4.47c-.08 0-.16-.02-.23-.06C15.66 3.42 14 3 12.01 3c-1.98 0-3.86.47-5.57 1.41-.24.13-.54.04-.68-.2-.13-.24-.04-.55.2-.68C7.82 2.52 9.86 2 12.01 2c2.13 0 3.99.47 6.03 1.52.25.13.34.43.21.67-.09.18-.26.28-.44.28zM3.5 9.72c-.1 0-.2-.03-.29-.09-.23-.16-.28-.47-.12-.7.99-1.4 2.25-2.5 3.75-3.27C9.98 4.04 14 4.03 17.15 5.65c1.5.77 2.76 1.86 3.75 3.25.16.22.11.54-.12.7-.23.16-.54.11-.7-.12-.9-1.26-2.04-2.25-3.39-2.94-2.87-1.47-6.54-1.47-9.4.01-1.36.69-2.5 1.68-3.4 2.94-.08.14-.23.21-.39.21zm6.25 12.07c-.13 0-.26-.05-.35-.15-.87-.87-1.34-2.04-1.34-3.28 0-2.54 2.07-4.61 4.61-4.61s4.61 2.07 4.61 4.61c0 1.24-.47 2.41-1.34 3.28-.19.19-.49.19-.68 0-.19-.19-.19-.49 0-.68.68-.68 1.02-1.58 1.02-2.6 0-2.02-1.64-3.61-3.61-3.61s-3.61 1.59-3.61 3.61c0 1.02.34 1.92 1.02 2.6.19.19.19.49 0 .68-.09.1-.22.15-.35.15z"/>
+          <path d="M12 18.72c-.7 0-1.26-.56-1.26-1.26s.56-1.26 1.26-1.26 1.26.56 1.26 1.26-.56 1.26-1.26 1.26z"/>
+        </svg>
+        <span class="font-medium">Iniciar con Biometría</span>
+      </button>
+
+      <!-- Divider -->
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-white border-opacity-30"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-2 bg-transparent text-white text-opacity-80">o</span>
+        </div>
+      </div>
+
+      <!-- Email Input -->
+      <div class="mb-4">
+        <input 
+          type="email" 
+          id="emailInput" 
+          name="email"
+          autocomplete="email"
+          placeholder="Email" 
+          value=""
+          class="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          required
+        />
+      </div>
+
+      <!-- Password Input -->
+      <div class="mb-6">
+        <input 
+          type="password" 
+          id="passwordInput" 
+          name="password"
+          autocomplete="current-password"
+          placeholder="Contraseña" 
+          value=""
+          class="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          required
+        />
+      </div>
+
+      <!-- Login Button -->
+      <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 shadow-lg">
+        Iniciar Sesión
+      </button>
+
+      <!-- Error Message -->
+      <div id="errorMessage" class="hidden mt-4 p-3 bg-red-600 bg-opacity-80 backdrop-blur-lg rounded-lg text-white text-sm text-center"></div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="hidden mt-4 p-3 bg-blue-600 bg-opacity-80 backdrop-blur-lg rounded-lg text-white text-sm text-center">
+        <div class="flex items-center justify-center space-x-2">
+          <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          <span>Iniciando sesión...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="mt-8 text-center space-y-3">
+      <a href="recover.html" class="block text-white text-opacity-80 hover:text-opacity-100 transition duration-300">
+        ¿Olvidaste tu contraseña?
+      </a>
+      <div class="text-white text-opacity-60">
+        ¿No tienes cuenta? 
+        <a href="register.html" class="text-blue-300 hover:text-blue-200 transition duration-300">
+          Regístrate
+        </a>
+      </div>
+      <a href="index.html" class="block text-white text-opacity-60 hover:text-opacity-80 transition duration-300">
+        ← Volver al inicio
+      </a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { auth } from './js/firebase-init.js';
+    import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Show registration success message if redirected from registration
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRegistrationSuccess = urlParams.get('registered') === 'true';
+    
+    if (isRegistrationSuccess) {
+      setTimeout(() => {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-4 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown';
+        successDiv.innerHTML = `
+          <div class="flex items-center">
+            <div class="mr-3">✅</div>
+            <div>
+              <p class="font-semibold">¡Cuenta creada exitosamente!</p>
+              <p class="text-sm opacity-90">Ahora puedes iniciar sesión con tu email y contraseña</p>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(successDiv);
+        
+        // Auto-hide after 8 seconds
+        setTimeout(() => {
+          if (successDiv.parentNode) {
+            successDiv.classList.remove('animate__fadeInDown');
+            successDiv.classList.add('animate__fadeOutUp');
+            setTimeout(() => {
+              successDiv.remove();
+            }, 500);
+          }
+        }, 8000);
+        
+        // Clean URL without reloading
+        const cleanUrl = new URL(window.location);
+        cleanUrl.searchParams.delete('registered');
+        window.history.replaceState({}, document.title, cleanUrl);
+      }, 500);
+    }
+
+    // Clear form fields on page load - AGGRESSIVE CLEARING
+    function clearFormFields() {
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
+      
+      if (emailInput && passwordInput) {
+        // Limpiar valores múltiples veces
+        emailInput.value = '';
+        passwordInput.value = '';
+        emailInput.defaultValue = '';
+        passwordInput.defaultValue = '';
+        
+        // Remover atributos que puedan mantener valores
+        emailInput.removeAttribute('value');
+        passwordInput.removeAttribute('value');
+        
+        // Resetear estilos que pudieran indicar pre-llenado
+        emailInput.style.backgroundColor = '';
+        passwordInput.style.backgroundColor = '';
+        emailInput.style.removeProperty('background-color');
+        passwordInput.style.removeProperty('background-color');
+        
+        // Forzar re-renderizado de placeholders
+        emailInput.setAttribute('placeholder', 'Email');
+        passwordInput.setAttribute('placeholder', 'Contraseña');
+        
+        // Forzar blur y focus para resetear estado interno
+        emailInput.blur();
+        passwordInput.blur();
+        
+        // Usar setTimeout para limpiar después del autofill del navegador
+        setTimeout(() => {
+          emailInput.value = '';
+          passwordInput.value = '';
+        }, 100);
+        
+        setTimeout(() => {
+          emailInput.value = '';
+          passwordInput.value = '';
+        }, 500);
+        
+        setTimeout(() => {
+          emailInput.value = '';
+          passwordInput.value = '';
+        }, 1000);
+        
+        console.log('✅ [LOGIN-EMAIL] Campos de formulario limpiados agresivamente');
+      }
+    }
+
+    // NUEVA FUNCIÓN: Detectar si se ejecuta en WebView/APK
+    function detectWebView() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      
+      // Detectores específicos de WebView
+      const webViewIndicators = [
+        'wv',                    // Android WebView
+        'webview',               // Genérico
+        'webintoapp',            // WebIntoApp específico
+        'appwebview',            // Apps genéricas
+        '; wv)',                 // Android WebView pattern
+        'version/',              // iOS WebView sin Safari
+        'mobile/',               // Móvil sin navegador específico
+      ];
+      
+      const isWebView = webViewIndicators.some(indicator => userAgent.includes(indicator));
+      
+      // Detectores adicionales
+      const noStandaloneAPI = !window.navigator.standalone && /mobile|android|iphone|ipad/i.test(userAgent);
+      const limitedWindowFeatures = !window.chrome && /android/i.test(userAgent);
+      const hasAndroidSpecificUA = /android.*wv\)/i.test(userAgent);
+      
+      // Log de diagnóstico
+      console.log('🔍 [WEBVIEW-DETECTION] User Agent:', userAgent);
+      console.log('🔍 [WEBVIEW-DETECTION] Indicadores:', {
+        webViewIndicators: isWebView,
+        noStandaloneAPI,
+        limitedWindowFeatures,
+        hasAndroidSpecificUA,
+        chrome: !!window.chrome,
+        standalone: window.navigator.standalone
+      });
+      
+      const finalResult = isWebView || hasAndroidSpecificUA || limitedWindowFeatures;
+      console.log('📱 [WEBVIEW-DETECTION] Es WebView/APK:', finalResult);
+      
+      return finalResult;
+    }
+
+    // NUEVA FUNCIÓN: Procesar resultado de Google Login
+    async function processGoogleLoginResult(result) {
+      console.log("✅ [GOOGLE-LOGIN] Procesando resultado para:", result.user.email);
+      
+      // Register biometric credentials if supported
+      if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
+        try {
+          console.log('🔐 [GOOGLE-LOGIN] Intentando registrar biometría para:', result.user.email);
+          const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
+          if (wantsToRegisterBiometric) {
+            await registerBiometricCredentials(result.user.email);
+          }
+        } catch (bioError) {
+          console.log('ℹ️ [GOOGLE-LOGIN] No se pudo registrar biometría:', bioError.message);
+        }
+      }
+      
+      // Check admin permissions
+      const adminEmails = [
+        'gfigueroa.w@gmail.com', 
+        'admin@yamevi.com.mx', 
+        'eugenfw@gmail.com',
+        'guillermo.figueroaw@totalplay.com.mx'
+      ];
+      const isAdmin = adminEmails.includes(result.user.email);
+      
+      // Verificar si viene de admin redirect
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminRedirect = urlParams.get('redirect') === 'admin';
+      
+      // Limpiar estado de autenticación
+      localStorage.removeItem('google_auth_in_progress');
+      localStorage.removeItem('google_auth_timestamp');
+      
+      if (isAdminRedirect && isAdmin) {
+        console.log('🔄 [GOOGLE-LOGIN] Redirigiendo a admin panel...');
+        window.location.href = "admin.html";
+      } else if (isAdminRedirect && !isAdmin) {
+        console.log('❌ [GOOGLE-LOGIN] Sin permisos de admin:', result.user.email);
+        alert(`❌ Sin permisos de administrador\n\nUsuario: ${result.user.email}\nContacta al administrador.`);
+        window.location.href = "index.html";
+      } else {
+        console.log('✅ [GOOGLE-LOGIN] Redirigiendo a home...');
+        window.location.href = "home.html";
+      }
+    }
+
+    // Initialize form clearing IMMEDIATELY and repeatedly
+    clearFormFields();
+    
+    // Clear again after a short delay
+    setTimeout(clearFormFields, 50);
+    setTimeout(clearFormFields, 100);
+    setTimeout(clearFormFields, 200);
+    setTimeout(clearFormFields, 500);
+    setTimeout(clearFormFields, 1000);
+
+    // Check for biometric authentication support
+    async function checkBiometricSupport() {
+      console.log('🔐 [CHECK-BIOMETRIC] Iniciando verificación...');
+      
+      // Force show button on mobile for testing
+      const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase());
+      console.log('📱 [CHECK-BIOMETRIC] Es dispositivo móvil:', isMobile);
+      
+      if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
+        try {
+          console.log('✅ [CHECK-BIOMETRIC] WebAuthn es compatible');
+          
+          // Check if WebAuthn is supported
+          const available = await Promise.race([
+            PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
+            new Promise((resolve) => setTimeout(() => resolve(false), 5000)) // 5 second timeout
+          ]);
+          
+          console.log('🔍 [CHECK-BIOMETRIC] Autenticador disponible:', available);
+          
+          // Check if user has registered biometric credentials
+          const storedCredentials = localStorage.getItem('biometric_user_credentials');
+          console.log('🔍 [CHECK-BIOMETRIC] Credenciales guardadas:', !!storedCredentials);
+          
+          // MOBILE OVERRIDE: Show button if mobile device has WebAuthn support
+          if (isMobile && window.PublicKeyCredential) {
+            console.log('📱 [CHECK-BIOMETRIC] MÓVIL: Forzando mostrar botón para pruebas');
+            if (storedCredentials) {
+              biometricLoginBtn.style.display = 'block';
+              console.log('✅ [CHECK-BIOMETRIC] MÓVIL: Botón biométrico habilitado');
+            } else {
+              console.log('ℹ️ [CHECK-BIOMETRIC] MÓVIL: Sin credenciales - botón oculto');
+              console.log('💡 [CHECK-BIOMETRIC] MÓVIL: Haz login con email/contraseña primero');
+            }
+            return;
+          }
+          
+          if (available) {
+            console.log('✅ [CHECK-BIOMETRIC] Biometría disponible en dispositivo');
+            
+            if (storedCredentials) {
+              // User has biometric credentials - show login button
+              biometricLoginBtn.style.display = 'block';
+              console.log('✅ [CHECK-BIOMETRIC] Credenciales biométricas encontradas - botón habilitado');
+            } else {
+              // User hasn't registered biometrics - hide button initially
+              biometricLoginBtn.style.display = 'none';
+              console.log('ℹ️ [CHECK-BIOMETRIC] Sin credenciales biométricas - botón oculto');
+              console.log('💡 [CHECK-BIOMETRIC] Haz login con email/contraseña primero para registrar biometría');
+            }
+          } else {
+            console.log('❌ [CHECK-BIOMETRIC] Biometría no disponible en este dispositivo');
+            biometricLoginBtn.style.display = 'none';
+          }
+        } catch (err) {
+          console.log('❌ [CHECK-BIOMETRIC] Error verificando biometría:', err);
+          
+          // FALLBACK for mobile: if error, still try to show button
+          if (isMobile) {
+            console.log('📱 [CHECK-BIOMETRIC] MÓVIL: Error pero intentando mostrar botón');
+            const storedCredentials = localStorage.getItem('biometric_user_credentials');
+            if (storedCredentials) {
+              biometricLoginBtn.style.display = 'block';
+              console.log('✅ [CHECK-BIOMETRIC] MÓVIL: Botón mostrado pese a error');
+            }
+          } else {
+            biometricLoginBtn.style.display = 'none';
+          }
+        }
+      } else {
+        console.log('❌ [CHECK-BIOMETRIC] WebAuthn no soportado en este navegador');
+        
+        // MOBILE OVERRIDE: Even without full WebAuthn support, show diagnostic info
+        if (isMobile) {
+          console.log('📱 [CHECK-BIOMETRIC] MÓVIL: WebAuthn no soportado pero es móvil');
+          console.log('📱 [CHECK-BIOMETRIC] User Agent:', navigator.userAgent);
+        }
+        
+        biometricLoginBtn.style.display = 'none';
+      }
+      
+      console.log('🔐 [CHECK-BIOMETRIC] Verificación completada');
+    }
+
+    // Refresh biometric button state
+    function refreshBiometricButton() {
+      const storedCredentials = localStorage.getItem('biometric_user_credentials');
+      if (storedCredentials && biometricLoginBtn) {
+        biometricLoginBtn.style.display = 'block';
+        console.log('🔐 [REFRESH] Botón biométrico habilitado');
+      }
+    }
+
+    // Register biometric credentials
+    async function registerBiometricCredentials(email) {
+      // Check if device supports biometrics
+      if (!window.PublicKeyCredential || !navigator.credentials) {
+        console.log('ℹ️ [LOGIN-EMAIL] Dispositivo no soporta biometría');
+        return;
+      }
+
+      // Check if already registered
+      const storedCredentials = localStorage.getItem('biometric_user_credentials');
+      if (storedCredentials) {
+        const credentials = JSON.parse(storedCredentials);
+        if (credentials.email === email) {
+          console.log('✅ [LOGIN-EMAIL] Credenciales biométricas ya registradas para:', email);
+          // Show biometric button since credentials exist
+          refreshBiometricButton();
+          return;
+        }
+      }
+
+      try {
+        // Check if biometrics are available
+        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        if (!available) {
+          console.log('ℹ️ [LOGIN-EMAIL] Biometría no disponible en este dispositivo');
+          return;
+        }
+
+        console.log('🔐 [LOGIN-EMAIL] Registrando credenciales biométricas para:', email);
+        
+        // Show loading message to user
+        showLoading('🔐 Configurando tu huella digital...');
+        
+        const challenge = new Uint8Array(32);
+        crypto.getRandomValues(challenge);
+        
+        const userId = new TextEncoder().encode(email);
+        
+        const publicKeyCredentialCreationOptions = {
+          challenge: challenge,
+          rp: {
+            name: "YA ME VI",
+            id: window.location.hostname
+          },
+          user: {
+            id: userId,
+            name: email,
+            displayName: email
+          },
+          pubKeyCredParams: [{alg: -7, type: "public-key"}],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "preferred"
+          },
+          timeout: 30000, // Reduced timeout
+          attestation: "direct"
+        };
+
+        const credential = await navigator.credentials.create({
+          publicKey: publicKeyCredentialCreationOptions
+        });
+
+        if (credential) {
+          // Store credential info
+          const credentialData = {
+            email: email,
+            credentialId: Array.from(new Uint8Array(credential.rawId)),
+            publicKey: Array.from(new Uint8Array(credential.response.publicKey || [])),
+            registeredAt: new Date().toISOString()
+          };
+          
+          localStorage.setItem('biometric_user_credentials', JSON.stringify(credentialData));
+          console.log('✅ [LOGIN-EMAIL] Credenciales biométricas registradas exitosamente');
+          
+          // Hide loading
+          hideLoading();
+          
+          // Show and enable biometric button
+          refreshBiometricButton();
+          
+          // Show success notification
+          showSuccess('🔐 ¡Biometría configurada exitosamente! La próxima vez podrás usar tu huella digital para ingresar.');
+        }
+      } catch (error) {
+        console.log('ℹ️ [LOGIN-EMAIL] Usuario rechazó registro biométrico o no está disponible:', error.message);
+        
+        // Hide loading if there was an error
+        hideLoading();
+        
+        // Don't show error for biometric registration - it's optional
+        if (error.name === 'NotAllowedError') {
+          console.log('ℹ️ [LOGIN-EMAIL] Usuario canceló el registro biométrico');
+        } else if (error.name === 'NotSupportedError') {
+          console.log('ℹ️ [LOGIN-EMAIL] Biometría no soportada en este dispositivo');
+        }
+      }
+    }
+
+    // Show error message
+    function showError(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      const loadingState = document.getElementById('loadingState');
+      if (errorMessage && loadingState) {
+        errorMessage.textContent = message;
+        errorMessage.classList.remove('hidden');
+        loadingState.classList.add('hidden');
+      }
+    }
+
+    // Show loading state
+    function showLoading(message = 'Iniciando sesión...') {
+      const loadingState = document.getElementById('loadingState');
+      const errorMessage = document.getElementById('errorMessage');
+      if (loadingState && errorMessage) {
+        const loadingSpan = loadingState.querySelector('span');
+        if (loadingSpan) {
+          loadingSpan.textContent = message;
+        }
+        loadingState.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+      }
+    }
+
+    // Hide loading state
+    function hideLoading() {
+      const loadingState = document.getElementById('loadingState');
+      if (loadingState) {
+        loadingState.classList.add('hidden');
+      }
+    }
+
+    // Show success message
+    function showSuccess(message) {
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 bg-opacity-90 backdrop-blur-lg text-white px-6 py-4 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown';
+      successDiv.innerHTML = `
+        <div class="flex items-center">
+          <div class="mr-3">✅</div>
+          <div>
+            <p class="font-semibold">${message}</p>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(successDiv);
+      
+      // Auto-hide after 4 seconds
+      setTimeout(() => {
+        if (successDiv.parentNode) {
+          successDiv.classList.remove('animate__fadeInDown');
+          successDiv.classList.add('animate__fadeOutUp');
+          setTimeout(() => {
+            successDiv.remove();
+          }, 500);
+        }
+      }, 4000);
+    }
+
+    // Diagnostic function for biometric system
+    function diagnoseBiometricSystem() {
+      console.log('🔍 [DIAGNÓSTICO BIOMÉTRICO] Iniciando diagnóstico...');
+      
+      // Device info
+      const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase());
+      const isAndroid = /android/i.test(navigator.userAgent);
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      
+      console.log('📱 [DIAGNÓSTICO] Tipo de dispositivo:', {
+        isMobile,
+        isAndroid,
+        isIOS,
+        userAgent: navigator.userAgent
+      });
+      
+      // Check basic WebAuthn support
+      const webAuthnSupported = !!(window.PublicKeyCredential && navigator.credentials);
+      console.log('🔍 [DIAGNÓSTICO] WebAuthn soportado:', webAuthnSupported);
+      console.log('🔍 [DIAGNÓSTICO] PublicKeyCredential:', !!window.PublicKeyCredential);
+      console.log('🔍 [DIAGNÓSTICO] navigator.credentials:', !!navigator.credentials);
+      
+      // Check button element
+      const buttonExists = !!document.getElementById('biometricLoginBtn');
+      console.log('🔍 [DIAGNÓSTICO] Botón biométrico existe:', buttonExists);
+      
+      if (buttonExists) {
+        const button = document.getElementById('biometricLoginBtn');
+        console.log('🔍 [DIAGNÓSTICO] Estado del botón:', {
+          display: button.style.display,
+          visible: button.style.display !== 'none',
+          className: button.className,
+          offsetWidth: button.offsetWidth,
+          offsetHeight: button.offsetHeight
+        });
+      }
+      
+      // Check stored credentials
+      const storedCredentials = localStorage.getItem('biometric_user_credentials');
+      console.log('🔍 [DIAGNÓSTICO] Credenciales almacenadas:', !!storedCredentials);
+      if (storedCredentials) {
+        try {
+          const creds = JSON.parse(storedCredentials);
+          console.log('🔍 [DIAGNÓSTICO] Email registrado:', creds.email);
+          console.log('🔍 [DIAGNÓSTICO] Fecha registro:', creds.registeredAt);
+        } catch (e) {
+          console.log('❌ [DIAGNÓSTICO] Error parseando credenciales:', e);
+        }
+      }
+      
+      // Check platform authenticator availability
+      if (webAuthnSupported) {
+        console.log('🔄 [DIAGNÓSTICO] Verificando autenticador de plataforma...');
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+          .then(available => {
+            console.log('🔍 [DIAGNÓSTICO] Autenticador de plataforma disponible:', available);
+            if (!available) {
+              if (isMobile) {
+                console.log('📱 [DIAGNÓSTICO MÓVIL] Tu dispositivo móvil no reporta biometría disponible');
+                console.log('📱 [DIAGNÓSTICO MÓVIL] Esto puede ser normal en algunos navegadores móviles');
+              } else {
+                console.log('❌ [DIAGNÓSTICO] Tu dispositivo no tiene biometría disponible');
+              }
+            } else {
+              console.log('✅ [DIAGNÓSTICO] Biometría disponible - debería funcionar');
+            }
+          })
+          .catch(err => {
+            console.log('❌ [DIAGNÓSTICO] Error verificando autenticador:', err);
+            if (isMobile) {
+              console.log('📱 [DIAGNÓSTICO MÓVIL] Error típico en móviles - puede ser normal');
+            }
+          });
+      }
+      
+      // Mobile-specific diagnostics
+      if (isMobile) {
+        console.log('� [DIAGNÓSTICO MÓVIL] Información adicional:');
+        console.log('📱 Screen size:', {
+          width: window.screen.width,
+          height: window.screen.height,
+          innerWidth: window.innerWidth,
+          innerHeight: window.innerHeight
+        });
+        console.log('📱 Touch support:', 'ontouchstart' in window);
+        console.log('📱 Standalone mode:', window.navigator.standalone);
+        
+        // Chrome/Android specific
+        if (isAndroid) {
+          console.log('🤖 [ANDROID] Chrome version:', navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[1] || 'unknown');
+        }
+        
+        // iOS specific
+        if (isIOS) {
+          console.log('🍎 [iOS] Safari/WebKit version:', navigator.userAgent.match(/Version\/([0-9.]+)/)?.[1] || 'unknown');
+        }
+      }
+      
+      console.log('🔍 [DIAGNÓSTICO COMPLETO] ===== VER RESULTADOS ARRIBA ===== ⬆️');
+    }
+
+    // Ask user for biometric registration permission
+    async function askForBiometricRegistration(email) {
+      return new Promise((resolve) => {
+        // Check if device supports biometrics first
+        if (!window.PublicKeyCredential || !navigator.credentials) {
+          console.log('ℹ️ [BIOMETRIC-ASK] Dispositivo no soporta biometría');
+          resolve(false);
+          return;
+        }
+
+        // Check if already registered
+        const storedCredentials = localStorage.getItem('biometric_user_credentials');
+        if (storedCredentials) {
+          const credentials = JSON.parse(storedCredentials);
+          if (credentials.email === email) {
+            console.log('✅ [BIOMETRIC-ASK] Ya está registrado para:', email);
+            resolve(false);
+            return;
+          }
+        }
+
+        // Create elegant modal dialog
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate__animated animate__fadeIn';
+        modal.innerHTML = `
+          <div class="bg-white bg-opacity-95 backdrop-blur-lg rounded-2xl p-8 text-center text-gray-800 max-w-sm mx-4 animate__animated animate__zoomIn">
+            <div class="text-6xl mb-4">🔐</div>
+            <h3 class="text-xl font-bold mb-4 text-gray-800">¿Configurar Biometría?</h3>
+            <p class="text-gray-600 mb-2">¿Te gustaría usar tu huella digital para ingresar más rápido la próxima vez?</p>
+            <p class="text-sm text-gray-500 mb-6">Tu huella se guardará de forma segura en tu dispositivo</p>
+            
+            <div class="flex gap-3">
+              <button id="biometric-decline" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-lg transition-colors font-medium">
+                No, gracias
+              </button>
+              <button id="biometric-accept" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition-colors font-medium">
+                Sí, configurar
+              </button>
+            </div>
+            
+            <p class="text-xs text-gray-400 mt-4">Podrás cambiar esto después en configuración</p>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle button clicks
+        const acceptBtn = modal.querySelector('#biometric-accept');
+        const declineBtn = modal.querySelector('#biometric-decline');
+        
+        acceptBtn.addEventListener('click', () => {
+          console.log('✅ [BIOMETRIC-ASK] Usuario aceptó configurar biometría');
+          modal.classList.add('animate__fadeOut');
+          setTimeout(() => {
+            modal.remove();
+            resolve(true);
+          }, 300);
+        });
+        
+        declineBtn.addEventListener('click', () => {
+          console.log('❌ [BIOMETRIC-ASK] Usuario rechazó configurar biometría');
+          modal.classList.add('animate__fadeOut');
+          setTimeout(() => {
+            modal.remove();
+            resolve(false);
+          }, 300);
+        });
+        
+        // Auto-decline after 15 seconds
+        setTimeout(() => {
+          if (document.body.contains(modal)) {
+            console.log('⏰ [BIOMETRIC-ASK] Timeout - no response from user');
+            modal.classList.add('animate__fadeOut');
+            setTimeout(() => {
+              modal.remove();
+              resolve(false);
+            }, 300);
+          }
+        }, 15000);
+      });
+    }
+
+    // Function to handle successful authentication redirect
+    async function handleSuccessfulAuth(user) {
+      console.log('🎯 [LOGIN-EMAIL] Procesando autenticación exitosa para:', user.email);
+      
+      // Intentar registrar credenciales biométricas si tiene email
+      if (user.email) {
+        try {
+          await registerBiometricCredentials(user.email);
+          console.log('✅ [LOGIN-EMAIL] Registro biométrico completado para:', user.email);
+        } catch (error) {
+          console.log('ℹ️ [LOGIN-EMAIL] No se pudo registrar biometría (opcional):', error.message);
+        }
+      }
+      
+      // Lista completa de admins
+      const adminEmails = [
+        'gfigueroa.w@gmail.com', 
+        'admin@yamevi.com.mx', 
+        'eugenfw@gmail.com',
+        'guillermo.figueroaw@totalplay.com.mx'
+      ];
+      
+      // Verificación por email
+      let isAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
+      
+      if (isAdminRedirect && isAdmin) {
+        console.log('🔄 Redirigiendo a admin panel...');
+        localStorage.setItem('admin_verified', 'true');
+        window.location.href = "admin.html";
+      } else if (isAdminRedirect && !isAdmin) {
+        console.log('❌ Usuario sin permisos de admin:', user.email || user.uid);
+        showError(`Sin permisos de administrador. Usuario: ${user.email || user.uid}`);
+      } else {
+        console.log('✅ Redirección confirmada a home.html');
+        window.location.href = "home.html";
+      }
+    }
+
+    // Check if user is already authenticated
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log('✅ Usuario ya autenticado detectado:', user.email || user.uid);
+        
+        // IMPORTANTE: No redirigir automáticamente - requerir confirmación explícita
+        console.log('🔐 Usuario debe confirmar su identidad antes de continuar');
+        
+        // Pre-fill email if available - DESHABILITADO para mantener campos vacíos
+        /*
+        if (user.email && emailInput) {
+          emailInput.value = user.email;
+          emailInput.style.backgroundColor = 'rgba(59, 130, 246, 0.2)'; // Blue tint to indicate it's pre-filled
+          // Focus on password field
+          setTimeout(() => {
+            passwordInput.focus();
+          }, 500);
+        }
+        */
+        
+        // Check admin redirect after explicit login, not automatically
+        return; // No automatic redirect
+      }
+    });
+
+    // NUEVA FUNCIÓN: Verificar resultado de redirect de Google Auth
+    async function checkGoogleRedirectResult() {
+      try {
+        const { getRedirectResult } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+        
+        console.log('🔍 [REDIRECT-CHECK] Verificando resultado de redirect...');
+        const result = await getRedirectResult(auth);
+        
+        if (result) {
+          console.log('✅ [REDIRECT-CHECK] Redirect result encontrado:', result.user.email);
+          
+          // Mostrar loading mientras procesamos
+          const loadingOverlay = document.createElement('div');
+          loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+          loadingOverlay.innerHTML = `
+            <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800">
+              <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full mb-4"></div>
+              <p>¡Autenticación exitosa! Redirigiendo...</p>
+            </div>
+          `;
+          document.body.appendChild(loadingOverlay);
+          
+          // Procesar resultado
+          setTimeout(async () => {
+            await processGoogleLoginResult(result);
+          }, 1500);
+          
+        } else {
+          console.log('ℹ️ [REDIRECT-CHECK] Sin resultado de redirect');
+          
+          // Verificar si había un auth en progreso que se perdió
+          const authInProgress = localStorage.getItem('google_auth_in_progress');
+          const authTimestamp = localStorage.getItem('google_auth_timestamp');
+          
+          if (authInProgress && authTimestamp) {
+            const elapsed = Date.now() - parseInt(authTimestamp);
+            console.log('⚠️ [REDIRECT-CHECK] Auth en progreso perdido hace:', elapsed, 'ms');
+            
+            // Limpiar estado si es muy viejo (>5 minutos)
+            if (elapsed > 300000) {
+              localStorage.removeItem('google_auth_in_progress');
+              localStorage.removeItem('google_auth_timestamp');
+              console.log('🧹 [REDIRECT-CHECK] Estado de auth expirado limpiado');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('❌ [REDIRECT-CHECK] Error verificando redirect:', error);
+        
+        // Limpiar estado en caso de error
+        localStorage.removeItem('google_auth_in_progress');
+        localStorage.removeItem('google_auth_timestamp');
+        
+        // Mostrar error solo si es relevante
+        if (error.code && error.code !== 'auth/null-user') {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
+          errorDiv.textContent = `Error en autenticación Google: ${error.message}`;
+          document.body.appendChild(errorDiv);
+          
+          setTimeout(() => {
+            errorDiv.remove();
+          }, 5000);
+        }
+      }
+    }
+
+    // Verificar resultado de redirect al cargar la página
+    window.addEventListener('load', () => {
+      // Pequeño delay para asegurar que Firebase esté inicializado
+      setTimeout(checkGoogleRedirectResult, 1000);
+    });
+
+    // Initialize event listeners when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🔧 [LOGIN-EMAIL] Inicializando event listeners...');
+      
+      // También verificar resultado de redirect
+      setTimeout(checkGoogleRedirectResult, 1000);
+      
+      // Obtener parámetros de URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminRedirect = urlParams.get('redirect') === 'admin';
+      
+      // Obtener elementos del DOM una vez que estén disponibles
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
+      const loginBtn = document.getElementById('loginBtn');
+      const googleLoginBtn = document.getElementById('googleLoginBtn');
+      const biometricLoginBtn = document.getElementById('biometricLoginBtn');
+      const errorMessage = document.getElementById('errorMessage');
+      const loadingState = document.getElementById('loadingState');
+      
+      // Verificar que todos los elementos existen
+      console.log('🔍 [LOGIN-EMAIL] Verificando elementos del DOM:');
+      console.log('- emailInput:', !!emailInput ? '✅' : '❌', emailInput);
+      console.log('- passwordInput:', !!passwordInput ? '✅' : '❌', passwordInput);
+      console.log('- loginBtn:', !!loginBtn ? '✅' : '❌', loginBtn);
+      console.log('- googleLoginBtn:', !!googleLoginBtn ? '✅' : '❌', googleLoginBtn);
+      console.log('- biometricLoginBtn:', !!biometricLoginBtn ? '✅' : '❌', biometricLoginBtn);
+      
+      // Biometric Login - CORREGIDO Y SIMPLIFICADO
+      if (biometricLoginBtn) {
+        biometricLoginBtn.addEventListener('click', async () => {
+          console.log('🔐 [LOGIN-EMAIL] Iniciando autenticación biométrica...');
+          
+          try {
+            showLoading('🔐 Verificando tu huella digital...');
+            
+            // Verificar soporte biométrico
+            const isSupported = await biometricSupport.isSupported();
+            if (!isSupported.supported) {
+              hideLoading();
+              showError('Tu dispositivo no soporta autenticación biométrica');
+              return;
+            }
+            
+            // Obtener credenciales almacenadas
+            const storedCredentials = localStorage.getItem('biometric_user_credentials');
+            if (!storedCredentials) {
+              hideLoading();
+              showError('No hay credenciales biométricas registradas. Regístrate primero.');
+              return;
+            }
+            
+            const credentials = JSON.parse(storedCredentials);
+            
+            // Crear desafío de autenticación
+            const challenge = new Uint8Array(32);
+            crypto.getRandomValues(challenge);
+            
+            const publicKeyCredentialRequestOptions = {
+              challenge: challenge,
+              allowCredentials: [{
+                id: new Uint8Array(credentials.credentialId),
+                type: 'public-key',
+                transports: ['internal']
+              }],
+              userVerification: 'preferred',
+              timeout: 30000
+            };
+
+            // Solicitar autenticación biométrica
+            const assertion = await navigator.credentials.get({
+              publicKey: publicKeyCredentialRequestOptions
+            });
+
+            if (assertion) {
+              console.log('✅ [LOGIN-EMAIL] Autenticación biométrica exitosa');
+              
+              const userEmail = credentials.email;
+              console.log('✅ [LOGIN-EMAIL] Login biométrico exitoso para:', userEmail);
+              
+              hideLoading();
+              showSuccess('✅ ¡Login biométrico exitoso!');
+              
+              // Verificar permisos de administrador
+              const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+              const isAdmin = adminEmails.includes(userEmail.toLowerCase());
+              
+              // Redirigir después de un momento
+              setTimeout(() => {
+                if (isAdminRedirect && isAdmin) {
+                  localStorage.setItem('admin_verified', 'true');
+                  window.location.href = "admin.html";
+                } else if (isAdminRedirect && !isAdmin) {
+                  showError(`❌ Sin permisos de administrador para: ${userEmail}`);
+                } else {
+                  localStorage.setItem('biometric_login', 'true');
+                  localStorage.setItem('user_email', userEmail);
+                  window.location.href = "home.html";
+                }
+              }, 1500);
+            }
+            
+          } catch (error) {
+            console.error('❌ [LOGIN-EMAIL] Error en autenticación biométrica:', error);
+            hideLoading();
+            
+            let errorMsg = '❌ Error en autenticación biométrica';
+            if (error.name === 'NotAllowedError') {
+              errorMsg = '🚫 Autenticación cancelada por el usuario';
+            } else if (error.name === 'NotSupportedError') {
+              errorMsg = '📱 Biometría no soportada en este dispositivo';
+            } else if (error.name === 'SecurityError') {
+              errorMsg = '🔒 Error de seguridad en biometría';
+            } else if (error.name === 'TimeoutError') {
+              errorMsg = '⏰ Tiempo agotado - intenta de nuevo';
+            }
+            
+            showError(errorMsg);
+          }
+        });
+      } else {
+        console.error('❌ [LOGIN-EMAIL] No se encontró el botón biometricLoginBtn');
+      }
+      
+      // Email/Password Login - CORREGIDO Y SIMPLIFICADO
+      if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+          const email = emailInput.value.trim();
+          const password = passwordInput.value.trim();
+
+          if (!email || !password) {
+            showError('Por favor ingresa email y contraseña');
+            return;
+          }
+
+          try {
+            showLoading('Iniciando sesión...');
+            
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            console.log('✅ Login exitoso:', result.user.email);
+            
+            // Verificar soporte biométrico y ofrecer registro si está disponible
+            if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
+              try {
+                const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
+                if (wantsToRegisterBiometric) {
+                  await registerBiometricCredentials(result.user.email);
+                }
+              } catch (bioError) {
+                console.log('ℹ️ [LOGIN-EMAIL] No se pudo registrar biometría:', bioError.message);
+              }
+            }
+            
+            hideLoading();
+            handleSuccessfulAuth(result.user);
+            
+          } catch (error) {
+            console.error('❌ Error en login:', error);
+            hideLoading();
+            
+            let errorMsg = 'Error al iniciar sesión';
+            if (error.code === 'auth/user-not-found') {
+              errorMsg = 'Usuario no encontrado';
+            } else if (error.code === 'auth/wrong-password') {
+              errorMsg = 'Contraseña incorrecta';
+            } else if (error.code === 'auth/invalid-email') {
+              errorMsg = 'Email inválido';
+            } else if (error.code === 'auth/too-many-requests') {
+              errorMsg = 'Demasiados intentos. Espera un momento';
+            }
+            
+            showError(errorMsg);
+          }
+        });
+      } else {
+        console.error('❌ [LOGIN-EMAIL] No se encontró el botón loginBtn');
+      }
+
+      // Google Login - SIMPLIFICADO Y CORREGIDO
+      if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', async () => {
+          console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google...');
+          
+          try {
+            showLoading('Iniciando sesión con Google...');
+            
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({
+              prompt: 'select_account'
+            });
+            
+            // Intentar popup primero, luego redirect como fallback
+            let result;
+            try {
+              console.log('💻 [LOGIN-EMAIL] Intentando signInWithPopup');
+              result = await signInWithPopup(auth, provider);
+            } catch (popupError) {
+              console.log('❌ [LOGIN-EMAIL] Popup falló, intentando redirect:', popupError.code);
+              
+              if (popupError.code === 'auth/popup-blocked' || 
+                  popupError.code === 'auth/popup-closed-by-user') {
+                // Usar redirect como fallback
+                const { signInWithRedirect } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+                
+                // Guardar estado para el redirect
+                localStorage.setItem('google_auth_in_progress', 'true');
+                localStorage.setItem('google_auth_timestamp', Date.now().toString());
+                
+                await signInWithRedirect(auth, provider);
+                return; // La página se recargará después del redirect
+              } else {
+                throw popupError; // Re-lanzar otros errores
+              }
+            }
+            
+            if (result && result.user) {
+              console.log("✅ Usuario logueado con Google:", result.user.email);
+              await processGoogleLoginResult(result);
+            }
+            
+            hideLoading();
+            
+          } catch (error) {
+            console.error("❌ Error al iniciar sesión con Google:", error);
+            hideLoading();
+            
+            let errorMessage = "Error al iniciar sesión con Google: ";
+            switch (error.code) {
+              case 'auth/popup-closed-by-user':
+                errorMessage = "Proceso cancelado. Inténtalo de nuevo.";
+                break;
+              case 'auth/popup-blocked':
+                errorMessage = "Popup bloqueado. Permite popups para este sitio.";
+                break;
+              case 'auth/account-exists-with-different-credential':
+                errorMessage = "Ya existe una cuenta con este email.";
+                break;
+              case 'auth/network-request-failed':
+                errorMessage = "Error de conexión. Verifica tu internet.";
+                break;
+              case 'auth/unauthorized-domain':
+                errorMessage = "Dominio no autorizado. Contacta soporte.";
+                break;
+              default:
+                errorMessage += error.message;
+                break;
+            }
+            
+            showError(errorMessage);
+          }
+        });
+      } else {
+        console.error('❌ [LOGIN-EMAIL] No se encontró el botón googleLoginBtn');
+      }
+
+      console.log('✅ [LOGIN-EMAIL] Event listeners inicializados correctamente');
+      
+      // Allow login with Enter key
+      if (passwordInput) {
+        passwordInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            loginBtn.click();
+          }
+        });
+      }
+
+      if (emailInput) {
+        emailInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            passwordInput.focus();
+          }
+        });
+      }
+    });
+
+    // Additional form clearing events - AGGRESSIVE CLEARING
+    window.addEventListener('focus', clearFormFields);
+    window.addEventListener('pageshow', (event) => {
+      clearFormFields();
+      if (event.persisted) {
+        clearFormFields();
+      }
+    });
+
+    // Clear on browser back/forward
+    window.addEventListener('popstate', clearFormFields);
+    
+    // Clear on load events
+    window.addEventListener('load', clearFormFields);
+    document.addEventListener('DOMContentLoaded', clearFormFields);
+    
+    // Clear with intervals to fight aggressive autofill
+    const clearingInterval = setInterval(() => {
+      if (emailInput && passwordInput) {
+        if (emailInput.value !== '' || passwordInput.value !== '') {
+          console.log('🧹 [LOGIN-EMAIL] Detectado autofill - limpiando campos...');
+          emailInput.value = '';
+          passwordInput.value = '';
+        }
+      }
+    }, 100);
+    
+    // Stop clearing after 5 seconds
+    setTimeout(() => {
+      clearInterval(clearingInterval);
+      console.log('✅ [LOGIN-EMAIL] Limpieza automática finalizada');
+    }, 5000);
+
+    // Verificar si regresamos de autenticación externa
+    function checkExternalAuthReturn() {
+      console.log('🔍 [LOGIN-EMAIL] Verificando retorno de auth externa...');
+      
+      // Verificar flags de autenticación externa
+      const externalAuthInProgress = localStorage.getItem('external_auth_in_progress');
+      const externalAuthData = localStorage.getItem('external_login_success');
+      
+      console.log('📋 [LOGIN-EMAIL] Estado external auth:', {
+        inProgress: externalAuthInProgress,
+        hasData: !!externalAuthData,
+        currentUrl: window.location.href
+      });
+      
+      if (externalAuthData) {
+        try {
+          const userData = JSON.parse(externalAuthData);
+          console.log('✅ [LOGIN-EMAIL] Datos de auth externa encontrados:', userData);
+          
+          // Limpiar localStorage
+          localStorage.removeItem('external_login_success');
+          localStorage.removeItem('external_auth_in_progress');
+          localStorage.removeItem('external_auth_type');
+          localStorage.removeItem('external_auth_return');
+          
+          // Mostrar mensaje de éxito y redirigir
+          showNotification('Autenticación exitosa. Redirigiendo...', 'success');
+          
+          setTimeout(() => {
+            // Redirigir basado en los datos del usuario
+            if (userData.email && userData.email.includes('admin@')) {
+              console.log('🔧 [LOGIN-EMAIL] Usuario admin detectado, redirigiendo a admin');
+              window.location.href = 'admin.html';
+            } else {
+              console.log('🏠 [LOGIN-EMAIL] Usuario normal, redirigiendo a home');
+              window.location.href = 'home.html';
+            }
+          }, 1500);
+          
+          return true;
+        } catch (error) {
+          console.error('❌ [LOGIN-EMAIL] Error procesando datos externos:', error);
+          localStorage.removeItem('external_login_success');
+        }
+      }
+      
+      // Limpiar flags si no hay datos pero sí progreso
+      if (externalAuthInProgress && !externalAuthData) {
+        console.log('🧹 [LOGIN-EMAIL] Limpiando flags de auth externa sin datos');
+        localStorage.removeItem('external_auth_in_progress');
+        localStorage.removeItem('external_auth_type');
+        localStorage.removeItem('external_auth_return');
+      }
+      
+      return false;
+    }
+
+    // Function to show success/error notifications
+    function showNotification(message, type = 'info') {
+      const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500'
+      };
+      
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50 animate__animated animate__fadeInRight`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.remove('animate__fadeInRight');
+        notification.classList.add('animate__fadeOutRight');
+        setTimeout(() => {
+          notification.remove();
+        }, 500);
+      }, 3000);
+    }
+
+    // Initialize biometric authentication system
+    async function initBiometricAuth() {
+      try {
+        // Import biometric login system
+        const { initBiometricLogin } = await import('./js/biometric-login.js');
+        
+        // Initialize biometric login
+        await initBiometricLogin('biometricLoginBtn');
+        console.log('✅ [LOGIN-EMAIL] Sistema biométrico inicializado');
+        
+      } catch (error) {
+        console.log('ℹ️ [LOGIN-EMAIL] Sistema biométrico no disponible:', error.message);
+        // Hide biometric button if import fails
+        if (biometricLoginBtn) {
+          biometricLoginBtn.style.display = 'none';
+        }
+      }
+    }
+
+    // Sistema de soporte biométrico
+    const biometricSupport = {
+      async isSupported() {
+        try {
+          if (!window.PublicKeyCredential || !navigator.credentials || !navigator.credentials.create) {
+            return { supported: false, reason: 'WebAuthn no soportado' };
+          }
+          
+          const available = await Promise.race([
+            PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
+            new Promise((resolve) => setTimeout(() => resolve(false), 5000))
+          ]);
+          
+          if (!available) {
+            return { supported: false, reason: 'Autenticador no disponible' };
+          }
+          
+          return { supported: true, reason: 'Biometría disponible' };
+        } catch (error) {
+          return { supported: false, reason: error.message };
+        }
+      }
+    };
+
+    async function askForBiometricRegistration(userEmail) {
+      return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+          <div class="bg-white rounded-xl p-6 max-w-md mx-4 text-center">
+            <div class="text-4xl mb-4">🔐</div>
+            <h3 class="text-xl font-bold mb-4">¿Activar Login Biométrico?</h3>
+            <p class="text-gray-600 mb-6">Usa tu huella dactilar o reconocimiento facial para iniciar sesión de forma más rápida y segura.</p>
+            <div class="flex space-x-3">
+              <button id="biometric-yes" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg">Sí, activar</button>
+              <button id="biometric-no" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">Ahora no</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('biometric-yes').onclick = () => {
+          modal.remove();
+          resolve(true);
+        };
+        
+        document.getElementById('biometric-no').onclick = () => {
+          modal.remove();
+          resolve(false);
+        };
+      });
+    }
+    
+    async function registerBiometricCredentials(userEmail) {
+      try {
+        const challenge = new Uint8Array(32);
+        crypto.getRandomValues(challenge);
+        
+        const userId = new Uint8Array(16);
+        crypto.getRandomValues(userId);
+        
+        const publicKeyCredentialCreationOptions = {
+          challenge: challenge,
+          rp: {
+            name: "YA ME VI",
+            id: "yamevi.com.mx",
+          },
+          user: {
+            id: userId,
+            name: userEmail,
+            displayName: userEmail,
+          },
+          pubKeyCredParams: [{alg: -7, type: "public-key"}],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "preferred"
+          },
+          timeout: 60000,
+          attestation: "direct"
+        };
+        
+        const credential = await navigator.credentials.create({
+          publicKey: publicKeyCredentialCreationOptions
+        });
+        
+        if (credential) {
+          const credentialData = {
+            id: credential.id,
+            credentialId: Array.from(new Uint8Array(credential.rawId)),
+            email: userEmail,
+            displayName: userEmail,
+            userId: Array.from(userId),
+            registrationTime: new Date().toISOString()
+          };
+          
+          localStorage.setItem('biometric_user_credentials', JSON.stringify(credentialData));
+          
+          showSuccess('✅ ¡Autenticación biométrica activada!');
+          
+          // Show biometric login button
+          if (biometricLoginBtn) {
+            biometricLoginBtn.style.display = 'block';
+          }
+          
+          console.log('✅ [BIOMETRIC] Credenciales registradas para:', userEmail);
+        }
+      } catch (error) {
+        console.error('❌ [BIOMETRIC] Error registrando credenciales:', error);
+        showError('No se pudo activar la autenticación biométrica');
+      }
+    }
+    
+    function handleSuccessfulAuth(user) {
+      console.log('✅ [LOGIN-EMAIL] Autenticación exitosa:', user.email);
+      
+      const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+      const isAdmin = adminEmails.includes(user.email.toLowerCase());
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminRedirect = urlParams.get('redirect') === 'admin';
+      
+      if (isAdminRedirect && isAdmin) {
+        localStorage.setItem('admin_verified', 'true');
+        window.location.href = "admin.html";
+      } else if (isAdminRedirect && !isAdmin) {
+        showError(`❌ Sin permisos de administrador para: ${user.email}`);
+      } else {
+        localStorage.setItem('user_email', user.email);
+        window.location.href = "home.html";
+      }
+    }
+
+    // Check external auth return on page load
+    checkExternalAuthReturn();
+    
+    // Initialize biometric authentication
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🔐 [LOGIN-EMAIL] Inicializando sistema biométrico...');
+      checkBiometricSupport();
+    });
+
+    console.log('✅ [LOGIN-EMAIL] Sistema de login mejorado inicializado');
+  </script>
+
+  <!-- Fondo dinámico -->
+  <script src="js/shared.js"></script>
+</body>
+</html>
