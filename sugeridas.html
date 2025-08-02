@@ -614,14 +614,15 @@
       });
     }
     
-    // ==================== FUNCIÓN PREDICCIONES IA MEJORADA ====================
+    // ==================== FUNCIÓN PREDICCIONES IA CON ANÁLISIS REAL ====================
     
     // Variables para controlar la versión de las predicciones
     let prediccionesPorUsuarioYHash = {};
+    let datosAnalisisCompleto = null;
     
-    // Ejecutar predicciones de IA
+    // Ejecutar predicciones de IA con análisis estadístico real
     async function ejecutarPrediccionesIA() {
-      console.log('🤖 Ejecutando predicciones IA');
+      console.log('🤖 Ejecutando predicciones IA con análisis estadístico real');
       
       const melateElement = document.getElementById('combinacion-melate');
       const revanchaElement = document.getElementById('combinacion-revancha');
@@ -633,7 +634,6 @@
       try {
         // Verificar si ya tenemos hash CSV actual
         if (csvHashActual === null) {
-          // Si no tenemos hash, necesitamos calcularlo primero
           await actualizarNumeroSorteo();
         }
         
@@ -650,36 +650,18 @@
           return;
         }
         
-        // Mostrar estado "cargando"
+        // Mostrar estado "analizando"
         if (melateElement) melateElement.textContent = 'Analizando...';
         if (revanchaElement) revanchaElement.textContent = 'Analizando...';
         if (revanchitaElement) revanchitaElement.textContent = 'Analizando...';
-        if (mensajeEstado) mensajeEstado.textContent = 'Aplicando 5 métodos de análisis...';
+        if (mensajeEstado) mensajeEstado.textContent = 'Aplicando 5 métodos: frecuencias, probabilidad, patrones, desviación estándar e IA...';
         
-        // Simular análisis
+        // Cargar y analizar datos reales
+        const datosReales = await cargarDatosRealesParaIA();
+        
         setTimeout(() => {
-          // Generar predicciones basadas en usuario + hash CSV para consistencia
-          const seedBase = generarHashSimple(usuario + csvHashActual);
-          
-          // Crear predicciones deterministas basadas en el ID de usuario y hash CSV
-          const generarNumeros = (multiplicador) => {
-            const nums = new Set();
-            let intentos = 0;
-            while (nums.size < 6 && intentos < 100) {
-              const seed = seedBase * multiplicador + nums.size;
-              const num = (seed % 56) + 1;
-              nums.add(num);
-              intentos++;
-            }
-            return [...nums].sort((a, b) => a - b).join(' - ');
-          };
-          
-          // Generar predicciones únicas para cada sorteo
-          const nuevasPredicciones = {
-            melate: generarNumeros(7),
-            revancha: generarNumeros(13),
-            revanchita: generarNumeros(19)
-          };
+          // Generar predicciones usando análisis estadístico real
+          const nuevasPredicciones = generarPrediccionesConIA(datosReales, usuario, csvHashActual);
           
           // Guardar en caché con la clave usuario+hash
           prediccionesPorUsuarioYHash[claveUsuarioHash] = nuevasPredicciones;
@@ -688,20 +670,334 @@
           if (melateElement) melateElement.textContent = nuevasPredicciones.melate;
           if (revanchaElement) revanchaElement.textContent = nuevasPredicciones.revancha;
           if (revanchitaElement) revanchitaElement.textContent = nuevasPredicciones.revanchita;
-          if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas de 5 métodos';
+          if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas: análisis estadístico + IA';
           
-          console.log(`✅ Nuevas predicciones generadas para ${usuario} (Hash: ${csvHashActual})`);
-        }, 1000);
+          console.log(`✅ Nuevas predicciones IA generadas para ${usuario} (Hash: ${csvHashActual})`);
+        }, 1500);
         
       } catch (error) {
         console.error('❌ Error en predicciones IA:', error);
         
-        // Fallback simple
-        if (melateElement) melateElement.textContent = 'Error al generar';
-        if (revanchaElement) revanchaElement.textContent = 'Error al generar';
-        if (revanchitaElement) revanchitaElement.textContent = 'Error al generar';
-        if (mensajeEstado) mensajeEstado.textContent = 'Error en predicciones';
+        // Fallback usando el sistema existente pero mejorado
+        const prediccionesFallback = generarPrediccionesFallback(usuario, csvHashActual);
+        
+        if (melateElement) melateElement.textContent = prediccionesFallback.melate;
+        if (revanchaElement) revanchaElement.textContent = prediccionesFallback.revancha;
+        if (revanchitaElement) revanchitaElement.textContent = prediccionesFallback.revanchita;
+        if (mensajeEstado) mensajeEstado.textContent = 'Predicciones generadas (modo fallback)';
       }
+    }
+    
+    // Función para cargar datos reales de los CSV
+    async function cargarDatosRealesParaIA() {
+      console.log('📊 Cargando datos reales para análisis IA...');
+      
+      const archivos = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
+      const sorteos = ['melate', 'revancha', 'revanchita'];
+      const datos = {};
+      
+      for (let i = 0; i < archivos.length; i++) {
+        const archivo = archivos[i];
+        const sorteo = sorteos[i];
+        
+        try {
+          const response = await fetch(archivo);
+          if (!response.ok) continue;
+          
+          const csvText = await response.text();
+          const lineas = csvText.trim().split('\n');
+          
+          if (lineas.length < 2) continue;
+          
+          const numeros = [];
+          const frecuencias = {};
+          const sumaTotal = [];
+          
+          // Procesar últimos 30 meses de datos
+          for (let j = 1; j < Math.min(lineas.length, 120); j++) { // ~120 sorteos = 30 meses
+            const linea = lineas[j].trim();
+            if (!linea) continue;
+            
+            const columnas = linea.split(',');
+            const numerosLinea = [];
+            
+            // Extraer números según el formato
+            const startCol = 2;
+            const endCol = 7;
+            
+            for (let k = startCol; k <= endCol; k++) {
+              const num = parseInt(columnas[k]);
+              if (!isNaN(num) && num >= 1 && num <= 56) {
+                numerosLinea.push(num);
+                numeros.push(num);
+                frecuencias[num] = (frecuencias[num] || 0) + 1;
+              }
+            }
+            
+            if (numerosLinea.length === 6) {
+              sumaTotal.push(numerosLinea.reduce((a, b) => a + b, 0));
+            }
+          }
+          
+          // Calcular estadísticas
+          const estadisticas = calcularEstadisticas(numeros, frecuencias, sumaTotal);
+          
+          datos[sorteo] = {
+            numeros: numeros,
+            frecuencias: frecuencias,
+            estadisticas: estadisticas,
+            totalSorteos: Math.floor(numeros.length / 6)
+          };
+          
+        } catch (error) {
+          console.error(`Error cargando ${archivo}:`, error);
+        }
+      }
+      
+      return datos;
+    }
+    
+    // Función para calcular estadísticas avanzadas
+    function calcularEstadisticas(numeros, frecuencias, sumas) {
+      const totalNumeros = numeros.length;
+      
+      // 1. Frecuencias normalizadas
+      const frecuenciasNorm = {};
+      for (let i = 1; i <= 56; i++) {
+        frecuenciasNorm[i] = (frecuencias[i] || 0) / totalNumeros;
+      }
+      
+      // 2. Desviación estándar de frecuencias
+      const promFrec = totalNumeros / 56;
+      let sumaCuadrados = 0;
+      for (let i = 1; i <= 56; i++) {
+        sumaCuadrados += Math.pow((frecuencias[i] || 0) - promFrec, 2);
+      }
+      const desviacionEstandar = Math.sqrt(sumaCuadrados / 56);
+      
+      // 3. Análisis de sumas
+      const promSuma = sumas.reduce((a, b) => a + b, 0) / sumas.length;
+      const sumaMin = Math.min(...sumas);
+      const sumaMax = Math.max(...sumas);
+      
+      // 4. Números calientes y fríos
+      const sortedFreqs = Object.entries(frecuencias).sort((a, b) => b[1] - a[1]);
+      const calientes = sortedFreqs.slice(0, 14).map(([num]) => parseInt(num));
+      const frios = sortedFreqs.slice(-14).map(([num]) => parseInt(num));
+      
+      return {
+        frecuenciasNorm,
+        desviacionEstandar,
+        promSuma,
+        sumaMin,
+        sumaMax,
+        calientes,
+        frios,
+        totalSorteos: Math.floor(totalNumeros / 6)
+      };
+    }
+    
+    // Función principal para generar predicciones con IA
+    function generarPrediccionesConIA(datosReales, usuario, hashCSV) {
+      console.log('🧠 Generando predicciones con IA y análisis estadístico...');
+      
+      const predicciones = {};
+      const userSeed = generarHashSimple(usuario + hashCSV);
+      
+      Object.keys(datosReales).forEach((sorteo, index) => {
+        const datos = datosReales[sorteo];
+        if (!datos || !datos.estadisticas) {
+          predicciones[sorteo] = generarCombinacionFallback(userSeed, index);
+          return;
+        }
+        
+        const stats = datos.estadisticas;
+        
+        // Combinar los 5 métodos de análisis
+        const combinacion = [];
+        
+        // Método 1: Frecuencias balanceadas (2 números)
+        const frecBalanceadas = seleccionarPorFrecuencias(stats.frecuenciasNorm, userSeed + index);
+        combinacion.push(...frecBalanceadas.slice(0, 2));
+        
+        // Método 2: Números calientes (1 número)
+        const caliente = stats.calientes[(userSeed + index * 7) % stats.calientes.length];
+        if (!combinacion.includes(caliente)) combinacion.push(caliente);
+        
+        // Método 3: Análisis de suma óptima (1 número)
+        const sumaOptima = seleccionarPorSuma(stats, userSeed + index * 11);
+        if (!combinacion.includes(sumaOptima) && combinacion.length < 5) combinacion.push(sumaOptima);
+        
+        // Método 4: Desviación estándar (1 número)
+        const porDesviacion = seleccionarPorDesviacion(stats, userSeed + index * 13);
+        if (!combinacion.includes(porDesviacion) && combinacion.length < 6) combinacion.push(porDesviacion);
+        
+        // Método 5: IA - Completar con análisis de patrones
+        while (combinacion.length < 6) {
+          const iaNumber = generarNumeroIA(stats, userSeed + index * 17 + combinacion.length, combinacion);
+          if (!combinacion.includes(iaNumber)) {
+            combinacion.push(iaNumber);
+          }
+        }
+        
+        // Ordenar y formatear
+        combinacion.sort((a, b) => a - b);
+        predicciones[sorteo] = combinacion.join(' - ');
+      });
+      
+      return predicciones;
+    }
+    
+    // Funciones auxiliares para cada método de análisis
+    function seleccionarPorFrecuencias(frecNorm, seed) {
+      const numeros = [];
+      const probabilidades = [];
+      
+      for (let i = 1; i <= 56; i++) {
+        // Balancear: ni muy frecuentes ni muy raros
+        const freq = frecNorm[i] || 0;
+        const ideal = 1/56; // Frecuencia ideal
+        const distancia = Math.abs(freq - ideal);
+        const prob = Math.max(0.1, 1 - distancia * 10); // Probabilidad inversamente proporcional a la distancia
+        
+        numeros.push(i);
+        probabilidades.push(prob);
+      }
+      
+      return seleccionarConProbabilidad(numeros, probabilidades, seed, 2);
+    }
+    
+    function seleccionarPorSuma(stats, seed) {
+      // Buscar números que contribuyan a una suma cercana al promedio
+      const sumaTarget = stats.promSuma;
+      const candidatos = [];
+      
+      for (let i = 1; i <= 56; i++) {
+        // Preferir números que están en el rango de suma óptima
+        const contrib = i / 6; // Contribución promedio de este número
+        const distancia = Math.abs(contrib - sumaTarget/6);
+        const peso = Math.max(0.1, 1 - distancia/10);
+        candidatos.push({numero: i, peso: peso});
+      }
+      
+      candidatos.sort((a, b) => b.peso - a.peso);
+      const index = Math.abs(seed * 7) % Math.min(10, candidatos.length);
+      return candidatos[index].numero;
+    }
+    
+    function seleccionarPorDesviacion(stats, seed) {
+      // Seleccionar números con desviación moderada (ni outliers positivos ni negativos extremos)
+      const promedio = stats.totalSorteos / 56 * 6; // Frecuencia promedio esperada
+      const candidatos = [];
+      
+      Object.entries(stats.frecuenciasNorm).forEach(([num, freq]) => {
+        const numero = parseInt(num);
+        const frecEsperada = promedio / stats.totalSorteos;
+        const desviacion = Math.abs(freq - frecEsperada);
+        
+        // Preferir desviaciones moderadas
+        const peso = Math.max(0.1, 1 - desviacion * 5);
+        candidatos.push({numero: numero, peso: peso});
+      });
+      
+      candidatos.sort((a, b) => b.peso - a.peso);
+      const index = Math.abs(seed * 11) % Math.min(15, candidatos.length);
+      return candidatos[index].numero;
+    }
+    
+    function generarNumeroIA(stats, seed, yaSeleccionados) {
+      // IA: Combinar múltiples factores con pesos adaptativos
+      const candidatos = [];
+      
+      for (let i = 1; i <= 56; i++) {
+        if (yaSeleccionados.includes(i)) continue;
+        
+        let puntuacion = 0;
+        
+        // Factor 1: Frecuencia balanceada (30%)
+        const freq = stats.frecuenciasNorm[i] || 0;
+        const idealFreq = 1/56;
+        puntuacion += (1 - Math.abs(freq - idealFreq) * 2) * 0.3;
+        
+        // Factor 2: No estar en extremos (20%)
+        const esCaliente = stats.calientes.includes(i);
+        const esFrio = stats.frios.includes(i);
+        if (!esCaliente && !esFrio) puntuacion += 0.2;
+        
+        // Factor 3: Balance par/impar (25%)
+        const pares = yaSeleccionados.filter(n => n % 2 === 0).length;
+        const impares = yaSeleccionados.length - pares;
+        if ((i % 2 === 0 && pares < 3) || (i % 2 === 1 && impares < 3)) {
+          puntuacion += 0.25;
+        }
+        
+        // Factor 4: Distribución en décadas (25%)
+        const decada = Math.floor((i - 1) / 10);
+        const enDecada = yaSeleccionados.filter(n => Math.floor((n - 1) / 10) === decada).length;
+        if (enDecada === 0) puntuacion += 0.25;
+        
+        candidatos.push({numero: i, puntuacion: puntuacion});
+      }
+      
+      candidatos.sort((a, b) => b.puntuacion - a.puntuacion);
+      
+      // Seleccionar con algo de aleatoriedad controlada
+      const topCandidatos = candidatos.slice(0, Math.min(10, candidatos.length));
+      const index = Math.abs(seed * 19) % topCandidatos.length;
+      
+      return topCandidatos[index].numero;
+    }
+    
+    function seleccionarConProbabilidad(numeros, probabilidades, seed, cantidad) {
+      const seleccionados = [];
+      const numerosDisponibles = [...numeros];
+      const probDisponibles = [...probabilidades];
+      
+      for (let i = 0; i < cantidad && numerosDisponibles.length > 0; i++) {
+        // Normalizar probabilidades
+        const sumProb = probDisponibles.reduce((a, b) => a + b, 0);
+        const probNorm = probDisponibles.map(p => p / sumProb);
+        
+        // Selección seudo-aleatoria basada en probabilidades
+        let acumulada = 0;
+        const target = ((seed * (i + 1) * 7) % 10000) / 10000;
+        
+        for (let j = 0; j < probNorm.length; j++) {
+          acumulada += probNorm[j];
+          if (target <= acumulada) {
+            seleccionados.push(numerosDisponibles[j]);
+            numerosDisponibles.splice(j, 1);
+            probDisponibles.splice(j, 1);
+            break;
+          }
+        }
+      }
+      
+      return seleccionados;
+    }
+    
+    // Función fallback mejorada
+    function generarPrediccionesFallback(usuario, hashCSV) {
+      const userSeed = generarHashSimple(usuario + hashCSV);
+      
+      return {
+        melate: generarCombinacionFallback(userSeed, 0),
+        revancha: generarCombinacionFallback(userSeed, 1),
+        revanchita: generarCombinacionFallback(userSeed, 2)
+      };
+    }
+    
+    function generarCombinacionFallback(seed, sorteoIndex) {
+      const nums = new Set();
+      let attempts = 0;
+      
+      while (nums.size < 6 && attempts < 100) {
+        const num = ((seed * (sorteoIndex + 1) * 7 + attempts * 11) % 56) + 1;
+        nums.add(num);
+        attempts++;
+      }
+      
+      return [...nums].sort((a, b) => a - b).join(' - ');
     }
     
     // ==================== SISTEMA DE SORTEOS POR USUARIO ====================
