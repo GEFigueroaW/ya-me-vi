@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Ingreso APK</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .loading-spinner {
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 2px solid white;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .apk-indicator {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      text-align: center;
+      font-weight: bold;
+      border: 2px solid #66BB6A;
+    }
+    
+    .error-display {
+      background: linear-gradient(135deg, #f44336, #d32f2f);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      text-align: center;
+      font-weight: bold;
+      border: 2px solid #ef5350;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+  <div class="glass-effect rounded-3xl p-8 w-full max-w-md text-white text-center animate__animated animate__fadeInUp">
+    
+    <!-- Logo -->
+    <div class="mb-6">
+      <div class="text-6xl mb-4">🎯</div>
+      <h1 class="text-3xl font-bold mb-2">YA ME VI</h1>
+      <p class="text-sm opacity-80">Versión APK Optimizada</p>
+    </div>
+
+    <!-- Indicador de entorno APK -->
+    <div id="apkIndicator" class="apk-indicator hidden">
+      <div class="text-2xl mb-2">📱</div>
+      <p>Entorno APK Detectado</p>
+      <p class="text-xs mt-1" id="environmentDetails">Cargando...</p>
+    </div>
+
+    <!-- Mostrar errores si los hay -->
+    <div id="errorDisplay" class="error-display hidden">
+      <div class="text-2xl mb-2">⚠️</div>
+      <p id="errorMessage">Error desconocido</p>
+      <button id="clearErrorBtn" class="mt-2 px-4 py-2 bg-white/20 rounded text-sm">
+        Limpiar y Reintentar
+      </button>
+    </div>
+
+    <!-- Login con Email (MÉTODO PRINCIPAL PARA APK) -->
+    <div class="space-y-4 mb-6">
+      <input 
+        type="email" 
+        id="emailInput" 
+        placeholder="📧 Correo electrónico" 
+        class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/30 focus:border-white/50 focus:outline-none transition-all"
+        autocomplete="email"
+        value=""
+      />
+      <input 
+        type="password" 
+        id="passwordInput" 
+        placeholder="🔒 Contraseña" 
+        class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/30 focus:border-white/50 focus:outline-none transition-all"
+        autocomplete="current-password"
+        value=""
+      />
+      
+      <button 
+        id="loginWithEmail" 
+        class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+      >
+        <span class="btn-text">🔑 Iniciar Sesión</span>
+        <div class="loading-spinner hidden mx-auto"></div>
+      </button>
+    </div>
+
+    <!-- Separador -->
+    <div class="flex items-center mb-6">
+      <div class="flex-1 h-px bg-white/30"></div>
+      <span class="px-4 text-sm opacity-70">Para crear cuenta</span>
+      <div class="flex-1 h-px bg-white/30"></div>
+    </div>
+
+    <!-- Enlaces -->
+    <div class="space-y-2 text-sm">
+      <p>
+        ¿No tienes cuenta? 
+        <a href="register.html" class="text-green-300 hover:text-green-200 underline transition-colors">
+          Crear cuenta
+        </a>
+      </p>
+      <p>
+        <a href="recover.html" class="text-purple-300 hover:text-purple-200 underline transition-colors">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </p>
+    </div>
+
+    <!-- Debug info -->
+    <div id="debugInfo" class="hidden mt-6 p-3 bg-black/20 rounded-lg text-xs font-mono text-left"></div>
+    
+    <!-- Botón de limpieza para debug -->
+    <div class="mt-4">
+      <button id="clearStateBtn" class="text-xs text-white/50 hover:text-white/80 underline">
+        🧹 Limpiar Estado de Autenticación
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de loading -->
+  <div id="loadingModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-white/90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800 max-w-sm mx-4">
+      <div class="loading-spinner mx-auto mb-4" style="border-color: #4CAF50; border-top-color: transparent;"></div>
+      <p id="loadingMessage" class="font-medium">Procesando...</p>
+    </div>
+  </div>
+
+  <!-- Firebase Authentication Script -->
+  <script type="module">
+    // Import Firebase functions y configuración centralizada
+    import { getFirebaseConfig, detectEnvironment, getAuthConfig, ADMIN_EMAILS } from './js/firebase-config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Obtener configuración apropiada para el entorno
+    const firebaseConfig = getFirebaseConfig();
+    const environment = detectEnvironment();
+    const authConfig = getAuthConfig();
+    
+    // Initialize Firebase
+    console.log('🔥 Inicializando Firebase con configuración para APK...');
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    // Configurar auth específicamente para APK
+    if (environment.isAPK) {
+      console.log('📱 Configurando Firebase Auth para entorno APK...');
+      // Configuraciones específicas para evitar problemas en WebView
+      auth.settings.appVerificationDisabledForTesting = false;
+    }
+
+    // Global variables
+    let currentUser = null;
+
+    // UI Management Functions
+    function showLoading(buttonId, message = 'Procesando...') {
+      const button = document.getElementById(buttonId);
+      const modal = document.getElementById('loadingModal');
+      const messageEl = document.getElementById('loadingMessage');
+      
+      if (button) {
+        button.disabled = true;
+        const spinner = button.querySelector('.loading-spinner');
+        const text = button.querySelector('.btn-text');
+        if (spinner) spinner.classList.remove('hidden');
+        if (text) text.classList.add('hidden');
+      }
+      
+      if (modal && messageEl) {
+        messageEl.textContent = message;
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function hideLoading(buttonId) {
+      const button = document.getElementById(buttonId);
+      const modal = document.getElementById('loadingModal');
+      
+      if (button) {
+        button.disabled = false;
+        const spinner = button.querySelector('.loading-spinner');
+        const text = button.querySelector('.btn-text');
+        if (spinner) spinner.classList.add('hidden');
+        if (text) text.classList.remove('hidden');
+      }
+      
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      const baseClasses = 'fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg z-50 text-white font-medium';
+      
+      const typeClasses = {
+        error: 'bg-red-500/90',
+        success: 'bg-green-500/90',
+        warning: 'bg-orange-500/90',
+        info: 'bg-blue-500/90'
+      };
+      
+      notification.className = `${baseClasses} ${typeClasses[type] || typeClasses.info}`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+
+    function showError(message) {
+      const errorDisplay = document.getElementById('errorDisplay');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      if (errorDisplay && errorMessage) {
+        errorMessage.textContent = message;
+        errorDisplay.classList.remove('hidden');
+      }
+    }
+
+    function hideError() {
+      const errorDisplay = document.getElementById('errorDisplay');
+      if (errorDisplay) {
+        errorDisplay.classList.add('hidden');
+      }
+    }
+
+    // Email Authentication (MÉTODO PRINCIPAL PARA APK)
+    async function loginWithEmail() {
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+      
+      if (!email || !password) {
+        showNotification('Por favor ingresa email y contraseña', 'warning');
+        return;
+      }
+
+      try {
+        hideError();
+        showLoading('loginWithEmail', 'Autenticando...');
+        
+        console.log('🔐 Iniciando autenticación con email para APK...');
+        
+        // Usar Firebase Auth directamente sin configuraciones especiales problemáticas
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        if (user) {
+          console.log('✅ Autenticación exitosa:', user.email);
+          
+          // Registrar en Firestore
+          await registerUserInFirestore(user);
+          
+          handleAuthSuccess(user);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error en autenticación:', error);
+        hideLoading('loginWithEmail');
+        
+        let errorMessage = 'Error al iniciar sesión: ';
+        
+        switch (error.code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            errorMessage = 'Email o contraseña incorrectos';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Demasiados intentos. Espera unos minutos';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = 'Error de conexión. Verifica tu internet';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'El email no es válido';
+            break;
+          case 'auth/missing-password':
+            errorMessage = 'Contraseña requerida';
+            break;
+          default:
+            errorMessage = `Error: ${error.message}`;
+        }
+        
+        showError(errorMessage);
+        showNotification(errorMessage, 'error');
+      }
+    }
+
+    // Registrar usuario en Firestore
+    async function registerUserInFirestore(user) {
+      try {
+        console.log('👤 Registrando usuario en Firestore...');
+        
+        if (!user) {
+          throw new Error('Usuario no proporcionado');
+        }
+        
+        const userRef = doc(db, 'users', user.uid);
+        
+        const userData = {
+          email: user.email,
+          displayName: user.displayName || null,
+          photoURL: user.photoURL || null,
+          lastAccess: serverTimestamp(),
+          device: 'Android APK',
+          isOnline: true,
+          loginCount: 1,
+          createdAt: serverTimestamp(),
+          isAdmin: user.email ? ADMIN_EMAILS.includes(user.email.toLowerCase()) : false,
+          environment: {
+            isAPK: environment.isAPK,
+            isWebView: environment.isWebView,
+            userAgent: environment.userAgent,
+            hasSessionStorage: environment.hasSessionStorage
+          },
+          uid: user.uid
+        };
+        
+        await setDoc(userRef, userData, { merge: true });
+        console.log('✅ Usuario registrado en Firestore:', user.email);
+        
+      } catch (error) {
+        console.error('❌ Error registrando usuario:', error);
+        // No lanzar error para no interrumpir el flujo de login
+      }
+    }
+
+    // Handle Authentication Success
+    function handleAuthSuccess(user) {
+      console.log('✅ Usuario autenticado exitosamente:', user.email || user.uid);
+      
+      hideLoading('loginWithEmail');
+      hideError();
+      
+      showNotification('¡Ingreso exitoso! Redirigiendo...', 'success');
+      
+      // Verificar si es admin
+      const isAdminRedirect = new URLSearchParams(window.location.search).get('admin') === 'true';
+      const isAdmin = ADMIN_EMAILS.includes(user.email);
+      
+      setTimeout(() => {
+        if (isAdminRedirect && isAdmin) {
+          window.location.href = 'admin.html';
+        } else if (isAdminRedirect && !isAdmin) {
+          showNotification('Sin permisos de administrador', 'error');
+          setTimeout(() => window.location.href = 'index.html', 2000);
+        } else {
+          window.location.href = 'home.html';
+        }
+      }, 1500);
+    }
+
+    // Clear authentication state
+    async function clearAuthentication() {
+      try {
+        showLoading('clearStateBtn', 'Limpiando estado...');
+        
+        await signOut(auth);
+        
+        // Limpiar almacenamiento local si es posible
+        try {
+          if (environment.hasLocalStorage) localStorage.clear();
+          if (environment.hasSessionStorage) sessionStorage.clear();
+        } catch (e) {
+          console.log('⚠️ No se pudo limpiar almacenamiento:', e);
+        }
+        
+        hideError();
+        showNotification('Estado de autenticación limpiado', 'success');
+        
+        // Limpiar formulario
+        document.getElementById('emailInput').value = '';
+        document.getElementById('passwordInput').value = '';
+        
+        console.log('🧹 Estado de autenticación limpiado');
+        
+      } catch (error) {
+        console.error('Error limpiando estado:', error);
+        showNotification('Error limpiando estado', 'error');
+      } finally {
+        hideLoading('clearStateBtn');
+      }
+    }
+
+    // Initialize App
+    function initializeApp() {
+      console.log('🚀 Inicializando app APK con entorno:', environment);
+      
+      // Mostrar indicador de APK
+      const apkIndicator = document.getElementById('apkIndicator');
+      const environmentDetails = document.getElementById('environmentDetails');
+      
+      if (environment.isAPK) {
+        apkIndicator.classList.remove('hidden');
+        environmentDetails.textContent = `Android APK | SessionStorage: ${environment.hasSessionStorage ? '✅' : '❌'}`;
+      }
+      
+      // Debug info si es necesario
+      const isDebug = window.location.search.includes('debug=true') || environment.hostname === 'localhost';
+      if (isDebug) {
+        const debugInfo = document.getElementById('debugInfo');
+        debugInfo.textContent = JSON.stringify(environment, null, 2);
+        debugInfo.classList.remove('hidden');
+      }
+      
+      console.log('📱 App APK inicializada correctamente');
+    }
+
+    // Event Listeners
+    document.getElementById('loginWithEmail').addEventListener('click', loginWithEmail);
+    document.getElementById('clearErrorBtn').addEventListener('click', hideError);
+    document.getElementById('clearStateBtn').addEventListener('click', clearAuthentication);
+    
+    // Allow login with Enter
+    document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loginWithEmail();
+    });
+
+    // Auth State Listener
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        console.log('✅ Usuario ya autenticado detectado:', user.email || user.uid);
+        // No redirigir automáticamente, permitir que el usuario vea la pantalla
+        // handleAuthSuccess(user);
+      } else {
+        console.log('👤 No hay usuario autenticado');
+      }
+    });
+
+    // Initialize
+    initializeApp();
+    
+    // Manejar errores globales
+    window.addEventListener('error', (event) => {
+      console.error('❌ Error global capturado:', event.error);
+      if (event.error && event.error.message && event.error.message.includes('missing initial state')) {
+        showError('Error de estado de Firebase. Prueba limpiar el estado e intentar de nuevo.');
+      }
+    });
+    
+    // Manejar errores de promesas rechazadas
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('❌ Promesa rechazada capturada:', event.reason);
+      if (event.reason && event.reason.message && event.reason.message.includes('missing initial state')) {
+        showError('Error de estado de Firebase. Prueba limpiar el estado e intentar de nuevo.');
+        event.preventDefault();
+      }
+    });
+    
+  </script>
+</body>
+</html>

@@ -6,6 +6,50 @@ export class SmartRedirector {
     this.initialized = false;
   }
 
+  // Detección específica de entorno APK/WebView
+  detectAPKEnvironment() {
+    const ua = navigator.userAgent.toLowerCase();
+    const hostname = window.location.hostname;
+    
+    // Indicadores de WebView/APK
+    const isWebView = /wv|webview|webintoapp/i.test(ua);
+    const isAndroid = /android/i.test(ua);
+    
+    // Verificar si sessionStorage está disponible
+    const hasSessionStorage = (() => {
+      try {
+        const test = '__storage_test__';
+        sessionStorage.setItem(test, test);
+        sessionStorage.removeItem(test);
+        return true;
+      } catch {
+        return false;
+      }
+    })();
+    
+    // Detectar si es un entorno APK (WebView + Android + posibles problemas de storage)
+    const isAPK = isWebView && isAndroid;
+    
+    console.log('🔍 Detección de entorno APK:', {
+      isWebView,
+      isAndroid,
+      isAPK,
+      hasSessionStorage,
+      userAgent: ua,
+      hostname
+    });
+    
+    return {
+      isWebView,
+      isAndroid,
+      isAPK,
+      hasSessionStorage,
+      userAgent: ua,
+      hostname,
+      protocol: window.location.protocol
+    };
+  }
+
   // Inicializar el detector
   async init() {
     try {
@@ -55,11 +99,23 @@ export class SmartRedirector {
     try {
       await this.waitForInit();
       
-      if (showLoadingFn) showLoadingFn('Detectando cuenta...');
+      if (showLoadingFn) showLoadingFn('Detectando entorno...');
       
-      console.log('🔍 Iniciando detección de cuenta...');
+      console.log('🔍 Iniciando detección de entorno y cuenta...');
       
-      // NUEVO: Verificar si ya hay una sesión activa de Firebase
+      // NUEVO: Detectar entorno APK/WebView PRIMERO
+      const isAPKEnvironment = this.detectAPKEnvironment();
+      
+      if (isAPKEnvironment.isAPK) {
+        console.log('📱 Entorno APK detectado - redirigiendo a login específico para APK');
+        return {
+          destination: 'login-apk-final.html',
+          reason: 'apk_environment',
+          environment: isAPKEnvironment
+        };
+      }
+      
+      // Si no es APK, verificar si ya hay una sesión activa de Firebase
       try {
         const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
         const auth = getAuth();

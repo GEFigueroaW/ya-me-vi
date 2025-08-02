@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "748876890843",
+    "project_id": "ya-me-vi",
+    "storage_bucket": "ya-me-vi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748876890843:android:315d26696c8142eed002fe",
+        "android_client_info": {
+          "package_name": "com.gefiguw.yamevi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "748876890843-ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gefiguw.yamevi",
+            "certificate_hash": "sha1_placeholder"
+          }
+        },
+        {
+          "client_id": "748876890843-ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBak3-l2c4nqltw-BPE04GYAaxS2gJo2Xo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "748876890843-ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

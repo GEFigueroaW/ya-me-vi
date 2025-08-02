@@ -4,14 +4,14 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-// Configuración de Firebase (misma que en firebase-init.js)
+// Configuración de Firebase (corregida para coincidir con firebase-config.js)
 const firebaseConfig = {
-  apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+  apiKey: "AIzaSyBak3-l2c4nqltw-BPE04GYAaxS2gJo2Xo",
   authDomain: "ya-me-vi.firebaseapp.com",
   projectId: "ya-me-vi",
-  storageBucket: "ya-me-vi.firebasestorage.app",
+  storageBucket: "ya-me-vi.appspot.com",
   messagingSenderId: "748876890843",
-  appId: "1:748876890843:web:070d1eb476d38594d002fe",
+  appId: "1:748876890843:web:ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
   measurementId: "G-D7R797S5BC"
 };
 
