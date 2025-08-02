@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Config - YA ME VI</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js" type="module"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2e7d32;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #1565c0;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #3367d6;
+        }
+        #log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test de Configuración Firebase</h1>
+        <p>Esta página permite verificar si la configuración de Firebase está funcionando correctamente.</p>
+        
+        <div id="status"></div>
+        
+        <button onclick="testFirebaseInit()">🔥 Probar Inicialización Firebase</button>
+        <button onclick="testGoogleAuth()">🔐 Probar Autenticación Google</button>
+        <button onclick="clearLog()">🧹 Limpiar Log</button>
+        
+        <div id="log"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+        // Configuración Firebase actualizada
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4bCqyyPuQo-3-ONMPrXtqPEJDF1BCb54",
+            authDomain: "ya-me-vi.firebaseapp.com",
+            projectId: "ya-me-vi",
+            storageBucket: "ya-me-vi.firebasestorage.app",
+            messagingSenderId: "748876890843",
+            appId: "1:748876890843:web:07bd1eb476d38594d002fe",
+            measurementId: "G-D7R797S5BC"
+        };
+
+        let app, auth, provider;
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logElement.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // También mostrar en el status
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="${type}">${prefix} ${message}</div>`;
+        }
+
+        window.testFirebaseInit = function() {
+            try {
+                log('Iniciando configuración Firebase...');
+                log(`API Key: ${firebaseConfig.apiKey}`);
+                log(`Auth Domain: ${firebaseConfig.authDomain}`);
+                log(`Project ID: ${firebaseConfig.projectId}`);
+                log(`App ID: ${firebaseConfig.appId}`);
+                
+                // Inicializar Firebase
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                provider = new GoogleAuthProvider();
+                
+                log('Firebase inicializado correctamente', 'success');
+                log(`Dominio actual: ${window.location.hostname}`);
+                log(`URL completa: ${window.location.href}`);
+                
+            } catch (error) {
+                log(`Error al inicializar Firebase: ${error.message}`, 'error');
+                console.error('Error Firebase:', error);
+            }
+        };
+
+        window.testGoogleAuth = function() {
+            if (!auth || !provider) {
+                log('Primero ejecuta la inicialización de Firebase', 'error');
+                return;
+            }
+
+            try {
+                log('Iniciando autenticación con Google...');
+                
+                signInWithPopup(auth, provider)
+                    .then((result) => {
+                        const user = result.user;
+                        log(`Autenticación exitosa para: ${user.email}`, 'success');
+                        log(`Nombre: ${user.displayName}`);
+                        log(`UID: ${user.uid}`);
+                    })
+                    .catch((error) => {
+                        log(`Error en autenticación: ${error.code}`, 'error');
+                        log(`Mensaje: ${error.message}`, 'error');
+                        console.error('Error completo:', error);
+                    });
+                    
+            } catch (error) {
+                log(`Error al configurar autenticación: ${error.message}`, 'error');
+                console.error('Error auth:', error);
+            }
+        };
+
+        window.clearLog = function() {
+            document.getElementById('log').textContent = '';
+            document.getElementById('status').innerHTML = '';
+        };
+
+        // Auto-inicializar cuando se carga la página
+        window.addEventListener('load', () => {
+            log('Página de prueba cargada');
+            log('Ejecuta las pruebas usando los botones');
+        });
+    </script>
+</body>
+</html>

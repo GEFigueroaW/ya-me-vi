@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:748876890843:android:315d26696c8142eed002fe",
+        "mobilesdk_app_id": "1:748876890843:android:315d26696c8142e4d002fe",
         "android_client_info": {
           "package_name": "com.gefiguw.yamevi"
         }
@@ -28,7 +28,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBak3-l2c4nqltw-BPE04GYAaxS2gJo2Xo"
+          "current_key": "AIzaSyB4bCqyyPuQo-3-ONMPrXtqPEJDF1BCb54"
         }
       ],
       "services": {

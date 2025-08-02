@@ -5,12 +5,12 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebas
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBak3-l2c4nqltw-BPE04GYAaxS2gJo2Xo",
+  apiKey: "AIzaSyB4bCqyyPuQo-3-ONMPrXtqPEJDF1BCb54",
   authDomain: "ya-me-vi.firebaseapp.com",
   projectId: "ya-me-vi",
-  storageBucket: "ya-me-vi.appspot.com",
+  storageBucket: "ya-me-vi.firebasestorage.app",
   messagingSenderId: "748876890843",
-  appId: "1:748876890843:web:ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+  appId: "1:748876890843:web:07bd1eb476d38594d002fe",
   measurementId: "G-D7R797S5BC"
 };
 
