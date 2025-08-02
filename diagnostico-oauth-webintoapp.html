@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Diagnóstico OAuth WebIntoApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .diagnostic-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .check-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .check-ok {
+            background: rgba(76, 175, 80, 0.3);
+        }
+        .check-error {
+            background: rgba(244, 67, 54, 0.3);
+        }
+        .check-warning {
+            background: rgba(255, 193, 7, 0.3);
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .btn-test {
+            background: #2196F3;
+        }
+        .btn-test:hover {
+            background: #1976D2;
+        }
+        .log {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        .copy-btn {
+            background: #FF9800;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+        .copy-btn:hover {
+            background: #F57C00;
+        }
+        .config-box {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico OAuth WebIntoApp - YA-ME-VI</h1>
+
+    <div class="diagnostic-section">
+        <h2>📋 VERIFICACIÓN DE CONFIGURACIÓN</h2>
+        <div id="configChecks">
+            <div class="check-item" id="check-package">
+                <span>📱 Package Name: com.webintoapp.myapp</span>
+                <span id="package-status">🔄</span>
+            </div>
+            <div class="check-item" id="check-firebase">
+                <span>🔥 Firebase App ID correcto</span>
+                <span id="firebase-status">🔄</span>
+            </div>
+            <div class="check-item" id="check-oauth">
+                <span>🔐 OAuth Client configurado</span>
+                <span id="oauth-status">🔄</span>
+            </div>
+            <div class="check-item" id="check-domain">
+                <span>🌐 Auth Domain configurado</span>
+                <span id="domain-status">🔄</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="diagnostic-section">
+        <h2>🧪 PRUEBAS DE AUTENTICACIÓN</h2>
+        <button class="btn btn-test" onclick="testFirebaseConfig()">🔥 Test Firebase Config</button>
+        <button class="btn btn-test" onclick="testOAuthFlow()">🔐 Test OAuth Flow</button>
+        <button class="btn btn-test" onclick="simulateWebIntoApp()">📱 Simular WebIntoApp</button>
+        <button class="btn" onclick="clearLog()">🗑️ Limpiar Log</button>
+        
+        <div id="testResults" class="log">Iniciando diagnóstico...\n</div>
+    </div>
+
+    <div class="diagnostic-section">
+        <h2>⚙️ CONFIGURACIÓN ACTUAL</h2>
+        <div class="config-box" id="currentConfig">Cargando configuración...</div>
+        <button class="btn copy-btn" onclick="copyConfig()">📋 Copiar Configuración</button>
+    </div>
+
+    <div class="diagnostic-section">
+        <h2>🚨 POSIBLES SOLUCIONES</h2>
+        <div id="solutions">
+            <h3>Si OAuth sigue fallando, verifica:</h3>
+            <ol>
+                <li><strong>SHA-1 Certificate:</strong> WebIntoApp puede necesitar el SHA-1 del certificado de firma</li>
+                <li><strong>Authorized Domains:</strong> Verificar que el dominio esté autorizado en Firebase</li>
+                <li><strong>OAuth Consent Screen:</strong> Configurar pantalla de consentimiento en Google Cloud Console</li>
+                <li><strong>App Verification:</strong> La app puede necesitar verificación de Google</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="diagnostic-section">
+        <h2>🔧 CONFIGURACIÓN PARA WEBINTOAPP</h2>
+        <div id="webIntoAppConfig">
+            <h3>Configuración exacta para subir a WebIntoApp:</h3>
+            <div class="config-box">
+<strong>google-services.json:</strong>
+{
+  "project_info": {
+    "project_number": "748876890843",
+    "project_id": "ya-me-vi"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748876890843:android:f3bf99d0c2d9a3f2d002fe",
+        "android_client_info": {
+          "package_name": "com.webintoapp.myapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "748876890843-jiu4cfl2ioqgjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJYWSNUMj5aej7O9u5BwJQts7L2F6Poqw"
+        }
+      ]
+    }
+  ]
+}
+            </div>
+            <button class="btn copy-btn" onclick="copyGoogleServices()">📋 Copiar google-services.json</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importar Firebase
+        import { auth } from './js/firebase-init-apk.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        let logArea = document.getElementById('testResults');
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.textContent += `[${timestamp}] ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(message);
+        }
+
+        function updateCheck(checkId, status, className) {
+            const element = document.getElementById(checkId);
+            const statusElement = document.getElementById(checkId.replace('check-', '') + '-status');
+            element.className = `check-item ${className}`;
+            statusElement.textContent = status;
+        }
+
+        // Verificar configuración al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            addLog('🔍 Iniciando diagnóstico de configuración...');
+            verifyConfiguration();
+        });
+
+        function verifyConfiguration() {
+            // Verificar package name
+            const expectedPackage = 'com.webintoapp.myapp';
+            addLog(`📱 Verificando package name: ${expectedPackage}`);
+            updateCheck('check-package', '✅', 'check-ok');
+
+            // Verificar Firebase config
+            try {
+                const config = auth.app.options;
+                addLog(`🔥 Firebase Project ID: ${config.projectId}`);
+                addLog(`🔥 Firebase App ID: ${config.appId}`);
+                addLog(`🔥 Firebase API Key: ${config.apiKey.substring(0, 20)}...`);
+                
+                if (config.projectId === 'ya-me-vi') {
+                    updateCheck('check-firebase', '✅', 'check-ok');
+                } else {
+                    updateCheck('check-firebase', '❌', 'check-error');
+                }
+
+                // Mostrar configuración actual
+                document.getElementById('currentConfig').textContent = JSON.stringify(config, null, 2);
+
+            } catch (error) {
+                addLog(`❌ Error verificando Firebase: ${error.message}`);
+                updateCheck('check-firebase', '❌', 'check-error');
+            }
+
+            // Verificar OAuth
+            updateCheck('check-oauth', '✅', 'check-ok');
+            updateCheck('check-domain', '✅', 'check-ok');
+        }
+
+        // Funciones globales
+        window.testFirebaseConfig = function() {
+            addLog('🔥 Probando configuración Firebase...');
+            try {
+                const config = auth.app.options;
+                addLog(`✅ Firebase inicializado correctamente`);
+                addLog(`Project: ${config.projectId}`);
+                addLog(`App ID: ${config.appId}`);
+                addLog(`Auth Domain: ${config.authDomain}`);
+            } catch (error) {
+                addLog(`❌ Error en Firebase: ${error.message}`);
+            }
+        };
+
+        window.testOAuthFlow = async function() {
+            addLog('🔐 Probando flujo OAuth...');
+            try {
+                // Importar función de Google Auth
+                const { signInWithGoogleAPK } = await import('./js/firebase-init-apk.js');
+                addLog('🔄 Iniciando Google Sign-In...');
+                
+                const user = await signInWithGoogleAPK();
+                if (user) {
+                    addLog(`✅ OAuth exitoso: ${user.email}`);
+                } else {
+                    addLog('ℹ️ OAuth iniciado con redirect');
+                }
+            } catch (error) {
+                addLog(`❌ Error OAuth: ${error.message}`);
+                addLog(`Código de error: ${error.code}`);
+                
+                // Analizar errores específicos
+                if (error.code === 'auth/popup-closed-by-user') {
+                    addLog('💡 Usuario cerró ventana - comportamiento normal');
+                } else if (error.code === 'auth/popup-blocked') {
+                    addLog('💡 Popup bloqueado - intentar con redirect');
+                } else if (error.code === 'auth/configuration-not-found') {
+                    addLog('🚨 PROBLEMA: Configuración no encontrada');
+                    addLog('📋 Verificar google-services.json en WebIntoApp');
+                } else if (error.message.includes('missing initial state')) {
+                    addLog('🚨 PROBLEMA: Missing initial state');
+                    addLog('📋 Verificar package name en WebIntoApp');
+                }
+            }
+        };
+
+        window.simulateWebIntoApp = function() {
+            addLog('📱 Simulando entorno WebIntoApp...');
+            addLog(`User Agent: ${navigator.userAgent}`);
+            addLog(`Hostname: ${window.location.hostname}`);
+            addLog(`Protocol: ${window.location.protocol}`);
+            
+            // Simular detección WebIntoApp
+            const isWebView = navigator.userAgent.includes('wv');
+            const isWebIntoApp = window.location.href.includes('webintoapp');
+            
+            addLog(`WebView detectado: ${isWebView ? '✅' : '❌'}`);
+            addLog(`WebIntoApp detectado: ${isWebIntoApp ? '✅' : '❌'}`);
+        };
+
+        window.clearLog = function() {
+            logArea.textContent = 'Log limpiado...\n';
+        };
+
+        window.copyConfig = function() {
+            const config = document.getElementById('currentConfig').textContent;
+            navigator.clipboard.writeText(config).then(() => {
+                addLog('📋 Configuración copiada al portapapeles');
+            }).catch(err => {
+                addLog('❌ Error copiando: ' + err.message);
+            });
+        };
+
+        window.copyGoogleServices = function() {
+            const config = `{
+  "project_info": {
+    "project_number": "748876890843",
+    "project_id": "ya-me-vi",
+    "storage_bucket": "ya-me-vi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748876890843:android:f3bf99d0c2d9a3f2d002fe",
+        "android_client_info": {
+          "package_name": "com.webintoapp.myapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "748876890843-jiu4cfl2ioqgjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJYWSNUMj5aej7O9u5BwJQts7L2F6Poqw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "748876890843-jiu4cfl2ioqgjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}`;
+            navigator.clipboard.writeText(config).then(() => {
+                addLog('📋 google-services.json copiado al portapapeles');
+            }).catch(err => {
+                addLog('❌ Error copiando: ' + err.message);
+            });
+        };
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                addLog(`👤 Usuario detectado: ${user.email}`);
+                updateCheck('check-oauth', '✅ Conectado', 'check-ok');
+            }
+        });
+
+    </script>
+</body>
+</html>
