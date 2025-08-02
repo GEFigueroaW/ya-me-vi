@@ -182,14 +182,10 @@
   <!-- Scripts -->
   <script src="js/shared.js"></script>
   <script type="module">
-    // Importaciones de Firebase
-    import { auth } from './js/firebase-init.js';
+    // Importaciones de Firebase APK optimizado
+    import { auth, signInWithGoogleAPK, handleRedirectResult } from './js/firebase-init-apk.js';
     import { 
-      signInWithEmailAndPassword, 
-      signInWithPopup, 
-      signInWithRedirect,
-      getRedirectResult,
-      GoogleAuthProvider, 
+      signInWithEmailAndPassword,
       onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -362,7 +358,7 @@
       }
     }
 
-    // Login con Google
+    // Login con Google optimizado para APK
     async function loginWithGoogle() {
       if (isAuthenticating) return;
       
@@ -370,43 +366,22 @@
       toggleLoading('loginWithGoogle', true);
       
       try {
-        const env = detectEnvironment();
-        const provider = new GoogleAuthProvider();
-        provider.addScope('email');
-        provider.addScope('profile');
+        console.log('🚀 Iniciando autenticación Google APK optimizada');
         
-        let result;
+        // Usar la nueva función optimizada para APK
+        const user = await signInWithGoogleAPK();
         
-        if (env.isWebView || env.isApp) {
-          // En WebView/App usar redirect
-          console.log('📱 Usando signInWithRedirect para WebView/App');
-          await signInWithRedirect(auth, provider);
-          // El resultado se manejará en el listener de auth state
-          return;
+        if (user) {
+          console.log('✅ Usuario autenticado:', user.email);
+          handleAuthSuccess(user);
         } else {
-          // En navegador normal usar popup
-          console.log('🖥️ Usando signInWithPopup para navegador');
-          result = await signInWithPopup(auth, provider);
-        }
-        
-        if (result && result.user) {
-          handleAuthSuccess(result.user);
+          console.log('ℹ️ Autenticación iniciada con redirect, esperando resultado...');
+          // El resultado se manejará por el listener de auth state
         }
         
       } catch (error) {
-        if (error.code === 'auth/popup-blocked') {
-          // Si falla popup, intentar redirect
-          console.log('🔄 Popup bloqueado, intentando redirect...');
-          try {
-            const provider = new GoogleAuthProvider();
-            await signInWithRedirect(auth, provider);
-            return;
-          } catch (redirectError) {
-            handleAuthError(redirectError);
-          }
-        } else {
-          handleAuthError(error);
-        }
+        console.error('❌ Error en autenticación Google APK:', error);
+        handleAuthError(error);
       } finally {
         isAuthenticating = false;
         toggleLoading('loginWithGoogle', false);
@@ -447,6 +422,17 @@
 
     // Inicializar
     updateSystemStatus();
+    
+    // Manejar resultados de redirect al cargar la página
+    handleRedirectResult().then(user => {
+      if (user) {
+        console.log('✅ Usuario autenticado via redirect:', user.email);
+        handleAuthSuccess(user);
+      }
+    }).catch(error => {
+      console.warn('⚠️ No se encontró resultado de redirect:', error);
+    });
+    
     console.log('🚀 Sistema de login APK-compatible inicializado');
     
   </script>

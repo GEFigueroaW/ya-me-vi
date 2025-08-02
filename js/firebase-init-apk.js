@@ -6,6 +6,10 @@ import {
   getAuth, 
   onAuthStateChanged,
   signInWithCustomToken,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
@@ -17,14 +21,18 @@ import {
   serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Firebase Config - ANDROID/APK específico basado en google-services.json
+// Firebase Config - HÍBRIDO para WebIntoApp/APK basado en google-services.json
+// Usa configuración Android pero con authDomain web para OAuth
 const firebaseConfig = {
   apiKey: "AIzaSyAJYWSNUMj5aej7O9u5BwJQts7L2F6Poqw", // Android API Key del google-services.json
-  authDomain: "ya-me-vi.firebaseapp.com",
+  authDomain: "ya-me-vi.firebaseapp.com", // Usar dominio web para OAuth en WebView
   projectId: "ya-me-vi",
   storageBucket: "ya-me-vi.firebasestorage.app",
   messagingSenderId: "748876890843",
-  appId: "1:748876890843:android:315d26696c8142e4d002fe", // Android App ID del google-services.json
+  // CRÍTICO: Usar appId web en WebIntoApp para OAuth, Android para app nativa
+  appId: window.location.href.includes('webintoapp') || navigator.userAgent.includes('webintoapp') 
+    ? "1:748876890843:web:07bd1eb476d38594d002fe"  // Web App ID para OAuth en WebView
+    : "1:748876890843:android:315d26696c8142e4d002fe", // Android App ID para app nativa
   measurementId: "G-D7R797S5BC"
 };
 
@@ -513,6 +521,104 @@ console.log('🚀 Firebase APK Init cargado');
   }
 }
 
+// Función de login con Google específica para APK
+export async function signInWithGoogleAPK() {
+  try {
+    console.log('🔄 Iniciando Google Sign-In para APK');
+    
+    // Detectar entorno antes de proceder
+    const environment = detectWebIntoAppEnvironment();
+    console.log('🔍 Entorno detectado:', environment);
+    
+    // Configuración específica para WebIntoApp
+    if (environment.isWebIntoApp) {
+      console.log('📱 Usando configuración específica WebIntoApp con OAuth híbrido');
+      
+      // Configurar provider con configuración optimizada para WebView
+      const provider = new GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      // Configurar parámetros específicos para WebIntoApp
+      provider.setCustomParameters({
+        'prompt': 'select_account',
+        'access_type': 'online',
+        'include_granted_scopes': 'true',
+        'state': 'webintoapp_oauth_' + Math.random().toString(36).substr(2, 9)
+      });
+      
+      // Usar popup en lugar de redirect para WebView
+      try {
+        console.log('🔄 Intentando autenticación con popup...');
+        const result = await signInWithPopup(auth, provider);
+        
+        if (result.user) {
+          console.log('✅ Autenticación Google exitosa (popup):', result.user.email);
+          await registerUserInFirestore(result.user, environment);
+          return result.user;
+        }
+      } catch (popupError) {
+        console.log('⚠️ Popup falló, intentando redirect:', popupError.message);
+        
+        // Si popup falla, intentar redirect como fallback
+        await signInWithRedirect(auth, provider);
+        return null; // El resultado se manejará en el callback
+      }
+    } else {
+      // Configuración estándar para otros entornos
+      console.log('🌐 Usando configuración estándar de Google Auth');
+      const provider = new GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      const result = await signInWithPopup(auth, provider);
+      if (result.user) {
+        console.log('✅ Autenticación Google exitosa:', result.user.email);
+        await registerUserInFirestore(result.user, environment);
+        return result.user;
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ Error en Google Sign-In APK:', error);
+    
+    // Manejar errores específicos de OAuth
+    if (error.code === 'auth/popup-closed-by-user') {
+      console.log('ℹ️ Usuario cerró la ventana de autenticación');
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      console.log('ℹ️ Solicitud de popup cancelada');
+    } else if (error.code === 'auth/popup-blocked') {
+      console.log('⚠️ Popup bloqueado, intentando redirect...');
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithRedirect(auth, provider);
+      } catch (redirectError) {
+        console.error('❌ También falló redirect:', redirectError);
+        throw redirectError;
+      }
+    } else {
+      throw error;
+    }
+  }
+}
+
+// Manejar resultados de redirect (para cuando popup falla)
+export async function handleRedirectResult() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result) {
+      console.log('✅ Autenticación Google exitosa (redirect):', result.user.email);
+      const environment = detectWebIntoAppEnvironment();
+      await registerUserInFirestore(result.user, environment);
+      return result.user;
+    }
+  } catch (error) {
+    console.error('❌ Error manejando redirect result:', error);
+    throw error;
+  }
+  return null;
+}
+
 // Listener global de autenticación optimizado para APK
 if (auth) {
   onAuthStateChanged(auth, async (user) => {
@@ -543,7 +649,7 @@ if (auth) {
 }
 
 // Exportaciones
-export { app, auth, db, onAuthStateChanged };
+export { app, auth, db, onAuthStateChanged, signInWithGoogleAPK, handleRedirectResult };
 
 // Log de inicialización
 console.log('🚀 Firebase APK-compatible inicializado');
