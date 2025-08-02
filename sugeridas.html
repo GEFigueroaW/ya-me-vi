@@ -802,39 +802,45 @@
       console.log('🧠 Generando predicciones con IA y análisis estadístico...');
       
       const predicciones = {};
-      const userSeed = generarHashSimple(usuario + hashCSV);
+      
+      // Generar múltiples seeds únicos por usuario para mayor diferenciación
+      const baseUserSeed = generarHashSimple(usuario + "_base_" + hashCSV);
+      const altUserSeed = generarHashSimple(usuario + "_alt_" + hashCSV + "_ia");
+      const mixedSeed = generarHashSimple(usuario + hashCSV + "_mixed_" + Date.now().toString().slice(-4));
       
       Object.keys(datosReales).forEach((sorteo, index) => {
         const datos = datosReales[sorteo];
         if (!datos || !datos.estadisticas) {
-          predicciones[sorteo] = generarCombinacionFallback(userSeed, index);
+          predicciones[sorteo] = generarCombinacionFallback(baseUserSeed, index);
           return;
         }
         
         const stats = datos.estadisticas;
         
-        // Combinar los 5 métodos de análisis
+        // Combinar los 5 métodos de análisis con seeds diferenciados
         const combinacion = [];
         
-        // Método 1: Frecuencias balanceadas (2 números)
-        const frecBalanceadas = seleccionarPorFrecuencias(stats.frecuenciasNorm, userSeed + index);
+        // Método 1: Frecuencias balanceadas (2 números) - Seed único
+        const frecBalanceadas = seleccionarPorFrecuencias(stats.frecuenciasNorm, baseUserSeed + index * 17);
         combinacion.push(...frecBalanceadas.slice(0, 2));
         
-        // Método 2: Números calientes (1 número)
-        const caliente = stats.calientes[(userSeed + index * 7) % stats.calientes.length];
+        // Método 2: Números calientes (1 número) - Seed alternativo
+        const indiceCaliente = (altUserSeed + index * 23) % stats.calientes.length;
+        const caliente = stats.calientes[indiceCaliente];
         if (!combinacion.includes(caliente)) combinacion.push(caliente);
         
-        // Método 3: Análisis de suma óptima (1 número)
-        const sumaOptima = seleccionarPorSuma(stats, userSeed + index * 11);
+        // Método 3: Análisis de suma óptima (1 número) - Seed mixto
+        const sumaOptima = seleccionarPorSuma(stats, mixedSeed + index * 31);
         if (!combinacion.includes(sumaOptima) && combinacion.length < 5) combinacion.push(sumaOptima);
         
-        // Método 4: Desviación estándar (1 número)
-        const porDesviacion = seleccionarPorDesviacion(stats, userSeed + index * 13);
+        // Método 4: Desviación estándar (1 número) - Seed combinado
+        const porDesviacion = seleccionarPorDesviacion(stats, baseUserSeed + altUserSeed + index * 37);
         if (!combinacion.includes(porDesviacion) && combinacion.length < 6) combinacion.push(porDesviacion);
         
-        // Método 5: IA - Completar con análisis de patrones
+        // Método 5: IA - Completar con análisis de patrones usando seed único por posición
         while (combinacion.length < 6) {
-          const iaNumber = generarNumeroIA(stats, userSeed + index * 17 + combinacion.length, combinacion);
+          const posicionSeed = mixedSeed + baseUserSeed + index * 41 + combinacion.length * 43;
+          const iaNumber = generarNumeroIA(stats, posicionSeed, combinacion);
           if (!combinacion.includes(iaNumber)) {
             combinacion.push(iaNumber);
           }
@@ -976,14 +982,17 @@
       return seleccionados;
     }
     
-    // Función fallback mejorada
+    // Función fallback mejorada con mayor diferenciación por usuario
     function generarPrediccionesFallback(usuario, hashCSV) {
-      const userSeed = generarHashSimple(usuario + hashCSV);
+      // Múltiples seeds para mayor variabilidad
+      const userSeed1 = generarHashSimple(usuario + "_fallback_" + hashCSV);
+      const userSeed2 = generarHashSimple(usuario + hashCSV + "_backup");
+      const userSeed3 = generarHashSimple(hashCSV + "_" + usuario + "_emergency");
       
       return {
-        melate: generarCombinacionFallback(userSeed, 0),
-        revancha: generarCombinacionFallback(userSeed, 1),
-        revanchita: generarCombinacionFallback(userSeed, 2)
+        melate: generarCombinacionFallback(userSeed1, 0),
+        revancha: generarCombinacionFallback(userSeed2, 1),
+        revanchita: generarCombinacionFallback(userSeed3, 2)
       };
     }
     
@@ -991,8 +1000,16 @@
       const nums = new Set();
       let attempts = 0;
       
+      // Usar múltiples factores para mayor diversidad
+      const baseSeed = seed + sorteoIndex * 47;
+      
       while (nums.size < 6 && attempts < 100) {
-        const num = ((seed * (sorteoIndex + 1) * 7 + attempts * 11) % 56) + 1;
+        // Combinar múltiples operaciones para mejor distribución
+        const factor1 = (baseSeed * (attempts + 1) * 17) % 56;
+        const factor2 = (baseSeed + attempts * 23) % 56;
+        const factor3 = ((baseSeed ^ attempts) * 31) % 56;
+        
+        const num = Math.abs(factor1 ^ factor2 ^ factor3) % 56 + 1;
         nums.add(num);
         attempts++;
       }
@@ -1006,14 +1023,21 @@
     let csvHashActual = null;
     let sorteosPorUsuario = {};
     
-    // Función para generar hash simple de un string
+    // Función para generar hash robusto de un string (mejor distribución)
     function generarHashSimple(str) {
-      let hash = 0;
+      let hash = 5381; // Usar primer número primo para mejor distribución
       for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convertir a 32bit integer
+        hash = ((hash << 5) + hash) + char; // hash * 33 + char
       }
+      
+      // Aplicar múltiples operaciones para mejor distribución
+      hash = hash ^ (hash >>> 16);
+      hash = Math.imul(hash, 0x85ebca6b);
+      hash = hash ^ (hash >>> 13);
+      hash = Math.imul(hash, 0xc2b2ae35);
+      hash = hash ^ (hash >>> 16);
+      
       return Math.abs(hash);
     }
     
@@ -1026,9 +1050,12 @@
         return sorteosPorUsuario[claveUsuario];
       }
       
-      // Generar sorteo único para este usuario basado en su ID y el hash CSV
-      const hashUsuario = generarHashSimple(usuario);
-      const offset = (hashUsuario % 10) + 1; // Offset entre 1 y 10
+      // Generar sorteo único para este usuario con mayor rango de diferenciación
+      const hashUsuario = generarHashSimple(usuario + "_sorteo_" + hashCSV);
+      
+      // Usar un rango más amplio para evitar duplicados entre usuarios cercanos
+      // Rango de 1 a 100 para mayor diferenciación
+      const offset = (hashUsuario % 100) + 1;
       const sorteoUsuario = ultimoSorteoCSV + offset;
       
       // Guardar en caché
@@ -1107,10 +1134,10 @@
       } catch (error) {
         console.error('❌ Error al actualizar número de sorteo:', error);
         
-        // Fallback con sistema de usuario
+        // Fallback con sistema de usuario mejorado
         const usuario = window.usuarioActualID || 'Guillermo';
-        const hashUsuario = generarHashSimple(usuario);
-        const sorteoFallback = 4091 + (hashUsuario % 10); // Sorteo base + offset único por usuario
+        const hashUsuario = generarHashSimple(usuario + "_fallback_emergency");
+        const sorteoFallback = 4091 + (hashUsuario % 100); // Rango ampliado para mayor diferenciación
         
         const tituloSorteo = document.getElementById('titulo-sorteo');
         if (tituloSorteo) {
