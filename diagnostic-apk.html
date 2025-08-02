@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico APK - YA ME VI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .status-ok { color: #10B981; }
+    .status-warning { color: #F59E0B; }
+    .status-error { color: #EF4444; }
+  </style>
+</head>
+<body class="p-4">
+  
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Título -->
+    <div class="glass-effect rounded-xl p-6 mb-6 text-center">
+      <h1 class="text-3xl font-bold text-white mb-2">🔍 Diagnóstico APK</h1>
+      <p class="text-white/80">YA ME VI - Análisis de Compatibilidad</p>
+    </div>
+    
+    <!-- Información del Entorno -->
+    <div class="glass-effect rounded-xl p-6 mb-6">
+      <h2 class="text-xl font-bold text-white mb-4">📱 Información del Entorno</h2>
+      <div id="environmentInfo" class="space-y-2 text-sm">
+        <div class="text-white/80">Cargando diagnóstico...</div>
+      </div>
+    </div>
+    
+    <!-- Estado de Firebase -->
+    <div class="glass-effect rounded-xl p-6 mb-6">
+      <h2 class="text-xl font-bold text-white mb-4">🔥 Estado de Firebase</h2>
+      <div id="firebaseInfo" class="space-y-2 text-sm">
+        <div class="text-white/80">Verificando Firebase...</div>
+      </div>
+    </div>
+    
+    <!-- Test de Funcionalidades -->
+    <div class="glass-effect rounded-xl p-6 mb-6">
+      <h2 class="text-xl font-bold text-white mb-4">⚡ Test de Funcionalidades</h2>
+      <div id="functionalityTests" class="space-y-2 text-sm">
+        <div class="text-white/80">Ejecutando tests...</div>
+      </div>
+    </div>
+    
+    <!-- Recomendaciones -->
+    <div class="glass-effect rounded-xl p-6 mb-6">
+      <h2 class="text-xl font-bold text-white mb-4">💡 Recomendaciones</h2>
+      <div id="recommendations" class="space-y-2 text-sm">
+        <div class="text-white/80">Analizando configuración...</div>
+      </div>
+    </div>
+    
+    <!-- Botones de Acción -->
+    <div class="glass-effect rounded-xl p-6 text-center space-y-4">
+      <button id="runTestsBtn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold">
+        🔄 Ejecutar Tests Nuevamente
+      </button>
+      <button id="exportResultsBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold ml-4">
+        📋 Exportar Resultados
+      </button>
+    </div>
+    
+  </div>
+
+  <script type="module">
+    console.log('🔍 Iniciando diagnóstico APK...');
+    
+    // Función para detectar entorno
+    function detectEnvironment() {
+      const ua = navigator.userAgent.toLowerCase();
+      const isWebView = !window.chrome || /wv|android.*version\/[.\d]+ chrome/.test(ua);
+      const isApp = ua.includes('webintoapp') || ua.includes('app') || window.location.protocol === 'file:';
+      const isMobile = /android|iphone|ipad|mobile/.test(ua);
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      
+      return {
+        userAgent: ua,
+        isWebView,
+        isApp,
+        isMobile,
+        isLocalhost,
+        protocol: window.location.protocol,
+        hostname: window.location.hostname,
+        href: window.location.href
+      };
+    }
+    
+    // Función para test de almacenamiento
+    function testStorage() {
+      const results = {
+        localStorage: false,
+        sessionStorage: false,
+        cookies: false,
+        indexedDB: false
+      };
+      
+      try {
+        localStorage.setItem('test', 'test');
+        localStorage.removeItem('test');
+        results.localStorage = true;
+      } catch (e) {
+        console.warn('LocalStorage no disponible:', e);
+      }
+      
+      try {
+        sessionStorage.setItem('test', 'test');
+        sessionStorage.removeItem('test');
+        results.sessionStorage = true;
+      } catch (e) {
+        console.warn('SessionStorage no disponible:', e);
+      }
+      
+      try {
+        document.cookie = 'test=test';
+        results.cookies = document.cookie.includes('test=test');
+        document.cookie = 'test=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+      } catch (e) {
+        console.warn('Cookies no disponibles:', e);
+      }
+      
+      try {
+        results.indexedDB = 'indexedDB' in window;
+      } catch (e) {
+        console.warn('IndexedDB no disponible:', e);
+      }
+      
+      return results;
+    }
+    
+    // Función para test de Firebase
+    async function testFirebase() {
+      const results = {
+        initialized: false,
+        auth: false,
+        firestore: false,
+        network: false,
+        error: null
+      };
+      
+      try {
+        // Test de inicialización
+        const { app, auth, db } = await import('./js/firebase-init.js');
+        results.initialized = !!app;
+        results.auth = !!auth;
+        results.firestore = !!db;
+        
+        // Test de conectividad
+        try {
+          const testResponse = await fetch('https://ya-me-vi.firebaseapp.com');
+          results.network = testResponse.status < 500;
+        } catch (networkError) {
+          console.warn('Error de red:', networkError);
+          results.network = false;
+        }
+        
+      } catch (error) {
+        console.error('Error testing Firebase:', error);
+        results.error = error.message;
+      }
+      
+      return results;
+    }
+    
+    // Función para generar recomendaciones
+    function generateRecommendations(env, storage, firebase) {
+      const recommendations = [];
+      
+      if (env.isApp || env.isWebView) {
+        recommendations.push({
+          type: 'info',
+          title: 'Entorno APK/WebView Detectado',
+          message: 'Se recomienda usar archivos APK-compatible para mejor funcionamiento.'
+        });
+      }
+      
+      if (!storage.localStorage) {
+        recommendations.push({
+          type: 'error',
+          title: 'LocalStorage No Disponible',
+          message: 'Esto causará problemas con la persistencia de datos. Verificar configuración WebView.'
+        });
+      }
+      
+      if (!firebase.initialized) {
+        recommendations.push({
+          type: 'error',
+          title: 'Firebase No Inicializado',
+          message: 'Error crítico. Verificar configuración y conectividad.'
+        });
+      }
+      
+      if (!firebase.network) {
+        recommendations.push({
+          type: 'warning',
+          title: 'Problemas de Conectividad',
+          message: 'Verificar conexión a internet y dominios autorizados en Firebase.'
+        });
+      }
+      
+      if (env.protocol === 'file:') {
+        recommendations.push({
+          type: 'warning',
+          title: 'Protocolo File:// Detectado',
+          message: 'Agregar file:// a dominios autorizados en Firebase Console.'
+        });
+      }
+      
+      if (recommendations.length === 0) {
+        recommendations.push({
+          type: 'success',
+          title: 'Configuración Correcta',
+          message: 'No se encontraron problemas críticos en la configuración.'
+        });
+      }
+      
+      return recommendations;
+    }
+    
+    // Función para mostrar resultados
+    function displayResults(env, storage, firebase, recommendations) {
+      // Información del entorno
+      const envHtml = `
+        <div class="grid grid-cols-2 gap-4">
+          <div><span class="text-white/60">User Agent:</span> <span class="text-white text-xs">${env.userAgent.substring(0, 50)}...</span></div>
+          <div><span class="text-white/60">Protocolo:</span> <span class="text-white">${env.protocol}</span></div>
+          <div><span class="text-white/60">Hostname:</span> <span class="text-white">${env.hostname}</span></div>
+          <div><span class="text-white/60">Es WebView:</span> <span class="${env.isWebView ? 'status-warning' : 'status-ok'}">${env.isWebView ? '✅ Sí' : '❌ No'}</span></div>
+          <div><span class="text-white/60">Es Aplicación:</span> <span class="${env.isApp ? 'status-ok' : 'status-warning'}">${env.isApp ? '✅ Sí' : '❌ No'}</span></div>
+          <div><span class="text-white/60">Es Móvil:</span> <span class="${env.isMobile ? 'status-ok' : 'status-warning'}">${env.isMobile ? '✅ Sí' : '❌ No'}</span></div>
+        </div>
+      `;
+      document.getElementById('environmentInfo').innerHTML = envHtml;
+      
+      // Estado de Firebase
+      const firebaseHtml = `
+        <div class="grid grid-cols-2 gap-4">
+          <div><span class="text-white/60">Inicializado:</span> <span class="${firebase.initialized ? 'status-ok' : 'status-error'}">${firebase.initialized ? '✅ Sí' : '❌ No'}</span></div>
+          <div><span class="text-white/60">Auth:</span> <span class="${firebase.auth ? 'status-ok' : 'status-error'}">${firebase.auth ? '✅ Disponible' : '❌ Error'}</span></div>
+          <div><span class="text-white/60">Firestore:</span> <span class="${firebase.firestore ? 'status-ok' : 'status-error'}">${firebase.firestore ? '✅ Disponible' : '❌ Error'}</span></div>
+          <div><span class="text-white/60">Red:</span> <span class="${firebase.network ? 'status-ok' : 'status-error'}">${firebase.network ? '✅ Conectado' : '❌ Sin conexión'}</span></div>
+          ${firebase.error ? `<div class="col-span-2"><span class="text-white/60">Error:</span> <span class="status-error">${firebase.error}</span></div>` : ''}
+        </div>
+      `;
+      document.getElementById('firebaseInfo').innerHTML = firebaseHtml;
+      
+      // Tests de funcionalidad
+      const functionalityHtml = `
+        <div class="grid grid-cols-2 gap-4">
+          <div><span class="text-white/60">LocalStorage:</span> <span class="${storage.localStorage ? 'status-ok' : 'status-error'}">${storage.localStorage ? '✅ Disponible' : '❌ No disponible'}</span></div>
+          <div><span class="text-white/60">SessionStorage:</span> <span class="${storage.sessionStorage ? 'status-ok' : 'status-error'}">${storage.sessionStorage ? '✅ Disponible' : '❌ No disponible'}</span></div>
+          <div><span class="text-white/60">Cookies:</span> <span class="${storage.cookies ? 'status-ok' : 'status-warning'}">${storage.cookies ? '✅ Disponibles' : '⚠️ Limitadas'}</span></div>
+          <div><span class="text-white/60">IndexedDB:</span> <span class="${storage.indexedDB ? 'status-ok' : 'status-warning'}">${storage.indexedDB ? '✅ Disponible' : '⚠️ No disponible'}</span></div>
+        </div>
+      `;
+      document.getElementById('functionalityTests').innerHTML = functionalityHtml;
+      
+      // Recomendaciones
+      const recommendationsHtml = recommendations.map(rec => {
+        const iconClass = rec.type === 'error' ? 'status-error' : rec.type === 'warning' ? 'status-warning' : 'status-ok';
+        const icon = rec.type === 'error' ? '❌' : rec.type === 'warning' ? '⚠️' : '✅';
+        return `
+          <div class="border-l-4 border-${rec.type === 'error' ? 'red' : rec.type === 'warning' ? 'yellow' : 'green'}-500 pl-4 py-2">
+            <div class="${iconClass} font-semibold">${icon} ${rec.title}</div>
+            <div class="text-white/80 text-xs mt-1">${rec.message}</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('recommendations').innerHTML = recommendationsHtml;
+    }
+    
+    // Función principal de diagnóstico
+    async function runDiagnosis() {
+      console.log('🔄 Ejecutando diagnóstico completo...');
+      
+      // Obtener información del entorno
+      const env = detectEnvironment();
+      console.log('🔍 Entorno:', env);
+      
+      // Test de almacenamiento
+      const storage = testStorage();
+      console.log('💾 Almacenamiento:', storage);
+      
+      // Test de Firebase
+      const firebase = await testFirebase();
+      console.log('🔥 Firebase:', firebase);
+      
+      // Generar recomendaciones
+      const recommendations = generateRecommendations(env, storage, firebase);
+      console.log('💡 Recomendaciones:', recommendations);
+      
+      // Mostrar resultados
+      displayResults(env, storage, firebase, recommendations);
+      
+      console.log('✅ Diagnóstico completado');
+    }
+    
+    // Función para exportar resultados
+    function exportResults() {
+      const timestamp = new Date().toISOString();
+      const env = detectEnvironment();
+      const storage = testStorage();
+      
+      const report = {
+        timestamp,
+        environment: env,
+        storage,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      };
+      
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `yamevi-diagnostic-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    // Event listeners
+    document.getElementById('runTestsBtn').addEventListener('click', runDiagnosis);
+    document.getElementById('exportResultsBtn').addEventListener('click', exportResults);
+    
+    // Ejecutar diagnóstico inicial
+    runDiagnosis();
+    
+  </script>
+</body>
+</html>

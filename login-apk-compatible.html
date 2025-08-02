@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Ingreso</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn {
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #4285f4, #0d47a1);
+      color: white;
+      border: none;
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #00b44f, #2e7d32);
+      color: white;
+      border: none;
+    }
+    
+    .input-field {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .input-field::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .input-field:focus {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      outline: none;
+    }
+    
+    .loading-spinner {
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 2px solid white;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      max-width: 90%;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+  
+  <!-- Container principal -->
+  <div class="glass-effect rounded-3xl p-8 w-full max-w-md shadow-2xl animate__animated animate__fadeInUp">
+    
+    <!-- Logo y título -->
+    <div class="text-center mb-8">
+      <div class="text-6xl mb-4">🎯</div>
+      <h1 class="text-3xl font-bold text-white mb-2">YA ME VI</h1>
+      <p class="text-white/80 text-sm">Análisis Inteligente de Lotería</p>
+    </div>
+    
+    <!-- Información de estado -->
+    <div id="statusInfo" class="mb-6 p-4 glass-effect rounded-lg text-center">
+      <div class="text-white/90 text-sm mb-2">Estado del sistema:</div>
+      <div id="systemStatus" class="text-green-400 text-xs">🟢 Verificando conexión...</div>
+    </div>
+    
+    <!-- Formulario de login -->
+    <div class="space-y-4">
+      
+      <!-- Input de email -->
+      <div>
+        <label class="block text-white/80 text-sm mb-2">Correo electrónico</label>
+        <input 
+          type="email" 
+          id="emailInput" 
+          class="input-field w-full px-4 py-3 rounded-lg"
+          placeholder="tu@email.com"
+          autocomplete="email"
+        />
+      </div>
+      
+      <!-- Input de contraseña -->
+      <div>
+        <label class="block text-white/80 text-sm mb-2">Contraseña</label>
+        <input 
+          type="password" 
+          id="passwordInput" 
+          class="input-field w-full px-4 py-3 rounded-lg"
+          placeholder="Tu contraseña"
+          autocomplete="current-password"
+        />
+      </div>
+      
+      <!-- Botón de login con email -->
+      <button id="loginWithEmail" class="btn btn-secondary w-full py-3 px-6 rounded-lg font-semibold flex items-center justify-center">
+        <span id="emailLoginText">🔐 Ingresar con Email</span>
+        <div id="emailLoginSpinner" class="loading-spinner ml-2 hidden"></div>
+      </button>
+      
+      <!-- Separador -->
+      <div class="flex items-center my-6">
+        <div class="flex-1 border-t border-white/30"></div>
+        <span class="px-4 text-white/60 text-sm">o</span>
+        <div class="flex-1 border-t border-white/30"></div>
+      </div>
+      
+      <!-- Botón de Google (solo si es compatible) -->
+      <button id="loginWithGoogle" class="btn btn-primary w-full py-3 px-6 rounded-lg font-semibold flex items-center justify-center">
+        <span id="googleLoginText">🚀 Continuar con Google</span>
+        <div id="googleLoginSpinner" class="loading-spinner ml-2 hidden"></div>
+      </button>
+      
+      <!-- Enlaces adicionales -->
+      <div class="text-center mt-6 space-y-2">
+        <a href="register.html" class="text-white/80 hover:text-white text-sm block">¿No tienes cuenta? Regístrate</a>
+        <a href="recover.html" class="text-white/60 hover:text-white/80 text-xs block">¿Olvidaste tu contraseña?</a>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script type="module">
+    // Importaciones de Firebase
+    import { auth } from './js/firebase-init.js';
+    import { 
+      signInWithEmailAndPassword, 
+      signInWithPopup, 
+      signInWithRedirect,
+      getRedirectResult,
+      GoogleAuthProvider, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Variables globales
+    let isAuthenticating = false;
+    const adminEmails = [
+      'gfigueroa.w@gmail.com', 
+      'admin@yamevi.com.mx', 
+      'eugenfw@gmail.com',
+      'guillermo.figueroaw@totalplay.com.mx'
+    ];
+
+    // Detectar entorno
+    function detectEnvironment() {
+      const ua = navigator.userAgent.toLowerCase();
+      const isWebView = !window.chrome || /wv|android.*version\/[.\d]+ chrome/.test(ua);
+      const isApp = ua.includes('webintoapp') || ua.includes('app') || window.location.protocol === 'file:';
+      const isMobile = /android|iphone|ipad|mobile/.test(ua);
+      
+      return {
+        isWebView,
+        isApp,
+        isMobile,
+        userAgent: ua,
+        protocol: window.location.protocol,
+        hostname: window.location.hostname
+      };
+    }
+
+    // Mostrar información del sistema
+    function updateSystemStatus() {
+      const env = detectEnvironment();
+      const statusElement = document.getElementById('systemStatus');
+      
+      let status = '🟢 Navegador web';
+      if (env.isApp) status = '📱 Aplicación móvil';
+      else if (env.isWebView) status = '🔲 WebView detectado';
+      
+      statusElement.textContent = status;
+      
+      console.log('🔍 Entorno detectado:', env);
+      
+      // Ajustar funcionalidad según entorno
+      if (env.isWebView || env.isApp) {
+        // En WebView/App, desactivar popup de Google y usar redirect
+        console.log('📱 Modo aplicación: usando redirect para Google Auth');
+      }
+    }
+
+    // Función para mostrar notificaciones
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      const bgClass = type === 'error' ? 'bg-red-500/90' : 
+                     type === 'success' ? 'bg-green-500/90' : 'bg-blue-500/90';
+      
+      notification.className = `notification ${bgClass} text-white px-6 py-4 rounded-lg shadow-lg`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      // Auto-remover después de 5 segundos
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+
+    // Función para mostrar/ocultar loading
+    function toggleLoading(buttonId, isLoading) {
+      const button = document.getElementById(buttonId);
+      const text = button.querySelector('span');
+      const spinner = button.querySelector('.loading-spinner');
+      
+      if (isLoading) {
+        button.disabled = true;
+        text.style.opacity = '0.7';
+        spinner.classList.remove('hidden');
+      } else {
+        button.disabled = false;
+        text.style.opacity = '1';
+        spinner.classList.add('hidden');
+      }
+    }
+
+    // Manejo de autenticación exitosa
+    function handleAuthSuccess(user) {
+      console.log('✅ Autenticación exitosa:', user.email || user.uid);
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminRedirect = urlParams.get('redirect') === 'admin';
+      const isAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
+      
+      if (isAdminRedirect && isAdmin) {
+        showNotification('✅ Acceso de administrador concedido', 'success');
+        setTimeout(() => window.location.href = "admin.html", 1000);
+      } else if (isAdminRedirect && !isAdmin) {
+        showNotification(`❌ Sin permisos de administrador\nUsuario: ${user.email}`, 'error');
+        setTimeout(() => window.location.href = "index.html", 2000);
+      } else {
+        showNotification('✅ Inicio de sesión exitoso', 'success');
+        setTimeout(() => window.location.href = "home.html", 1000);
+      }
+    }
+
+    // Manejo de errores de autenticación
+    function handleAuthError(error) {
+      console.error('❌ Error de autenticación:', error);
+      
+      let errorMessage = '❌ Error de inicio de sesión\n';
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage += 'Usuario no encontrado. Verifica tu email.';
+          break;
+        case 'auth/wrong-password':
+          errorMessage += 'Contraseña incorrecta.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage += 'Email inválido.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage += 'Cuenta deshabilitada.';
+          break;
+        case 'auth/network-request-failed':
+          errorMessage += 'Error de conexión. Verifica tu internet.';
+          break;
+        case 'auth/popup-blocked':
+          errorMessage += 'Popup bloqueado. Permitir popups para este sitio.';
+          break;
+        case 'auth/popup-closed-by-user':
+          errorMessage += 'Popup cerrado. Intenta nuevamente.';
+          break;
+        default:
+          errorMessage += error.message;
+          break;
+      }
+      
+      showNotification(errorMessage, 'error');
+    }
+
+    // Login con email y contraseña
+    async function loginWithEmail() {
+      if (isAuthenticating) return;
+      
+      const email = document.getElementById("emailInput").value.trim();
+      const password = document.getElementById("passwordInput").value.trim();
+      
+      if (!email || !password) {
+        showNotification("Por favor ingresa email y contraseña", 'error');
+        return;
+      }
+      
+      // Validación básica de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showNotification("Por favor ingresa un email válido", 'error');
+        return;
+      }
+      
+      isAuthenticating = true;
+      toggleLoading('loginWithEmail', true);
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        handleAuthSuccess(userCredential.user);
+      } catch (error) {
+        handleAuthError(error);
+      } finally {
+        isAuthenticating = false;
+        toggleLoading('loginWithEmail', false);
+      }
+    }
+
+    // Login con Google
+    async function loginWithGoogle() {
+      if (isAuthenticating) return;
+      
+      isAuthenticating = true;
+      toggleLoading('loginWithGoogle', true);
+      
+      try {
+        const env = detectEnvironment();
+        const provider = new GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        let result;
+        
+        if (env.isWebView || env.isApp) {
+          // En WebView/App usar redirect
+          console.log('📱 Usando signInWithRedirect para WebView/App');
+          await signInWithRedirect(auth, provider);
+          // El resultado se manejará en el listener de auth state
+          return;
+        } else {
+          // En navegador normal usar popup
+          console.log('🖥️ Usando signInWithPopup para navegador');
+          result = await signInWithPopup(auth, provider);
+        }
+        
+        if (result && result.user) {
+          handleAuthSuccess(result.user);
+        }
+        
+      } catch (error) {
+        if (error.code === 'auth/popup-blocked') {
+          // Si falla popup, intentar redirect
+          console.log('🔄 Popup bloqueado, intentando redirect...');
+          try {
+            const provider = new GoogleAuthProvider();
+            await signInWithRedirect(auth, provider);
+            return;
+          } catch (redirectError) {
+            handleAuthError(redirectError);
+          }
+        } else {
+          handleAuthError(error);
+        }
+      } finally {
+        isAuthenticating = false;
+        toggleLoading('loginWithGoogle', false);
+      }
+    }
+
+    // Event listeners
+    document.getElementById("loginWithEmail").addEventListener("click", loginWithEmail);
+    document.getElementById("loginWithGoogle").addEventListener("click", loginWithGoogle);
+
+    // Permitir login con Enter
+    document.getElementById("passwordInput").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        loginWithEmail();
+      }
+    });
+
+    // Verificar si el usuario ya está autenticado
+    onAuthStateChanged(auth, async (user) => {
+      if (user && !isAuthenticating) {
+        console.log('✅ Usuario ya autenticado:', user.email || user.uid);
+        handleAuthSuccess(user);
+      }
+    });
+
+    // Manejar resultado de redirect (para WebView/App)
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        console.log('✅ Redirect result:', result.user.email);
+        handleAuthSuccess(result.user);
+      }
+    }).catch((error) => {
+      if (error.code !== 'auth/no-redirect-operation-pending') {
+        console.error('❌ Error en redirect result:', error);
+        handleAuthError(error);
+      }
+    });
+
+    // Inicializar
+    updateSystemStatus();
+    console.log('🚀 Sistema de login APK-compatible inicializado');
+    
+  </script>
+</body>
+</html>

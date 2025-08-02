@@ -136,15 +136,27 @@
   <script src="js/shared.js"></script> 
   <script type="module">
     import { auth } from './js/firebase-init.js';
-    import { signInWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import WebViewDetector from './js/webview-detector.js';
-    import MobileAuthOptimizer from './js/mobile-auth-optimizer.js';
+    import { 
+      signInWithEmailAndPassword, 
+      signInWithPopup, 
+      signInWithRedirect,
+      getRedirectResult,
+      GoogleAuthProvider, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // Inicializar el optimizador de autenticación móvil
-    const authOptimizer = new MobileAuthOptimizer();
+    // Detectar entorno APK/WebView
+    function detectEnvironment() {
+      const ua = navigator.userAgent.toLowerCase();
+      const isWebView = !window.chrome || /wv|android.*version\/[.\d]+ chrome/.test(ua);
+      const isApp = ua.includes('webintoapp') || ua.includes('app') || window.location.protocol === 'file:';
+      const isMobile = /android|iphone|ipad|mobile/.test(ua);
+      
+      return { isWebView, isApp, isMobile, userAgent: ua };
+    }
     
-    // Mostrar información de diagnóstico
-    console.log('📊 Diagnóstico del dispositivo:', authOptimizer.getEnvironmentInfo());
+    const environment = detectEnvironment();
+    console.log('� Entorno detectado:', environment);
 
     // Check if redirecting from admin panel
     const urlParams = new URLSearchParams(window.location.search);
@@ -328,7 +340,7 @@
       }
     });
 
-    document.getElementById("loginWithEmail").addEventListener("click", () => {
+    document.getElementById("loginWithEmail").addEventListener("click", async () => {
       const email = document.getElementById("emailInput").value.trim();
       const password = document.getElementById("passwordInput").value.trim();
       
@@ -337,27 +349,63 @@
         return;
       }
       
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          console.log("✅ Usuario logueado con email:", userCredential.user.email);
-          
-          // Check admin permissions
-          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
-          const isAdmin = adminEmails.includes(userCredential.user.email);
-          
-          if (isAdminRedirect && isAdmin) {
-            window.location.href = "admin.html";
-          } else if (isAdminRedirect && !isAdmin) {
-            alert(`❌ Sin permisos de administrador\n\nUsuario: ${userCredential.user.email}\nContacta al administrador.`);
-            window.location.href = "index.html";
-          } else {
-            window.location.href = "home.html";
-          }
-        })
-        .catch((error) => {
-          console.error("❌ Error al iniciar sesión:", error);
-          alert("Error al iniciar sesión: " + error.message);
-        });
+      // Validación básica de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alert("Por favor ingresa un email válido");
+        return;
+      }
+      
+      try {
+        console.log("🔄 Iniciando sesión con email...");
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log("✅ Usuario logueado con email:", userCredential.user.email);
+        
+        // Check admin permissions
+        const adminEmails = [
+          'gfigueroa.w@gmail.com', 
+          'admin@yamevi.com.mx', 
+          'eugenfw@gmail.com',
+          'guillermo.figueroaw@totalplay.com.mx'
+        ];
+        const isAdmin = adminEmails.includes(userCredential.user.email.toLowerCase());
+        
+        if (isAdminRedirect && isAdmin) {
+          window.location.href = "admin.html";
+        } else if (isAdminRedirect && !isAdmin) {
+          alert(`❌ Sin permisos de administrador\n\nUsuario: ${userCredential.user.email}\nContacta al administrador.`);
+          window.location.href = "index.html";
+        } else {
+          window.location.href = "home.html";
+        }
+      } catch (error) {
+        console.error("❌ Error al iniciar sesión:", error);
+        
+        // Mensajes de error más específicos
+        let errorMessage = "Error al iniciar sesión: ";
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage += "Usuario no encontrado. Verifica tu email.";
+            break;
+          case 'auth/wrong-password':
+            errorMessage += "Contraseña incorrecta.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage += "Email inválido.";
+            break;
+          case 'auth/network-request-failed':
+            errorMessage += "Error de conexión. Verifica tu internet.";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage += "Demasiados intentos. Intenta más tarde.";
+            break;
+          default:
+            errorMessage += error.message;
+            break;
+        }
+        
+        alert(errorMessage);
+      }
     });
   </script>
 </body>
