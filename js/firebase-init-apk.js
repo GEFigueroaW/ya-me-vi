@@ -22,19 +22,44 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Firebase Config - HÍBRIDO para WebIntoApp/APK basado en google-services.json
-// Usa configuración Android pero con authDomain web para OAuth
-const firebaseConfig = {
-  apiKey: "AIzaSyAJYWSNUMj5aej7O9u5BwJQts7L2F6Poqw", // Android API Key del google-services.json
-  authDomain: "ya-me-vi.firebaseapp.com", // Usar dominio web para OAuth en WebView
-  projectId: "ya-me-vi",
-  storageBucket: "ya-me-vi.firebasestorage.app",
-  messagingSenderId: "748876890843",
-  // CRÍTICO: Usar appId web en WebIntoApp para OAuth, Android para app nativa
-  appId: window.location.href.includes('webintoapp') || navigator.userAgent.includes('webintoapp') 
-    ? "1:748876890843:web:07bd1eb476d38594d002fe"  // Web App ID para OAuth en WebView
-    : "1:748876890843:android:315d26696c8142e4d002fe", // Android App ID para app nativa
-  measurementId: "G-D7R797S5BC"
-};
+// Detectar entorno para usar configuración correcta
+function getFirebaseConfig() {
+  const isWebIntoApp = window.location.href.includes('webintoapp') || 
+                       navigator.userAgent.includes('webintoapp') ||
+                       navigator.userAgent.includes('wv');
+
+  if (isWebIntoApp) {
+    // Configuración específica para WebIntoApp con package name correcto
+    return {
+      apiKey: "AIzaSyAJYWSNUMj5aej7O9u5BwJQts7L2F6Poqw", // API Key del google-services.json WebIntoApp
+      authDomain: "ya-me-vi.firebaseapp.com", // Web domain para OAuth
+      projectId: "ya-me-vi",
+      storageBucket: "ya-me-vi.firebasestorage.app",
+      messagingSenderId: "748876890843",
+      appId: "1:748876890843:android:f3bf99d0c2d9a3f2d002fe", // Android App ID WebIntoApp
+      measurementId: "G-D7R797S5BC"
+    };
+  } else {
+    // Configuración estándar para otros entornos (usar web config para OAuth)
+    return {
+      apiKey: "AIzaSyAJYWSNUMj5aej7O9u5BwJQts7L2F6Poqw", // Usar misma API key
+      authDomain: "ya-me-vi.firebaseapp.com",
+      projectId: "ya-me-vi",
+      storageBucket: "ya-me-vi.firebasestorage.app",
+      messagingSenderId: "748876890843",
+      appId: "1:748876890843:web:07bd1eb476d38594d002fe", // Web App ID para navegador
+      measurementId: "G-D7R797S5BC"
+    };
+  }
+}
+
+const firebaseConfig = getFirebaseConfig();
+
+console.log('🔧 Firebase Config cargado:', {
+  projectId: firebaseConfig.projectId,
+  appId: firebaseConfig.appId,
+  isWebIntoApp: firebaseConfig.appId.includes('android')
+});
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

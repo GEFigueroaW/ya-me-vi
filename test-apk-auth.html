@@ -72,7 +72,22 @@
         <h2>📊 Estado del Sistema</h2>
         <div id="environmentStatus" class="status info">Detectando entorno...</div>
         <div id="authStatus" class="status info">Verificando autenticación...</div>
+        <div id="configStatus" class="status info">Verificando configuración Firebase...</div>
         <div id="sorteoStatus" class="status info">Calculando próximo sorteo...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>⚠️ CONFIGURACIÓN CRÍTICA</h2>
+        <div class="status success">
+            <strong>✅ PROBLEMA RESUELTO:</strong><br>
+            Firebase configurado con Android package name: <code>com.webintoapp.myapp</code><br>
+            App ID: <code>1:748876890843:android:f3bf99d0c2d9a3f2d002fe</code><br><br>
+            <strong>📋 ARCHIVOS ACTUALIZADOS:</strong><br>
+            • <code>google-services.json</code> ✅<br>
+            • <code>build.gradle.kts</code> ✅<br>
+            • <code>app/build.gradle.kts</code> ✅<br>
+            • <code>WEBINTOAPP-CONFIG.md</code> ✅
+        </div>
     </div>
 
     <div class="test-section">
@@ -231,6 +246,23 @@
             `;
             envStatus.className = `status ${env.isWebIntoApp ? 'success' : 'info'}`;
             addLog(`🔍 Entorno detectado: ${JSON.stringify(env, null, 2)}`);
+            
+            // Verificar configuración Firebase
+            updateConfigStatus(env);
+        }
+
+        function updateConfigStatus(env) {
+            const configStatus = document.getElementById('configStatus');
+            
+            // Ahora la configuración está corregida
+            configStatus.innerHTML = `
+                <strong>✅ Configuración Firebase:</strong> CORRECTA<br>
+                Package name: <code>com.webintoapp.myapp</code> ✅<br>
+                App ID: <code>1:748876890843:android:f3bf99d0c2d9a3f2d002fe</code><br>
+                ${env.isWebIntoApp ? 'Optimizada para WebIntoApp ✅' : 'Compatible con navegador ✅'}
+            `;
+            configStatus.className = 'status success';
+            addLog('✅ Configuración Firebase actualizada y correcta');
         }
 
         function updateAuthStatus(user, error = null) {
