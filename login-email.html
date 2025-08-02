@@ -951,320 +951,262 @@
       setTimeout(checkGoogleRedirectResult, 1000);
     });
 
-    // Biometric Login - CORREGIDO Y SIMPLIFICADO
-    biometricLoginBtn.addEventListener('click', async () => {
-      console.log('🔐 [LOGIN-EMAIL] Iniciando autenticación biométrica...');
+    // Initialize event listeners when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🔧 [LOGIN-EMAIL] Inicializando event listeners...');
       
-      try {
-        showLoading('🔐 Verificando tu huella digital...');
-        
-        // Verificar soporte biométrico
-        const isSupported = await biometricSupport.isSupported();
-        if (!isSupported.supported) {
-          hideLoading();
-          showError('Tu dispositivo no soporta autenticación biométrica');
-          return;
-        }
-        
-        // Obtener credenciales almacenadas
-        const storedCredentials = localStorage.getItem('biometric_user_credentials');
-        if (!storedCredentials) {
-          hideLoading();
-          showError('No hay credenciales biométricas registradas. Regístrate primero.');
-          return;
-        }
-        
-        const credentials = JSON.parse(storedCredentials);
-        
-        // Crear desafío de autenticación
-        const challenge = new Uint8Array(32);
-        crypto.getRandomValues(challenge);
-        
-        const publicKeyCredentialRequestOptions = {
-          challenge: challenge,
-          allowCredentials: [{
-            id: new Uint8Array(credentials.credentialId),
-            type: 'public-key',
-            transports: ['internal']
-          }],
-          userVerification: 'preferred',
-          timeout: 30000
-        };
-
-        // Solicitar autenticación biométrica
-        const assertion = await navigator.credentials.get({
-          publicKey: publicKeyCredentialRequestOptions
-        });
-
-        if (assertion) {
-          console.log('✅ [LOGIN-EMAIL] Autenticación biométrica exitosa');
-          
-          const userEmail = credentials.email;
-          console.log('✅ [LOGIN-EMAIL] Login biométrico exitoso para:', userEmail);
-          
-          hideLoading();
-          showSuccess('✅ ¡Login biométrico exitoso!');
-          
-          // Verificar permisos de administrador
-          const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
-          const isAdmin = adminEmails.includes(userEmail.toLowerCase());
-          
-          // Redirigir después de un momento
-          setTimeout(() => {
-            if (isAdminRedirect && isAdmin) {
-              localStorage.setItem('admin_verified', 'true');
-              window.location.href = "admin.html";
-            } else if (isAdminRedirect && !isAdmin) {
-              showError(`❌ Sin permisos de administrador para: ${userEmail}`);
-            } else {
-              localStorage.setItem('biometric_login', 'true');
-              localStorage.setItem('user_email', userEmail);
-              window.location.href = "home.html";
-            }
-          }, 1500);
-        }
-        
-      } catch (error) {
-        console.error('❌ [LOGIN-EMAIL] Error en autenticación biométrica:', error);
-        hideLoading();
-        
-        let errorMsg = '❌ Error en autenticación biométrica';
-        if (error.name === 'NotAllowedError') {
-          errorMsg = '🚫 Autenticación cancelada por el usuario';
-        } else if (error.name === 'NotSupportedError') {
-          errorMsg = '📱 Biometría no soportada en este dispositivo';
-        } else if (error.name === 'SecurityError') {
-          errorMsg = '🔒 Error de seguridad en biometría';
-        } else if (error.name === 'TimeoutError') {
-          errorMsg = '⏰ Tiempo agotado - intenta de nuevo';
-        }
-        
-        showError(errorMsg);
-      }
-    });
-
-    // Email/Password Login - CORREGIDO Y SIMPLIFICADO
-    loginBtn.addEventListener('click', async () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      if (!email || !password) {
-        showError('Por favor ingresa email y contraseña');
-        return;
-      }
-
-      try {
-        showLoading('Iniciando sesión...');
-        
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        console.log('✅ Login exitoso:', result.user.email);
-        
-        // Verificar soporte biométrico y ofrecer registro si está disponible
-        if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
-          try {
-            const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
-            if (wantsToRegisterBiometric) {
-              await registerBiometricCredentials(result.user.email);
-            }
-          } catch (bioError) {
-            console.log('ℹ️ [LOGIN-EMAIL] No se pudo registrar biometría:', bioError.message);
-          }
-        }
-        
-        hideLoading();
-        handleSuccessfulAuth(result.user);
-        
-      } catch (error) {
-        console.error('❌ Error en login:', error);
-        hideLoading();
-        
-        let errorMsg = 'Error al iniciar sesión';
-        if (error.code === 'auth/user-not-found') {
-          errorMsg = 'Usuario no encontrado';
-        } else if (error.code === 'auth/wrong-password') {
-          errorMsg = 'Contraseña incorrecta';
-        } else if (error.code === 'auth/invalid-email') {
-          errorMsg = 'Email inválido';
-        } else if (error.code === 'auth/too-many-requests') {
-          errorMsg = 'Demasiados intentos. Espera un momento';
-        }
-        
-        showError(errorMsg);
-      }
-    });
-
-    // Google Login - SIMPLIFICADO Y CORREGIDO
-    googleLoginBtn.addEventListener('click', async () => {
-      console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google...');
+      // Verificar que todos los elementos existen
+      console.log('🔍 [LOGIN-EMAIL] Verificando elementos del DOM:');
+      console.log('- emailInput:', !!emailInput ? '✅' : '❌', emailInput);
+      console.log('- passwordInput:', !!passwordInput ? '✅' : '❌', passwordInput);
+      console.log('- loginBtn:', !!loginBtn ? '✅' : '❌', loginBtn);
+      console.log('- googleLoginBtn:', !!googleLoginBtn ? '✅' : '❌', googleLoginBtn);
+      console.log('- biometricLoginBtn:', !!biometricLoginBtn ? '✅' : '❌', biometricLoginBtn);
       
-      try {
-        showLoading('Iniciando sesión con Google...');
-        
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({
-          prompt: 'select_account'
-        });
-        
-        // Intentar popup primero, luego redirect como fallback
-        let result;
-        try {
-          console.log('💻 [LOGIN-EMAIL] Intentando signInWithPopup');
-          result = await signInWithPopup(auth, provider);
-        } catch (popupError) {
-          console.log('❌ [LOGIN-EMAIL] Popup falló, intentando redirect:', popupError.code);
+      // Biometric Login - CORREGIDO Y SIMPLIFICADO
+      if (biometricLoginBtn) {
+        biometricLoginBtn.addEventListener('click', async () => {
+          console.log('🔐 [LOGIN-EMAIL] Iniciando autenticación biométrica...');
           
-          if (popupError.code === 'auth/popup-blocked' || 
-              popupError.code === 'auth/popup-closed-by-user') {
-            // Usar redirect como fallback
-            const { signInWithRedirect } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-            
-            // Guardar estado para el redirect
-            localStorage.setItem('google_auth_in_progress', 'true');
-            localStorage.setItem('google_auth_timestamp', Date.now().toString());
-            
-            await signInWithRedirect(auth, provider);
-            return; // La página se recargará después del redirect
-          } else {
-            throw popupError; // Re-lanzar otros errores
-          }
-        }
-        
-        if (result && result.user) {
-          console.log("✅ Usuario logueado con Google:", result.user.email);
-          await processGoogleLoginResult(result);
-        }
-        
-        hideLoading();
-        
-      } catch (error) {
-        console.error("❌ Error al iniciar sesión con Google:", error);
-        hideLoading();
-        
-        let errorMessage = "Error al iniciar sesión con Google: ";
-        switch (error.code) {
-          case 'auth/popup-closed-by-user':
-            errorMessage = "Proceso cancelado. Inténtalo de nuevo.";
-            break;
-          case 'auth/popup-blocked':
-            errorMessage = "Popup bloqueado. Permite popups para este sitio.";
-            break;
-          case 'auth/account-exists-with-different-credential':
-            errorMessage = "Ya existe una cuenta con este email.";
-            break;
-          case 'auth/network-request-failed':
-            errorMessage = "Error de conexión. Verifica tu internet.";
-            break;
-          case 'auth/unauthorized-domain':
-            errorMessage = "Dominio no autorizado. Contacta soporte.";
-            break;
-          default:
-            errorMessage += error.message;
-            break;
-        }
-        
-        showError(errorMessage);
-      }
-    });
-        }
-        
-        // Register biometric credentials if supported
-        if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
           try {
-            console.log('🔐 [GOOGLE-LOGIN] Intentando registrar biometría para:', result.user.email);
-            // Ask user if they want to register biometric authentication
-            const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
-            if (wantsToRegisterBiometric) {
-              await registerBiometricCredentials(result.user.email);
+            showLoading('🔐 Verificando tu huella digital...');
+            
+            // Verificar soporte biométrico
+            const isSupported = await biometricSupport.isSupported();
+            if (!isSupported.supported) {
+              hideLoading();
+              showError('Tu dispositivo no soporta autenticación biométrica');
+              return;
             }
-          } catch (bioError) {
-            console.log('ℹ️ [GOOGLE-LOGIN] No se pudo registrar biometría:', bioError.message);
-          }
-        }
-        
-        // Actualizar loading
-        const loadingMessage = loadingOverlay.querySelector('p');
-        if (loadingMessage) {
-          loadingMessage.textContent = '¡Autenticación exitosa! Redirigiendo...';
-        }
-        
-        // Check admin permissions
-        const adminEmails = [
-          'gfigueroa.w@gmail.com', 
-          'admin@yamevi.com.mx', 
-          'eugenfw@gmail.com',
-          'guillermo.figueroaw@totalplay.com.mx'
-        ];
-        const isAdmin = adminEmails.includes(result.user.email);
-        
-        // Verificar si viene de admin redirect
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdminRedirect = urlParams.get('redirect') === 'admin';
-        
-        setTimeout(() => {
-          if (isAdminRedirect && isAdmin) {
-            window.location.href = "admin.html";
-          } else if (isAdminRedirect && !isAdmin) {
-            alert(`❌ Sin permisos de administrador\n\nUsuario: ${result.user.email}\nContacta al administrador.`);
-            window.location.href = "index.html";
-          } else {
-            window.location.href = "home.html";
-          }
-        }, 1500);
-        
-      } catch (error) {
-        console.error("❌ Error al iniciar sesión con Google:", error);
-        
-        // Ocultar loading
-        if (loadingOverlay) {
-          loadingOverlay.remove();
-        }
-        
-        // Manejo específico de errores (igual que register.js)
-        let errorMessage = "Error al iniciar sesión con Google: ";
-        switch (error.code) {
-          case 'auth/popup-closed-by-user':
-            errorMessage += "Proceso cancelado. Inténtalo de nuevo.";
-            break;
-          case 'auth/popup-blocked':
-            errorMessage += "Popup bloqueado. Por favor permite popups para este sitio.";
-            break;
-          case 'auth/account-exists-with-different-credential':
-            errorMessage += "Ya existe una cuenta con este email usando otro método.";
-            break;
-          case 'auth/web-storage-unsupported':
-            errorMessage += "Tu navegador no soporta el almacenamiento necesario. Intenta con otro navegador.";
-            break;
-          case 'auth/unauthorized-domain':
-            errorMessage += "Dominio no autorizado. Contacta al administrador.";
-            break;
-          default:
-            errorMessage += error.message;
-            break;
-        }
-        
-        // Mostrar error de manera elegante (igual que register.js)
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 bg-opacity-90 backdrop-blur-lg text-white px-6 py-3 rounded-lg shadow-lg z-50';
-        errorDiv.textContent = errorMessage;
-        document.body.appendChild(errorDiv);
-        
-        // Auto-ocultar error después de 5 segundos
-        setTimeout(() => {
-          errorDiv.remove();
-        }, 5000);
-      }
-    });
+            
+            // Obtener credenciales almacenadas
+            const storedCredentials = localStorage.getItem('biometric_user_credentials');
+            if (!storedCredentials) {
+              hideLoading();
+              showError('No hay credenciales biométricas registradas. Regístrate primero.');
+              return;
+            }
+            
+            const credentials = JSON.parse(storedCredentials);
+            
+            // Crear desafío de autenticación
+            const challenge = new Uint8Array(32);
+            crypto.getRandomValues(challenge);
+            
+            const publicKeyCredentialRequestOptions = {
+              challenge: challenge,
+              allowCredentials: [{
+                id: new Uint8Array(credentials.credentialId),
+                type: 'public-key',
+                transports: ['internal']
+              }],
+              userVerification: 'preferred',
+              timeout: 30000
+            };
 
-    // Allow login with Enter key
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        loginBtn.click();
-      }
-    });
+            // Solicitar autenticación biométrica
+            const assertion = await navigator.credentials.get({
+              publicKey: publicKeyCredentialRequestOptions
+            });
 
-    emailInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        passwordInput.focus();
+            if (assertion) {
+              console.log('✅ [LOGIN-EMAIL] Autenticación biométrica exitosa');
+              
+              const userEmail = credentials.email;
+              console.log('✅ [LOGIN-EMAIL] Login biométrico exitoso para:', userEmail);
+              
+              hideLoading();
+              showSuccess('✅ ¡Login biométrico exitoso!');
+              
+              // Verificar permisos de administrador
+              const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
+              const isAdmin = adminEmails.includes(userEmail.toLowerCase());
+              
+              // Redirigir después de un momento
+              setTimeout(() => {
+                if (isAdminRedirect && isAdmin) {
+                  localStorage.setItem('admin_verified', 'true');
+                  window.location.href = "admin.html";
+                } else if (isAdminRedirect && !isAdmin) {
+                  showError(`❌ Sin permisos de administrador para: ${userEmail}`);
+                } else {
+                  localStorage.setItem('biometric_login', 'true');
+                  localStorage.setItem('user_email', userEmail);
+                  window.location.href = "home.html";
+                }
+              }, 1500);
+            }
+            
+          } catch (error) {
+            console.error('❌ [LOGIN-EMAIL] Error en autenticación biométrica:', error);
+            hideLoading();
+            
+            let errorMsg = '❌ Error en autenticación biométrica';
+            if (error.name === 'NotAllowedError') {
+              errorMsg = '🚫 Autenticación cancelada por el usuario';
+            } else if (error.name === 'NotSupportedError') {
+              errorMsg = '📱 Biometría no soportada en este dispositivo';
+            } else if (error.name === 'SecurityError') {
+              errorMsg = '🔒 Error de seguridad en biometría';
+            } else if (error.name === 'TimeoutError') {
+              errorMsg = '⏰ Tiempo agotado - intenta de nuevo';
+            }
+            
+            showError(errorMsg);
+          }
+        });
+      } else {
+        console.error('❌ [LOGIN-EMAIL] No se encontró el botón biometricLoginBtn');
+      }
+      
+      // Email/Password Login - CORREGIDO Y SIMPLIFICADO
+      if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+          const email = emailInput.value.trim();
+          const password = passwordInput.value.trim();
+
+          if (!email || !password) {
+            showError('Por favor ingresa email y contraseña');
+            return;
+          }
+
+          try {
+            showLoading('Iniciando sesión...');
+            
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            console.log('✅ Login exitoso:', result.user.email);
+            
+            // Verificar soporte biométrico y ofrecer registro si está disponible
+            if (window.PublicKeyCredential && navigator.credentials && navigator.credentials.create) {
+              try {
+                const wantsToRegisterBiometric = await askForBiometricRegistration(result.user.email);
+                if (wantsToRegisterBiometric) {
+                  await registerBiometricCredentials(result.user.email);
+                }
+              } catch (bioError) {
+                console.log('ℹ️ [LOGIN-EMAIL] No se pudo registrar biometría:', bioError.message);
+              }
+            }
+            
+            hideLoading();
+            handleSuccessfulAuth(result.user);
+            
+          } catch (error) {
+            console.error('❌ Error en login:', error);
+            hideLoading();
+            
+            let errorMsg = 'Error al iniciar sesión';
+            if (error.code === 'auth/user-not-found') {
+              errorMsg = 'Usuario no encontrado';
+            } else if (error.code === 'auth/wrong-password') {
+              errorMsg = 'Contraseña incorrecta';
+            } else if (error.code === 'auth/invalid-email') {
+              errorMsg = 'Email inválido';
+            } else if (error.code === 'auth/too-many-requests') {
+              errorMsg = 'Demasiados intentos. Espera un momento';
+            }
+            
+            showError(errorMsg);
+          }
+        });
+      } else {
+        console.error('❌ [LOGIN-EMAIL] No se encontró el botón loginBtn');
+      }
+
+      // Google Login - SIMPLIFICADO Y CORREGIDO
+      if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', async () => {
+          console.log('🔍 [LOGIN-EMAIL] Iniciando autenticación Google...');
+          
+          try {
+            showLoading('Iniciando sesión con Google...');
+            
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({
+              prompt: 'select_account'
+            });
+            
+            // Intentar popup primero, luego redirect como fallback
+            let result;
+            try {
+              console.log('💻 [LOGIN-EMAIL] Intentando signInWithPopup');
+              result = await signInWithPopup(auth, provider);
+            } catch (popupError) {
+              console.log('❌ [LOGIN-EMAIL] Popup falló, intentando redirect:', popupError.code);
+              
+              if (popupError.code === 'auth/popup-blocked' || 
+                  popupError.code === 'auth/popup-closed-by-user') {
+                // Usar redirect como fallback
+                const { signInWithRedirect } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+                
+                // Guardar estado para el redirect
+                localStorage.setItem('google_auth_in_progress', 'true');
+                localStorage.setItem('google_auth_timestamp', Date.now().toString());
+                
+                await signInWithRedirect(auth, provider);
+                return; // La página se recargará después del redirect
+              } else {
+                throw popupError; // Re-lanzar otros errores
+              }
+            }
+            
+            if (result && result.user) {
+              console.log("✅ Usuario logueado con Google:", result.user.email);
+              await processGoogleLoginResult(result);
+            }
+            
+            hideLoading();
+            
+          } catch (error) {
+            console.error("❌ Error al iniciar sesión con Google:", error);
+            hideLoading();
+            
+            let errorMessage = "Error al iniciar sesión con Google: ";
+            switch (error.code) {
+              case 'auth/popup-closed-by-user':
+                errorMessage = "Proceso cancelado. Inténtalo de nuevo.";
+                break;
+              case 'auth/popup-blocked':
+                errorMessage = "Popup bloqueado. Permite popups para este sitio.";
+                break;
+              case 'auth/account-exists-with-different-credential':
+                errorMessage = "Ya existe una cuenta con este email.";
+                break;
+              case 'auth/network-request-failed':
+                errorMessage = "Error de conexión. Verifica tu internet.";
+                break;
+              case 'auth/unauthorized-domain':
+                errorMessage = "Dominio no autorizado. Contacta soporte.";
+                break;
+              default:
+                errorMessage += error.message;
+                break;
+            }
+            
+            showError(errorMessage);
+          }
+        });
+      } else {
+        console.error('❌ [LOGIN-EMAIL] No se encontró el botón googleLoginBtn');
+      }
+
+      console.log('✅ [LOGIN-EMAIL] Event listeners inicializados correctamente');
+      
+      // Allow login with Enter key
+      if (passwordInput) {
+        passwordInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            loginBtn.click();
+          }
+        });
+      }
+
+      if (emailInput) {
+        emailInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            passwordInput.focus();
+          }
+        });
       }
     });
 
