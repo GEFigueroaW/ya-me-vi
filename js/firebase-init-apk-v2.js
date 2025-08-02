@@ -1,12 +1,11 @@
-// Firebase configuración específica para APK/WebView
-// Este archivo maneja la autenticación optimizada para entornos WebIntoApp
+// Firebase configuración específica para APK/WebView mejorada
+// Autor: Sistema YA ME VI
+// Versión: 2.0 - Optimizada para WebIntoApp
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
   getAuth, 
-  onAuthStateChanged,
-  signInWithCustomToken,
-  signOut
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
   getFirestore, 
@@ -166,17 +165,7 @@ export function setupAPKAuthListener() {
     setTimeout(checkExternalAuthToken, 1000);
   }
 }
-    
-    // Desactivar características que pueden fallar en WebView
-    if (typeof window !== 'undefined') {
-      // Evitar errores de sessionStorage en algunos WebViews
-      try {
-        window.sessionStorage.setItem('apk_mode', 'true');
-      } catch (e) {
-        console.warn('⚠️ SessionStorage no disponible en WebView');
-      }
-      
-      // Configurar localStorage como método principal de persistencia
+
 // Verificar token de autenticación externa
 async function checkExternalAuthToken() {
   try {
@@ -330,7 +319,7 @@ export async function registerUserInFirestore(user, environment = null) {
 // Manejar mensajes de autenticación externa
 function handleExternalAuthMessage(event) {
   if (event.data.type === 'YAMEVI_AUTH_SUCCESS') {
-    console.log('� Mensaje de auth externa recibido:', event.data.data);
+    console.log('📨 Mensaje de auth externa recibido:', event.data.data);
     simulateAuthSuccess(event.data.data);
   }
 }
@@ -429,122 +418,4 @@ export {
   createExternalAuthUrl 
 };
 
-console.log('🚀 Firebase APK Init cargado');
-    
-    // Verificar si el usuario ya existe
-    let existingUser;
-    try {
-      const userDoc = await getDoc(userRef);
-      existingUser = userDoc.exists() ? userDoc.data() : null;
-    } catch (error) {
-      console.warn('⚠️ Error verificando usuario existente:', error);
-      existingUser = null;
-    }
-    
-    // Detectar información del dispositivo de forma segura
-    let deviceInfo = 'Unknown';
-    let browser = 'Unknown';
-    
-    try {
-      const userAgent = navigator.userAgent || '';
-      
-      if (/Mobile|Android|iPhone|iPad/.test(userAgent)) {
-        deviceInfo = 'Mobile';
-      } else if (/Tablet/.test(userAgent)) {
-        deviceInfo = 'Tablet';
-      } else {
-        deviceInfo = 'Desktop';
-      }
-      
-      if (userAgent.includes('Chrome')) browser = 'Chrome';
-      else if (userAgent.includes('Firefox')) browser = 'Firefox';
-      else if (userAgent.includes('Safari')) browser = 'Safari';
-      else if (userAgent.includes('Edge')) browser = 'Edge';
-      else if (userAgent.includes('webintoapp')) browser = 'WebIntoApp';
-    } catch (error) {
-      console.warn('⚠️ Error detectando dispositivo:', error);
-    }
-    
-    // Configurar datos del usuario
-    const userEmail = user.email || '';
-    const adminEmails = [
-      'gfigueroa.w@gmail.com', 
-      'admin@yamevi.com.mx', 
-      'eugenfw@gmail.com',
-      'guillermo.figueroaw@totalplay.com.mx'
-    ];
-    
-    const userData = {
-      email: userEmail,
-      displayName: user.displayName || null,
-      photoURL: user.photoURL || null,
-      lastAccess: serverTimestamp(),
-      device: `${browser} ${deviceInfo}`,
-      isOnline: true,
-      loginCount: existingUser ? (existingUser.loginCount || 0) + 1 : 1,
-      isAdmin: adminEmails.includes(userEmail.toLowerCase()),
-      totalAnalysis: existingUser?.totalAnalysis || 0,
-      totalQueries: existingUser?.totalQueries || 0,
-      uid: user.uid,
-      // Campos específicos para APK
-      lastLoginMethod: user.providerData?.[0]?.providerId || 'unknown',
-      lastLoginTimestamp: new Date().toISOString(),
-      // Mantener fecha de creación si existe
-      createdAt: existingUser?.createdAt || serverTimestamp()
-    };
-    
-    console.log('👤 Guardando datos de usuario:', {
-      email: userData.email,
-      isAdmin: userData.isAdmin,
-      device: userData.device,
-      loginCount: userData.loginCount
-    });
-    
-    // Guardar con merge para preservar datos existentes
-    await setDoc(userRef, userData, { merge: true });
-    
-    console.log('✅ Usuario registrado/actualizado en Firestore');
-    
-  } catch (error) {
-    console.error('❌ Error registrando usuario en Firestore:', error);
-    
-    // En caso de error, continuar sin bloquear la aplicación
-    console.log('🔄 Continuando sin registro en Firestore...');
-  }
-}
-
-// Listener global de autenticación optimizado para APK
-if (auth) {
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      console.log('👤 Usuario autenticado:', user.email || user.uid);
-      console.log('🔐 Método de autenticación:', user.providerData?.[0]?.providerId || 'unknown');
-      
-      // Registrar en Firestore de forma asíncrona
-      try {
-        await registerUserInFirestore(user);
-      } catch (error) {
-        console.warn('⚠️ Error en registro automático:', error);
-      }
-      
-      // Limpiar indicadores de redirección
-      try {
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.removeItem('authRedirectCount');
-        }
-      } catch (error) {
-        console.warn('⚠️ Error limpiando sessionStorage:', error);
-      }
-      
-    } else {
-      console.log('👤 Usuario desconectado');
-    }
-  });
-}
-
-// Exportaciones
-export { app, auth, db, onAuthStateChanged };
-
-// Log de inicialización
-console.log('🚀 Firebase APK-compatible inicializado');
-console.log('📱 Entorno:', detectEnvironment());
+console.log('🚀 Firebase APK Init v2.0 cargado correctamente');

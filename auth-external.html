@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autenticación Externa - YA ME VI</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+  <div class="glass-effect rounded-3xl p-8 w-full max-w-md text-white text-center">
+    
+    <!-- Estado inicial -->
+    <div id="initialState">
+      <div class="text-6xl mb-4">🔐</div>
+      <h1 class="text-2xl font-bold mb-4">Autenticación Segura</h1>
+      <p class="text-sm opacity-80 mb-6">
+        Se abrió esta ventana para completar la autenticación de forma segura desde tu navegador predeterminado.
+      </p>
+      
+      <button 
+        id="proceedWithGoogle" 
+        class="w-full bg-white/20 hover:bg-white/30 border border-white/30 text-white py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg mb-4 flex items-center justify-center space-x-2"
+      >
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span>Continuar con Google</span>
+      </button>
+      
+      <p class="text-xs opacity-70 mb-4">
+        Esta autenticación es necesaria para usar la app desde tu dispositivo móvil de forma segura.
+      </p>
+    </div>
+
+    <!-- Estado de procesamiento -->
+    <div id="processingState" class="hidden">
+      <div class="text-6xl mb-4">⏳</div>
+      <h2 class="text-xl font-bold mb-4">Procesando autenticación...</h2>
+      <div class="flex justify-center mb-4">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+      <p class="text-sm opacity-80">
+        Por favor espera mientras completamos tu autenticación.
+      </p>
+    </div>
+
+    <!-- Estado de éxito -->
+    <div id="successState" class="hidden">
+      <div class="text-6xl mb-4">✅</div>
+      <h2 class="text-xl font-bold mb-4">¡Autenticación exitosa!</h2>
+      <p class="text-sm opacity-80 mb-4">
+        Ya puedes regresar a la aplicación. Esta ventana se cerrará automáticamente.
+      </p>
+      <button id="closeWindow" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-all">
+        Cerrar ventana
+      </button>
+    </div>
+
+    <!-- Estado de error -->
+    <div id="errorState" class="hidden">
+      <div class="text-6xl mb-4">❌</div>
+      <h2 class="text-xl font-bold mb-4">Error en la autenticación</h2>
+      <p id="errorMessage" class="text-sm opacity-80 mb-4">
+        Ocurrió un error durante la autenticación.
+      </p>
+      <div class="space-y-2">
+        <button id="retryAuth" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-6 rounded-lg transition-all">
+          Intentar de nuevo
+        </button>
+        <button id="closeWindowError" class="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg transition-all">
+          Cerrar ventana
+        </button>
+      </div>
+    </div>
+
+    <!-- Instrucciones para regresar a la app -->
+    <div class="mt-6 p-4 bg-black/20 rounded-lg">
+      <p class="text-xs opacity-70">
+        💡 <strong>Instrucciones:</strong> Después de la autenticación exitosa, regresa a la aplicación YA ME VI en tu dispositivo.
+      </p>
+    </div>
+  </div>
+
+  <!-- Firebase Authentication -->
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+      authDomain: "ya-me-vi.firebaseapp.com",
+      projectId: "ya-me-vi",
+      storageBucket: "ya-me-vi.firebasestorage.app",
+      messagingSenderId: "748876890843",
+      appId: "1:748876890843:web:070d1eb476d38594d002fe",
+      measurementId: "G-D7R797S5BC"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // UI State Management
+    function showState(stateName) {
+      const states = ['initialState', 'processingState', 'successState', 'errorState'];
+      states.forEach(state => {
+        document.getElementById(state).classList.add('hidden');
+      });
+      document.getElementById(stateName).classList.remove('hidden');
+    }
+
+    // Store authentication token for the app
+    function storeAuthToken(user) {
+      try {
+        // Crear un token de sesión que la app pueda usar
+        const authData = {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          timestamp: new Date().getTime(),
+          provider: 'google'
+        };
+        
+        // Guardar en localStorage para que la app lo pueda leer
+        localStorage.setItem('yamevi_external_auth', JSON.stringify(authData));
+        
+        // También intentar postMessage si es un popup
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'YAMEVI_AUTH_SUCCESS',
+            data: authData
+          }, '*');
+        }
+        
+        console.log('✅ Token de autenticación guardado:', authData);
+        return true;
+      } catch (error) {
+        console.error('❌ Error guardando token:', error);
+        return false;
+      }
+    }
+
+    // Google Authentication
+    async function authenticateWithGoogle() {
+      try {
+        showState('processingState');
+        
+        const provider = new GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+
+        const result = await signInWithPopup(auth, provider);
+        
+        if (result && result.user) {
+          console.log('✅ Autenticación exitosa:', result.user.email);
+          
+          // Guardar datos de autenticación
+          const tokenStored = storeAuthToken(result.user);
+          
+          if (tokenStored) {
+            showState('successState');
+            
+            // Auto-cerrar después de unos segundos
+            setTimeout(() => {
+              closeWindow();
+            }, 3000);
+          } else {
+            throw new Error('No se pudo guardar el token de autenticación');
+          }
+        }
+
+      } catch (error) {
+        console.error('❌ Error en autenticación:', error);
+        
+        let errorMessage = 'Error desconocido';
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage = 'Proceso cancelado por el usuario';
+            break;
+          case 'auth/popup-blocked':
+            errorMessage = 'Popup bloqueado por el navegador';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = 'Error de conexión a internet';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Demasiados intentos. Espera unos minutos';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        
+        document.getElementById('errorMessage').textContent = errorMessage;
+        showState('errorState');
+      }
+    }
+
+    // Close window function
+    function closeWindow() {
+      try {
+        // Intentar cerrar de varias formas
+        if (window.close) {
+          window.close();
+        }
+        
+        // Si no se puede cerrar, mostrar instrucciones
+        setTimeout(() => {
+          if (!window.closed) {
+            alert('Por favor cierra esta ventana manualmente y regresa a la aplicación YA ME VI');
+          }
+        }, 1000);
+      } catch (error) {
+        console.log('No se pudo cerrar automáticamente');
+      }
+    }
+
+    // Event Listeners
+    document.getElementById('proceedWithGoogle').addEventListener('click', authenticateWithGoogle);
+    document.getElementById('retryAuth').addEventListener('click', () => {
+      showState('initialState');
+    });
+    document.getElementById('closeWindow').addEventListener('click', closeWindow);
+    document.getElementById('closeWindowError').addEventListener('click', closeWindow);
+
+    // Auth State Listener
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('👤 Usuario ya autenticado:', user.email);
+        // Si ya está autenticado, guardar token y mostrar éxito
+        storeAuthToken(user);
+        showState('successState');
+        setTimeout(closeWindow, 2000);
+      }
+    });
+
+    // Listen for messages from parent window
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'YAMEVI_AUTH_REQUEST') {
+        console.log('📨 Solicitud de autenticación recibida');
+        authenticateWithGoogle();
+      }
+    });
+
+    // Get return URL from query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnTo = urlParams.get('return_to');
+    
+    if (returnTo) {
+      console.log('🔗 URL de retorno:', returnTo);
+      // Guardar para usar después de la autenticación
+      sessionStorage.setItem('yamevi_return_url', returnTo);
+    }
+
+    // Auto-iniciar autenticación si viene desde la app
+    const autoStart = urlParams.get('auto_start');
+    if (autoStart === 'true') {
+      setTimeout(authenticateWithGoogle, 1000);
+    }
+
+    console.log('🚀 Página de autenticación externa inicializada');
+  </script>
+</body>
+</html>
