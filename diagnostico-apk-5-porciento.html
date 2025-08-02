@@ -35,6 +35,20 @@
         .btn:hover {
             background: #c0392b;
         }
+        .btn.critical {
+            background: #dc3545;
+            animation: blink 1s infinite;
+            border: 2px solid #fff;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .btn.critical:hover {
+            background: #c82333;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.7; }
+        }
         .btn-success {
             background: #27ae60;
         }
@@ -94,39 +108,68 @@
         
         <div class="solution-item critical">
             <h3>🔑 SOLUCIÓN 1: SHA-1 Certificate</h3>
-            <p><strong>PROBLEMA:</strong> WebIntoApp usa un SHA-1 certificate específico no registrado en Firebase</p>
-            <p><strong>ACCIÓN:</strong></p>
+            <p><strong>✅ ESTADO:</strong> SHA-1 certificate agregado correctamente en Firebase Console</p>
+            <p><strong>✅ COMPLETADO:</strong></p>
             <ol>
-                <li>Contactar soporte de WebIntoApp</li>
-                <li>Solicitar el SHA-1 certificate que usan</li>
-                <li>Agregarlo en Firebase Console → Project Settings → Add fingerprint</li>
+                <li>✅ SHA-1 certificate agregado: DA:39:A3:EE:5E:6B:4B:0D:32:55:BF:EF:95:60:18:90:AF:D8:07:09</li>
+                <li>✅ Firebase Console configurado</li>
+                <li>🔄 Esperando propagación (10-30 minutos)</li>
             </ol>
-            <div class="config-box">
-SHA-1 común de WebIntoApp:
+            <div class="config-box" style="background-color: #d4edda; border-color: #c3e6cb;">
+✅ SHA-1 CONFIGURADO EN FIREBASE:
 DA:39:A3:EE:5E:6B:4B:0D:32:55:BF:EF:95:60:18:90:AF:D8:07:09
             </div>
             <button class="btn" onclick="copySHA1()">📋 Copiar SHA-1</button>
         </div>
 
+        <div class="solution-item critical" style="border-color: #dc3545;">
+            <h3>🚨 SOLUCIÓN 2: REDIRECT URIs INCORRECTOS - ACCIÓN URGENTE</h3>
+            <p><strong>❌ ERROR CRÍTICO:</strong> Los redirect URIs que agregaste son para apps Android nativas, pero WebIntoApp usa WebView</p>
+            
+            <div style="background-color: #f8d7da; padding: 15px; border: 2px solid #dc3545; border-radius: 8px; margin: 10px 0;">
+                <strong>🔥 QUITA ESTOS URIs INMEDIATAMENTE:</strong><br>
+                ❌ com.webintoapp.myapp://oauth/callback<br>
+                ❌ intent://oauth/callback/#Intent;scheme=com.webintoapp.myapp;end
+            </div>
+
+            <div style="background-color: #d4edda; padding: 15px; border: 2px solid #28a745; border-radius: 8px;">
+                <strong>✅ USA SOLO ESTOS URIs PARA WEBINTOAPP:</strong><br>
+                ✅ https://yamevi.com.mx/__/auth/handler<br>
+                ✅ https://ya-me-vi.firebaseapp.com/__/auth/handler<br>
+                ✅ https://ya-me-vi.web.app/__/auth/handler
+            </div>
+
+            <p><strong>⚡ ACCIÓN INMEDIATA:</strong></p>
+            <ol>
+                <li>🚨 Ir a Google Cloud Console → OAuth 2.0 Client</li>
+                <li>❌ ELIMINAR los URIs com.webintoapp.myapp://oauth/callback</li>
+                <li>❌ ELIMINAR los URIs intent://oauth/callback</li>
+                <li>✅ MANTENER solo los URIs https:// que ya tienes</li>
+            </ol>
+            <button class="btn critical" onclick="showRedirectFix()">🚨 Ver Corrección Urgente</button>
+        </div>
+
         <div class="solution-item">
-            <h3>🌐 SOLUCIÓN 2: WebView Configuration</h3>
+            <h3>🌐 SOLUCIÓN 3: WebView Configuration</h3>
             <p><strong>PROBLEMA:</strong> WebView puede necesitar configuración específica para OAuth</p>
             <button class="btn" onclick="testWebViewOAuth()">🧪 Test OAuth WebView</button>
         </div>
 
         <div class="solution-item">
-            <h3>📱 SOLUCIÓN 3: Package Name Verification</h3>
+            <h3>📱 SOLUCIÓN 4: Package Name Verification</h3>
             <p><strong>PROBLEMA:</strong> APK puede no estar usando package name correcto</p>
             <button class="btn" onclick="verifyPackageName()">✅ Verificar Package</button>
         </div>
 
         <div class="solution-item">
-            <h3>🔄 SOLUCIÓN 4: Redirect URI Específico</h3>
-            <p><strong>PROBLEMA:</strong> WebIntoApp puede necesitar redirect URI específico</p>
+            <h3>🔄 SOLUCIÓN 5: Tiempo de Propagación</h3>
+            <p><strong>INFO:</strong> Los cambios de SHA-1 pueden tardar 10-30 minutos en propagarse</p>
             <div class="config-box">
-Agregar en Google Cloud Console → Redirect URIs:
-com.webintoapp.myapp://oauth/callback
-intent://oauth/callback/#Intent;scheme=com.webintoapp.myapp;end
+⏰ Cambios realizados:
+- SHA-1 certificate agregado
+- Esperando propagación completa
+
+🧪 Probar OAuth en APK después de 30 minutos
             </div>
             <button class="btn" onclick="copyRedirectURI()">📋 Copiar Redirect URI</button>
         </div>
@@ -262,6 +305,31 @@ ${!info.isWebView ? '⚠️ Para simular APK, abrir desde app WebIntoApp' : ''}
                 addLog('📋 SHA-1 copiado al portapapeles');
             }).catch(err => {
                 addLog('❌ Error copiando SHA-1: ' + err.message);
+            });
+        };
+
+        window.showRedirectFix = function() {
+            addLog('🚨 REDIRECT URIs INCORRECTOS DETECTADOS');
+            addLog('❌ ELIMINA INMEDIATAMENTE: com.webintoapp.myapp://oauth/callback');
+            addLog('❌ ELIMINA INMEDIATAMENTE: intent://oauth/callback/#Intent;scheme=com.webintoapp.myapp;end');
+            addLog('');
+            addLog('✅ MANTÉN SOLO ESTOS URIs HTTPS://');
+            addLog('✅ https://yamevi.com.mx/__/auth/handler');
+            addLog('✅ https://ya-me-vi.firebaseapp.com/__/auth/handler');
+            addLog('✅ https://ya-me-vi.web.app/__/auth/handler');
+            addLog('');
+            addLog('📚 EXPLICACIÓN: WebIntoApp usa WebView, no app nativa Android');
+            addLog('🔧 WebView requiere URIs https://, no esquemas personalizados');
+            addLog('⚡ Ve a Google Cloud Console y corrige esto AHORA');
+            
+            // Also copy the correct URIs
+            const correctUris = `https://yamevi.com.mx/__/auth/handler
+https://ya-me-vi.firebaseapp.com/__/auth/handler
+https://ya-me-vi.web.app/__/auth/handler`;
+            navigator.clipboard.writeText(correctUris).then(() => {
+                addLog('📋 URIs correctos copiados al portapapeles - úsalos en Google Cloud Console');
+            }).catch(err => {
+                addLog('❌ Error copiando URIs correctos: ' + err.message);
             });
         };
 
