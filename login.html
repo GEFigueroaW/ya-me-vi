@@ -3,13 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YA ME VI - Ingreso APK</title>
+  <title>YA ME VI - Ingreso</title>
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   
   <style>
     body {
@@ -21,6 +35,7 @@
     .glass-effect {
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
@@ -38,415 +53,467 @@
       100% { transform: rotate(360deg); }
     }
     
-    .webview-alert {
-      background: linear-gradient(135deg, #ff5722, #d32f2f);
-      color: white;
-      padding: 20px;
-      border-radius: 15px;
-      margin: 20px 0;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
-    
-    .success-message {
-      background: linear-gradient(135deg, #4caf50, #2e7d32);
+    .webview-warning {
+      background: linear-gradient(135deg, #ff9800, #f57c00);
       color: white;
       padding: 15px;
       border-radius: 10px;
       margin: 10px 0;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-  <div class="glass-effect rounded-3xl p-8 w-full max-w-md text-white text-center">
+  <div class="glass-effect rounded-3xl p-8 w-full max-w-md text-white text-center animate__animated animate__fadeInUp">
     
     <!-- Logo -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-white">YA ME VI</h1>
-      <p class="text-lg opacity-80">Versión APK Optimizada</p>
+      <div class="text-6xl mb-4">🎯</div>
+      <h1 class="text-3xl font-bold mb-2">YA ME VI</h1>
+      <p class="text-sm opacity-80">Predicciones inteligentes de lotería</p>
     </div>
 
-    <!-- Detección automática de entorno -->
-    <div id="environmentDetection" class="mb-6">
-      <div class="loading-spinner mx-auto mb-4"></div>
-      <p>Detectando entorno de ejecución...</p>
+    <!-- Detección de entorno -->
+    <div id="environmentInfo" class="mb-4 text-sm opacity-75"></div>
+
+    <!-- Warning para WebView -->
+    <div id="webviewWarning" class="webview-warning hidden">
+      <div class="text-2xl mb-2">⚠️</div>
+      <p>Entorno WebView detectado</p>
+      <p class="text-xs mt-1">Usando método de autenticación optimizado</p>
     </div>
 
-    <!-- Información del entorno -->
-    <div id="environmentInfo" class="mb-4 text-sm opacity-75 hidden"></div>
-
-    <!-- Formulario de login (inicialmente oculto) -->
-    <div id="loginForm" class="hidden">
+    <!-- Login con Email -->
+    <div class="space-y-4 mb-6">
+      <input 
+        type="email" 
+        id="emailInput" 
+        placeholder="📧 Correo electrónico" 
+        class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/30 focus:border-white/50 focus:outline-none transition-all"
+        autocomplete="email"
+      />
+      <input 
+        type="password" 
+        id="passwordInput" 
+        placeholder="🔒 Contraseña" 
+        class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/30 focus:border-white/50 focus:outline-none transition-all"
+        autocomplete="current-password"
+      />
       
-      <!-- Login con Email -->
-      <div class="mb-6">
-        <input
-          type="email"
-          id="email"
-          placeholder="Correo electrónico"
-          class="w-full p-4 rounded-xl bg-white bg-opacity-20 text-white placeholder-gray-300 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
-        />
-      </div>
-
-      <div class="mb-6">
-        <input
-          type="password"
-          id="password"
-          placeholder="Contraseña"
-          class="w-full p-4 rounded-xl bg-white bg-opacity-20 text-white placeholder-gray-300 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
-        />
-      </div>
-
-      <button
-        id="emailLoginBtn"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl transition duration-300 mb-4"
+      <button 
+        id="loginWithEmail" 
+        class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
       >
-        <span id="emailLoginText">Ingresar con Email</span>
-        <div id="emailLoginSpinner" class="loading-spinner mx-auto hidden"></div>
+        <span class="btn-text">🔑 Iniciar Sesión</span>
+        <div class="loading-spinner hidden mx-auto"></div>
       </button>
-
-      <div class="text-center mb-6">
-        <span class="text-gray-300">o</span>
-      </div>
-
-      <!-- Google Login -->
-      <button
-        id="googleLoginBtn"
-        class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-6 rounded-xl transition duration-300 mb-6"
-      >
-        <span id="googleLoginText">🔐 Continuar con Google</span>
-        <div id="googleLoginSpinner" class="loading-spinner mx-auto hidden"></div>
-      </button>
-
-      <!-- Enlaces adicionales -->
-      <div class="text-center space-y-2">
-        <p class="text-sm text-gray-300">
-          ¿No tienes cuenta? 
-          <a href="register.html" class="text-blue-300 hover:text-blue-200 underline">Regístrate</a>
-        </p>
-        <p class="text-sm text-gray-300">
-          <a href="recover.html" class="text-blue-300 hover:text-blue-200 underline">¿Olvidaste tu contraseña?</a>
-        </p>
-      </div>
     </div>
 
-    <!-- Alertas dinámicas -->
-    <div id="alerts" class="mt-4"></div>
+    <!-- Separador -->
+    <div class="flex items-center mb-6">
+      <div class="flex-1 h-px bg-white/30"></div>
+      <span class="px-4 text-sm opacity-70">o</span>
+      <div class="flex-1 h-px bg-white/30"></div>
+    </div>
 
+    <!-- Login con Google -->
+    <button 
+      id="loginWithGoogle" 
+      class="w-full bg-white/20 hover:bg-white/30 border border-white/30 text-white py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg mb-6 flex items-center justify-center space-x-2"
+    >
+      <svg class="w-5 h-5" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      <span class="btn-text">Continuar con Google</span>
+      <div class="loading-spinner hidden"></div>
+    </button>
+
+    <!-- Método alternativo para WebView -->
+    <div id="alternativeAuth" class="hidden">
+      <button 
+        id="externalGoogleAuth" 
+        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg mb-4"
+      >
+        🌐 Autenticación Externa
+      </button>
+      <p class="text-xs opacity-70 mb-4">
+        Este método abrirá un navegador externo para completar la autenticación de forma segura
+      </p>
+    </div>
+
+    <!-- Enlaces -->
+    <div class="space-y-2 text-sm">
+      <p>
+        ¿No tienes cuenta? 
+        <a href="register.html" class="text-blue-300 hover:text-blue-200 underline transition-colors">
+          Crear cuenta
+        </a>
+      </p>
+      <p>
+        <a href="recover.html" class="text-purple-300 hover:text-purple-200 underline transition-colors">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </p>
+    </div>
+
+    <!-- Debug info (solo en desarrollo) -->
+    <div id="debugInfo" class="hidden mt-6 p-3 bg-black/20 rounded-lg text-xs font-mono text-left"></div>
   </div>
 
-  <!-- Firebase Config -->
+  <!-- Modal de loading -->
+  <div id="loadingModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-white/90 backdrop-blur-lg rounded-xl p-8 text-center text-gray-800 max-w-sm mx-4">
+      <div class="loading-spinner mx-auto mb-4" style="border-color: #3b82f6; border-top-color: transparent;"></div>
+      <p id="loadingMessage" class="font-medium">Procesando...</p>
+    </div>
+  </div>
+
+  <!-- Firebase and Auth Logic -->
   <script type="module">
-    // Firebase Configuration
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
       getAuth, 
-      signInWithEmailAndPassword,
-      signInWithPopup,
+      signInWithEmailAndPassword, 
+      signInWithPopup, 
       signInWithRedirect,
       getRedirectResult,
-      GoogleAuthProvider,
+      GoogleAuthProvider, 
       onAuthStateChanged 
-    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+    // Firebase Config - CORREGIDA para que coincida con google-services.json
     const firebaseConfig = {
       apiKey: "AIzaSyBak3-l2c4nqltw-BPE04GYAaxS2gJo2Xo",
       authDomain: "ya-me-vi.firebaseapp.com",
       projectId: "ya-me-vi",
       storageBucket: "ya-me-vi.appspot.com",
       messagingSenderId: "748876990843",
-      appId: "1:748876990843:web:ju4cf2bggjomna6fa8r"
+      appId: "1:748876990843:web:ju4cf2bggjomna6fa8r",
+      measurementId: "G-D7R797S5BC"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
 
-    // Configuración específica para APK
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
-
-    // Variables globales
-    let isWebView = false;
-    let authMethod = 'popup';
-
-    // Función de detección de entorno mejorada
+    // Environment Detection - SIMPLIFICADA para Firebase nativo
     function detectEnvironment() {
-      console.log('🔍 Iniciando detección de entorno...');
+      const ua = navigator.userAgent.toLowerCase();
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
       
-      const userAgent = navigator.userAgent;
-      const hasAndroidUA = /Android/.test(userAgent);
-      const hasWebViewUA = /wv/.test(userAgent);
-      const limitedFeatures = !window.chrome || typeof window.orientation === 'undefined';
-      const isWebIntoApp = userAgent.includes('WebIntoApp') || 
-                          userAgent.includes('webintoapp') ||
-                          window.location.hostname.includes('webintoapp') ||
-                          document.referrer.includes('webintoapp');
-
-      isWebView = hasWebViewUA || isWebIntoApp || (hasAndroidUA && limitedFeatures);
+      // Con google-services.json, podemos usar métodos nativos
+      const isMobile = /android|iphone|ipad|mobile/i.test(ua);
+      const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+      const isHTTPS = protocol === 'https:';
       
-      console.log('📱 Detección completa:', {
-        userAgent,
-        hasAndroidUA,
-        hasWebViewUA,
-        limitedFeatures,
-        isWebIntoApp,
-        isWebView
-      });
-
+      // Ahora Firebase nativo debería funcionar
+      const isWebView = /wv|webview/i.test(ua);
+      
       return {
         isWebView,
-        isWebIntoApp,
-        hasAndroidUA,
-        method: isWebView ? 'external' : 'popup'
+        isWebIntoApp: false, // Con Firebase nativo, no necesitamos detectar esto
+        isMobile,
+        isLocalhost,
+        isHTTPS,
+        userAgent: ua,
+        hostname,
+        protocol,
+        // Con google-services.json, podemos usar todos los métodos
+        canUsePopup: true,
+        canUseRedirect: true,
+        canUseExternalBrowser: false // Ya no necesario
       };
     }
 
-    // Función para mostrar información del entorno
-    function showEnvironmentInfo(detection) {
-      const envInfo = document.getElementById('environmentInfo');
-      const envDetection = document.getElementById('environmentDetection');
+    // UI Management
+    function showLoading(buttonId, message = 'Procesando...') {
+      const button = document.getElementById(buttonId);
+      const modal = document.getElementById('loadingModal');
+      const messageEl = document.getElementById('loadingMessage');
       
-      envDetection.classList.add('hidden');
-      envInfo.classList.remove('hidden');
-      
-      if (detection.isWebView) {
-        authMethod = 'external';
-        envInfo.innerHTML = `
-          <div class="webview-alert">
-            <h3 class="font-bold mb-2">🔧 Entorno APK Detectado</h3>
-            <p class="text-sm">Usando autenticación externa optimizada para WebView</p>
-            <p class="text-xs mt-2">Método: ${authMethod}</p>
-          </div>
-        `;
-      } else {
-        authMethod = 'popup';
-        envInfo.innerHTML = `
-          <div class="success-message">
-            <p class="text-sm">✅ Entorno web estándar detectado</p>
-            <p class="text-xs">Método: ${authMethod}</p>
-          </div>
-        `;
+      if (button) {
+        button.disabled = true;
+        const spinner = button.querySelector('.loading-spinner');
+        const text = button.querySelector('.btn-text');
+        if (spinner) spinner.classList.remove('hidden');
+        if (text) text.classList.add('hidden');
       }
       
-      document.getElementById('loginForm').classList.remove('hidden');
+      if (modal && messageEl) {
+        messageEl.textContent = message;
+        modal.classList.remove('hidden');
+      }
     }
 
-    // Función para mostrar alertas
-    function showAlert(message, type = 'info') {
-      const alerts = document.getElementById('alerts');
-      const alertClass = type === 'error' ? 'bg-red-500' : 
-                        type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+    function hideLoading(buttonId) {
+      const button = document.getElementById(buttonId);
+      const modal = document.getElementById('loadingModal');
       
-      alerts.innerHTML = `
-        <div class="${alertClass} text-white p-4 rounded-xl mb-4">
-          ${message}
-        </div>
-      `;
+      if (button) {
+        button.disabled = false;
+        const spinner = button.querySelector('.loading-spinner');
+        const text = button.querySelector('.btn-text');
+        if (spinner) spinner.classList.add('hidden');
+        if (text) text.classList.remove('hidden');
+      }
+      
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      const baseClasses = 'fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg z-50 text-white font-medium';
+      
+      const typeClasses = {
+        error: 'bg-red-500/90',
+        success: 'bg-green-500/90',
+        warning: 'bg-orange-500/90',
+        info: 'bg-blue-500/90'
+      };
+      
+      notification.className = `${baseClasses} ${typeClasses[type] || typeClasses.info}`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
       
       setTimeout(() => {
-        alerts.innerHTML = '';
+        notification.remove();
       }, 5000);
     }
 
-    // Función de autenticación con Google externa
-    async function authenticateWithGoogleExternal() {
+    // External Browser Authentication
+    function openExternalGoogleAuth() {
+      const env = detectEnvironment();
+      
+      // URL para autenticación externa
+      const externalAuthUrl = `https://yamevi.com.mx/auth-external.html?return_to=${encodeURIComponent(window.location.href)}`;
+      
+      showNotification('Abriendo navegador externo...', 'info');
+      
       try {
-        console.log('🌐 Iniciando autenticación externa...');
-        
-        // Crear URL de autenticación externa
-        const authUrl = `${window.location.origin}/auth-external.html`;
-        const popup = window.open(authUrl, 'GoogleAuth', 'width=500,height=600');
-        
-        if (!popup) {
-          throw new Error('No se pudo abrir ventana de autenticación');
-        }
-
-        // Escuchar el token de autenticación
-        return new Promise((resolve, reject) => {
-          const checkAuth = setInterval(() => {
-            try {
-              const token = localStorage.getItem('externalAuthToken');
-              if (token) {
-                localStorage.removeItem('externalAuthToken');
-                popup.close();
-                clearInterval(checkAuth);
-                
-                // Aquí deberías validar el token con tu backend
-                // Por simplicidad, simulamos un login exitoso
-                resolve({ success: true, token });
-              }
-              
-              if (popup.closed) {
-                clearInterval(checkAuth);
-                reject(new Error('Autenticación cancelada'));
-              }
-            } catch (error) {
-              console.error('Error verificando autenticación:', error);
+        // Intentar varios métodos para abrir navegador externo
+        if (window.open) {
+          const popup = window.open(externalAuthUrl, '_blank', 'location=yes,hidden=no,clearcache=yes,clearsessioncache=yes');
+          
+          if (!popup) {
+            throw new Error('Popup bloqueado');
+          }
+          
+          // Verificar si se abrió
+          setTimeout(() => {
+            if (popup.closed) {
+              showNotification('Navegador cerrado. Intenta de nuevo.', 'warning');
             }
           }, 1000);
           
-          setTimeout(() => {
-            clearInterval(checkAuth);
-            if (!popup.closed) popup.close();
-            reject(new Error('Tiempo de autenticación agotado'));
-          }, 30000);
-        });
+        } else {
+          // Fallback: redirigir directamente
+          window.location.href = externalAuthUrl;
+        }
         
       } catch (error) {
-        console.error('❌ Error en autenticación externa:', error);
-        throw error;
+        console.error('Error abriendo navegador externo:', error);
+        showNotification('No se pudo abrir el navegador externo. Intenta con email y contraseña.', 'error');
       }
     }
 
-    // Google Login
+    // Google Authentication - SIMPLIFICADA para Firebase nativo
     async function loginWithGoogle() {
-      const btn = document.getElementById('googleLoginBtn');
-      const text = document.getElementById('googleLoginText');
-      const spinner = document.getElementById('googleLoginSpinner');
+      const env = detectEnvironment();
       
-      btn.disabled = true;
-      text.classList.add('hidden');
-      spinner.classList.remove('hidden');
+      console.log('🔍 Entorno detectado:', env);
       
       try {
-        console.log(`🔐 Iniciando Google Auth (método: ${authMethod})`);
-        
+        const provider = new GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+
         let result;
         
-        if (authMethod === 'external') {
-          result = await authenticateWithGoogleExternal();
-          if (result.success) {
-            showAlert('¡Autenticación externa exitosa!', 'success');
-            setTimeout(() => {
-              window.location.href = 'home.html';
-            }, 1500);
-            return;
-          }
-        } else {
-          try {
-            result = await signInWithPopup(auth, provider);
-          } catch (popupError) {
-            console.log('❌ Popup falló, intentando redirect...');
+        showLoading('loginWithGoogle', 'Autenticando con Google...');
+
+        try {
+          // Intentar popup primero (funciona mejor con Firebase nativo)
+          console.log('🖥️ Usando signInWithPopup con Firebase nativo');
+          result = await signInWithPopup(auth, provider);
+          
+        } catch (popupError) {
+          console.log('❌ Popup falló, intentando redirect...', popupError);
+          
+          if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user') {
+            // Fallback a redirect
+            console.log('🔄 Usando signInWithRedirect');
             await signInWithRedirect(auth, provider);
-            return;
+            return; // El resultado se maneja en getRedirectResult
+          } else {
+            throw popupError; // Re-lanzar otros errores
           }
         }
 
-        if (result?.user) {
-          console.log('✅ Login exitoso:', result.user.email);
-          
-          // Verificar si es admin
-          const userDoc = await getDoc(doc(db, 'usuarios', result.user.uid));
-          if (userDoc.exists() && userDoc.data().esAdmin) {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'home.html';
-          }
+        if (result && result.user) {
+          console.log('✅ Autenticación exitosa:', result.user.email);
+          handleAuthSuccess(result.user);
         }
-        
+
       } catch (error) {
         console.error('❌ Error en Google Auth:', error);
-        showAlert(`Error: ${error.message}`, 'error');
-      } finally {
-        btn.disabled = false;
-        text.classList.remove('hidden');
-        spinner.classList.add('hidden');
+        hideLoading('loginWithGoogle');
+        
+        let errorMessage = 'Error de autenticación: ';
+        switch (error.code) {
+          case 'auth/network-request-failed':
+            errorMessage = 'Error de conexión. Verifica tu internet.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Demasiados intentos. Espera unos minutos.';
+            break;
+          case 'auth/configuration-not-found':
+            errorMessage = 'Error de configuración Firebase. Contacta soporte.';
+            break;
+          default:
+            errorMessage += error.message;
+        }
+        
+        showNotification(errorMessage, 'error');
       }
     }
 
-    // Email Login
+    // Email Authentication
     async function loginWithEmail() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const btn = document.getElementById('emailLoginBtn');
-      const text = document.getElementById('emailLoginText');
-      const spinner = document.getElementById('emailLoginSpinner');
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
       
       if (!email || !password) {
-        showAlert('Por favor completa todos los campos', 'error');
+        showNotification('Por favor ingresa email y contraseña', 'warning');
         return;
       }
-      
-      btn.disabled = true;
-      text.classList.add('hidden');
-      spinner.classList.remove('hidden');
-      
+
       try {
-        const result = await signInWithEmailAndPassword(auth, email, password);
+        showLoading('loginWithEmail', 'Verificando credenciales...');
         
-        if (result.user) {
-          console.log('✅ Login con email exitoso:', result.user.email);
-          
-          // Verificar si es admin
-          const userDoc = await getDoc(doc(db, 'usuarios', result.user.uid));
-          if (userDoc.exists() && userDoc.data().esAdmin) {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'home.html';
-          }
-        }
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        handleAuthSuccess(userCredential.user);
         
       } catch (error) {
-        console.error('❌ Error en email login:', error);
-        showAlert(`Error: ${error.message}`, 'error');
-      } finally {
-        btn.disabled = false;
-        text.classList.remove('hidden');
-        spinner.classList.add('hidden');
+        console.error('❌ Error en login con email:', error);
+        hideLoading('loginWithEmail');
+        
+        let message = 'Error al iniciar sesión: ';
+        switch (error.code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            message = 'Email o contraseña incorrectos';
+            break;
+          case 'auth/too-many-requests':
+            message = 'Demasiados intentos. Espera unos minutos';
+            break;
+          case 'auth/network-request-failed':
+            message = 'Error de conexión. Verifica tu internet';
+            break;
+          default:
+            message += error.message;
+        }
+        
+        showNotification(message, 'error');
       }
     }
 
-    // Verificar resultado de redirect al cargar la página
-    async function checkRedirectResult() {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          console.log('✅ Redirect result exitoso:', result.user.email);
-          
-          const userDoc = await getDoc(doc(db, 'usuarios', result.user.uid));
-          if (userDoc.exists() && userDoc.data().esAdmin) {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'home.html';
-          }
+    // Handle Authentication Success
+    function handleAuthSuccess(user) {
+      console.log('✅ Usuario autenticado:', user.email || user.uid);
+      
+      hideLoading('loginWithEmail');
+      hideLoading('loginWithGoogle');
+      
+      showNotification('¡Ingreso exitoso! Redirigiendo...', 'success');
+      
+      // Verificar si es admin
+      const adminEmails = [
+        'gfigueroa.w@gmail.com',
+        'admin@yamevi.com.mx', 
+        'eugenfw@gmail.com',
+        'guillermo.figueroaw@totalplay.com.mx'
+      ];
+      
+      const isAdminRedirect = new URLSearchParams(window.location.search).get('admin') === 'true';
+      const isAdmin = adminEmails.includes(user.email);
+      
+      setTimeout(() => {
+        if (isAdminRedirect && isAdmin) {
+          window.location.href = 'admin.html';
+        } else if (isAdminRedirect && !isAdmin) {
+          showNotification('Sin permisos de administrador', 'error');
+          setTimeout(() => window.location.href = 'index.html', 2000);
+        } else {
+          window.location.href = 'home.html';
         }
-      } catch (error) {
-        console.error('❌ Error procesando redirect:', error);
+      }, 1500);
+    }
+
+    // Initialize App - SIMPLIFICADA para Firebase nativo
+    function initializeApp() {
+      const env = detectEnvironment();
+      
+      // Update environment info
+      const envInfo = document.getElementById('environmentInfo');
+      envInfo.textContent = `${env.isMobile ? '📱' : '🖥️'} ${env.isWebView ? 'WebView' : 'Navegador'} | Firebase Nativo ✅`;
+      
+      // No mostrar warnings ni alternativas - Firebase nativo debería funcionar
+      console.log('🚀 App inicializada con Firebase nativo:', env);
+      
+      // Debug info solo en localhost
+      if (env.isLocalhost || window.location.search.includes('debug=true')) {
+        const debugInfo = document.getElementById('debugInfo');
+        debugInfo.textContent = JSON.stringify(env, null, 2);
+        debugInfo.classList.remove('hidden');
       }
     }
 
     // Event Listeners
-    document.getElementById('googleLoginBtn').addEventListener('click', loginWithGoogle);
-    document.getElementById('emailLoginBtn').addEventListener('click', loginWithEmail);
+    document.getElementById('loginWithEmail').addEventListener('click', loginWithEmail);
+    document.getElementById('loginWithGoogle').addEventListener('click', loginWithGoogle);
+    document.getElementById('externalGoogleAuth').addEventListener('click', openExternalGoogleAuth);
+    
+    // Allow login with Enter
+    document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loginWithEmail();
+    });
 
-    // Verificar autenticación existente
+    // Auth State Listener
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log('✅ Usuario ya autenticado:', user.email);
-        window.location.href = 'home.html';
+        console.log('✅ Usuario ya autenticado:', user.email || user.uid);
+        handleAuthSuccess(user);
       }
     });
 
-    // Inicialización
-    window.addEventListener('load', async () => {
-      console.log('🚀 Inicializando aplicación...');
-      
-      // Verificar redirect result primero
-      await checkRedirectResult();
-      
-      // Detectar entorno y mostrar interfaz
-      const detection = detectEnvironment();
-      
-      setTimeout(() => {
-        showEnvironmentInfo(detection);
-      }, 1500);
+    // Handle Redirect Result (for WebView redirect method)
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        console.log('✅ Redirect result recibido:', result.user.email);
+        handleAuthSuccess(result.user);
+      }
+    }).catch((error) => {
+      if (error.code !== 'auth/no-redirect-operation-pending') {
+        console.error('❌ Error en redirect result:', error);
+        showNotification(`Error en redirect: ${error.message}`, 'error');
+      }
     });
 
+    // Initialize
+    initializeApp();
   </script>
-
 </body>
 </html>

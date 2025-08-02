@@ -187,14 +187,14 @@
       onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // Firebase Config
+    // Firebase Config - CORREGIDA para que coincida con google-services.json
     const firebaseConfig = {
-      apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+      apiKey: "AIzaSyBak3-l2c4nqltw-BPE04GYAaxS2gJo2Xo",
       authDomain: "ya-me-vi.firebaseapp.com",
       projectId: "ya-me-vi",
-      storageBucket: "ya-me-vi.firebasestorage.app",
-      messagingSenderId: "748876890843",
-      appId: "1:748876890843:web:070d1eb476d38594d002fe",
+      storageBucket: "ya-me-vi.appspot.com",
+      messagingSenderId: "748876990843",
+      appId: "1:748876990843:web:ju4cf2bggjomna6fa8r",
       measurementId: "G-D7R797S5BC"
     };
 
@@ -202,52 +202,33 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Environment Detection - Mejorada específicamente para WebIntoApp
+    // Environment Detection - SIMPLIFICADA para Firebase nativo
     function detectEnvironment() {
       const ua = navigator.userAgent.toLowerCase();
       const hostname = window.location.hostname;
       const protocol = window.location.protocol;
       
-      // Detectores específicos para WebIntoApp y similares
-      const webIntoAppIndicators = [
-        'webintoapp',
-        'android.*wv',
-        '; wv)',
-        'version/.*mobile.*safari',
-        /android.*version\/[.\d]+.*chrome\/[.\d]+.*mobile.*safari/i.test(navigator.userAgent)
-      ];
-      
-      const isWebIntoApp = webIntoAppIndicators.some(indicator => {
-        if (typeof indicator === 'string') {
-          return ua.includes(indicator);
-        }
-        return indicator; // para regex
-      });
-      
-      // Otros indicadores de WebView
-      const isWebView = isWebIntoApp || 
-                       !window.chrome || 
-                       ua.includes('wv') ||
-                       window.navigator.standalone ||
-                       window.matchMedia('(display-mode: standalone)').matches;
-      
+      // Con google-services.json, podemos usar métodos nativos
       const isMobile = /android|iphone|ipad|mobile/i.test(ua);
       const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
       const isHTTPS = protocol === 'https:';
       
+      // Ahora Firebase nativo debería funcionar
+      const isWebView = /wv|webview/i.test(ua);
+      
       return {
         isWebView,
-        isWebIntoApp,
+        isWebIntoApp: false, // Con Firebase nativo, no necesitamos detectar esto
         isMobile,
         isLocalhost,
         isHTTPS,
         userAgent: ua,
         hostname,
         protocol,
-        // Capacidades del entorno
-        canUsePopup: !isWebView && window.chrome,
+        // Con google-services.json, podemos usar todos los métodos
+        canUsePopup: true,
         canUseRedirect: true,
-        canUseExternalBrowser: isWebView || isWebIntoApp
+        canUseExternalBrowser: false // Ya no necesario
       };
     }
 
@@ -345,7 +326,7 @@
       }
     }
 
-    // Google Authentication
+    // Google Authentication - SIMPLIFICADA para Firebase nativo
     async function loginWithGoogle() {
       const env = detectEnvironment();
       
@@ -360,26 +341,25 @@
         });
 
         let result;
+        
+        showLoading('loginWithGoogle', 'Autenticando con Google...');
 
-        if (env.canUsePopup) {
-          // Método 1: Popup (navegadores normales)
-          console.log('🖥️ Usando signInWithPopup');
-          showLoading('loginWithGoogle', 'Abriendo ventana de Google...');
+        try {
+          // Intentar popup primero (funciona mejor con Firebase nativo)
+          console.log('🖥️ Usando signInWithPopup con Firebase nativo');
           result = await signInWithPopup(auth, provider);
           
-        } else if (env.canUseRedirect && !env.isWebIntoApp) {
-          // Método 2: Redirect (WebView básico)
-          console.log('🔄 Usando signInWithRedirect');
-          showLoading('loginWithGoogle', 'Redirigiendo a Google...');
-          await signInWithRedirect(auth, provider);
-          return; // El resultado se maneja en getRedirectResult
+        } catch (popupError) {
+          console.log('❌ Popup falló, intentando redirect...', popupError);
           
-        } else {
-          // Método 3: Navegador externo (WebIntoApp y similares)
-          console.log('🌐 Usando navegador externo');
-          hideLoading('loginWithGoogle');
-          openExternalGoogleAuth();
-          return;
+          if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user') {
+            // Fallback a redirect
+            console.log('🔄 Usando signInWithRedirect');
+            await signInWithRedirect(auth, provider);
+            return; // El resultado se maneja en getRedirectResult
+          } else {
+            throw popupError; // Re-lanzar otros errores
+          }
         }
 
         if (result && result.user) {
@@ -389,22 +369,24 @@
 
       } catch (error) {
         console.error('❌ Error en Google Auth:', error);
-        
         hideLoading('loginWithGoogle');
         
-        // Manejo específico de errores
-        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-          // Fallback: ofrecer navegador externo
-          showNotification('Popup bloqueado. Usa el método alternativo.', 'warning');
-          document.getElementById('alternativeAuth').classList.remove('hidden');
-          
-        } else if (error.code === 'auth/web-storage-unsupported') {
-          showNotification('Tu navegador no soporta el almacenamiento necesario. Usa autenticación externa.', 'error');
-          document.getElementById('alternativeAuth').classList.remove('hidden');
-          
-        } else {
-          showNotification(`Error: ${error.message}`, 'error');
+        let errorMessage = 'Error de autenticación: ';
+        switch (error.code) {
+          case 'auth/network-request-failed':
+            errorMessage = 'Error de conexión. Verifica tu internet.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Demasiados intentos. Espera unos minutos.';
+            break;
+          case 'auth/configuration-not-found':
+            errorMessage = 'Error de configuración Firebase. Contacta soporte.';
+            break;
+          default:
+            errorMessage += error.message;
         }
+        
+        showNotification(errorMessage, 'error');
       }
     }
 
@@ -480,31 +462,23 @@
       }, 1500);
     }
 
-    // Initialize App
+    // Initialize App - SIMPLIFICADA para Firebase nativo
     function initializeApp() {
       const env = detectEnvironment();
       
       // Update environment info
       const envInfo = document.getElementById('environmentInfo');
-      envInfo.textContent = `${env.isMobile ? '📱' : '🖥️'} ${env.isWebView ? 'WebView' : 'Navegador'} | ${env.isHTTPS ? 'HTTPS' : 'HTTP'}`;
+      envInfo.textContent = `${env.isMobile ? '📱' : '🖥️'} ${env.isWebView ? 'WebView' : 'Navegador'} | Firebase Nativo ✅`;
       
-      // Show WebView warning if needed
-      if (env.isWebView || env.isWebIntoApp) {
-        document.getElementById('webviewWarning').classList.remove('hidden');
-        // Pre-mostrar alternativa para WebIntoApp
-        if (env.isWebIntoApp) {
-          document.getElementById('alternativeAuth').classList.remove('hidden');
-        }
-      }
+      // No mostrar warnings ni alternativas - Firebase nativo debería funcionar
+      console.log('🚀 App inicializada con Firebase nativo:', env);
       
-      // Debug info (solo en desarrollo)
+      // Debug info solo en localhost
       if (env.isLocalhost || window.location.search.includes('debug=true')) {
         const debugInfo = document.getElementById('debugInfo');
         debugInfo.textContent = JSON.stringify(env, null, 2);
         debugInfo.classList.remove('hidden');
       }
-      
-      console.log('🚀 App inicializada:', env);
     }
 
     // Event Listeners
