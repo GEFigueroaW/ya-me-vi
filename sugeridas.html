@@ -528,7 +528,7 @@
         // cuando el usuario vuelva a abrir la caja
         
         isPrediccionOpen = false;
-        console.log('✅ Caja predicción cerrada y limpiada');
+        console.log('✅ Caja predicción cerrada (datos preservados)');
       }
       
       // Cerrar análisis
@@ -695,29 +695,66 @@
     
     // ==================== FUNCIÓN ACTUALIZAR NUMERO SORTEO ====================
     
-    function actualizarNumeroSorteo() {
-      // Fecha actual
-      const hoy = new Date();
+    async function actualizarNumeroSorteo() {
+      console.log('🔢 Actualizando número de sorteo...');
       
-      // En un caso real, esto cargaría datos del CSV para determinar el último sorteo
-      // Aquí vamos a calcularlo basado en la fecha actual
-      
-      // Para ejemplo, tomamos como referencia que el sorteo 4089 sería el del 28/07/2025
-      const fechaSorteoReferencia = new Date(2025, 6, 28); // 28 de julio de 2025 (mes 0-11)
-      const numeroSorteoReferencia = 4089;
-      
-      // Calculamos el número de sorteo basado en la fecha actual
-      // Asumiendo sorteos cada semana (7 días)
-      const diasDesdeSorteoReferencia = Math.floor((hoy - fechaSorteoReferencia) / (1000 * 60 * 60 * 24 * 7));
-      const numeroSorteoActual = numeroSorteoReferencia + diasDesdeSorteoReferencia;
-      
-      // Actualizar el título con el número de sorteo calculado
-      const tituloSorteo = document.getElementById('titulo-sorteo');
-      if (tituloSorteo) {
-        tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI Guillermo para el sorteo ${numeroSorteoActual}`;
+      try {
+        // Cargar el CSV de Melate para obtener el último sorteo
+        const response = await fetch('assets/Melate.csv');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const csvText = await response.text();
+        const lineas = csvText.trim().split('\n');
+        
+        if (lineas.length < 2) {
+          throw new Error('CSV sin datos');
+        }
+        
+        // La primera línea después del encabezado contiene el último sorteo
+        const primeraLinea = lineas[1].trim();
+        const columnas = primeraLinea.split(',');
+        
+        // El concurso está en la columna 1 (índice 1)
+        const ultimoSorteo = parseInt(columnas[1]);
+        
+        if (isNaN(ultimoSorteo)) {
+          throw new Error('Número de sorteo inválido');
+        }
+        
+        // Calcular el próximo sorteo (último + 1)
+        const proximoSorteo = ultimoSorteo + 1;
+        
+        // Actualizar el título con el número de sorteo calculado
+        const tituloSorteo = document.getElementById('titulo-sorteo');
+        if (tituloSorteo) {
+          tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI Guillermo para el sorteo ${proximoSorteo}`;
+        }
+        
+        console.log(`✅ Número de sorteo actualizado: ${proximoSorteo} (último sorteo en CSV: ${ultimoSorteo})`);
+        
+      } catch (error) {
+        console.error('❌ Error al actualizar número de sorteo:', error);
+        
+        // Fallback: usar fecha actual para calcular sorteo aproximado
+        const hoy = new Date();
+        const fechaSorteoReferencia = new Date(2025, 6, 28); // 28 de julio de 2025 (mes 0-11)
+        const numeroSorteoReferencia = 4089;
+        
+        // Calculamos el número de sorteo basado en la fecha actual
+        // Asumiendo sorteos cada semana (7 días)
+        const diasDesdeSorteoReferencia = Math.floor((hoy - fechaSorteoReferencia) / (1000 * 60 * 60 * 24 * 7));
+        const numeroSorteoFallback = numeroSorteoReferencia + diasDesdeSorteoReferencia + 1; // +1 para el próximo sorteo
+        
+        // Actualizar el título con el número de sorteo calculado
+        const tituloSorteo = document.getElementById('titulo-sorteo');
+        if (tituloSorteo) {
+          tituloSorteo.textContent = `🎯 Combinaciones sugeridas por IA para TI Guillermo para el sorteo ${numeroSorteoFallback}`;
+        }
+        
+        console.log(`⚠️ Usando fallback para número de sorteo: ${numeroSorteoFallback}`);
       }
-      
-      console.log(`✅ Número de sorteo actualizado: ${numeroSorteoActual}`);
     }
     
     // Hacer funciones disponibles globalmente
