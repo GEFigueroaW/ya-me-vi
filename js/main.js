@@ -475,4 +475,57 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     console.warn('❌ No se encontró el botón de administración');
   }
+
+  // Cargar último sorteo
+  cargarUltimoSorteo();
 });
+
+// === Función para cargar y mostrar el último sorteo ===
+async function cargarUltimoSorteo() {
+  console.log('🎯 Cargando último sorteo...');
+  
+  try {
+    // Cargar el CSV de Melate para obtener el último sorteo
+    const response = await fetch('assets/Melate.csv');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const csvText = await response.text();
+    const lineas = csvText.trim().split('\n');
+    
+    if (lineas.length < 2) {
+      throw new Error('CSV sin datos');
+    }
+    
+    // La primera línea después del encabezado contiene el último sorteo
+    const primeraLinea = lineas[1].trim();
+    const columnas = primeraLinea.split(',');
+    
+    // El concurso está en la columna 1 (índice 1)
+    const ultimoSorteo = parseInt(columnas[1]);
+    
+    if (isNaN(ultimoSorteo)) {
+      throw new Error('Número de sorteo inválido');
+    }
+    
+    // Actualizar el elemento en la página
+    const ultimoSorteoElemento = document.getElementById('ultimo-sorteo-numero');
+    if (ultimoSorteoElemento) {
+      ultimoSorteoElemento.textContent = `ULTIMO SORTEO ${ultimoSorteo}`;
+    }
+    
+    console.log(`✅ Último sorteo cargado: ${ultimoSorteo}`);
+    
+  } catch (error) {
+    console.error('❌ Error al cargar último sorteo:', error);
+    
+    // Fallback con número aproximado
+    const ultimoSorteoElemento = document.getElementById('ultimo-sorteo-numero');
+    if (ultimoSorteoElemento) {
+      ultimoSorteoElemento.textContent = 'ULTIMO SORTEO 4090';
+    }
+    
+    console.log('⚠️ Usando fallback para último sorteo: 4090');
+  }
+}
