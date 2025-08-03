@@ -175,9 +175,6 @@
 
   <!-- Firebase and Auth Logic -->
   <script type="module">
-    // Import APK OAuth Fix
-    import { fixOAuthAPK } from './js/fixOAuthAPK.js';
-    
     // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
@@ -189,9 +186,6 @@
       GoogleAuthProvider, 
       onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-    // Aplicar fix para OAuth APK
-    const oauthFix = fixOAuthAPK();
 
     // Firebase Config - CORREGIDA para que coincida con google-services.json
     const firebaseConfig = {

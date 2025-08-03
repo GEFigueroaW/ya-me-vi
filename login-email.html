@@ -154,16 +154,9 @@
   <script type="module">
     console.log('🚀 [LOGIN-CLEAN] Iniciando sistema de login limpio...');
     
-    // Import APK OAuth Fix PRIMERO
-    import { fixOAuthAPK } from './js/fixOAuthAPK.js';
-    
     // Import Firebase modules
     import { auth } from './js/firebase-init.js';
     import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-    // Aplicar fix OAuth APK inmediatamente
-    console.log('🔧 Aplicando fix OAuth APK en login-email.html...');
-    const oauthFix = fixOAuthAPK();
 
     // Wait for DOM to be ready
     document.addEventListener('DOMContentLoaded', async () => {
