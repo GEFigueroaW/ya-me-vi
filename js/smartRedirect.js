@@ -107,10 +107,10 @@ export class SmartRedirector {
       const isAPKEnvironment = this.detectAPKEnvironment();
       
       if (isAPKEnvironment.isAPK) {
-        console.log('📱 Entorno APK detectado - redirigiendo a login específico para APK');
+        console.log('📱 Entorno APK detectado - redirigiendo a login SEGURO para APK');
         return {
-          destination: 'login-apk-final.html',
-          reason: 'apk_environment',
+          destination: 'login-apk-secure.html',
+          reason: 'apk_environment_secure',
           environment: isAPKEnvironment
         };
       }
