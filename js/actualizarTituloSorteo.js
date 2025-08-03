@@ -19,7 +19,7 @@ window.actualizarTituloSorteo = async function() {
     // Actualizar el elemento del título
     const tituloElement = document.getElementById('titulo-sorteo');
     if (tituloElement) {
-      const nuevoTitulo = `🎯 Combinaciones sugeridas por IA para TI ${nombreUsuario} para el sorteo ${proximoSorteo}`;
+      const nuevoTitulo = `🎯 Combinaciones sugeridas por IA para ${nombreUsuario} para el sorteo ${proximoSorteo}`;
       tituloElement.textContent = nuevoTitulo;
       console.log(`✅ Título actualizado: Sorteo ${proximoSorteo} para usuario ${nombreUsuario}`);
       console.log(`📝 Título completo: "${nuevoTitulo}"`);
@@ -39,7 +39,7 @@ window.actualizarTituloSorteo = async function() {
     if (tituloElement) {
       const nombreFallback = obtenerPrimerNombre();
       const sorteoFallback = 4091; // Próximo después del último conocido (4090)
-      const tituloFallback = `🎯 Combinaciones sugeridas por IA para TI ${nombreFallback} para el sorteo ${sorteoFallback}`;
+      const tituloFallback = `🎯 Combinaciones sugeridas por IA para ${nombreFallback} para el sorteo ${sorteoFallback}`;
       tituloElement.textContent = tituloFallback;
       console.log(`⚠️ Usando título de fallback: "${tituloFallback}"`);
     }
