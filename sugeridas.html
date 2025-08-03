@@ -332,6 +332,9 @@
     window.usuarioActualID = null;
     window.usuarioActualNombre = null;
     window.usuarioActualEmail = null;
+    
+    // Exportar auth globalmente para que otros scripts puedan acceder al usuario actual
+    window.auth = auth;
 
     // === Función para obtener datos del usuario autenticado ===
     async function configurarUsuarioAutenticado(user) {
@@ -362,18 +365,12 @@
           console.log('⚠️ No se pudieron cargar datos adicionales de Firestore:', firestoreError.message);
         }
         
-        // Actualizar el título del sorteo con la información del usuario
-        if (window.actualizarTituloSorteo) {
-          await window.actualizarTituloSorteo();
-        } else {
-          // Fallback: llamar a la función local
-          await actualizarNumeroSorteo();
-        }
-        
         console.log('✅ Usuario configurado correctamente');
         console.log('- ID:', window.usuarioActualID);
         console.log('- Nombre:', window.usuarioActualNombre);
         console.log('- Email:', window.usuarioActualEmail);
+        
+        // La función actualizarTituloSorteo.js se auto-ejecutará automáticamente
         
       } catch (error) {
         console.error('❌ Error configurando usuario:', error);
@@ -388,15 +385,6 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         await configurarUsuarioAutenticado(user);
-        
-        // Pequeño retraso para asegurar que todo esté configurado
-        setTimeout(async () => {
-          // Llamar actualización del título después de configurar usuario
-          if (window.actualizarTituloSorteo) {
-            await window.actualizarTituloSorteo();
-          }
-        }, 500);
-        
       } else {
         console.log('❌ Usuario no autenticado, redirigiendo a login');
         
@@ -755,7 +743,11 @@
       try {
         // Verificar si ya tenemos hash CSV actual
         if (csvHashActual === null) {
-          await actualizarNumeroSorteo();
+          if (window.actualizarTituloSorteo) {
+            await window.actualizarTituloSorteo();
+          } else {
+            console.warn('⚠️ actualizarTituloSorteo no está disponible');
+          }
         }
         
         const claveUsuarioHash = `${usuarioId}_${csvHashActual}`;
@@ -1172,97 +1164,6 @@
       return proximoSorteo;
     }
     
-    async function actualizarNumeroSorteo() {
-      console.log('🔢 Actualizando número de sorteo...');
-      
-      try {
-        // Usar la función especializada de actualizarTituloSorteo.js si está disponible
-        if (window.actualizarTituloSorteo) {
-          console.log('📋 Usando función especializada de actualizarTituloSorteo.js');
-          await window.actualizarTituloSorteo();
-          return;
-        }
-        
-        // Fallback: cargar CSV para obtener último sorteo
-        const response = await fetch('assets/Melate.csv');
-        if (!response.ok) {
-          throw new Error('No se pudo cargar Melate.csv');
-        }
-        
-        const csvText = await response.text();
-        const lineas = csvText.trim().split('\n');
-        
-        if (lineas.length < 2) {
-          throw new Error('El archivo CSV no tiene datos suficientes');
-        }
-        
-        // Obtener último sorteo (segunda línea del CSV)
-        const primeraLinea = lineas[1].trim();
-        const columnas = primeraLinea.split(',');
-        const ultimoSorteo = parseInt(columnas[1]) || 0;
-        
-        if (ultimoSorteo === 0) {
-          throw new Error('No se pudo obtener el último número de sorteo');
-        }
-        
-        // Calcular próximo sorteo
-        const proximoSorteo = ultimoSorteo + 1;
-        
-        // Obtener nombre del usuario
-        let nombreUsuario = 'TI';
-        
-        if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
-          // Usar solo el primer nombre (sin apellidos)
-          nombreUsuario = window.usuarioActualNombre.trim().split(' ')[0];
-        } else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
-          // Usar parte del email antes del @
-          const emailPart = window.usuarioActualEmail.trim().split('@')[0];
-          nombreUsuario = emailPart.replace(/[._\d]/g, '');
-          nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
-        } else if (window.usuarioActualID && window.usuarioActualID.trim()) {
-          nombreUsuario = `Usuario${window.usuarioActualID.substring(0, 4)}`;
-        }
-        
-        // Limitar longitud del nombre
-        if (nombreUsuario.length > 15) {
-          nombreUsuario = nombreUsuario.substring(0, 15);
-        }
-        
-        // Actualizar el título
-        const tituloSorteo = document.getElementById('titulo-sorteo');
-        if (tituloSorteo) {
-          const nuevoTitulo = `🎯 Combinaciones sugeridas por IA para ${nombreUsuario} para el sorteo ${proximoSorteo}`;
-          tituloSorteo.textContent = nuevoTitulo;
-          console.log(`✅ Título actualizado: ${nuevoTitulo}`);
-        }
-        
-        console.log(`✅ Sorteo actualizado: ${proximoSorteo} (último CSV: ${ultimoSorteo}) para usuario: ${nombreUsuario}`);
-        
-      } catch (error) {
-        console.error('❌ Error al actualizar número de sorteo:', error);
-        
-        // Fallback con valores predeterminados
-        let nombreUsuario = 'TI';
-        
-        if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
-          nombreUsuario = window.usuarioActualNombre.trim().split(' ')[0];
-        } else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
-          const emailPart = window.usuarioActualEmail.trim().split('@')[0];
-          nombreUsuario = emailPart.replace(/[._\d]/g, '');
-          nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
-        }
-        
-        const sorteoFallback = 4091; // Próximo después del último conocido (4090)
-        
-        const tituloSorteo = document.getElementById('titulo-sorteo');
-        if (tituloSorteo) {
-          const tituloFallback = `🎯 Combinaciones sugeridas por IA para ${nombreUsuario} para el sorteo ${sorteoFallback}`;
-          tituloSorteo.textContent = tituloFallback;
-          console.log(`⚠️ Usando título de fallback: ${tituloFallback}`);
-        }
-      }
-    }
-    
     // Hacer funciones disponibles globalmente
     window.toggleAleatorias = toggleAleatorias;
     window.togglePrediccionIA = togglePrediccionIA;
@@ -1270,7 +1171,6 @@
     window.generarAleatorias = generarAleatorias;
     window.copiarCombinacion = copiarCombinacion;
     window.ejecutarPrediccionesIA = ejecutarPrediccionesIA;
-    window.actualizarNumeroSorteo = actualizarNumeroSorteo;
     
     console.log('✅ Todas las funciones cargadas correctamente');
   </script>

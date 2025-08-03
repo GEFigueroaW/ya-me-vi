@@ -14,7 +14,7 @@ window.actualizarTituloSorteo = async function() {
     let proximoSorteo = await calcularProximoSorteo();
     
     // Obtener solo el primer nombre del usuario (sin apellidos)
-    let nombreUsuario = obtenerPrimerNombre();
+    let nombreUsuario = await obtenerPrimerNombre();
     
     // Actualizar el elemento del título
     const tituloElement = document.getElementById('titulo-sorteo');
@@ -37,7 +37,7 @@ window.actualizarTituloSorteo = async function() {
     // En caso de error, usar un mensaje genérico pero con datos válidos
     const tituloElement = document.getElementById('titulo-sorteo');
     if (tituloElement) {
-      const nombreFallback = obtenerPrimerNombre();
+      const nombreFallback = await obtenerPrimerNombre();
       const sorteoFallback = 4091; // Próximo después del último conocido (4090)
       const tituloFallback = `🎯 Combinaciones sugeridas por IA para ${nombreFallback} para el sorteo ${sorteoFallback}`;
       tituloElement.textContent = tituloFallback;
@@ -50,35 +50,64 @@ window.actualizarTituloSorteo = async function() {
 
 /**
  * Extrae solo el primer nombre del usuario (sin apellidos)
+ * Detecta automáticamente qué sistema de autenticación está disponible
  */
-function obtenerPrimerNombre() {
+async function obtenerPrimerNombre() {
   let nombreUsuario = 'TI';  // Valor por defecto
   
   try {
-    // Prioridad 1: Nombre completo del usuario autenticado
-    if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
-      const nombreCompleto = window.usuarioActualNombre.trim();
-      // Extraer solo el primer nombre (antes del primer espacio)
-      nombreUsuario = nombreCompleto.split(' ')[0];
-      console.log(`👤 Usando primer nombre del displayName: "${nombreUsuario}"`);
-    }
-    // Prioridad 2: Email del usuario (parte antes del @)
-    else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
-      const email = window.usuarioActualEmail.trim();
-      nombreUsuario = email.split('@')[0];
-      // Si el nombre de usuario del email contiene puntos o números, limpiar
-      nombreUsuario = nombreUsuario.replace(/[._\d]/g, '');
-      // Capitalizar primera letra
-      nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
-      console.log(`📧 Usando nombre del email: "${nombreUsuario}"`);
-    }
-    // Prioridad 3: UID del usuario (primeros 8 caracteres)
-    else if (window.usuarioActualID && window.usuarioActualID.trim()) {
-      nombreUsuario = `Usuario${window.usuarioActualID.substring(0, 4)}`;
-      console.log(`🆔 Usando ID de usuario: "${nombreUsuario}"`);
+    console.log('🔍 Detectando sistema de autenticación disponible...');
+    
+    // Intentar obtener desde el objeto global window.auth (Firebase Auth v9+)
+    if (window.auth && typeof window.auth.currentUser !== 'undefined') {
+      const user = window.auth.currentUser;
+      if (user && user.displayName) {
+        nombreUsuario = user.displayName.split(' ')[0];
+        console.log(`👤 Firebase Auth v9+ - nombre: "${nombreUsuario}"`);
+        return nombreUsuario;
+      }
+      if (user && user.email) {
+        nombreUsuario = user.email.split('@')[0].replace(/[._\d]/g, '');
+        nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
+        console.log(`� Firebase Auth v9+ - email: "${nombreUsuario}"`);
+        return nombreUsuario;
+      }
     }
     
-    // Limitar longitud máxima del nombre para el título
+    // Intentar obtener desde firebase legacy (v8)
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      const user = firebase.auth().currentUser;
+      if (user && user.displayName) {
+        nombreUsuario = user.displayName.split(' ')[0];
+        console.log(`👤 Firebase Auth v8 - nombre: "${nombreUsuario}"`);
+        return nombreUsuario;
+      }
+      if (user && user.email) {
+        nombreUsuario = user.email.split('@')[0].replace(/[._\d]/g, '');
+        nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
+        console.log(`📧 Firebase Auth v8 - email: "${nombreUsuario}"`);
+        return nombreUsuario;
+      }
+    }
+    
+    // Fallback: usar variables globales si están disponibles
+    if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
+      const nombreCompleto = window.usuarioActualNombre.trim();
+      nombreUsuario = nombreCompleto.split(' ')[0];
+      console.log(`👤 Variable global - nombre: "${nombreUsuario}"`);
+    }
+    else if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
+      const email = window.usuarioActualEmail.trim();
+      nombreUsuario = email.split('@')[0].replace(/[._\d]/g, '');
+      nombreUsuario = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1).toLowerCase();
+      console.log(`📧 Variable global - email: "${nombreUsuario}"`);
+    }
+    else if (window.usuarioActualID && window.usuarioActualID.trim()) {
+      nombreUsuario = `Usuario${window.usuarioActualID.substring(0, 4)}`;
+      console.log(`🆔 Variable global - ID: "${nombreUsuario}"`);
+    }
+    
+    // Limitar longitud del nombre
     if (nombreUsuario.length > 15) {
       nombreUsuario = nombreUsuario.substring(0, 15);
     }
@@ -88,6 +117,7 @@ function obtenerPrimerNombre() {
     nombreUsuario = 'TI';
   }
   
+  console.log(`✅ Nombre final seleccionado: "${nombreUsuario}"`);
   return nombreUsuario;
 }
 
@@ -177,3 +207,46 @@ async function calcularProximoSorteo() {
 // Confirmar que la función está disponible globalmente
 console.log('✅ Función actualizarTituloSorteo disponible globalmente');
 console.log('🔧 actualizarTituloSorteo.js cargado correctamente');
+
+// Auto-ejecutar la función cuando se detecte que hay un usuario autenticado
+// Esto garantiza que el título se actualice sin importar el orden de carga
+setTimeout(async () => {
+  try {
+    console.log('⏰ Auto-ejecutando actualización de título después de 1 segundo...');
+    await window.actualizarTituloSorteo();
+  } catch (error) {
+    console.log('⚠️ Auto-ejecución falló, se ejecutará manualmente:', error.message);
+  }
+}, 1000);
+
+// También intentar cada 2 segundos hasta que funcione (máximo 5 intentos)
+let intentos = 0;
+const intervalId = setInterval(async () => {
+  intentos++;
+  
+  try {
+    // Solo ejecutar si el elemento existe y aún dice "Cargando"
+    const titulo = document.getElementById('titulo-sorteo');
+    if (titulo && titulo.textContent.includes('Cargando')) {
+      console.log(`🔄 Intento ${intentos} de actualización de título...`);
+      await window.actualizarTituloSorteo();
+      
+      // Si ya no dice "Cargando", la actualización fue exitosa
+      if (!titulo.textContent.includes('Cargando')) {
+        console.log('✅ Título actualizado exitosamente, deteniendo reintentos');
+        clearInterval(intervalId);
+      }
+    } else {
+      // Si el título ya no dice "Cargando", detener los intentos
+      clearInterval(intervalId);
+    }
+  } catch (error) {
+    console.log(`⚠️ Intento ${intentos} falló:`, error.message);
+  }
+  
+  // Máximo 5 intentos
+  if (intentos >= 5) {
+    console.log('⏹️ Máximo de intentos alcanzado, deteniendo reintentos');
+    clearInterval(intervalId);
+  }
+}, 2000);
