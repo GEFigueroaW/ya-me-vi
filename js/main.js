@@ -32,6 +32,20 @@ async function mostrarBienvenidaConSueño(user) {
       let userDream = '';
       let needsOnboarding = false;
       
+      // OBTENER SUEÑO DEL LOCALSTORAGE INMEDIATAMENTE
+      const dreamFromStorage = localStorage.getItem('user_dream');
+      const nameFromStorage = localStorage.getItem('user_name');
+      
+      if (dreamFromStorage) {
+        userDream = dreamFromStorage;
+        console.log('💾 [MAIN] Sueño recuperado del localStorage:', userDream);
+      }
+      
+      if (nameFromStorage) {
+        userName = nameFromStorage;
+        console.log('💾 [MAIN] Nombre recuperado del localStorage:', userName);
+      }
+      
       // VERIFICACIÓN DE EMERGENCIA ANTI-LOOP
       const emergencyFlag = localStorage.getItem('emergency_no_onboarding');
       const justCompletedFlag = localStorage.getItem('just_completed_onboarding');
@@ -272,8 +286,17 @@ async function mostrarBienvenidaConSueño(user) {
       });
       
       if (userDream && userDream.trim() !== '' && userName) {
-        // Mapear categorías de sueños a textos más naturales
+        // Mapear sueños de dream-input.html a textos mostrados
         const dreamDisplayMap = {
+          'comprar el coche de tus sueños': 'comprar el coche de tus sueños',
+          'hacer el viaje de tus sueños': 'hacer el viaje de tus sueños',
+          'comprar la casa de tus sueños': 'comprar la casa de tus sueños',
+          'invertir en tu propio negocio': 'invertir en tu propio negocio',
+          'lograr libertad financiera': 'lograr libertad financiera',
+          'asegurar tu jubilación': 'asegurar tu jubilación',
+          'pagar tus estudios': 'pagar tus estudios',
+          'apoyar a tu familia': 'apoyar a tu familia',
+          // Mapeos legacy para compatibilidad
           'casa': 'comprar tu casa soñada',
           'auto': 'comprar tu auto ideal',
           'viaje': 'viajar por el mundo',
@@ -285,27 +308,38 @@ async function mostrarBienvenidaConSueño(user) {
         };
         
         const dreamDisplay = dreamDisplayMap[userDream] || userDream;
-        welcomeMsg.innerHTML = `
-          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
-            ¡Bienvenido ${userName}!
-          </div>
-          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md animate__animated animate__pulse" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.6), 1px -1px 2px rgba(0,0,0,0.6), -1px 1px 2px rgba(0,0,0,0.6), 1px 1px 2px rgba(0,0,0,0.6);">
-            🌟 Listo para cumplir tu sueño: ${dreamDisplay}
-          </div>
-        `;
+        
+        // Actualizar mensaje de bienvenida
+        welcomeMsg.innerHTML = `¡Bienvenido ${userName}!`;
+        
+        // Actualizar mensaje del sueño
+        const dreamMessage = document.getElementById('dream-message');
+        if (dreamMessage) {
+          dreamMessage.innerHTML = `🌟 Listo para cumplir tu sueño: ${dreamDisplay}`;
+          dreamMessage.classList.add('animate__pulse');
+        }
+        
         console.log('✨ [MAIN] Mensaje de bienvenida personalizado con sueño mostrado');
       } else if (userName) {
-        welcomeMsg.innerHTML = `
-          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
-            ¡Bienvenido ${userName}!
-          </div>
-          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
-            ¡Listo para ganar!
-          </div>
-        `;
+        welcomeMsg.innerHTML = `¡Bienvenido ${userName}!`;
+        
+        // Ocultar o mostrar mensaje genérico del sueño
+        const dreamMessage = document.getElementById('dream-message');
+        if (dreamMessage) {
+          dreamMessage.innerHTML = `🎯 ¡Listo para ganar!`;
+          dreamMessage.classList.remove('animate__pulse');
+        }
+        
         console.log('✨ [MAIN] Mensaje de bienvenida con nombre mostrado');
       } else {
-        welcomeMsg.innerHTML = `
+        welcomeMsg.innerHTML = `¡Bienvenido!`;
+        
+        // Mensaje genérico del sueño
+        const dreamMessage = document.getElementById('dream-message');
+        if (dreamMessage) {
+          dreamMessage.innerHTML = `🎯 ¡Listo para ganar!`;
+          dreamMessage.classList.remove('animate__pulse');
+        }
           <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
             ¡Bienvenido!
           </div>

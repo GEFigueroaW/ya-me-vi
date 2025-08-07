@@ -70,6 +70,43 @@
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-20px) rotate(180deg); }
     }
+    
+    .dream-card {
+      display: block;
+      background: rgba(255, 255, 255, 0.9);
+      border: 3px solid transparent;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #4a5568;
+      font-weight: 600;
+    }
+    
+    .dream-card:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .dream-option input[type="radio"]:checked + .dream-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .dream-option input[type="radio"]:checked + .dream-card .text-3xl {
+      animation: bounce 0.6s ease;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 60%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      80% { transform: translateY(-5px); }
+    }
   </style>
 </head>
 
@@ -87,9 +124,9 @@
       
       <!-- Logo y título -->
       <div class="text-center mb-8">
-        <div class="text-6xl mb-4">🎯</div>
-        <h1 class="text-3xl font-bold text-white mb-2">¡Bienvenido a YA ME VI!</h1>
-        <p class="text-white text-opacity-80">Completa tu registro para comenzar</p>
+        <div class="text-6xl mb-4">🌟</div>
+        <h1 class="text-3xl font-bold text-white mb-2">¡Cuéntanos tu Sueño!</h1>
+        <p class="text-white text-opacity-80">¿Qué harías si te ganaras el premio mayor?</p>
       </div>
 
       <!-- Formulario -->
@@ -110,47 +147,86 @@
           >
         </div>
 
-        <!-- Número de la suerte -->
+        <!-- Selección de sueño -->
         <div>
-          <label for="numero-suerte" class="block text-white text-sm font-semibold mb-2">
-            🍀 ¿Cuál es tu número de la suerte? (1-56)
+          <label class="block text-white text-sm font-semibold mb-4">
+            🎯 Elige tu sueño principal:
           </label>
-          <input 
-            type="number" 
-            id="numero-suerte" 
-            name="numero-suerte" 
-            min="1" 
-            max="56"
-            class="input-field w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none"
-            placeholder="Ej: 7, 13, 21..."
-          >
-        </div>
+          <div class="grid grid-cols-2 gap-3">
+            
+            <!-- Comprar coche nuevo -->
+            <div class="dream-option" data-dream="comprar el coche de tus sueños">
+              <input type="radio" id="coche" name="sueno" value="comprar el coche de tus sueños" class="hidden">
+              <label for="coche" class="dream-card">
+                <div class="text-3xl mb-2">🚗</div>
+                <div class="text-sm font-semibold">Coche Nuevo</div>
+              </label>
+            </div>
 
-        <!-- Fecha especial -->
-        <div>
-          <label for="fecha-especial" class="block text-white text-sm font-semibold mb-2">
-            📅 ¿Tienes una fecha especial? (opcional)
-          </label>
-          <input 
-            type="date" 
-            id="fecha-especial" 
-            name="fecha-especial" 
-            class="input-field w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none"
-          >
-        </div>
+            <!-- Viaje de tus sueños -->
+            <div class="dream-option" data-dream="hacer el viaje de tus sueños">
+              <input type="radio" id="viaje" name="sueno" value="hacer el viaje de tus sueños" class="hidden">
+              <label for="viaje" class="dream-card">
+                <div class="text-3xl mb-2">✈️</div>
+                <div class="text-sm font-semibold">Viaje Soñado</div>
+              </label>
+            </div>
 
-        <!-- Motivación -->
-        <div>
-          <label for="motivacion" class="block text-white text-sm font-semibold mb-2">
-            💭 ¿Qué harías si ganaras? (opcional)
-          </label>
-          <textarea 
-            id="motivacion" 
-            name="motivacion" 
-            rows="3"
-            class="input-field w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none resize-none"
-            placeholder="Comprar una casa, viajar, ayudar a la familia..."
-          ></textarea>
+            <!-- Comprar casa -->
+            <div class="dream-option" data-dream="comprar la casa de tus sueños">
+              <input type="radio" id="casa" name="sueno" value="comprar la casa de tus sueños" class="hidden">
+              <label for="casa" class="dream-card">
+                <div class="text-3xl mb-2">🏠</div>
+                <div class="text-sm font-semibold">Casa Propia</div>
+              </label>
+            </div>
+
+            <!-- Invertir en negocio -->
+            <div class="dream-option" data-dream="invertir en tu propio negocio">
+              <input type="radio" id="negocio" name="sueno" value="invertir en tu propio negocio" class="hidden">
+              <label for="negocio" class="dream-card">
+                <div class="text-3xl mb-2">💼</div>
+                <div class="text-sm font-semibold">Mi Negocio</div>
+              </label>
+            </div>
+
+            <!-- Libertad financiera -->
+            <div class="dream-option" data-dream="lograr libertad financiera">
+              <input type="radio" id="libertad" name="sueno" value="lograr libertad financiera" class="hidden">
+              <label for="libertad" class="dream-card">
+                <div class="text-3xl mb-2">💰</div>
+                <div class="text-sm font-semibold">Libertad Financiera</div>
+              </label>
+            </div>
+
+            <!-- Jubilación/retiro -->
+            <div class="dream-option" data-dream="asegurar tu jubilación">
+              <input type="radio" id="jubilacion" name="sueno" value="asegurar tu jubilación" class="hidden">
+              <label for="jubilacion" class="dream-card">
+                <div class="text-3xl mb-2">🏖️</div>
+                <div class="text-sm font-semibold">Jubilación</div>
+              </label>
+            </div>
+
+            <!-- Estudios -->
+            <div class="dream-option" data-dream="pagar tus estudios">
+              <input type="radio" id="estudios" name="sueno" value="pagar tus estudios" class="hidden">
+              <label for="estudios" class="dream-card">
+                <div class="text-3xl mb-2">🎓</div>
+                <div class="text-sm font-semibold">Estudiar</div>
+              </label>
+            </div>
+
+            <!-- Apoyar a padres -->
+            <div class="dream-option" data-dream="apoyar a tu familia">
+              <input type="radio" id="familia" name="sueno" value="apoyar a tu familia" class="hidden">
+              <label for="familia" class="dream-card">
+                <div class="text-3xl mb-2">👨‍👩‍👧‍👦</div>
+                <div class="text-sm font-semibold">Ayudar Familia</div>
+              </label>
+            </div>
+
+          </div>
         </div>
 
         <!-- Botón de envío -->
@@ -243,9 +319,14 @@
         // Obtener datos del formulario
         const formData = new FormData(e.target);
         const nombre = formData.get('nombre').trim();
-        const numeroSuerte = formData.get('numero-suerte');
-        const fechaEspecial = formData.get('fecha-especial');
-        const motivacion = formData.get('motivacion');
+        const sueno = formData.get('sueno');
+
+        // Validar que se haya seleccionado un sueño
+        if (!sueno) {
+          alert('Por favor selecciona tu sueño principal 🌟');
+          document.getElementById('loading-overlay').classList.add('hidden');
+          return;
+        }
 
         // Actualizar perfil de Firebase Auth
         if (nombre) {
@@ -259,9 +340,7 @@
         const userData = {
           email: currentUser.email,
           displayName: nombre,
-          numeroSuerte: numeroSuerte ? parseInt(numeroSuerte) : null,
-          fechaEspecial: fechaEspecial || null,
-          motivacion: motivacion || null,
+          sueno: sueno,
           registroCompletado: true,
           fechaRegistro: new Date().toISOString(),
           ultimoAcceso: new Date().toISOString()
@@ -269,6 +348,10 @@
 
         await setDoc(doc(db, 'users', currentUser.uid), userData, { merge: true });
         console.log('✅ Datos guardados en Firestore');
+
+        // Guardar sueño en localStorage para uso inmediato
+        localStorage.setItem('user_dream', sueno);
+        localStorage.setItem('user_name', nombre);
 
         // Limpiar localStorage de registro
         localStorage.removeItem('registration_in_progress');
@@ -280,7 +363,7 @@
 
         // Mensaje de éxito y redirección
         setTimeout(() => {
-          alert('¡Registro completado! Bienvenido a YA ME VI 🎉');
+          alert(`¡Perfecto! Ahora te ayudaremos a ${sueno} 🎉`);
           window.location.href = 'home.html';
         }, 1000);
 
