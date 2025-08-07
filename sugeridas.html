@@ -1062,55 +1062,18 @@
     
     // Ejecutar predicciones de IA con análisis estadístico real (PERSISTENTE)
     async function ejecutarPrediccionesIA() {
-      console.log('🤖 ===== INICIO ejecutarPrediccionesIA =====');
-      console.log('🤖 Estado del usuario:', {
-        ID: window.usuarioActualID,
-        Email: window.usuarioActualEmail,
-        Nombre: window.usuarioActualNombre
-      });
-      console.log('🤖 Ejecutando predicciones IA PERSISTENTES con análisis estadístico real');
-      
-      // DEPURACIÓN EXTREMA: Verificar que los elementos existen
-      console.log('🔍 VERIFICANDO ELEMENTOS DOM...');
-      const melateCheck = document.getElementById('combinacion-melate');
-      const revanchaCheck = document.getElementById('combinacion-revancha');
-      const revanchitaCheck = document.getElementById('combinacion-revanchita');
-      console.log('🔍 Elementos encontrados:', {
-        melate: !!melateCheck,
-        revancha: !!revanchaCheck,
-        revanchita: !!revanchitaCheck,
-        melateContent: melateCheck ? melateCheck.textContent : 'NO ENCONTRADO',
-        revanchaContent: revanchaCheck ? revanchaCheck.textContent : 'NO ENCONTRADO',
-        revanchitaContent: revanchitaCheck ? revanchitaCheck.textContent : 'NO ENCONTRADO'
-      });
+      console.log('🤖 Ejecutando predicciones IA con análisis estadístico avanzado');
       
       const melateElement = document.getElementById('combinacion-melate');
       const revanchaElement = document.getElementById('combinacion-revancha');
       const revanchitaElement = document.getElementById('combinacion-revanchita');
       const mensajeEstado = document.getElementById('mensaje-estado');
       
-      console.log('📋 ELEMENTOS ASIGNADOS:', {
-        melateElement: !!melateElement,
-        revanchaElement: !!revanchaElement,
-        revanchitaElement: !!revanchitaElement,
-        mensajeEstado: !!mensajeEstado
-      });
-      
-      // DEPURACIÓN: Verificar contenido actual
-      if (melateElement) console.log('🎲 Contenido actual melate:', melateElement.textContent);
-      if (revanchaElement) console.log('🎲 Contenido actual revancha:', revanchaElement.textContent);
-      if (revanchitaElement) console.log('🎲 Contenido actual revanchita:', revanchitaElement.textContent);
-      
       // Cargar predicciones persistentes al inicio
-      console.log('📥 CARGANDO PREDICCIONES PERSISTENTES...');
       cargarPrediccionesPersistentes();
-      console.log('📥 PREDICCIONES PERSISTENTES CARGADAS');
-      console.log('📥 Estado actual prediccionesPorUsuarioYHash:', Object.keys(prediccionesPorUsuarioYHash));
       
       // GENERAR ID ÚNICO ROBUSTO PARA MÁXIMA DIFERENCIACIÓN ENTRE USUARIOS
-      console.log('🆔 GENERANDO ID USUARIO ÚNICO...');
       let usuarioId = generarIDUsuarioUnico();
-      console.log('🆔 ID generado:', usuarioId);
       
       // Para mostrar en el título, usar el nombre real del usuario
       let nombreUsuario = 'TI';
@@ -1163,9 +1126,7 @@
         if (mensajeEstado) mensajeEstado.textContent = 'Aplicando 5 métodos: frecuencias, probabilidad, patrones, desviación estándar e IA...';
         
         // Cargar y analizar datos reales
-        console.log('📊 ➡️ LLAMANDO A cargarDatosRealesParaIA...');
         const datosReales = await cargarDatosRealesParaIA();
-        console.log('📊 ⬅️ DATOS CARGADOS:', datosReales ? 'ÉXITO' : 'FALLÓ');
         
         setTimeout(async () => {
           // Generar predicciones usando análisis estadístico real
@@ -1205,13 +1166,10 @@
         if (revanchitaElement) revanchitaElement.textContent = prediccionesFallback.revanchita;
         if (mensajeEstado) mensajeEstado.textContent = 'Predicciones generadas (modo fallback)';
       }
-      
-      console.log('🏁 ===== FIN ejecutarPrediccionesIA =====');
     }
     
     // Función para cargar datos reales de los CSV
     async function cargarDatosRealesParaIA() {
-      console.log('📊 ===== INICIO cargarDatosRealesParaIA =====');
       console.log('📊 Cargando datos reales para análisis IA...');
       
       const archivos = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
