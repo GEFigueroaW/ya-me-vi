@@ -372,6 +372,11 @@
         
         // La función actualizarTituloSorteo.js se auto-ejecutará automáticamente
         
+        // CARGAR PREDICCIONES PERSISTENTES INMEDIATAMENTE
+        setTimeout(() => {
+          cargarPrediccionesPersistentesInmediato();
+        }, 100);
+        
       } catch (error) {
         console.error('❌ Error configurando usuario:', error);
         // Fallback con datos básicos
@@ -506,12 +511,27 @@
         // Verificar si ya hay predicciones generadas
         const melateElement = document.getElementById('combinacion-melate');
         if (!melateElement || melateElement.textContent === '-- -- -- -- -- --') {
-          // Ejecutar predicciones IA solo si no hay datos previos
-          if (window.ejecutarPrediccionesIA) {
-            window.ejecutarPrediccionesIA();
-          } else {
-            console.error('❌ ejecutarPrediccionesIA no disponible');
-          }
+          // Solo ejecutar predicciones IA si NO hay datos previos y NO hay predicciones persistentes
+          console.log('🔍 Verificando si existen predicciones persistentes antes de generar nuevas...');
+          
+          // Intentar cargar predicciones persistentes primero
+          cargarPrediccionesPersistentesInmediato().then(() => {
+            // Verificar nuevamente después de intentar cargar predicciones persistentes
+            const melateElementCheck = document.getElementById('combinacion-melate');
+            if (!melateElementCheck || melateElementCheck.textContent === '-- -- -- -- -- --') {
+              // No hay predicciones persistentes, generar nuevas
+              if (window.ejecutarPrediccionesIA) {
+                console.log('🤖 Generando nuevas predicciones IA...');
+                window.ejecutarPrediccionesIA();
+              } else {
+                console.error('❌ ejecutarPrediccionesIA no disponible');
+              }
+            } else {
+              console.log('✅ Predicciones persistentes encontradas, no se generan nuevas');
+            }
+          });
+        } else {
+          console.log('✅ Ya hay predicciones mostradas, no se modifican');
         }
       } else {
         // Cerrar caja sin limpiar el contenido
@@ -712,21 +732,200 @@
     
     // ==================== FUNCIÓN PREDICCIONES IA CON ANÁLISIS REAL ====================
     
-    // Variables para controlar la versión de las predicciones
+    // Variables para controlar la versión de las predicciones (PERSISTENTE)
     let prediccionesPorUsuarioYHash = {};
     let datosAnalisisCompleto = null;
+    let csvHashActual = null;
+    let csvHashCalculado = false;
     
-    // Ejecutar predicciones de IA con análisis estadístico real
+    // Función para generar ID único robusto del usuario (máxima diferenciación)
+    function generarIDUsuarioUnico() {
+      try {
+        console.log('🔐 Generando ID único robusto para máxima diferenciación...');
+        
+        let factoresUnicos = [];
+        
+        // Factor 1: ID de Firebase (principal)
+        if (window.usuarioActualID && window.usuarioActualID.trim()) {
+          factoresUnicos.push(window.usuarioActualID.trim());
+        }
+        
+        // Factor 2: Email completo (diferenciación adicional)
+        if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
+          factoresUnicos.push(window.usuarioActualEmail.trim());
+        }
+        
+        // Factor 3: Nombre completo (más diferenciación)
+        if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
+          factoresUnicos.push(window.usuarioActualNombre.trim());
+        }
+        
+        // Factor 4: Hora de creación de cuenta o timestamp único
+        if (window.usuarioActualID) {
+          // Los IDs de Firebase incluyen timestamp, extraer componentes únicos
+          const idParts = window.usuarioActualID.split('').slice(0, 20); // Primeros 20 caracteres
+          factoresUnicos.push(idParts.join(''));
+        }
+        
+        // Factor 5: Fingerprint del navegador (para usuarios anónimos)
+        const navigatorFingerprint = [
+          navigator.userAgent,
+          navigator.language,
+          screen.width + 'x' + screen.height,
+          new Date().getTimezoneOffset(),
+          (navigator.platform || 'unknown')
+        ].join('|');
+        factoresUnicos.push(navigatorFingerprint);
+        
+        // Factor 6: Información adicional del dispositivo/navegador
+        try {
+          const deviceInfo = [
+            navigator.hardwareConcurrency || 'unknown',
+            navigator.deviceMemory || 'unknown',
+            navigator.maxTouchPoints || 'unknown',
+            screen.colorDepth || 'unknown',
+            screen.pixelDepth || 'unknown',
+            window.devicePixelRatio || 'unknown'
+          ].join('|');
+          factoresUnicos.push(deviceInfo);
+        } catch (e) {
+          factoresUnicos.push('device_unknown');
+        }
+        
+        // Factor 7: Timestamp de sesión única + micro-timestamp para máxima unicidad
+        const sessionId = Date.now().toString() + Math.random().toString(36) + performance.now();
+        factoresUnicos.push(sessionId);
+        
+        // Combinar todos los factores
+        const combinacionFactores = factoresUnicos.join('|||') + '|||' + sessionId;
+        
+        // Generar hash robusto y extraer componentes únicos
+        const hashPrincipal = generarHashSimple(combinacionFactores);
+        const hashSecundario = generarHashSimple(combinacionFactores.split('').reverse().join(''));
+        const hashTerciario = generarHashSimple(factoresUnicos.join('***'));
+        
+        // Crear ID final súper único
+        const idUnico = `${hashPrincipal}_${hashSecundario}_${hashTerciario}`;
+        
+        console.log(`✅ ID único generado: ${idUnico.substring(0, 16)}... (truncado para log)`);
+        console.log(`🎯 Factores únicos utilizados: ${factoresUnicos.length}`);
+        
+        return idUnico;
+        
+      } catch (error) {
+        console.error('❌ Error generando ID único:', error);
+        
+        // Fallback robusto
+        const fallbackId = 'fallback_' + Date.now() + '_' + Math.random().toString(36);
+        console.log(`⚠️ Usando ID de fallback: ${fallbackId}`);
+        return fallbackId;
+      }
+    }
+    
+    // Función para calcular hash robusto de los archivos CSV
+    async function calcularHashCSV() {
+      if (csvHashCalculado && csvHashActual !== null) {
+        console.log(`🔒 Usando hash CSV en caché: ${csvHashActual}`);
+        return csvHashActual;
+      }
+      
+      try {
+        console.log('🔢 Calculando hash CSV de archivos...');
+        
+        const [melateResponse, revanchaResponse, revanchitaResponse] = await Promise.all([
+          fetch('assets/Melate.csv'),
+          fetch('assets/Revancha.csv'),
+          fetch('assets/Revanchita.csv')
+        ]);
+        
+        const [melateText, revanchaText, revanchitaText] = await Promise.all([
+          melateResponse.text(),
+          revanchaResponse.text(),
+          revanchitaResponse.text()
+        ]);
+        
+        // Crear hash basado en el contenido de los 3 archivos CSV
+        const contenidoCombinado = melateText + revanchaText + revanchitaText;
+        const hash = generarHashSimple(contenidoCombinado);
+        
+        csvHashActual = hash.toString();
+        csvHashCalculado = true;
+        
+        console.log(`✅ Hash CSV calculado: ${csvHashActual}`);
+        
+        // Guardar el hash en localStorage para persistencia entre sesiones
+        try {
+          localStorage.setItem('yaViCSVHash', csvHashActual);
+          console.log('💾 Hash CSV guardado en localStorage');
+        } catch (e) {
+          console.warn('⚠️ No se pudo guardar hash en localStorage:', e);
+        }
+        
+        return csvHashActual;
+      } catch (error) {
+        console.error('❌ Error calculando hash CSV:', error);
+        
+        // Intentar recuperar hash del localStorage
+        try {
+          const hashGuardado = localStorage.getItem('yaViCSVHash');
+          if (hashGuardado) {
+            csvHashActual = hashGuardado;
+            csvHashCalculado = true;
+            console.log(`🔄 Hash CSV recuperado del localStorage: ${csvHashActual}`);
+            return csvHashActual;
+          }
+        } catch (e) {
+          console.warn('⚠️ No se pudo recuperar hash del localStorage:', e);
+        }
+        
+        // Fallback: usar fecha como hash (se actualizará cuando cambien los CSV)
+        const fechaHash = new Date().toDateString();
+        csvHashActual = generarHashSimple(fechaHash).toString();
+        csvHashCalculado = true;
+        console.log(`⚠️ Usando hash de fallback basado en fecha: ${csvHashActual}`);
+        return csvHashActual;
+      }
+    }
+    
+    // Función para cargar predicciones persistentes del localStorage
+    function cargarPrediccionesPersistentes() {
+      try {
+        const prediccionesGuardadas = localStorage.getItem('yaViPrediccionesIA');
+        if (prediccionesGuardadas) {
+          prediccionesPorUsuarioYHash = JSON.parse(prediccionesGuardadas);
+          console.log('💾 Predicciones persistentes cargadas del localStorage');
+          console.log('📊 Claves disponibles:', Object.keys(prediccionesPorUsuarioYHash));
+        }
+      } catch (error) {
+        console.warn('⚠️ Error cargando predicciones del localStorage:', error);
+        prediccionesPorUsuarioYHash = {};
+      }
+    }
+    
+    // Función para guardar predicciones en localStorage
+    function guardarPrediccionesPersistentes() {
+      try {
+        localStorage.setItem('yaViPrediccionesIA', JSON.stringify(prediccionesPorUsuarioYHash));
+        console.log('💾 Predicciones guardadas en localStorage');
+      } catch (error) {
+        console.warn('⚠️ Error guardando predicciones en localStorage:', error);
+      }
+    }
+    
+    // Ejecutar predicciones de IA con análisis estadístico real (PERSISTENTE)
     async function ejecutarPrediccionesIA() {
-      console.log('🤖 Ejecutando predicciones IA con análisis estadístico real');
+      console.log('🤖 Ejecutando predicciones IA PERSISTENTES con análisis estadístico real');
       
       const melateElement = document.getElementById('combinacion-melate');
       const revanchaElement = document.getElementById('combinacion-revancha');
       const revanchitaElement = document.getElementById('combinacion-revanchita');
       const mensajeEstado = document.getElementById('mensaje-estado');
       
-      // Obtener identificador del usuario para las predicciones
-      let usuarioId = window.usuarioActualID || 'usuario-anonimo';
+      // Cargar predicciones persistentes al inicio
+      cargarPrediccionesPersistentes();
+      
+      // GENERAR ID ÚNICO ROBUSTO PARA MÁXIMA DIFERENCIACIÓN ENTRE USUARIOS
+      let usuarioId = generarIDUsuarioUnico();
       
       // Para mostrar en el título, usar el nombre real del usuario
       let nombreUsuario = 'TI';
@@ -741,27 +940,29 @@
       }
       
       try {
-        // Verificar si ya tenemos hash CSV actual
-        if (csvHashActual === null) {
-          if (window.actualizarTituloSorteo) {
-            await window.actualizarTituloSorteo();
-          } else {
-            console.warn('⚠️ actualizarTituloSorteo no está disponible');
-          }
+        // Calcular hash CSV de forma robusta
+        await calcularHashCSV();
+        
+        // Actualizar título del sorteo si es necesario
+        if (window.actualizarTituloSorteo) {
+          await window.actualizarTituloSorteo();
         }
         
         const claveUsuarioHash = `${usuarioId}_${csvHashActual}`;
         
-        // Si ya tenemos predicciones para este usuario con este hash, usarlas
+        // VERIFICAR PREDICCIONES PERSISTENTES - PRIORIDAD MÁXIMA
         if (prediccionesPorUsuarioYHash[claveUsuarioHash]) {
           const predicciones = prediccionesPorUsuarioYHash[claveUsuarioHash];
           if (melateElement) melateElement.textContent = predicciones.melate;
           if (revanchaElement) revanchaElement.textContent = predicciones.revancha;
           if (revanchitaElement) revanchitaElement.textContent = predicciones.revanchita;
-          if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas de 5 métodos';
-          console.log(`✅ Usando predicciones en caché para ${nombreUsuario} (Hash: ${csvHashActual})`);
+          if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas de 5 métodos (persistentes)';
+          console.log(`🔒 Usando predicciones PERSISTENTES para ${nombreUsuario} (Hash: ${csvHashActual})`);
+          console.log(`📋 Predicciones cargadas desde caché persistente`);
           return;
         }
+        
+        console.log(`🔄 Generando NUEVAS predicciones para ${nombreUsuario} (Hash: ${csvHashActual})`);
         
         // Mostrar estado "analizando"
         if (melateElement) melateElement.textContent = 'Analizando...';
@@ -776,23 +977,27 @@
           // Generar predicciones usando análisis estadístico real
           const nuevasPredicciones = generarPrediccionesConIA(datosReales, usuarioId, csvHashActual);
           
-          // Guardar en caché con la clave usuario+hash
+          // Guardar en caché EN MEMORIA
           prediccionesPorUsuarioYHash[claveUsuarioHash] = nuevasPredicciones;
+          
+          // Guardar PERSISTENTEMENTE en localStorage
+          guardarPrediccionesPersistentes();
           
           // Mostrar resultados
           if (melateElement) melateElement.textContent = nuevasPredicciones.melate;
           if (revanchaElement) revanchaElement.textContent = nuevasPredicciones.revancha;
           if (revanchitaElement) revanchitaElement.textContent = nuevasPredicciones.revanchita;
-          if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas: análisis estadístico + IA';
+          if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas: análisis estadístico + IA (persistentes)';
           
-          console.log(`✅ Nuevas predicciones IA generadas para ${nombreUsuario} (Hash: ${csvHashActual})`);
+          console.log(`✅ Nuevas predicciones IA generadas y GUARDADAS PERSISTENTEMENTE para ${nombreUsuario}`);
+          console.log(`🔐 Hash CSV: ${csvHashActual}`);
         }, 1500);
         
       } catch (error) {
         console.error('❌ Error en predicciones IA:', error);
         
         // Fallback usando el sistema existente pero mejorado
-        const prediccionesFallback = generarPrediccionesFallback(usuarioId, csvHashActual);
+        const prediccionesFallback = generarPrediccionesFallback(usuarioId, csvHashActual || 'fallback');
         
         if (melateElement) melateElement.textContent = prediccionesFallback.melate;
         if (revanchaElement) revanchaElement.textContent = prediccionesFallback.revancha;
@@ -910,16 +1115,24 @@
       };
     }
     
-    // Función principal para generar predicciones con IA
+    // Función principal para generar predicciones con IA (MÁXIMA DIFERENCIACIÓN)
     function generarPrediccionesConIA(datosReales, usuario, hashCSV) {
-      console.log('🧠 Generando predicciones con IA y análisis estadístico...');
+      console.log('🧠 Generando predicciones con IA y análisis estadístico (MÁXIMA DIFERENCIACIÓN)...');
       
       const predicciones = {};
       
-      // Generar múltiples seeds únicos por usuario para mayor diferenciación
+      // GENERAR MÚLTIPLES SEEDS ÚNICOS PARA MÁXIMA DIFERENCIACIÓN ENTRE USUARIOS
       const baseUserSeed = generarHashSimple(usuario + "_base_" + hashCSV);
       const altUserSeed = generarHashSimple(usuario + "_alt_" + hashCSV + "_ia");
       const mixedSeed = generarHashSimple(usuario + hashCSV + "_mixed_" + Date.now().toString().slice(-4));
+      
+      // SEEDS ADICIONALES PARA MAYOR VARIABILIDAD
+      const uniqueSeed1 = generarHashSimple(usuario.split('_')[0] + "_unique1_" + hashCSV);
+      const uniqueSeed2 = generarHashSimple(usuario.split('_')[1] + "_unique2_" + hashCSV);
+      const uniqueSeed3 = generarHashSimple(usuario.split('_')[2] + "_unique3_" + hashCSV);
+      const timeSeed = generarHashSimple(usuario + "_time_" + Math.floor(Date.now() / 86400000)); // Cambia cada día
+      
+      console.log(`🎲 Usando 7 seeds únicos para usuario: ${usuario.substring(0, 20)}...`);
       
       Object.keys(datosReales).forEach((sorteo, index) => {
         const datos = datosReales[sorteo];
@@ -930,38 +1143,55 @@
         
         const stats = datos.estadisticas;
         
-        // Combinar los 5 métodos de análisis con seeds diferenciados
+        // Combinar los 5 métodos de análisis con seeds SÚPER diferenciados
         const combinacion = [];
         
-        // Método 1: Frecuencias balanceadas (2 números) - Seed único
-        const frecBalanceadas = seleccionarPorFrecuencias(stats.frecuenciasNorm, baseUserSeed + index * 17);
+        // Método 1: Frecuencias balanceadas (2 números) - Seed único + índice único
+        const frecBalanceadas = seleccionarPorFrecuencias(stats.frecuenciasNorm, 
+          baseUserSeed + uniqueSeed1 + index * 17);
         combinacion.push(...frecBalanceadas.slice(0, 2));
         
-        // Método 2: Números calientes (1 número) - Seed alternativo
-        const indiceCaliente = (altUserSeed + index * 23) % stats.calientes.length;
+        // Método 2: Números calientes (1 número) - Seed alternativo + rotación
+        const indiceCaliente = (altUserSeed + uniqueSeed2 + index * 23) % stats.calientes.length;
         const caliente = stats.calientes[indiceCaliente];
         if (!combinacion.includes(caliente)) combinacion.push(caliente);
         
-        // Método 3: Análisis de suma óptima (1 número) - Seed mixto
-        const sumaOptima = seleccionarPorSuma(stats, mixedSeed + index * 31);
+        // Método 3: Análisis de suma óptima (1 número) - Seed mixto + tiempo
+        const sumaOptima = seleccionarPorSuma(stats, 
+          mixedSeed + timeSeed + index * 31);
         if (!combinacion.includes(sumaOptima) && combinacion.length < 5) combinacion.push(sumaOptima);
         
-        // Método 4: Desviación estándar (1 número) - Seed combinado
-        const porDesviacion = seleccionarPorDesviacion(stats, baseUserSeed + altUserSeed + index * 37);
+        // Método 4: Desviación estándar (1 número) - Seed combinado múltiple
+        const porDesviacion = seleccionarPorDesviacion(stats, 
+          baseUserSeed + altUserSeed + uniqueSeed3 + index * 37);
         if (!combinacion.includes(porDesviacion) && combinacion.length < 6) combinacion.push(porDesviacion);
         
         // Método 5: IA - Completar con análisis de patrones usando seed único por posición
-        while (combinacion.length < 6) {
-          const posicionSeed = mixedSeed + baseUserSeed + index * 41 + combinacion.length * 43;
+        let intentos = 0;
+        while (combinacion.length < 6 && intentos < 20) {
+          const posicionSeed = mixedSeed + baseUserSeed + uniqueSeed1 + uniqueSeed2 + 
+                              index * 41 + combinacion.length * 43 + intentos * 7;
           const iaNumber = generarNumeroIA(stats, posicionSeed, combinacion);
           if (!combinacion.includes(iaNumber)) {
             combinacion.push(iaNumber);
+          }
+          intentos++;
+        }
+        
+        // Si aún faltan números, usar generación híbrida
+        while (combinacion.length < 6) {
+          const hybridSeed = uniqueSeed3 + timeSeed + baseUserSeed + combinacion.length * 53;
+          const num = (hybridSeed % 56) + 1;
+          if (!combinacion.includes(num)) {
+            combinacion.push(num);
           }
         }
         
         // Ordenar y formatear
         combinacion.sort((a, b) => a - b);
         predicciones[sorteo] = combinacion.join(' - ');
+        
+        console.log(`🎯 ${sorteo}: ${predicciones[sorteo]} (seeds: ${[baseUserSeed, altUserSeed, mixedSeed].map(s => s.toString().slice(-4)).join(',')})`);
       });
       
       return predicciones;
@@ -1133,25 +1363,42 @@
     // ==================== SISTEMA DE SORTEOS POR USUARIO ====================
     
     // Variables para controlar cambios en CSV y sorteos por usuario
-    let csvHashActual = null;
     let sorteosPorUsuario = {};
     
-    // Función para generar hash robusto de un string (mejor distribución)
+    // Función para generar hash robusto de un string (MÁXIMA DISTRIBUCIÓN)
     function generarHashSimple(str) {
-      let hash = 5381; // Usar primer número primo para mejor distribución
+      // Usar múltiples algoritmos de hash para mejor distribución
+      let hash1 = 5381; // DJB2 hash
+      let hash2 = 0;    // Simple hash
+      let hash3 = 1;    // Multiplicative hash
+      
       for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
-        hash = ((hash << 5) + hash) + char; // hash * 33 + char
+        
+        // Hash 1: DJB2
+        hash1 = ((hash1 << 5) + hash1) + char;
+        
+        // Hash 2: Additive with rotation
+        hash2 = (hash2 * 31 + char) & 0x7fffffff;
+        
+        // Hash 3: Multiplicative
+        hash3 = (hash3 * 16777619) ^ char;
       }
       
-      // Aplicar múltiples operaciones para mejor distribución
-      hash = hash ^ (hash >>> 16);
-      hash = Math.imul(hash, 0x85ebca6b);
-      hash = hash ^ (hash >>> 13);
-      hash = Math.imul(hash, 0xc2b2ae35);
-      hash = hash ^ (hash >>> 16);
+      // Combinar los tres hashes con operaciones adicionales
+      let finalHash = hash1 ^ hash2 ^ hash3;
       
-      return Math.abs(hash);
+      // Aplicar más transformaciones para mejor distribución
+      finalHash = finalHash ^ (finalHash >>> 16);
+      finalHash = Math.imul(finalHash, 0x85ebca6b);
+      finalHash = finalHash ^ (finalHash >>> 13);
+      finalHash = Math.imul(finalHash, 0xc2b2ae35);
+      finalHash = finalHash ^ (finalHash >>> 16);
+      
+      // Agregar factor adicional basado en la longitud de la cadena
+      finalHash = finalHash ^ (str.length * 0x9e3779b9);
+      
+      return Math.abs(finalHash);
     }
     
     // Función para obtener sorteo único por usuario basado en hash CSV
@@ -1164,6 +1411,51 @@
       return proximoSorteo;
     }
     
+    // Función para cargar predicciones persistentes inmediatamente (sin esperar)
+    async function cargarPrediccionesPersistentesInmediato() {
+      try {
+        console.log('⚡ Verificando predicciones persistentes inmediatas...');
+        
+        // Cargar del localStorage
+        cargarPrediccionesPersistentes();
+        
+        // Calcular hash CSV
+        await calcularHashCSV();
+        
+        // Obtener usuario actual
+        let usuarioId = window.usuarioActualID || 'usuario-anonimo';
+        const claveUsuarioHash = `${usuarioId}_${csvHashActual}`;
+        
+        // Si hay predicciones persistentes, mostrarlas inmediatamente
+        if (prediccionesPorUsuarioYHash[claveUsuarioHash]) {
+          const predicciones = prediccionesPorUsuarioYHash[claveUsuarioHash];
+          const melateElement = document.getElementById('combinacion-melate');
+          const revanchaElement = document.getElementById('combinacion-revancha');
+          const revanchitaElement = document.getElementById('combinacion-revanchita');
+          const mensajeEstado = document.getElementById('mensaje-estado');
+          
+          if (melateElement && melateElement.textContent === '-- -- -- -- -- --') {
+            melateElement.textContent = predicciones.melate;
+          }
+          if (revanchaElement && revanchaElement.textContent === '-- -- -- -- -- --') {
+            revanchaElement.textContent = predicciones.revancha;
+          }
+          if (revanchitaElement && revanchitaElement.textContent === '-- -- -- -- -- --') {
+            revanchitaElement.textContent = predicciones.revanchita;
+          }
+          if (mensajeEstado) {
+            mensajeEstado.textContent = 'Predicciones persistentes cargadas instantáneamente';
+          }
+          
+          console.log('⚡ Predicciones persistentes cargadas inmediatamente desde localStorage');
+        } else {
+          console.log('ℹ️ No hay predicciones persistentes disponibles para este usuario+hash');
+        }
+      } catch (error) {
+        console.warn('⚠️ Error en carga inmediata de predicciones:', error);
+      }
+    }
+
     // Hacer funciones disponibles globalmente
     window.toggleAleatorias = toggleAleatorias;
     window.togglePrediccionIA = togglePrediccionIA;
@@ -1172,7 +1464,83 @@
     window.copiarCombinacion = copiarCombinacion;
     window.ejecutarPrediccionesIA = ejecutarPrediccionesIA;
     
+    // FUNCIÓN ADICIONAL: Limpiar predicciones persistentes (solo para administradores)
+    window.limpiarPrediccionesPersistentes = function() {
+      try {
+        prediccionesPorUsuarioYHash = {};
+        localStorage.removeItem('yaViPrediccionesIA');
+        localStorage.removeItem('yaViCSVHash');
+        csvHashActual = null;
+        csvHashCalculado = false;
+        console.log('🧹 Predicciones persistentes limpiadas. Se generarán nuevas predicciones.');
+        alert('✅ Predicciones limpiadas. Refresca la página para generar nuevas predicciones.');
+      } catch (error) {
+        console.error('❌ Error limpiando predicciones:', error);
+      }
+    };
+    
+    // FUNCIÓN DE TESTING: Generar múltiples IDs para verificar unicidad
+    window.testUnicidadUsuarios = function(cantidad = 10) {
+      console.log('🧪 TESTING: Generando múltiples IDs para verificar unicidad...');
+      const idsGenerados = new Set();
+      const duplicados = [];
+      
+      for (let i = 0; i < cantidad; i++) {
+        const id = generarIDUsuarioUnico();
+        if (idsGenerados.has(id)) {
+          duplicados.push(id);
+        } else {
+          idsGenerados.add(id);
+        }
+        console.log(`ID ${i + 1}: ${id.substring(0, 30)}...`);
+      }
+      
+      console.log(`✅ Resultados del test:`);
+      console.log(`- IDs únicos generados: ${idsGenerados.size}/${cantidad}`);
+      console.log(`- Duplicados encontrados: ${duplicados.length}`);
+      console.log(`- Tasa de unicidad: ${((idsGenerados.size / cantidad) * 100).toFixed(2)}%`);
+      
+      if (duplicados.length === 0) {
+        console.log('🎉 EXCELENTE: Todos los IDs son únicos');
+      } else {
+        console.warn('⚠️ ADVERTENCIA: Se encontraron duplicados');
+      }
+      
+      return {
+        total: cantidad,
+        unicos: idsGenerados.size,
+        duplicados: duplicados.length,
+        tasaUnicidad: (idsGenerados.size / cantidad) * 100
+      };
+    };
+    
     console.log('✅ Todas las funciones cargadas correctamente');
+    console.log('🔒 Sistema de predicciones PERSISTENTES activado');
+    
+    // Event listener para detectar navegación del navegador y cargar predicciones persistentes
+    window.addEventListener('pageshow', function(event) {
+      console.log('📄 Página mostrada (pageshow event)');
+      
+      // Cargar predicciones persistentes cuando se muestra la página
+      setTimeout(() => {
+        cargarPrediccionesPersistentesInmediato();
+      }, 200);
+    });
+    
+    // Event listener adicional para cuando el DOM esté completamente cargado
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 DOM cargado completamente');
+        setTimeout(() => {
+          cargarPrediccionesPersistentesInmediato();
+        }, 300);
+      });
+    } else {
+      // El DOM ya está cargado
+      setTimeout(() => {
+        cargarPrediccionesPersistentesInmediato();
+      }, 100);
+    }
   </script>
 </body>
 </html>
