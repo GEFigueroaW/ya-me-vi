@@ -182,6 +182,10 @@
         
         <div class="text-center">
           <h2 id="titulo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">🎯 Combinaciones sugeridas por IA - Cargando...</h2>
+          <!-- Indicador de administrador -->
+          <div id="admin-indicator" class="hidden bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-sm font-bold px-3 py-1 rounded-full mx-auto mb-2 w-fit shadow-lg">
+            👑 MODO ADMINISTRADOR - Máxima Probabilidad Activada
+          </div>
           <div class="flex items-center justify-center">
             <span class="text-white text-lg mr-2">Haz clic para ver</span>
             <div id="arrow-icon" class="arrow-rotation">▼</div>
@@ -333,6 +337,35 @@
     window.usuarioActualNombre = null;
     window.usuarioActualEmail = null;
     
+    // === SISTEMA DE ADMINISTRADORES ===
+    // Lista de emails de administradores (puedes modificar esta lista)
+    const ADMIN_EMAILS = [
+      'gfigueroa.wd@gmail.com',    // Email principal del desarrollador
+      'admin@yameviapp.com',       // Email administrativo (si existe)
+      'yameloteria@gmail.com'      // Email de soporte (si existe)
+    ];
+    
+    // Función para verificar si el usuario actual es administrador
+    function esUsuarioAdmin() {
+      if (!window.usuarioActualEmail) {
+        return false;
+      }
+      
+      const emailUsuario = window.usuarioActualEmail.toLowerCase().trim();
+      const esAdmin = ADMIN_EMAILS.some(adminEmail => 
+        adminEmail.toLowerCase().trim() === emailUsuario
+      );
+      
+      if (esAdmin) {
+        console.log('👑 USUARIO ADMINISTRADOR DETECTADO:', emailUsuario);
+      }
+      
+      return esAdmin;
+    }
+    
+    // Variable global para acceso rápido al estado de admin
+    window.esAdmin = () => esUsuarioAdmin();
+    
     // Exportar auth globalmente para que otros scripts puedan acceder al usuario actual
     window.auth = auth;
 
@@ -369,6 +402,19 @@
         console.log('- ID:', window.usuarioActualID);
         console.log('- Nombre:', window.usuarioActualNombre);
         console.log('- Email:', window.usuarioActualEmail);
+        
+        // ACTIVAR INDICADOR VISUAL DE ADMINISTRADOR
+        setTimeout(() => {
+          const esAdmin = esUsuarioAdmin();
+          const adminIndicator = document.getElementById('admin-indicator');
+          
+          if (esAdmin && adminIndicator) {
+            adminIndicator.classList.remove('hidden');
+            console.log('👑 Indicador visual de administrador activado');
+          } else if (adminIndicator) {
+            adminIndicator.classList.add('hidden');
+          }
+        }, 500);
         
         // La función actualizarTituloSorteo.js se auto-ejecutará automáticamente
         
@@ -975,7 +1021,13 @@
           if (melateElement) melateElement.textContent = predicciones.melate;
           if (revanchaElement) revanchaElement.textContent = predicciones.revancha;
           if (revanchitaElement) revanchitaElement.textContent = predicciones.revanchita;
-          if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas de 5 métodos (persistentes)';
+          
+          // INDICADOR PARA ADMINISTRADORES
+          const mensajeEstadoTexto = esUsuarioAdmin() ? 
+            '👑 PREDICCIONES ADMIN: Incluyen números con máxima probabilidad (persistentes)' : 
+            'Predicciones completas de 5 métodos (persistentes)';
+          
+          if (mensajeEstado) mensajeEstado.textContent = mensajeEstadoTexto;
           console.log(`🔒 Usando predicciones PERSISTENTES para ${nombreUsuario} (Hash: ${csvHashActual})`);
           console.log(`📋 Predicciones cargadas desde caché persistente`);
           return;
@@ -1002,11 +1054,17 @@
           // Guardar PERSISTENTEMENTE en localStorage
           guardarPrediccionesPersistentes();
           
-          // Mostrar resultados
+          // Mostrar resultados con indicador de administrador
           if (melateElement) melateElement.textContent = nuevasPredicciones.melate;
           if (revanchaElement) revanchaElement.textContent = nuevasPredicciones.revancha;
           if (revanchitaElement) revanchitaElement.textContent = nuevasPredicciones.revanchita;
-          if (mensajeEstado) mensajeEstado.textContent = 'Predicciones completas: análisis estadístico + IA (persistentes)';
+          
+          // INDICADOR PARA ADMINISTRADORES EN NUEVAS PREDICCIONES
+          const mensajeEstadoTexto = esUsuarioAdmin() ? 
+            '👑 PREDICCIONES ADMIN: Incluyen números con máxima probabilidad (recién generadas)' : 
+            'Predicciones completas: análisis estadístico + IA (persistentes)';
+          
+          if (mensajeEstado) mensajeEstado.textContent = mensajeEstadoTexto;
           
           console.log(`✅ Nuevas predicciones IA generadas y GUARDADAS PERSISTENTEMENTE para ${nombreUsuario}`);
           console.log(`🔐 Hash CSV: ${csvHashActual}`);
@@ -1122,6 +1180,29 @@
       const calientes = sortedFreqs.slice(0, 14).map(([num]) => parseInt(num));
       const frios = sortedFreqs.slice(-14).map(([num]) => parseInt(num));
       
+      // === NUEVOS FACTORES AVANZADOS PARA MEJORAR PREDICCIONES ===
+      
+      // 5. Análisis de ciclos y patrones temporales
+      const analisisCiclos = analizarCiclosTemporales(numeros, sumas);
+      
+      // 6. Análisis de gaps (espacios entre apariciones)
+      const analisisGaps = analizarGapsNumeros(frecuencias, totalNumeros);
+      
+      // 7. Análisis de pares/parejas frecuentes
+      const analisisPares = analizarParejasRecurrentes(numeros);
+      
+      // 8. Análisis de distribución por décadas
+      const analisisDecadas = analizarDistribucionDecadas(numeros);
+      
+      // 9. Análisis de balance par/impar optimizado
+      const analisisParImpar = analizarBalanceParImpar(numeros);
+      
+      // 10. Análisis de secuencias y saltos
+      const analisisSecuencias = analizarSecuenciasYSaltos(numeros);
+      
+      // 11. Análisis de regresión a la media
+      const analisisRegresion = analizarRegresionMedia(frecuencias, totalNumeros);
+      
       return {
         frecuenciasNorm,
         desviacionEstandar,
@@ -1130,7 +1211,392 @@
         sumaMax,
         calientes,
         frios,
-        totalSorteos: Math.floor(totalNumeros / 6)
+        totalSorteos: Math.floor(totalNumeros / 6),
+        // Nuevos factores avanzados
+        ciclos: analisisCiclos,
+        gaps: analisisGaps,
+        pares: analisisPares,
+        decadas: analisisDecadas,
+        parImpar: analisisParImpar,
+        secuencias: analisisSecuencias,
+        regresion: analisisRegresion
+      };
+    }
+    
+    // === FUNCIONES DE ANÁLISIS AVANZADO PARA MEJORAR PREDICCIONES ===
+    
+    // 5. Análisis de ciclos y patrones temporales
+    function analizarCiclosTemporales(numeros, sumas) {
+      const ultimosSorteos = Math.min(60, Math.floor(numeros.length / 6)); // Últimos 60 sorteos
+      const cicloCorto = [];
+      const cicloMedio = [];
+      
+      // Analizar últimos 10 sorteos (ciclo corto)
+      for (let i = 0; i < Math.min(10, ultimosSorteos) * 6; i += 6) {
+        const sorteo = numeros.slice(i, i + 6);
+        cicloCorto.push(...sorteo);
+      }
+      
+      // Analizar últimos 30 sorteos (ciclo medio) 
+      for (let i = 0; i < Math.min(30, ultimosSorteos) * 6; i += 6) {
+        const sorteo = numeros.slice(i, i + 6);
+        cicloMedio.push(...sorteo);
+      }
+      
+      // Frecuencias en ciclos
+      const frecCicloCorto = {};
+      const frecCicloMedio = {};
+      
+      cicloCorto.forEach(num => frecCicloCorto[num] = (frecCicloCorto[num] || 0) + 1);
+      cicloMedio.forEach(num => frecCicloMedio[num] = (frecCicloMedio[num] || 0) + 1);
+      
+      // Tendencias ascendentes/descendentes
+      const tendencias = {};
+      for (let i = 1; i <= 56; i++) {
+        const freqCorto = frecCicloCorto[i] || 0;
+        const freqMedio = frecCicloMedio[i] || 0;
+        tendencias[i] = freqCorto - (freqMedio / 3); // Comparar tendencia reciente vs media
+      }
+      
+      return {
+        frecCicloCorto,
+        frecCicloMedio,
+        tendencias,
+        numerosCalientesRecientes: Object.entries(frecCicloCorto)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 12)
+          .map(([num]) => parseInt(num))
+      };
+    }
+    
+    // 6. Análisis de gaps (espacios entre apariciones)
+    function analizarGapsNumeros(frecuencias, totalNumeros) {
+      const gaps = {};
+      const ultimaAparicion = {};
+      const totalSorteos = Math.floor(totalNumeros / 6);
+      
+      // Calcular gaps promedio y actual para cada número
+      for (let i = 1; i <= 56; i++) {
+        const freq = frecuencias[i] || 0;
+        if (freq > 0) {
+          gaps[i] = {
+            promedio: totalSorteos / freq,
+            frecuencia: freq,
+            probabilidadProxima: 1 / (totalSorteos / freq) // Probabilidad basada en gap promedio
+          };
+        } else {
+          gaps[i] = {
+            promedio: totalSorteos,
+            frecuencia: 0,
+            probabilidadProxima: 0.1 // Baja probabilidad para números que no han salido
+          };
+        }
+      }
+      
+      // Números con gap alto (candidatos a salir pronto)
+      const numerosPorGap = Object.entries(gaps)
+        .sort((a, b) => b[1].promedio - a[1].promedio)
+        .slice(0, 15)
+        .map(([num]) => parseInt(num));
+      
+      return {
+        gaps,
+        numerosPorGap
+      };
+    }
+    
+    // 7. Análisis de pares/parejas frecuentes  
+    function analizarParejasRecurrentes(numeros) {
+      const parejas = {};
+      const sorteoCompleto = [];
+      
+      // Agrupar números por sorteo
+      for (let i = 0; i < numeros.length; i += 6) {
+        const sorteo = numeros.slice(i, i + 6).sort((a, b) => a - b);
+        sorteoCompleto.push(sorteo);
+      }
+      
+      // Analizar parejas en cada sorteo
+      sorteoCompleto.forEach(sorteo => {
+        for (let i = 0; i < sorteo.length; i++) {
+          for (let j = i + 1; j < sorteo.length; j++) {
+            const pareja = `${sorteo[i]}-${sorteo[j]}`;
+            parejas[pareja] = (parejas[pareja] || 0) + 1;
+          }
+        }
+      });
+      
+      // Top parejas más frecuentes
+      const parejasTop = Object.entries(parejas)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 20)
+        .map(([pareja, freq]) => ({
+          numeros: pareja.split('-').map(n => parseInt(n)),
+          frecuencia: freq
+        }));
+      
+      return {
+        parejas,
+        parejasTop
+      };
+    }
+    
+    // 8. Análisis de distribución por décadas
+    function analizarDistribucionDecadas(numeros) {
+      const decadas = {
+        'd1': { rango: [1, 10], count: 0, numeros: [] },
+        'd2': { rango: [11, 20], count: 0, numeros: [] },
+        'd3': { rango: [21, 30], count: 0, numeros: [] },
+        'd4': { rango: [31, 40], count: 0, numeros: [] },
+        'd5': { rango: [41, 50], count: 0, numeros: [] },
+        'd6': { rango: [51, 56], count: 0, numeros: [] }
+      };
+      
+      numeros.forEach(num => {
+        Object.keys(decadas).forEach(decada => {
+          const [min, max] = decadas[decada].rango;
+          if (num >= min && num <= max) {
+            decadas[decada].count++;
+            decadas[decada].numeros.push(num);
+          }
+        });
+      });
+      
+      // Calcular distribución ideal vs real
+      const totalNumeros = numeros.length;
+      const distribuciones = {};
+      
+      Object.keys(decadas).forEach(decada => {
+        const rangoSize = decadas[decada].rango[1] - decadas[decada].rango[0] + 1;
+        const esperado = (rangoSize / 56) * totalNumeros;
+        const real = decadas[decada].count;
+        distribuciones[decada] = {
+          esperado,
+          real,
+          desviacion: (real - esperado) / esperado,
+          rangoSize
+        };
+      });
+      
+      return {
+        decadas,
+        distribuciones
+      };
+    }
+    
+    // 9. Análisis de balance par/impar optimizado
+    function analizarBalanceParImpar(numeros) {
+      let pares = 0;
+      let impares = 0;
+      const sorteos = [];
+      
+      // Analizar balance por sorteo
+      for (let i = 0; i < numeros.length; i += 6) {
+        const sorteo = numeros.slice(i, i + 6);
+        const paresSorteo = sorteo.filter(n => n % 2 === 0).length;
+        const imparesSorteo = sorteo.filter(n => n % 2 === 1).length;
+        
+        sorteos.push({
+          pares: paresSorteo,
+          impares: imparesSorteo,
+          balance: paresSorteo - imparesSorteo
+        });
+        
+        pares += paresSorteo;
+        impares += imparesSorteo;
+      }
+      
+      // Distribución más común de pares/impares
+      const distribucionesComunes = {};
+      sorteos.forEach(s => {
+        const key = `${s.pares}p-${s.impares}i`;
+        distribucionesComunes[key] = (distribucionesComunes[key] || 0) + 1;
+      });
+      
+      const distribucionOptima = Object.entries(distribucionesComunes)
+        .sort((a, b) => b[1] - a[1])[0];
+      
+      return {
+        totalPares: pares,
+        totalImpares: impares,
+        ratio: pares / impares,
+        distribucionOptima: distribucionOptima ? distribucionOptima[0] : '3p-3i',
+        sorteos
+      };
+    }
+    
+    // 10. Análisis de secuencias y saltos
+    function analizarSecuenciasYSaltos(numeros) {
+      const secuencias = [];
+      const saltos = [];
+      
+      // Analizar por sorteo
+      for (let i = 0; i < numeros.length; i += 6) {
+        const sorteo = numeros.slice(i, i + 6).sort((a, b) => a - b);
+        
+        // Detectar secuencias consecutivas
+        let secuenciaActual = [sorteo[0]];
+        for (let j = 1; j < sorteo.length; j++) {
+          if (sorteo[j] === sorteo[j-1] + 1) {
+            secuenciaActual.push(sorteo[j]);
+          } else {
+            if (secuenciaActual.length > 1) {
+              secuencias.push(secuenciaActual);
+            }
+            secuenciaActual = [sorteo[j]];
+          }
+        }
+        if (secuenciaActual.length > 1) {
+          secuencias.push(secuenciaActual);
+        }
+        
+        // Calcular saltos entre números
+        for (let j = 1; j < sorteo.length; j++) {
+          saltos.push(sorteo[j] - sorteo[j-1]);
+        }
+      }
+      
+      // Análisis de saltos más comunes
+      const saltosComunes = {};
+      saltos.forEach(salto => {
+        saltosComunes[salto] = (saltosComunes[salto] || 0) + 1;
+      });
+      
+      const saltosTop = Object.entries(saltosComunes)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([salto, freq]) => ({ salto: parseInt(salto), frecuencia: freq }));
+      
+      return {
+        secuencias,
+        saltos,
+        saltosComunes,
+        saltosTop,
+        promedioSalto: saltos.reduce((a, b) => a + b, 0) / saltos.length
+      };
+    }
+    
+    // 11. Análisis de regresión a la media
+    function analizarRegresionMedia(frecuencias, totalNumeros) {
+      const promedio = totalNumeros / 56;
+      const regresion = {};
+      
+      for (let i = 1; i <= 56; i++) {
+        const freq = frecuencias[i] || 0;
+        const desviacion = freq - promedio;
+        const factorRegresion = desviacion / promedio;
+        
+        // Probabilidad de regresión (números muy altos tienden a bajar, muy bajos a subir)
+        regresion[i] = {
+          frecuenciaActual: freq,
+          desviacion,
+          factorRegresion,
+          probabilidadRegresion: Math.abs(factorRegresion), // Mayor desviación = mayor probabilidad de regresión
+          tendencia: factorRegresion > 0.2 ? 'descendente' : (factorRegresion < -0.2 ? 'ascendente' : 'estable')
+        };
+      }
+      
+      // Números candidatos a ascender (frecuencia muy baja)
+      const candidatosAscendentes = Object.entries(regresion)
+        .filter(([num, data]) => data.tendencia === 'ascendente')
+        .sort((a, b) => b[1].probabilidadRegresion - a[1].probabilidadRegresion)
+        .slice(0, 12)
+        .map(([num]) => parseInt(num));
+      
+      return {
+        regresion,
+        candidatosAscendentes
+      };
+    }
+    
+    // === FUNCIÓN ESPECIAL PARA ADMINISTRADORES ===
+    // Calcula el número con MÁXIMA probabilidad estadística de salir
+    function calcularNumeroMaximaProbabilidad(stats) {
+      console.log('👑 Calculando número con MÁXIMA probabilidad para administrador...');
+      
+      const puntuacionesMaximas = {};
+      
+      for (let i = 1; i <= 56; i++) {
+        let puntuacionTotal = 0;
+        
+        // Factor 1: Análisis de gaps - prioridad máxima (25%)
+        if (stats.gaps && stats.gaps.gaps[i]) {
+          const gapData = stats.gaps.gaps[i];
+          const probabilidadGap = gapData.probabilidadProxima || 0;
+          puntuacionTotal += probabilidadGap * 0.25;
+        }
+        
+        // Factor 2: Regresión a la media - números ascendentes (20%)
+        if (stats.regresion && stats.regresion.regresion[i]) {
+          const regresionData = stats.regresion.regresion[i];
+          if (regresionData.tendencia === 'ascendente') {
+            puntuacionTotal += regresionData.probabilidadRegresion * 0.20;
+          }
+        }
+        
+        // Factor 3: Ciclos temporales - tendencias positivas (20%)
+        if (stats.ciclos && stats.ciclos.tendencias[i]) {
+          const tendencia = stats.ciclos.tendencias[i];
+          if (tendencia > 0) {
+            puntuacionTotal += (tendencia * 0.20);
+          }
+        }
+        
+        // Factor 4: Frecuencia balanceada hacia la media (15%)
+        const freq = stats.frecuenciasNorm[i] || 0;
+        const idealFreq = 1/56;
+        const balanceFactor = 1 - Math.abs(freq - idealFreq);
+        puntuacionTotal += balanceFactor * 0.15;
+        
+        // Factor 5: Análisis de distribución por décadas (10%)
+        if (stats.decadas && stats.decadas.distribuciones) {
+          const decada = Math.floor((i - 1) / 10);
+          const claveDecada = `d${decada + 1}`;
+          const infoDecada = stats.decadas.distribuciones[claveDecada];
+          
+          if (infoDecada && infoDecada.desviacion < -0.1) { // Década muy sub-representada
+            puntuacionTotal += Math.abs(infoDecada.desviacion) * 0.10;
+          }
+        }
+        
+        // Factor 6: Balance estadístico general (10%)
+        const esCaliente = stats.calientes.includes(i);
+        const esFrio = stats.frios.includes(i);
+        
+        // Números en zona media tienen mejor balance estadístico
+        if (!esCaliente && !esFrio) {
+          puntuacionTotal += 0.10;
+        } else if (esFrio) {
+          // Números fríos tienen potencial de regresión
+          puntuacionTotal += 0.05;
+        }
+        
+        puntuacionesMaximas[i] = puntuacionTotal;
+      }
+      
+      // Encontrar el número con máxima puntuación
+      const numeroMaximo = Object.entries(puntuacionesMaximas)
+        .sort((a, b) => b[1] - a[1])[0];
+      
+      const numeroGanador = parseInt(numeroMaximo[0]);
+      const puntuacionMaxima = numeroMaximo[1];
+      
+      console.log(`🎯 NÚMERO CON MÁXIMA PROBABILIDAD: ${numeroGanador} (puntuación: ${puntuacionMaxima.toFixed(4)})`);
+      console.log(`📊 Top 5 números más probables:`, 
+        Object.entries(puntuacionesMaximas)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([num, punt]) => `${num}(${punt.toFixed(3)})`)
+          .join(', ')
+      );
+      
+      return {
+        numero: numeroGanador,
+        puntuacion: puntuacionMaxima,
+        topCinco: Object.entries(puntuacionesMaximas)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([num, punt]) => ({ numero: parseInt(num), puntuacion: punt }))
       };
     }
     
@@ -1274,7 +1740,34 @@
     }
     
     function generarNumeroIA(stats, seed, yaSeleccionados) {
-      // IA: Combinar múltiples factores con pesos adaptativos
+      // ⭐ VERIFICAR SI EL USUARIO ES ADMINISTRADOR PARA NÚMERO DE MÁXIMA PROBABILIDAD
+      const esAdmin = esUsuarioAdmin();
+      
+      if (esAdmin) {
+        console.log('👑 MODO ADMINISTRADOR: Intentando incluir número de máxima probabilidad...');
+        
+        // Calcular número con máxima probabilidad estadística
+        const numeroMaxProb = calcularNumeroMaximaProbabilidad(stats);
+        
+        // Si el número de máxima probabilidad no está ya seleccionado, darlo con alta prioridad
+        if (!yaSeleccionados.includes(numeroMaxProb.numero)) {
+          console.log(`🎯 ADMIN: Número de máxima probabilidad disponible: ${numeroMaxProb.numero}`);
+          
+          // Para administradores, hay 50% de probabilidad de que reciban el número de máxima probabilidad
+          const probabilidadAdmin = ((seed * 13) % 100) < 50;
+          
+          if (probabilidadAdmin) {
+            console.log(`✅ ADMIN: Entregando número de MÁXIMA PROBABILIDAD: ${numeroMaxProb.numero} (puntuación: ${numeroMaxProb.puntuacion.toFixed(4)})`);
+            return numeroMaxProb.numero;
+          } else {
+            console.log(`🎲 ADMIN: Usando algoritmo estándar (variabilidad del 50%)`);
+          }
+        } else {
+          console.log(`⚠️ ADMIN: Número de máxima probabilidad ya seleccionado: ${numeroMaxProb.numero}`);
+        }
+      }
+      
+      // IA AVANZADA: Algoritmo estándar para usuarios regulares y administradores (variabilidad)
       const candidatos = [];
       
       for (let i = 1; i <= 56; i++) {
@@ -1282,38 +1775,134 @@
         
         let puntuacion = 0;
         
-        // Factor 1: Frecuencia balanceada (30%)
+        // Factor 1: Frecuencia balanceada (15% - reducido para dar espacio a nuevos factores)
         const freq = stats.frecuenciasNorm[i] || 0;
         const idealFreq = 1/56;
-        puntuacion += (1 - Math.abs(freq - idealFreq) * 2) * 0.3;
+        puntuacion += (1 - Math.abs(freq - idealFreq) * 2) * 0.15;
         
-        // Factor 2: No estar en extremos (20%)
-        const esCaliente = stats.calientes.includes(i);
-        const esFrio = stats.frios.includes(i);
-        if (!esCaliente && !esFrio) puntuacion += 0.2;
-        
-        // Factor 3: Balance par/impar (25%)
-        const pares = yaSeleccionados.filter(n => n % 2 === 0).length;
-        const impares = yaSeleccionados.length - pares;
-        if ((i % 2 === 0 && pares < 3) || (i % 2 === 1 && impares < 3)) {
-          puntuacion += 0.25;
+        // Factor 2: Análisis de ciclos temporales (15%)
+        if (stats.ciclos && stats.ciclos.tendencias[i]) {
+          const tendencia = stats.ciclos.tendencias[i];
+          const esCalienteReciente = stats.ciclos.numerosCalientesRecientes.includes(i);
+          if (tendencia > 0 || esCalienteReciente) {
+            puntuacion += 0.15 * (1 + tendencia * 0.1);
+          }
         }
         
-        // Factor 4: Distribución en décadas (25%)
-        const decada = Math.floor((i - 1) / 10);
-        const enDecada = yaSeleccionados.filter(n => Math.floor((n - 1) / 10) === decada).length;
-        if (enDecada === 0) puntuacion += 0.25;
+        // Factor 3: Análisis de gaps - números con gap alto tienen mayor probabilidad (15%)
+        if (stats.gaps && stats.gaps.gaps[i]) {
+          const probabilidadGap = stats.gaps.gaps[i].probabilidadProxima || 0;
+          const esNumeroConGapAlto = stats.gaps.numerosPorGap.includes(i);
+          if (esNumeroConGapAlto) {
+            puntuacion += 0.15 * probabilidadGap;
+          }
+        }
+        
+        // Factor 4: Análisis de pares frecuentes (10%)
+        if (stats.pares && stats.pares.parejasTop) {
+          let factorPares = 0;
+          yaSeleccionados.forEach(numSeleccionado => {
+            const existePareja = stats.pares.parejasTop.find(pareja => 
+              pareja.numeros.includes(i) && pareja.numeros.includes(numSeleccionado)
+            );
+            if (existePareja) {
+              factorPares += existePareja.frecuencia / 100; // Normalizar frecuencia
+            }
+          });
+          puntuacion += Math.min(factorPares, 0.1); // Máximo 10%
+        }
+        
+        // Factor 5: Balance par/impar optimizado (10%)
+        const pares = yaSeleccionados.filter(n => n % 2 === 0).length;
+        const impares = yaSeleccionados.length - pares;
+        if (stats.parImpar && stats.parImpar.distribucionOptima) {
+          const [paresOpt, imparesOpt] = stats.parImpar.distribucionOptima.match(/\d+/g).map(Number);
+          if ((i % 2 === 0 && pares < paresOpt) || (i % 2 === 1 && impares < imparesOpt)) {
+            puntuacion += 0.1;
+          }
+        } else {
+          // Fallback al balance 3-3
+          if ((i % 2 === 0 && pares < 3) || (i % 2 === 1 && impares < 3)) {
+            puntuacion += 0.1;
+          }
+        }
+        
+        // Factor 6: Distribución por décadas mejorada (10%)
+        if (stats.decadas && stats.decadas.distribuciones) {
+          const decada = Math.floor((i - 1) / 10);
+          const claveDecada = `d${decada + 1}`;
+          const infoDecada = stats.decadas.distribuciones[claveDecada];
+          
+          if (infoDecada && infoDecada.desviacion < 0) { // Década sub-representada
+            puntuacion += 0.1 * Math.abs(infoDecada.desviacion);
+          }
+          
+          // Bonus si no hay números de esta década seleccionados
+          const enDecada = yaSeleccionados.filter(n => Math.floor((n - 1) / 10) === decada).length;
+          if (enDecada === 0) puntuacion += 0.05;
+        }
+        
+        // Factor 7: Análisis de regresión a la media (10%)
+        if (stats.regresion && stats.regresion.regresion[i]) {
+          const regresionData = stats.regresion.regresion[i];
+          if (regresionData.tendencia === 'ascendente') {
+            puntuacion += 0.1 * regresionData.probabilidadRegresion;
+          }
+          
+          // Bonus para candidatos ascendentes identificados
+          if (stats.regresion.candidatosAscendentes.includes(i)) {
+            puntuacion += 0.05;
+          }
+        }
+        
+        // Factor 8: Análisis de secuencias y saltos (5%)
+        if (stats.secuencias && yaSeleccionados.length > 0) {
+          const ultimoSeleccionado = Math.max(...yaSeleccionados);
+          const salto = Math.abs(i - ultimoSeleccionado);
+          
+          // Favorecer saltos comunes
+          if (stats.secuencias.saltosTop) {
+            const saltoComun = stats.secuencias.saltosTop.find(s => s.salto === salto);
+            if (saltoComun) {
+              puntuacion += 0.05 * (saltoComun.frecuencia / Math.max(...stats.secuencias.saltosTop.map(s => s.frecuencia)));
+            }
+          }
+        }
+        
+        // Factor 9: Evitar extremos de frecuencia (5%)
+        const esCaliente = stats.calientes.includes(i);
+        const esFrio = stats.frios.includes(i);
+        if (!esCaliente && !esFrio) {
+          puntuacion += 0.05;
+        }
+        
+        // Factor 10: Bonus aleatorio controlado para variabilidad (5%)
+        const bonusAleatorio = ((seed * i * 7) % 100) / 1000; // 0-0.1
+        puntuacion += bonusAleatorio * 0.05;
         
         candidatos.push({numero: i, puntuacion: puntuacion});
       }
       
       candidatos.sort((a, b) => b.puntuacion - a.puntuacion);
       
-      // Seleccionar con algo de aleatoriedad controlada
-      const topCandidatos = candidatos.slice(0, Math.min(10, candidatos.length));
-      const index = Math.abs(seed * 19) % topCandidatos.length;
+      // Seleccionar con algoritmo mejorado de aleatoriedad controlada
+      const topCandidatos = candidatos.slice(0, Math.min(15, candidatos.length));
       
-      return topCandidatos[index].numero;
+      // Usar distribución ponderada en lugar de selección uniforme
+      const pesos = topCandidatos.map((c, idx) => Math.max(0.1, 1 - (idx * 0.1))); // Peso decreciente
+      const sumaTotal = pesos.reduce((a, b) => a + b, 0);
+      const target = ((seed * 23) % 10000) / 10000;
+      
+      let acumulado = 0;
+      for (let i = 0; i < topCandidatos.length; i++) {
+        acumulado += pesos[i] / sumaTotal;
+        if (target <= acumulado) {
+          return topCandidatos[i].numero;
+        }
+      }
+      
+      // Fallback
+      return topCandidatos[0].numero;
     }
     
     function seleccionarConProbabilidad(numeros, probabilidades, seed, cantidad) {
@@ -1498,6 +2087,50 @@
     window.generarAleatorias = generarAleatorias;
     window.copiarCombinacion = copiarCombinacion;
     window.ejecutarPrediccionesIA = ejecutarPrediccionesIA;
+    
+    // === FUNCIONES ESPECIALES PARA ADMINISTRADORES ===
+    
+    // Función para mostrar información detallada de predicciones (solo admins)
+    window.verDetallesPrediccionAdmin = function() {
+      if (!esUsuarioAdmin()) {
+        console.log('❌ Acceso denegado: Solo para administradores');
+        return;
+      }
+      
+      console.log('👑 ======= DETALLES DE PREDICCIÓN PARA ADMINISTRADOR =======');
+      console.log('📧 Email admin:', window.usuarioActualEmail);
+      console.log('🔑 Usuario ID:', window.usuarioActualID);
+      console.log('📊 Hash CSV actual:', csvHashActual);
+      console.log('💾 Predicciones en caché:', Object.keys(prediccionesPorUsuarioYHash).length);
+      
+      // Mostrar próximo número de máxima probabilidad para cada sorteo
+      ejecutarAnalisisAdminCompleto();
+    };
+    
+    // Función de análisis completo para administradores
+    async function ejecutarAnalisisAdminCompleto() {
+      try {
+        console.log('🔍 Ejecutando análisis completo para administrador...');
+        
+        const datosReales = await cargarDatosRealesParaIA();
+        
+        ['melate', 'revancha', 'revanchita'].forEach(sorteo => {
+          const datos = datosReales[sorteo];
+          if (datos && datos.numeros && datos.frecuencias) {
+            const stats = calcularEstadisticas(datos.numeros, datos.frecuencias, datos.sumas || []);
+            const numeroMaxProb = calcularNumeroMaximaProbabilidad(stats);
+            
+            console.log(`🎯 ${sorteo.toUpperCase()}: Número con máxima probabilidad: ${numeroMaxProb.numero} (puntuación: ${numeroMaxProb.puntuacion.toFixed(4)})`);
+            console.log(`   📈 Top 3:`, numeroMaxProb.topCinco.slice(0, 3).map(n => `${n.numero}(${n.puntuacion.toFixed(3)})`).join(', '));
+          }
+        });
+        
+        console.log('✅ Análisis completo finalizado');
+        
+      } catch (error) {
+        console.error('❌ Error en análisis de administrador:', error);
+      }
+    }
     
     // FUNCIÓN ADICIONAL: Limpiar predicciones persistentes (solo para administradores)
     window.limpiarPrediccionesPersistentes = function() {
