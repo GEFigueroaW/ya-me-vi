@@ -340,13 +340,6 @@ async function mostrarBienvenidaConSueño(user) {
           dreamMessage.innerHTML = `🎯 ¡Listo para ganar!`;
           dreamMessage.classList.remove('animate__pulse');
         }
-          <div class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
-            ¡Bienvenido!
-          </div>
-          <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md">
-            ¡Listo para cumplir tus sueños!
-          </div>
-        `;
         console.log('✨ [MAIN] Mensaje de bienvenida genérico mostrado');
       }
       
@@ -399,19 +392,28 @@ onAuthStateChanged(auth, async (user) => {
     }
     
     // Verificar si el usuario es administrador y mostrar/ocultar elementos
+    console.log('🔍 [MAIN] Iniciando verificación de admin para:', user.email);
     const isAdmin = await isUserAdmin();
-    console.log('🔐 Verificación de admin completada:', isAdmin);
+    console.log('🔐 [MAIN] Verificación de admin completada:', isAdmin, 'para email:', user.email);
     toggleAdminElements(isAdmin);
     
     // Mostrar botón de admin si es administrador
     const btnAdmin = document.getElementById('btn-admin');
+    console.log('🔍 [MAIN] Botón admin encontrado:', !!btnAdmin);
     if (btnAdmin && isAdmin) {
       btnAdmin.classList.remove('hidden');
-      console.log('✅ Botón de administrador mostrado');
+      btnAdmin.style.display = 'block';
+      console.log('✅ [MAIN] Botón de administrador mostrado para:', user.email);
+    } else if (btnAdmin && !isAdmin) {
+      btnAdmin.classList.add('hidden');
+      btnAdmin.style.display = 'none';
+      console.log('❌ [MAIN] Botón de administrador ocultado para:', user.email);
     }
     
     if (isAdmin) {
-      console.log('✅ Usuario identificado como administrador');
+      console.log('✅ [MAIN] Usuario identificado como administrador:', user.email);
+    } else {
+      console.log('ℹ️ [MAIN] Usuario regular (no admin):', user.email);
     }
   } else {
     console.log('❌ Usuario no autenticado, redirigiendo a index.html');
@@ -422,7 +424,7 @@ onAuthStateChanged(auth, async (user) => {
 
 // === Inicialización cuando el DOM está listo ===
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🎯 DOM cargado, inicializando botones...');
+  console.log('🎯 [MAIN] DOM cargado, inicializando botones...');
   
   // === Referencias DOM ===
   const btnAnalizar = document.getElementById('btn-analizar');
@@ -431,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAdmin = document.getElementById('btn-admin');
 
   // Verificar que los elementos existen
-  console.log('🔍 Elementos encontrados:', {
+  console.log('🔍 [MAIN] Elementos encontrados:', {
     btnAnalizar: !!btnAnalizar,
     btnCombinacion: !!btnCombinacion,
     btnSugeridas: !!btnSugeridas,
@@ -440,55 +442,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === Botones: alternar visibilidad y redirigir ===
   if (btnAnalizar && btnCombinacion && btnSugeridas) {
-    console.log('✅ Configurando event listeners para botones principales');
+    console.log('✅ [MAIN] Configurando event listeners para botones principales');
     
     btnAnalizar.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('🎯 Botón Analizar clickeado');
+      console.log('🎯 [MAIN] Botón Analizar clickeado');
       // Marcar que viene de home para evitar loop al regresar
       localStorage.setItem('came_from_home', 'true');
       // Mostrar feedback visual inmediato
       btnAnalizar.style.opacity = '0.5';
       setTimeout(() => {
+        console.log('🚀 [MAIN] Redirigiendo a analisis.html');
         window.location.href = "analisis.html";
       }, 100);
     });
 
     btnCombinacion.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('🎯 Botón Combinación clickeado');
+      console.log('🎯 [MAIN] Botón Combinación clickeado');
       // Marcar que viene de home para evitar loop al regresar
       localStorage.setItem('came_from_home', 'true');
       // Mostrar feedback visual inmediato
       btnCombinacion.style.opacity = '0.5';
       setTimeout(() => {
+        console.log('🚀 [MAIN] Redirigiendo a combinacion.html');
         window.location.href = "combinacion.html";
       }, 100);
     });
 
     btnSugeridas.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('🎯 Botón Sugeridas clickeado');
+      console.log('🎯 [MAIN] Botón Sugeridas clickeado');
       // Marcar que viene de home para evitar loop al regresar
       localStorage.setItem('came_from_home', 'true');
       // Mostrar feedback visual inmediato
       btnSugeridas.style.opacity = '0.5';
       setTimeout(() => {
+        console.log('🚀 [MAIN] Redirigiendo a sugeridas.html');
         window.location.href = "sugeridas.html";
       }, 100);
     });
   } else {
-    console.warn('❌ No se encontraron todos los botones principales');
+    console.warn('❌ [MAIN] No se encontraron todos los botones principales');
+    console.log('🔍 [MAIN] Debug elementos:', {
+      btnAnalizar: btnAnalizar,
+      btnCombinacion: btnCombinacion,
+      btnSugeridas: btnSugeridas
+    });
   }
   
   // Botón de administración (solo visible para admins)
   if (btnAdmin) {
-    console.log('✅ Configurando event listener para botón de admin');
+    console.log('✅ [MAIN] Configurando event listener para botón de admin');
     btnAdmin.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('🔐 Accediendo al panel de administración');
+      console.log('🔐 [MAIN] Botón admin clickeado');
       btnAdmin.style.opacity = '0.5';
       setTimeout(() => {
+        console.log('🚀 [MAIN] Redirigiendo a admin.html');
         window.location.href = "admin.html";
       }, 100);
     });
@@ -496,18 +507,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Verificación adicional de administrador después de un tiempo
     setTimeout(async () => {
       try {
+        console.log('🔍 [MAIN] Ejecutando verificación tardía de admin...');
         const isAdmin = await isUserAdmin();
-        console.log('🔍 Verificación tardía de admin:', isAdmin);
+        console.log('🔍 [MAIN] Verificación tardía de admin completada:', isAdmin);
         if (isAdmin) {
           btnAdmin.classList.remove('hidden');
-          console.log('✅ Botón de admin mostrado por verificación tardía');
+          btnAdmin.style.display = 'block';
+          console.log('✅ [MAIN] Botón de admin mostrado por verificación tardía');
+        } else {
+          btnAdmin.classList.add('hidden');
+          btnAdmin.style.display = 'none';
+          console.log('❌ [MAIN] Botón de admin ocultado por verificación tardía');
         }
       } catch (error) {
-        console.error('❌ Error en verificación tardía de admin:', error);
+        console.error('❌ [MAIN] Error en verificación tardía de admin:', error);
       }
     }, 2000);
   } else {
-    console.warn('❌ No se encontró el botón de administración');
+    console.warn('❌ [MAIN] No se encontró el botón de administración en DOM');
   }
 
   // Cargar último sorteo con un pequeño delay para asegurar que el DOM esté listo

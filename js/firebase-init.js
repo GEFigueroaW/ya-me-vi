@@ -14,8 +14,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const messaging = getMessaging(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const messaging = getMessaging(app);
+
+export { app, auth, db, messaging, onAuthStateChanged, getToken, onMessage };
 export const VAPID_KEY = 'TU_VAPID_KEY_AQUI';
-export { app, onAuthStateChanged, getToken, onMessage };

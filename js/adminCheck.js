@@ -11,31 +11,40 @@ export async function isUserAdmin() {
   return new Promise((resolve, reject) => {
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
+        console.log('❌ [ADMIN] No hay usuario autenticado');
         resolve(false);
         return;
       }
+      
+      console.log('🔍 [ADMIN] Verificando admin para usuario:', user.email);
       
       try {
         // Lista de emails de administradores autorizados
         const adminEmails = ['gfigueroa.w@gmail.com', 'admin@yamevi.com.mx', 'eugenfw@gmail.com'];
         
+        console.log('📋 [ADMIN] Lista de admins:', adminEmails);
+        console.log('📧 [ADMIN] Email del usuario:', user.email);
+        
         // Verificación primaria por email
         if (adminEmails.includes(user.email)) {
-          console.log('✅ Admin verificado por email:', user.email);
+          console.log('✅ [ADMIN] Admin verificado por email:', user.email);
           resolve(true);
           return;
         }
         
+        console.log('❌ [ADMIN] Email no está en lista de admins');
+        
         // Verificación secundaria por Firestore
+        console.log('🔍 [ADMIN] Verificando en Firestore...');
         const userRef = collection(db, "users");
         const q = query(userRef, where("email", "==", user.email), where("isAdmin", "==", true));
         const querySnapshot = await getDocs(q);
         
         const isAdmin = !querySnapshot.empty;
-        console.log('✅ Admin verificado por Firestore:', isAdmin, 'para', user.email);
+        console.log('🔍 [ADMIN] Verificación Firestore completada:', isAdmin, 'para', user.email);
         resolve(isAdmin);
       } catch (error) {
-        console.error('Error verificando permisos de administrador:', error);
+        console.error('❌ [ADMIN] Error verificando permisos de administrador:', error);
         resolve(false);
       }
     });
@@ -47,23 +56,25 @@ export async function isUserAdmin() {
  * @param {boolean} showAdminElements - Si es true, muestra los elementos para administradores
  */
 export function toggleAdminElements(showAdminElements) {
+  console.log(`🔧 [ADMIN] toggleAdminElements llamado con:`, showAdminElements);
   const adminElements = document.querySelectorAll('.admin-only');
   
-  console.log(`🔍 Encontrados ${adminElements.length} elementos admin-only`);
+  console.log(`🔍 [ADMIN] Encontrados ${adminElements.length} elementos admin-only`);
   
   adminElements.forEach((element, index) => {
+    console.log(`🔍 [ADMIN] Elemento ${index + 1}:`, element.id || element.className);
     if (showAdminElements) {
       element.classList.remove('hidden');
       element.style.display = 'block';
-      console.log(`✅ Elemento admin ${index + 1} mostrado`);
+      console.log(`✅ [ADMIN] Elemento admin ${index + 1} mostrado`);
     } else {
       element.classList.add('hidden');
       element.style.display = 'none';
-      console.log(`⛔ Elemento admin ${index + 1} ocultado`);
+      console.log(`⛔ [ADMIN] Elemento admin ${index + 1} ocultado`);
     }
   });
   
-  console.log(`${showAdminElements ? '✅ Mostrando' : '⛔ Ocultando'} elementos de administrador`);
+  console.log(`${showAdminElements ? '✅ [ADMIN] Mostrando' : '⛔ [ADMIN] Ocultando'} elementos de administrador`);
 }
 
 /**
