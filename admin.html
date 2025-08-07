@@ -376,9 +376,19 @@
               statusElement.className = 'text-green-400 font-medium';
               updateIndicator('connection-indicator', 'online');
               
-              console.log('👑 Acceso de admin confirmado');
-              await loadAdminData();
-              startAutoRefresh();
+              console.log('👑 Acceso de admin confirmado, cargando datos...');
+              
+              // Cargar datos con manejo de errores robusto
+              try {
+                await loadAdminData();
+                startAutoRefresh();
+              } catch (loadError) {
+                console.error('❌ Error cargando datos iniciales:', loadError);
+                showError('Panel cargado con errores - Verificar permisos Firestore');
+                
+                // Aún así iniciar auto-refresh para intentos posteriores
+                startAutoRefresh();
+              }
               
             } else {
               statusElement.textContent = `❌ Sin permisos: ${user.email}`;
@@ -418,98 +428,157 @@
 
     // === CARGAR DATOS DEL ADMIN ===
     async function loadAdminData() {
-      if (!isUserAdmin || !db) return;
+      if (!isUserAdmin || !db) {
+        console.warn('⚠️ No se puede cargar datos - Admin:', isUserAdmin, 'DB:', !!db);
+        return;
+      }
       
-      console.log('📊 Cargando datos del admin...');
+      console.log('📊 Iniciando carga de datos del admin...');
       
       try {
-        await Promise.all([
-          loadUsers(),
-          loadStats()
-        ]);
+        // Cargar datos de manera secuencial para mejor debugging
+        console.log('🔄 Paso 1: Cargando usuarios...');
+        await loadUsers();
         
-        showSuccess('Conectado - Firebase operativo');
+        console.log('🔄 Paso 2: Cargando estadísticas...');
+        await loadStats();
         
-        const now = new Date().toLocaleString('es-MX');
+        // Solo mostrar éxito si ambas funciones se ejecutaron
+        showSuccess('Panel cargado - Firebase operativo');
+        
+        const now = new Date().toLocaleString('es-MX', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
         document.getElementById('last-update').textContent = `Actualizado: ${now}`;
         
-        console.log('✅ Todos los datos cargados');
+        console.log('✅ Carga completa de datos del admin finalizada');
         
       } catch (error) {
-        console.error('❌ Error cargando datos:', error);
-        showError('Error cargando datos');
+        console.error('❌ Error en la carga general de datos:', error);
+        showError(`Error: ${error.message || 'Problema de conexión'}`);
+        
+        // Aún intentar mostrar algo en caso de error parcial
+        const now = new Date().toLocaleString('es-MX');
+        document.getElementById('last-update').textContent = `Error: ${now}`;
       }
     }
 
     // === CARGAR USUARIOS ===
     async function loadUsers() {
-      if (!db) return;
+      if (!db) {
+        console.warn('⚠️ Base de datos no disponible');
+        return;
+      }
       
       try {
+        console.log('📊 Cargando usuarios...');
         const { collection, getDocs, query, orderBy, limit } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
         
-        const usersQuery = query(collection(db, 'users'), orderBy('fechaRegistro', 'desc'), limit(50));
-        const snapshot = await getDocs(usersQuery);
+        // Intentar múltiples campos de ordenamiento
+        let snapshot;
+        try {
+          // Intentar ordenar por fechaRegistro
+          const usersQuery = query(collection(db, 'users'), orderBy('fechaRegistro', 'desc'), limit(50));
+          snapshot = await getDocs(usersQuery);
+        } catch (orderError) {
+          console.warn('⚠️ No se pudo ordenar por fechaRegistro, intentando otro campo...');
+          try {
+            // Intentar ordenar por ultimoAcceso
+            const usersQuery = query(collection(db, 'users'), orderBy('ultimoAcceso', 'desc'), limit(50));
+            snapshot = await getDocs(usersQuery);
+          } catch (orderError2) {
+            console.warn('⚠️ No se pudo ordenar, obteniendo todos los usuarios...');
+            // Sin ordenamiento, solo obtener usuarios
+            snapshot = await getDocs(collection(db, 'users'));
+          }
+        }
         
-        document.getElementById('total-users').textContent = snapshot.size;
-        document.getElementById('users-count').textContent = snapshot.size;
+        const userCount = snapshot.size;
+        document.getElementById('total-users').textContent = userCount;
+        document.getElementById('users-count').textContent = userCount;
         
         const tbody = document.getElementById('users-table-body');
         tbody.innerHTML = '';
         
         if (snapshot.empty) {
           tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400">No hay usuarios registrados</td></tr>';
+          console.log('📊 No hay usuarios en la base de datos');
           return;
         }
         
+        let rowsAdded = 0;
         snapshot.forEach((doc) => {
-          const data = doc.data();
-          const row = document.createElement('tr');
-          row.className = 'border-b border-gray-700 hover:bg-gray-800';
-          
-          const isAdmin = ADMIN_EMAILS.includes(data.email?.toLowerCase()) ? 
-            ' <span class="ml-2 px-2 py-1 bg-yellow-600 text-xs rounded">ADMIN</span>' : '';
-          
-          row.innerHTML = `
-            <td class="py-3 px-4">
-              <div class="flex items-center">
-                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
-                  ${(data.email || 'U').charAt(0).toUpperCase()}
+          try {
+            const data = doc.data();
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-700 hover:bg-gray-800';
+            
+            const email = data.email || 'Sin email';
+            const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase()) ? 
+              ' <span class="ml-2 px-2 py-1 bg-yellow-600 text-xs rounded">ADMIN</span>' : '';
+            
+            row.innerHTML = `
+              <td class="py-3 px-4">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
+                    ${email.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div class="font-medium">${email}${isAdmin}</div>
+                    <div class="text-xs text-gray-400">${doc.id.substring(0, 8)}...</div>
+                  </div>
                 </div>
-                <div>
-                  <div class="font-medium">${data.email || 'Sin email'}${isAdmin}</div>
-                  <div class="text-xs text-gray-400">${doc.id.substring(0, 8)}...</div>
-                </div>
-              </div>
-            </td>
-            <td class="py-3 px-4">${data.displayName || 'N/A'}</td>
-            <td class="py-3 px-4">${formatDate(data.fechaRegistro || data.createdAt)}</td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-1 rounded-full text-xs bg-green-600">Activo</span>
-            </td>
-          `;
-          
-          tbody.appendChild(row);
+              </td>
+              <td class="py-3 px-4">${data.displayName || 'N/A'}</td>
+              <td class="py-3 px-4">${formatDate(data.fechaRegistro || data.ultimoAcceso || data.createdAt)}</td>
+              <td class="py-3 px-4">
+                <span class="px-2 py-1 rounded-full text-xs bg-green-600">Activo</span>
+              </td>
+            `;
+            
+            tbody.appendChild(row);
+            rowsAdded++;
+          } catch (rowError) {
+            console.warn('⚠️ Error procesando usuario:', doc.id, rowError.message);
+          }
         });
         
-        console.log(`✅ ${snapshot.size} usuarios cargados`);
+        console.log(`✅ ${rowsAdded} usuarios cargados de ${userCount} totales`);
         
       } catch (error) {
-        console.error('❌ Error cargando usuarios:', error);
+        console.error('❌ Error cargando usuarios:', error.code, error.message);
+        
+        // Mostrar error específico según el tipo
+        let errorMessage = 'Error cargando usuarios';
+        if (error.code === 'permission-denied') {
+          errorMessage = 'Sin permisos para leer usuarios';
+          console.warn('⚠️ Permisos insuficientes para la colección users');
+        }
+        
         document.getElementById('total-users').textContent = 'Error';
         document.getElementById('users-table-body').innerHTML = 
-          '<tr><td colspan="4" class="text-center py-8 text-red-400">Error cargando usuarios</td></tr>';
+          `<tr><td colspan="4" class="text-center py-8 text-red-400">${errorMessage}</td></tr>`;
       }
     }
 
     // === CARGAR ESTADÍSTICAS ===
     async function loadStats() {
-      if (!db) return;
+      if (!db) {
+        console.warn('⚠️ Base de datos no disponible para estadísticas');
+        return;
+      }
+      
+      console.log('📈 Cargando estadísticas...');
       
       try {
         const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
         
-        // Cargar diferentes colecciones con manejo de errores individual
+        // Objeto para almacenar estadísticas
         const stats = {
           queries: 0,
           analysis: 0,
@@ -519,74 +588,117 @@
           emailsSent: 0
         };
         
-        // Consultas
+        // === CONSULTAS ===
         try {
-          const queries = await getDocs(collection(db, 'queries'));
-          stats.queries = queries.size;
+          console.log('📊 Cargando consultas...');
+          const queriesSnapshot = await getDocs(collection(db, 'queries'));
+          stats.queries = queriesSnapshot.size;
+          console.log(`✅ Consultas: ${stats.queries}`);
         } catch (e) {
-          console.warn('⚠️ No se pudo cargar queries:', e.message);
+          console.warn('⚠️ No se pudo cargar queries:', e.code || e.message);
+          stats.queries = 0;
         }
         
-        // Análisis
+        // === ANÁLISIS ===
         try {
-          const analysis = await getDocs(collection(db, 'analysis'));
-          stats.analysis = analysis.size;
+          console.log('📊 Cargando análisis...');
+          const analysisSnapshot = await getDocs(collection(db, 'analysis'));
+          stats.analysis = analysisSnapshot.size;
+          console.log(`✅ Análisis: ${stats.analysis}`);
         } catch (e) {
-          console.warn('⚠️ No se pudo cargar analysis:', e.message);
+          console.warn('⚠️ No se pudo cargar analysis:', e.code || e.message);
+          stats.analysis = 0;
         }
         
-        // Registros en DB (usar users como referencia)
+        // === REGISTROS EN DB (USUARIOS) ===
         try {
-          const users = await getDocs(collection(db, 'users'));
-          stats.dbRecords = users.size;
+          console.log('📊 Cargando registros de usuarios...');
+          const usersSnapshot = await getDocs(collection(db, 'users'));
+          stats.dbRecords = usersSnapshot.size;
+          console.log(`✅ Usuarios en DB: ${stats.dbRecords}`);
         } catch (e) {
-          console.warn('⚠️ No se pudo cargar db records:', e.message);
+          console.warn('⚠️ No se pudo cargar users para db records:', e.code || e.message);
+          stats.dbRecords = 0;
         }
         
-        // Notificaciones push
+        // === NOTIFICACIONES PUSH ===
         try {
-          const push = await getDocs(collection(db, 'notifications'));
-          stats.pushSent = push.size;
+          console.log('📊 Cargando notificaciones...');
+          const notificationsSnapshot = await getDocs(collection(db, 'notifications'));
+          stats.pushSent = notificationsSnapshot.size;
+          console.log(`✅ Notificaciones: ${stats.pushSent}`);
         } catch (e) {
-          console.warn('⚠️ No se pudo cargar push notifications:', e.message);
+          console.warn('⚠️ No se pudo cargar notifications:', e.code || e.message);
+          // Intentar con nombre alternativo
+          try {
+            const pushSnapshot = await getDocs(collection(db, 'pushNotifications'));
+            stats.pushSent = pushSnapshot.size;
+            console.log(`✅ Push notifications (alt): ${stats.pushSent}`);
+          } catch (e2) {
+            console.warn('⚠️ No se pudo cargar pushNotifications:', e2.code || e2.message);
+            stats.pushSent = 0;
+          }
         }
         
-        // Notificaciones in-app (usar misma colección)
-        stats.inappActive = Math.floor(stats.pushSent * 0.7); // Estimación
+        // === NOTIFICACIONES IN-APP (ESTIMACIÓN) ===
+        stats.inappActive = Math.floor(stats.pushSent * 0.7);
+        console.log(`📱 In-app estimadas: ${stats.inappActive}`);
         
-        // Emails (estimación basada en usuarios)
-        stats.emailsSent = Math.floor(stats.dbRecords * 0.3); // Estimación
+        // === EMAILS ENVIADOS (ESTIMACIÓN) ===
+        stats.emailsSent = Math.floor(stats.dbRecords * 0.3);
+        console.log(`📧 Emails estimados: ${stats.emailsSent}`);
         
-        // Actualizar UI
-        document.getElementById('daily-queries').textContent = stats.queries;
-        document.getElementById('total-analysis').textContent = stats.analysis;
-        document.getElementById('db-records').textContent = stats.dbRecords;
-        document.getElementById('push-sent').textContent = stats.pushSent;
-        document.getElementById('inapp-active').textContent = stats.inappActive;
-        document.getElementById('emails-sent').textContent = stats.emailsSent;
-        
-        console.log('✅ Estadísticas cargadas:', stats);
+        // === ACTUALIZAR UI ===
+        try {
+          document.getElementById('daily-queries').textContent = stats.queries.toString();
+          document.getElementById('total-analysis').textContent = stats.analysis.toString();
+          document.getElementById('db-records').textContent = stats.dbRecords.toString();
+          document.getElementById('push-sent').textContent = stats.pushSent.toString();
+          document.getElementById('inapp-active').textContent = stats.inappActive.toString();
+          document.getElementById('emails-sent').textContent = stats.emailsSent.toString();
+          
+          console.log('✅ Estadísticas actualizadas en UI:', stats);
+        } catch (uiError) {
+          console.error('❌ Error actualizando UI de estadísticas:', uiError);
+        }
         
       } catch (error) {
-        console.error('❌ Error cargando estadísticas:', error);
-        // Establecer valores por defecto en caso de error
-        document.getElementById('daily-queries').textContent = '0';
-        document.getElementById('total-analysis').textContent = '0';
-        document.getElementById('db-records').textContent = '0';
-        document.getElementById('push-sent').textContent = '0';
-        document.getElementById('inapp-active').textContent = '0';
-        document.getElementById('emails-sent').textContent = '0';
+        console.error('❌ Error general cargando estadísticas:', error.code || error.message);
+        
+        // Establecer valores por defecto en caso de error total
+        const defaultValues = ['0', '0', '0', '0', '0', '0'];
+        const ids = ['daily-queries', 'total-analysis', 'db-records', 'push-sent', 'inapp-active', 'emails-sent'];
+        
+        ids.forEach((id, index) => {
+          try {
+            const element = document.getElementById(id);
+            if (element) {
+              element.textContent = defaultValues[index];
+            }
+          } catch (e) {
+            console.warn(`⚠️ No se pudo actualizar ${id}:`, e.message);
+          }
+        });
       }
     }
 
     // === AUTO REFRESH ===
     function startAutoRefresh() {
-      setInterval(() => {
+      console.log('🔄 Iniciando auto-refresh cada 2 minutos...');
+      
+      setInterval(async () => {
         if (isUserAdmin && currentUser && db) {
-          console.log('🔄 Auto-refresh...');
-          loadAdminData();
+          try {
+            console.log('🔄 Auto-refresh ejecutándose...');
+            await loadAdminData();
+          } catch (refreshError) {
+            console.warn('⚠️ Error en auto-refresh:', refreshError.message);
+            // No hacer nada más, seguir intentando en el próximo ciclo
+          }
+        } else {
+          console.warn('⚠️ Auto-refresh saltado - Condiciones no cumplidas');
         }
-      }, 60000); // Cada minuto
+      }, 120000); // Cada 2 minutos (menos agresivo)
     }
 
     // === FUNCIONES GLOBALES ===
