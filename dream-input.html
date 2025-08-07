@@ -251,114 +251,25 @@
   <!-- Scripts -->
   <script src="js/shared.js"></script>
   
-  <script type="module">
-    // === WebView Detection ===
-    class WebViewDetector {
-      static isWebView() {
-        const userAgent = navigator.userAgent.toLowerCase();
-        
-        // Detectar WebIntoApp específicamente
-        if (this.isWebIntoApp()) {
-          console.log('🔍 WebIntoApp detectado');
-          return true;
-        }
-        
-        // Detectar otros tipos de WebView
-        const webViewPatterns = [
-          'webview',
-          'wv',
-          'android.*version.*chrome',
-          'crios',
-          'fxios',
-          'mobile.*safari.*version',
-          'facebook',
-          'instagram',
-          'twitter',
-          'linkedin'
-        ];
-        
-        const isWebViewUA = webViewPatterns.some(pattern => {
-          const regex = new RegExp(pattern);
-          return regex.test(userAgent);
-        });
-        
-        // Detectar por características específicas del entorno
-        const hasWebViewFeatures = 
-          (window.navigator.standalone === false && /iPhone|iPad/.test(userAgent)) ||
-          (typeof window.orientation !== 'undefined' && !window.DeviceMotionEvent) ||
-          (window.ReactNativeWebView !== undefined) ||
-          (window.webkit && window.webkit.messageHandlers) ||
-          (window.Android !== undefined);
-        
-        const result = isWebViewUA || hasWebViewFeatures;
-        console.log('🔍 WebView detectado:', result);
-        
-        return result;
-      }
-      
-      static isWebIntoApp() {
-        const userAgent = navigator.userAgent.toLowerCase();
-        return userAgent.includes('webintoapp') || 
-               userAgent.includes('wia-') ||
-               window.location.href.includes('webintoapp') ||
-               document.referrer.includes('webintoapp');
-      }
+  <script>
+    // === Función simple para detectar WebView ===
+    function isWebView() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      return userAgent.includes('webview') || 
+             userAgent.includes('wv') || 
+             userAgent.includes('webintoapp') ||
+             userAgent.includes('wia-');
     }
-
-    // === Imports de Firebase ===
-    import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     
-    // Esperar a que el DOM esté listo
-    document.addEventListener('DOMContentLoaded', async () => {
+    // === Inicializar cuando el DOM esté listo ===
+    document.addEventListener('DOMContentLoaded', function() {
       console.log('🎯 [DREAM] DOM cargado, inicializando...');
-      
-      // Variables globales
-      let currentUser = null;
-      let auth = null;
-      let db = null;
-      
-      try {
-        // Detectar entorno y cargar configuración apropiada
-        let firebaseModule;
-        const isWebView = WebViewDetector.isWebView();
-        const isWebIntoApp = WebViewDetector.isWebIntoApp();
-        
-        if (isWebView || isWebIntoApp) {
-          firebaseModule = await import('./js/firebase-init-apk.js');
-        } else {
-          firebaseModule = await import('./js/firebase-init.js');
-        }
-        
-        auth = getAuth(firebaseModule.app);
-        db = getFirestore(firebaseModule.app);
-        
-        // Verificar autenticación
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            currentUser = user;
-            console.log('✅ [DREAM] Usuario autenticado:', user.email);
-            
-            // Pre-llenar el email si está disponible
-            const emailFromStorage = localStorage.getItem('user_email');
-            if (emailFromStorage) {
-              console.log('📧 [DREAM] Email recuperado del localStorage:', emailFromStorage);
-            }
-          } else {
-            console.log('❌ [DREAM] Usuario no autenticado, pero continuando...');
-            // No redirigir, permitir que funcione sin autenticación
-          }
-        });
-      } catch (error) {
-        console.error('⚠️ [DREAM] Error cargando Firebase, continuando sin autenticación:', error);
-      }
       
       // === Inicializar fondo dinámico ===
       function inicializarFondo() {
         if (typeof iniciarFondoDinamico === 'function') {
           iniciarFondoDinamico();
         } else {
-          // Fallback si shared.js no está disponible
           const background = document.getElementById('background');
           if (background) {
             background.style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -366,144 +277,74 @@
         }
       }
       
-      // Inicializar fondo inmediatamente
       inicializarFondo();
-
-      // Manejar envío del formulario
+      
+      // === Manejar envío del formulario ===
       const dreamForm = document.getElementById('dream-form');
       if (dreamForm) {
-        console.log('✅ [DREAM] Formulario encontrado, agregando event listener');
-        dreamForm.addEventListener('submit', async (e) => {
+        console.log('✅ [DREAM] Formulario encontrado');
+        dreamForm.addEventListener('submit', function(e) {
           e.preventDefault();
           e.stopPropagation();
           
-          console.log('🚀 [DREAM] Formulario enviado');
+          console.log('🚀 [DREAM] Formulario enviado - redirigiendo a home.html');
           
-          // Mostrar loading
+          // Mostrar loading brevemente
           const loadingOverlay = document.getElementById('loading-overlay');
           if (loadingOverlay) {
             loadingOverlay.classList.remove('hidden');
           }
-          
-          try {
-            // Si no hay usuario autenticado, aún permitir continuar
-            if (!currentUser) {
-              console.warn('⚠️ [DREAM] Usuario no autenticado, continuando sin guardar en Firebase');
-              // Limpiar localStorage de registro
-              localStorage.removeItem('registration_in_progress');
-              localStorage.removeItem('from_welcome_google');
-              localStorage.removeItem('force_dream_input');
-              localStorage.setItem('registration_completed', 'true');
-              
-              setTimeout(() => {
-                window.location.href = 'home.html';
-              }, 500);
-              return;
-            }
-
-            // Obtener datos del formulario
-            const formData = new FormData(e.target);
-            const sueno = formData.get('sueno') || '';
-
-            console.log('📝 [DREAM] Datos del formulario:', { sueno });
-
-            // Si no se seleccionó un sueño, continuar sin sueño
-            if (!sueno) {
-              console.log('📝 [DREAM] Sin sueño seleccionado, continuando');
-            }
-
-            // Intentar guardar datos en Firestore
-            if (sueno) {
-              try {
-                const userData = {
-                  email: currentUser.email,
-                  displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Usuario',
-                  sueno: sueno,
-                  registroCompletado: true,
-                  fechaRegistro: new Date().toISOString(),
-                  ultimoAcceso: new Date().toISOString()
-                };
-
-                await setDoc(doc(db, 'users', currentUser.uid), userData, { merge: true });
-                console.log('✅ [DREAM] Datos guardados en Firestore');
-
-                // Guardar sueño en localStorage
-                localStorage.setItem('user_dream', sueno);
-                localStorage.setItem('user_name', userData.displayName);
-              } catch (firestoreError) {
-                console.error('⚠️ [DREAM] Error guardando en Firestore, continuando:', firestoreError);
-              }
-            }
-
-            // Limpiar localStorage de registro
-            localStorage.removeItem('registration_in_progress');
-            localStorage.removeItem('from_welcome_google');
-            localStorage.removeItem('force_dream_input');
-            localStorage.setItem('registration_completed', 'true');
-
-            console.log('✅ [DREAM] Registro completado, redirigiendo a home.html');
-            
-            // Redirección a home.html
-            setTimeout(() => {
-              window.location.href = 'home.html';
-            }, 1000);
-
-          } catch (error) {
-            console.error('❌ [DREAM] Error completando registro:', error);
-            // Aún así, intentar continuar
-            localStorage.setItem('registration_completed', 'true');
-            setTimeout(() => {
-              window.location.href = 'home.html';
-            }, 1000);
-          } finally {
-            if (loadingOverlay) {
-              loadingOverlay.classList.add('hidden');
-            }
-          }
-        });
-      } else {
-        console.error('❌ [DREAM] No se encontró el formulario dream-form');
-      }
-
-      // Manejar botón de omitir
-      const skipBtn = document.getElementById('skip-btn');
-      if (skipBtn) {
-        console.log('✅ [DREAM] Botón omitir encontrado, agregando event listener');
-        skipBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          console.log('⏭️ [DREAM] Omitiendo selección de sueño');
           
           // Limpiar localStorage de registro
           localStorage.removeItem('registration_in_progress');
           localStorage.removeItem('from_welcome_google');
           localStorage.removeItem('force_dream_input');
           localStorage.setItem('registration_completed', 'true');
+          
+          // Guardar sueño seleccionado si hay uno
+          const formData = new FormData(e.target);
+          const sueno = formData.get('sueno');
+          if (sueno) {
+            localStorage.setItem('user_dream', sueno);
+            console.log('💭 [DREAM] Sueño guardado:', sueno);
+          }
+          
+          // Redireccionar después de un breve delay
+          setTimeout(function() {
+            console.log('🏠 [DREAM] Redirigiendo a home.html');
+            window.location.href = 'home.html';
+          }, 800);
+        });
+      } else {
+        console.error('❌ [DREAM] No se encontró el formulario');
+      }
 
-          console.log('✅ [DREAM] Registro básico completado, redirigiendo a home.html');
+      // === Manejar botón de omitir ===
+      const skipBtn = document.getElementById('skip-btn');
+      if (skipBtn) {
+        console.log('✅ [DREAM] Botón omitir encontrado');
+        skipBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          console.log('⏭️ [DREAM] Omitiendo - redirigiendo a home.html');
+          
+          // Limpiar localStorage de registro
+          localStorage.removeItem('registration_in_progress');
+          localStorage.removeItem('from_welcome_google');
+          localStorage.removeItem('force_dream_input');
+          localStorage.setItem('registration_completed', 'true');
           
           // Redireccionar inmediatamente
+          console.log('🏠 [DREAM] Redirigiendo a home.html');
           window.location.href = 'home.html';
         });
       } else {
-        console.error('❌ [DREAM] No se encontró el botón skip-btn');
+        console.error('❌ [DREAM] No se encontró el botón omitir');
       }
-
-      // === DEBUG: Verificar estado inicial ===
-      console.log('🎯 [DREAM] dream-input.html cargado');
-      console.log('📍 [DREAM] Estado inicial:', {
-        url: window.location.href,
-        localStorage: {
-          user_email: localStorage.getItem('user_email'),
-          registration_in_progress: localStorage.getItem('registration_in_progress'),
-          force_dream_input: localStorage.getItem('force_dream_input'),
-          registration_completed: localStorage.getItem('registration_completed')
-        }
-      });
       
-    }); // Fin del DOMContentLoaded
-
+      console.log('✅ [DREAM] Inicialización completada');
+    });
   </script>
 </body>
 </html>
