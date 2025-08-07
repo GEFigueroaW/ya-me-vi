@@ -349,53 +349,83 @@
     // Función para verificar si el usuario actual es administrador
     // MISMO CRITERIO QUE admin.html para consistencia
     async function esUsuarioAdmin() {
+      try {
+        if (!window.usuarioActualEmail) {
+          console.log('🔍 No hay email de usuario disponible para verificar admin');
+          return false;
+        }
+        
+        const emailUsuario = window.usuarioActualEmail.toLowerCase().trim();
+        
+        // Primera verificación - por email directo (igual que admin.html)
+        let esAdmin = ADMIN_EMAILS.includes(emailUsuario);
+        
+        if (esAdmin) {
+          console.log('👑 USUARIO ADMINISTRADOR DETECTADO (email directo):', emailUsuario);
+          return true;
+        }
+        
+        // Segunda verificación - por Firestore (igual que admin.html)
+        if (!esAdmin && window.usuarioActualID) {
+          try {
+            console.log('🔍 Verificando admin en Firestore para UID:', window.usuarioActualID);
+            
+            // Verificar que las funciones de Firestore estén disponibles
+            if (typeof doc === 'undefined' || typeof getDoc === 'undefined') {
+              console.log('⚠️ Funciones de Firestore no disponibles, omitiendo verificación');
+              return false;
+            }
+            
+            const userRef = doc(db, 'users', window.usuarioActualID);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
+              const userData = userSnap.data();
+              console.log('📄 Datos del usuario en Firestore:', userData);
+              
+              if (userData.isAdmin === true) {
+                esAdmin = true;
+                console.log('✅ Admin confirmado por flag isAdmin en Firestore');
+              } else if (userData.email && ADMIN_EMAILS.includes(userData.email.toLowerCase())) {
+                esAdmin = true;
+                console.log('✅ Admin confirmado por email en Firestore');
+              }
+            }
+          } catch (firestoreError) {
+            console.warn('⚠️ Error verificando admin en Firestore:', firestoreError.message);
+          }
+        }
+        
+        if (esAdmin) {
+          console.log('👑 USUARIO ADMINISTRADOR CONFIRMADO:', emailUsuario);
+        } else {
+          console.log('👤 Usuario regular confirmado:', emailUsuario);
+        }
+        
+        return esAdmin;
+        
+      } catch (error) {
+        console.error('❌ Error en verificación de administrador:', error);
+        return false;
+      }
+    }
+    
+    // Variables globales para acceso rápido al estado de admin
+    window.esUsuarioAdmin = esUsuarioAdmin;
+    window.esAdmin = () => esUsuarioAdmin(); // Mantener compatibilidad
+    
+    // Función simple para verificación rápida de admin (sin Firestore)
+    function esUsuarioAdminRapido() {
       if (!window.usuarioActualEmail) {
         return false;
       }
       
       const emailUsuario = window.usuarioActualEmail.toLowerCase().trim();
-      
-      // Primera verificación - por email directo (igual que admin.html)
-      let esAdmin = ADMIN_EMAILS.includes(emailUsuario);
-      
-      if (esAdmin) {
-        console.log('👑 USUARIO ADMINISTRADOR DETECTADO (email directo):', emailUsuario);
-        return true;
-      }
-      
-      // Segunda verificación - por Firestore (igual que admin.html)
-      if (!esAdmin && window.usuarioActualID) {
-        try {
-          console.log('🔍 Verificando admin en Firestore para UID:', window.usuarioActualID);
-          const userRef = doc(db, 'users', window.usuarioActualID);
-          const userSnap = await getDoc(userRef);
-          
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            console.log('📄 Datos del usuario en Firestore:', userData);
-            
-            if (userData.isAdmin === true) {
-              esAdmin = true;
-              console.log('✅ Admin confirmado por flag isAdmin en Firestore');
-            } else if (userData.email && ADMIN_EMAILS.includes(userData.email.toLowerCase())) {
-              esAdmin = true;
-              console.log('✅ Admin confirmado por email en Firestore');
-            }
-          }
-        } catch (error) {
-          console.warn('⚠️ Error verificando admin en Firestore:', error.message);
-        }
-      }
-      
-      if (esAdmin) {
-        console.log('👑 USUARIO ADMINISTRADOR CONFIRMADO:', emailUsuario);
-      }
-      
-      return esAdmin;
+      return ADMIN_EMAILS.includes(emailUsuario);
     }
     
-    // Variable global para acceso rápido al estado de admin
-    window.esAdmin = () => esUsuarioAdmin();
+    // Exportar función rápida también
+    window.esUsuarioAdminRapido = esUsuarioAdminRapido;
     
     // Exportar auth globalmente para que otros scripts puedan acceder al usuario actual
     window.auth = auth;
@@ -435,15 +465,19 @@
         console.log('- Email:', window.usuarioActualEmail);
         
         // ACTIVAR INDICADOR VISUAL DE ADMINISTRADOR
-        setTimeout(() => {
-          const esAdmin = esUsuarioAdmin();
-          const adminIndicator = document.getElementById('admin-indicator');
-          
-          if (esAdmin && adminIndicator) {
-            adminIndicator.classList.remove('hidden');
-            console.log('👑 Indicador visual de administrador activado');
-          } else if (adminIndicator) {
-            adminIndicator.classList.add('hidden');
+        setTimeout(async () => {
+          try {
+            const esAdmin = await esUsuarioAdmin();
+            const adminIndicator = document.getElementById('admin-indicator');
+            
+            if (esAdmin && adminIndicator) {
+              adminIndicator.classList.remove('hidden');
+              console.log('👑 Indicador visual de administrador activado');
+            } else if (adminIndicator) {
+              adminIndicator.classList.add('hidden');
+            }
+          } catch (error) {
+            console.warn('⚠️ Error verificando estado de admin:', error);
           }
         }, 500);
         
@@ -1078,7 +1112,7 @@
         
         setTimeout(async () => {
           // Generar predicciones usando análisis estadístico real
-          const nuevasPredicciones = await generarPrediccionesConIA(datosReales, usuarioId, csvHashActual);
+          const nuevasPredicciones = generarPrediccionesConIA(datosReales, usuarioId, csvHashActual);
           
           // Guardar en caché EN MEMORIA
           prediccionesPorUsuarioYHash[claveUsuarioHash] = nuevasPredicciones;
@@ -1634,7 +1668,7 @@
     }
     
     // Función principal para generar predicciones con IA (MÁXIMA DIFERENCIACIÓN)
-    async function generarPrediccionesConIA(datosReales, usuario, hashCSV) {
+    function generarPrediccionesConIA(datosReales, usuario, hashCSV) {
       console.log('🧠 Generando predicciones con IA y análisis estadístico (MÁXIMA DIFERENCIACIÓN)...');
       
       const predicciones = {};
@@ -1692,7 +1726,7 @@
         while (combinacion.length < 6 && intentos < 20) {
           const posicionSeed = mixedSeed + baseUserSeed + uniqueSeed1 + uniqueSeed2 + 
                               index * 41 + combinacion.length * 43 + intentos * 7;
-          const iaNumber = await generarNumeroIA(stats, posicionSeed, combinacion);
+          const iaNumber = generarNumeroIA(stats, posicionSeed, combinacion);
           if (!combinacion.includes(iaNumber)) {
             combinacion.push(iaNumber);
           }
@@ -1775,9 +1809,10 @@
       return candidatos[index].numero;
     }
     
-    async function generarNumeroIA(stats, seed, yaSeleccionados) {
+    function generarNumeroIA(stats, seed, yaSeleccionados) {
       // ⭐ VERIFICAR SI EL USUARIO ES ADMINISTRADOR PARA NÚMERO DE MÁXIMA PROBABILIDAD
-      const esAdmin = await esUsuarioAdmin();
+      // Usar verificación rápida para evitar problemas de contexto async
+      const esAdmin = esUsuarioAdminRapido();
       
       if (esAdmin) {
         console.log('👑 MODO ADMINISTRADOR: Intentando incluir número de máxima probabilidad...');
