@@ -488,6 +488,18 @@
           cargarPrediccionesPersistentesInmediato();
         }, 100);
         
+        // FORZAR EJECUCIÓN DE PREDICCIONES DESPUÉS DE UN TIEMPO
+        setTimeout(() => {
+          console.log('🔄 Forzando ejecución de predicciones si no hay resultados...');
+          const melateCheck = document.getElementById('combinacion-melate');
+          if (!melateCheck || melateCheck.textContent === '-- -- -- -- -- --' || melateCheck.textContent === 'Analizando...') {
+            console.log('🚀 Ejecutando predicciones forzadas...');
+            if (window.ejecutarPrediccionesIA) {
+              window.ejecutarPrediccionesIA();
+            }
+          }
+        }, 3000); // 3 segundos
+        
       } catch (error) {
         console.error('❌ Error configurando usuario:', error);
         // Fallback con datos básicos
@@ -633,9 +645,15 @@
               // No hay predicciones persistentes, generar nuevas
               if (window.ejecutarPrediccionesIA) {
                 console.log('🤖 Generando nuevas predicciones IA...');
+                console.log('🔍 Estado actual de elementos:', {
+                  melate: melateElementCheck?.textContent,
+                  usuarioID: window.usuarioActualID,
+                  usuarioEmail: window.usuarioActualEmail
+                });
                 window.ejecutarPrediccionesIA();
               } else {
                 console.error('❌ ejecutarPrediccionesIA no disponible');
+                console.log('🔍 Funciones disponibles en window:', Object.keys(window).filter(k => k.includes('ejecutar')));
               }
             } else {
               console.log('✅ Predicciones persistentes encontradas, no se generan nuevas');
@@ -1044,18 +1062,55 @@
     
     // Ejecutar predicciones de IA con análisis estadístico real (PERSISTENTE)
     async function ejecutarPrediccionesIA() {
+      console.log('🤖 ===== INICIO ejecutarPrediccionesIA =====');
+      console.log('🤖 Estado del usuario:', {
+        ID: window.usuarioActualID,
+        Email: window.usuarioActualEmail,
+        Nombre: window.usuarioActualNombre
+      });
       console.log('🤖 Ejecutando predicciones IA PERSISTENTES con análisis estadístico real');
+      
+      // DEPURACIÓN EXTREMA: Verificar que los elementos existen
+      console.log('🔍 VERIFICANDO ELEMENTOS DOM...');
+      const melateCheck = document.getElementById('combinacion-melate');
+      const revanchaCheck = document.getElementById('combinacion-revancha');
+      const revanchitaCheck = document.getElementById('combinacion-revanchita');
+      console.log('🔍 Elementos encontrados:', {
+        melate: !!melateCheck,
+        revancha: !!revanchaCheck,
+        revanchita: !!revanchitaCheck,
+        melateContent: melateCheck ? melateCheck.textContent : 'NO ENCONTRADO',
+        revanchaContent: revanchaCheck ? revanchaCheck.textContent : 'NO ENCONTRADO',
+        revanchitaContent: revanchitaCheck ? revanchitaCheck.textContent : 'NO ENCONTRADO'
+      });
       
       const melateElement = document.getElementById('combinacion-melate');
       const revanchaElement = document.getElementById('combinacion-revancha');
       const revanchitaElement = document.getElementById('combinacion-revanchita');
       const mensajeEstado = document.getElementById('mensaje-estado');
       
+      console.log('📋 ELEMENTOS ASIGNADOS:', {
+        melateElement: !!melateElement,
+        revanchaElement: !!revanchaElement,
+        revanchitaElement: !!revanchitaElement,
+        mensajeEstado: !!mensajeEstado
+      });
+      
+      // DEPURACIÓN: Verificar contenido actual
+      if (melateElement) console.log('🎲 Contenido actual melate:', melateElement.textContent);
+      if (revanchaElement) console.log('🎲 Contenido actual revancha:', revanchaElement.textContent);
+      if (revanchitaElement) console.log('🎲 Contenido actual revanchita:', revanchitaElement.textContent);
+      
       // Cargar predicciones persistentes al inicio
+      console.log('📥 CARGANDO PREDICCIONES PERSISTENTES...');
       cargarPrediccionesPersistentes();
+      console.log('📥 PREDICCIONES PERSISTENTES CARGADAS');
+      console.log('📥 Estado actual prediccionesPorUsuarioYHash:', Object.keys(prediccionesPorUsuarioYHash));
       
       // GENERAR ID ÚNICO ROBUSTO PARA MÁXIMA DIFERENCIACIÓN ENTRE USUARIOS
+      console.log('🆔 GENERANDO ID USUARIO ÚNICO...');
       let usuarioId = generarIDUsuarioUnico();
+      console.log('🆔 ID generado:', usuarioId);
       
       // Para mostrar en el título, usar el nombre real del usuario
       let nombreUsuario = 'TI';
@@ -1108,7 +1163,9 @@
         if (mensajeEstado) mensajeEstado.textContent = 'Aplicando 5 métodos: frecuencias, probabilidad, patrones, desviación estándar e IA...';
         
         // Cargar y analizar datos reales
+        console.log('📊 ➡️ LLAMANDO A cargarDatosRealesParaIA...');
         const datosReales = await cargarDatosRealesParaIA();
+        console.log('📊 ⬅️ DATOS CARGADOS:', datosReales ? 'ÉXITO' : 'FALLÓ');
         
         setTimeout(async () => {
           // Generar predicciones usando análisis estadístico real
@@ -1148,10 +1205,13 @@
         if (revanchitaElement) revanchitaElement.textContent = prediccionesFallback.revanchita;
         if (mensajeEstado) mensajeEstado.textContent = 'Predicciones generadas (modo fallback)';
       }
+      
+      console.log('🏁 ===== FIN ejecutarPrediccionesIA =====');
     }
     
     // Función para cargar datos reales de los CSV
     async function cargarDatosRealesParaIA() {
+      console.log('📊 ===== INICIO cargarDatosRealesParaIA =====');
       console.log('📊 Cargando datos reales para análisis IA...');
       
       const archivos = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
@@ -1812,7 +1872,7 @@
     function generarNumeroIA(stats, seed, yaSeleccionados) {
       // ⭐ VERIFICAR SI EL USUARIO ES ADMINISTRADOR PARA NÚMERO DE MÁXIMA PROBABILIDAD
       // Usar verificación rápida para evitar problemas de contexto async
-      const esAdmin = esUsuarioAdminRapido();
+      const esAdmin = window.esUsuarioAdminRapido ? window.esUsuarioAdminRapido() : false;
       
       if (esAdmin) {
         console.log('👑 MODO ADMINISTRADOR: Intentando incluir número de máxima probabilidad...');
