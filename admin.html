@@ -340,7 +340,53 @@
     // === VERIFICACIÓN DE ADMIN ===
     function isEmailAdmin(email) {
       if (!email) return false;
-      return ADMIN_EMAILS.includes(email.toLowerCase());
+      const adminEmails = [
+        'gfigueroa.w@gmail.com',
+        'eugenfw@gmail.com', 
+        'admin@yamevi.com.mx',
+        'guillermo.figueroaw@totalplay.com.mx'
+      ];
+      const isAdmin = adminEmails.includes(email.toLowerCase());
+      console.log(`🔍 Verificando admin: ${email} -> ${isAdmin}`);
+      return isAdmin;
+    }
+    
+    // === CREAR DOCUMENTO ADMIN SI NO EXISTE ===
+    async function ensureAdminDocument(user) {
+      if (!db || !user) return false;
+      
+      try {
+        const { doc, setDoc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+        
+        console.log(`🔧 Verificando documento admin para: ${user.email}`);
+        
+        // Verificar si ya existe el documento
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        
+        if (!userDoc.exists() || !userDoc.data().isAdmin) {
+          console.log('📝 Creando/actualizando documento admin...');
+          
+          await setDoc(doc(db, 'users', user.uid), {
+            email: user.email,
+            displayName: user.displayName || user.email.split('@')[0],
+            isAdmin: true,
+            adminLevel: 'superadmin',
+            fechaRegistro: new Date().toISOString(),
+            ultimoAcceso: new Date().toISOString(),
+            createdBy: 'admin-panel'
+          }, { merge: true });
+          
+          console.log('✅ Documento admin creado/actualizado');
+          return true;
+        }
+        
+        console.log('✅ Documento admin ya existe');
+        return true;
+        
+      } catch (error) {
+        console.error('❌ Error creando documento admin:', error);
+        return false;
+      }
     }
 
     // === INICIALIZACIÓN ===
@@ -366,9 +412,9 @@
           
           if (user) {
             currentUser = user;
-            console.log('👤 Usuario conectado:', user.email);
+            console.log('👤 Usuario conectado:', user.email, 'UID:', user.uid);
             
-            // Verificar si es admin
+            // Verificar si es admin por email
             isUserAdmin = isEmailAdmin(user.email);
             
             if (isUserAdmin) {
@@ -376,15 +422,21 @@
               statusElement.className = 'text-green-400 font-medium';
               updateIndicator('connection-indicator', 'online');
               
-              console.log('👑 Acceso de admin confirmado, cargando datos...');
+              console.log('👑 Acceso de admin confirmado por email');
+              
+              // Crear documento admin si no existe
+              console.log('🔧 Asegurando documento admin...');
+              await ensureAdminDocument(user);
               
               // Cargar datos con manejo de errores robusto
               try {
+                console.log('📊 Iniciando carga de datos...');
                 await loadAdminData();
+                console.log('🔄 Iniciando auto-refresh...');
                 startAutoRefresh();
               } catch (loadError) {
                 console.error('❌ Error cargando datos iniciales:', loadError);
-                showError('Panel cargado con errores - Verificar permisos Firestore');
+                showError('Panel cargado - Algunos datos pueden tener restricciones');
                 
                 // Aún así iniciar auto-refresh para intentos posteriores
                 startAutoRefresh();
@@ -475,30 +527,52 @@
         return;
       }
       
+      console.log('📊 === INICIANDO CARGA DE USUARIOS ===');
+      console.log('� Usuario actual:', currentUser?.email, 'UID:', currentUser?.uid);
+      
       try {
-        console.log('📊 Cargando usuarios...');
         const { collection, getDocs, query, orderBy, limit } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
         
-        // Intentar múltiples campos de ordenamiento
+        console.log('📦 Módulos de Firestore importados correctamente');
+        
+        // Intentar acceso directo primero
+        console.log('🎯 Intentando acceso directo a colección users...');
         let snapshot;
+        
         try {
-          // Intentar ordenar por fechaRegistro
-          const usersQuery = query(collection(db, 'users'), orderBy('fechaRegistro', 'desc'), limit(50));
-          snapshot = await getDocs(usersQuery);
-        } catch (orderError) {
-          console.warn('⚠️ No se pudo ordenar por fechaRegistro, intentando otro campo...');
+          // Intentar obtener todos los usuarios sin ordenamiento primero
+          console.log('🔍 Paso 1: Acceso básico a users...');
+          snapshot = await getDocs(collection(db, 'users'));
+          console.log(`✅ Acceso básico exitoso: ${snapshot.size} documentos`);
+        } catch (basicError) {
+          console.error('❌ Error en acceso básico:', basicError.code, basicError.message);
+          throw basicError;
+        }
+        
+        // Si el acceso básico funciona, intentar con ordenamiento
+        if (snapshot.size > 0) {
+          console.log('🔍 Paso 2: Intentando con ordenamiento...');
           try {
-            // Intentar ordenar por ultimoAcceso
-            const usersQuery = query(collection(db, 'users'), orderBy('ultimoAcceso', 'desc'), limit(50));
+            const usersQuery = query(collection(db, 'users'), orderBy('fechaRegistro', 'desc'), limit(50));
             snapshot = await getDocs(usersQuery);
-          } catch (orderError2) {
-            console.warn('⚠️ No se pudo ordenar, obteniendo todos los usuarios...');
-            // Sin ordenamiento, solo obtener usuarios
-            snapshot = await getDocs(collection(db, 'users'));
+            console.log(`✅ Ordenamiento por fechaRegistro exitoso: ${snapshot.size} documentos`);
+          } catch (orderError) {
+            console.warn('⚠️ Error ordenando por fechaRegistro:', orderError.message);
+            try {
+              const usersQuery = query(collection(db, 'users'), orderBy('ultimoAcceso', 'desc'), limit(50));
+              snapshot = await getDocs(usersQuery);
+              console.log(`✅ Ordenamiento por ultimoAcceso exitoso: ${snapshot.size} documentos`);
+            } catch (orderError2) {
+              console.warn('⚠️ Error ordenando por ultimoAcceso:', orderError2.message);
+              // Usar snapshot básico sin ordenamiento
+              console.log('📝 Usando snapshot básico sin ordenamiento');
+            }
           }
         }
         
         const userCount = snapshot.size;
+        console.log(`📊 Total usuarios obtenidos: ${userCount}`);
+        
         document.getElementById('total-users').textContent = userCount;
         document.getElementById('users-count').textContent = userCount;
         
@@ -512,14 +586,18 @@
         }
         
         let rowsAdded = 0;
+        console.log('🔄 Procesando documentos de usuarios...');
+        
         snapshot.forEach((doc) => {
           try {
             const data = doc.data();
+            console.log(`👤 Procesando usuario: ${data.email || 'Sin email'} (${doc.id})`);
+            
             const row = document.createElement('tr');
             row.className = 'border-b border-gray-700 hover:bg-gray-800';
             
             const email = data.email || 'Sin email';
-            const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase()) ? 
+            const isAdmin = isEmailAdmin(email) ? 
               ' <span class="ml-2 px-2 py-1 bg-yellow-600 text-xs rounded">ADMIN</span>' : '';
             
             row.innerHTML = `
@@ -548,16 +626,24 @@
           }
         });
         
-        console.log(`✅ ${rowsAdded} usuarios cargados de ${userCount} totales`);
+        console.log(`✅ USUARIOS CARGADOS: ${rowsAdded} de ${userCount} procesados correctamente`);
         
       } catch (error) {
-        console.error('❌ Error cargando usuarios:', error.code, error.message);
+        console.error('❌ === ERROR CARGANDO USUARIOS ===');
+        console.error('🔴 Código:', error.code);
+        console.error('🔴 Mensaje:', error.message);
+        console.error('🔴 Stack:', error.stack);
         
         // Mostrar error específico según el tipo
         let errorMessage = 'Error cargando usuarios';
         if (error.code === 'permission-denied') {
-          errorMessage = 'Sin permisos para leer usuarios';
-          console.warn('⚠️ Permisos insuficientes para la colección users');
+          errorMessage = 'Sin permisos para leer usuarios - Verificar reglas Firestore';
+          console.error('🚫 PERMISOS DENEGADOS - Posibles causas:');
+          console.error('   1. Reglas de Firestore restrictivas');
+          console.error('   2. Token de autenticación inválido');
+          console.error('   3. Usuario no tiene flag isAdmin en Firestore');
+        } else if (error.code === 'failed-precondition') {
+          errorMessage = 'Error de índice - Verificar configuración Firestore';
         }
         
         document.getElementById('total-users').textContent = 'Error';
