@@ -738,36 +738,36 @@
     let csvHashActual = null;
     let csvHashCalculado = false;
     
-    // Función para generar ID único robusto del usuario (máxima diferenciación)
+    // Función para generar ID único robusto del usuario (máxima diferenciación pero ESTABLE)
     function generarIDUsuarioUnico() {
       try {
-        console.log('🔐 Generando ID único robusto para máxima diferenciación...');
+        console.log('🔐 Generando ID único robusto ESTABLE para máxima diferenciación...');
         
         let factoresUnicos = [];
         
-        // Factor 1: ID de Firebase (principal)
+        // Factor 1: ID de Firebase (principal) - ESTABLE
         if (window.usuarioActualID && window.usuarioActualID.trim()) {
           factoresUnicos.push(window.usuarioActualID.trim());
         }
         
-        // Factor 2: Email completo (diferenciación adicional)
+        // Factor 2: Email completo (diferenciación adicional) - ESTABLE
         if (window.usuarioActualEmail && window.usuarioActualEmail.trim()) {
           factoresUnicos.push(window.usuarioActualEmail.trim());
         }
         
-        // Factor 3: Nombre completo (más diferenciación)
+        // Factor 3: Nombre completo (más diferenciación) - ESTABLE
         if (window.usuarioActualNombre && window.usuarioActualNombre.trim()) {
           factoresUnicos.push(window.usuarioActualNombre.trim());
         }
         
-        // Factor 4: Hora de creación de cuenta o timestamp único
+        // Factor 4: Hora de creación de cuenta o timestamp único - ESTABLE
         if (window.usuarioActualID) {
           // Los IDs de Firebase incluyen timestamp, extraer componentes únicos
           const idParts = window.usuarioActualID.split('').slice(0, 20); // Primeros 20 caracteres
           factoresUnicos.push(idParts.join(''));
         }
         
-        // Factor 5: Fingerprint del navegador (para usuarios anónimos)
+        // Factor 5: Fingerprint del navegador (para usuarios anónimos) - ESTABLE
         const navigatorFingerprint = [
           navigator.userAgent,
           navigator.language,
@@ -777,7 +777,7 @@
         ].join('|');
         factoresUnicos.push(navigatorFingerprint);
         
-        // Factor 6: Información adicional del dispositivo/navegador
+        // Factor 6: Información adicional del dispositivo/navegador - ESTABLE
         try {
           const deviceInfo = [
             navigator.hardwareConcurrency || 'unknown',
@@ -792,22 +792,41 @@
           factoresUnicos.push('device_unknown');
         }
         
-        // Factor 7: Timestamp de sesión única + micro-timestamp para máxima unicidad
-        const sessionId = Date.now().toString() + Math.random().toString(36) + performance.now();
-        factoresUnicos.push(sessionId);
+        // Factor 7: Identificador de sesión PERSISTENTE (solo se genera una vez por usuario)
+        let sessionIdPersistente = '';
+        try {
+          // Intentar recuperar sessionId persistente del localStorage
+          const keySessionId = `yaViSessionId_${window.usuarioActualID || 'anon'}`;
+          sessionIdPersistente = localStorage.getItem(keySessionId);
+          
+          if (!sessionIdPersistente) {
+            // Generar nuevo sessionId solo si no existe
+            sessionIdPersistente = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem(keySessionId, sessionIdPersistente);
+            console.log('🆕 Nuevo sessionId persistente generado');
+          } else {
+            console.log('🔄 SessionId persistente recuperado del localStorage');
+          }
+        } catch (e) {
+          // Fallback si localStorage no está disponible
+          sessionIdPersistente = 'session_fallback_' + (window.usuarioActualID || 'anon');
+          console.warn('⚠️ Usando sessionId de fallback');
+        }
         
-        // Combinar todos los factores
-        const combinacionFactores = factoresUnicos.join('|||') + '|||' + sessionId;
+        factoresUnicos.push(sessionIdPersistente);
+        
+        // Combinar todos los factores ESTABLES
+        const combinacionFactores = factoresUnicos.join('|||STABLE|||');
         
         // Generar hash robusto y extraer componentes únicos
         const hashPrincipal = generarHashSimple(combinacionFactores);
         const hashSecundario = generarHashSimple(combinacionFactores.split('').reverse().join(''));
-        const hashTerciario = generarHashSimple(factoresUnicos.join('***'));
+        const hashTerciario = generarHashSimple(factoresUnicos.join('***FINAL***'));
         
-        // Crear ID final súper único
+        // Crear ID final súper único pero ESTABLE
         const idUnico = `${hashPrincipal}_${hashSecundario}_${hashTerciario}`;
         
-        console.log(`✅ ID único generado: ${idUnico.substring(0, 16)}... (truncado para log)`);
+        console.log(`✅ ID único ESTABLE generado: ${idUnico.substring(0, 16)}... (truncado para log)`);
         console.log(`🎯 Factores únicos utilizados: ${factoresUnicos.length}`);
         
         return idUnico;
@@ -815,9 +834,9 @@
       } catch (error) {
         console.error('❌ Error generando ID único:', error);
         
-        // Fallback robusto
-        const fallbackId = 'fallback_' + Date.now() + '_' + Math.random().toString(36);
-        console.log(`⚠️ Usando ID de fallback: ${fallbackId}`);
+        // Fallback robusto ESTABLE
+        const fallbackId = 'fallback_' + (window.usuarioActualID || 'anon') + '_stable';
+        console.log(`⚠️ Usando ID de fallback ESTABLE: ${fallbackId}`);
         return fallbackId;
       }
     }
@@ -1422,9 +1441,12 @@
         // Calcular hash CSV
         await calcularHashCSV();
         
-        // Obtener usuario actual
-        let usuarioId = window.usuarioActualID || 'usuario-anonimo';
+        // USAR ID ÚNICO ESTABLE (mismo que usa ejecutarPrediccionesIA)
+        let usuarioId = generarIDUsuarioUnico();
         const claveUsuarioHash = `${usuarioId}_${csvHashActual}`;
+        
+        console.log(`🔍 Buscando predicciones con clave: ${claveUsuarioHash.substring(0, 30)}...`);
+        console.log(`📊 Claves disponibles en localStorage: ${Object.keys(prediccionesPorUsuarioYHash).length}`);
         
         // Si hay predicciones persistentes, mostrarlas inmediatamente
         if (prediccionesPorUsuarioYHash[claveUsuarioHash]) {
@@ -1434,25 +1456,38 @@
           const revanchitaElement = document.getElementById('combinacion-revanchita');
           const mensajeEstado = document.getElementById('mensaje-estado');
           
+          console.log('🎯 PREDICCIONES ENCONTRADAS:');
+          console.log('- Melate:', predicciones.melate);
+          console.log('- Revancha:', predicciones.revancha);
+          console.log('- Revanchita:', predicciones.revanchita);
+          
+          // Mostrar predicciones solo si los elementos están vacíos
           if (melateElement && melateElement.textContent === '-- -- -- -- -- --') {
             melateElement.textContent = predicciones.melate;
+            console.log('✅ Melate actualizado');
           }
           if (revanchaElement && revanchaElement.textContent === '-- -- -- -- -- --') {
             revanchaElement.textContent = predicciones.revancha;
+            console.log('✅ Revancha actualizado');
           }
           if (revanchitaElement && revanchitaElement.textContent === '-- -- -- -- -- --') {
             revanchitaElement.textContent = predicciones.revanchita;
+            console.log('✅ Revanchita actualizado');
           }
           if (mensajeEstado) {
             mensajeEstado.textContent = 'Predicciones persistentes cargadas instantáneamente';
           }
           
           console.log('⚡ Predicciones persistentes cargadas inmediatamente desde localStorage');
+          return true; // Indicar que se cargaron predicciones
         } else {
-          console.log('ℹ️ No hay predicciones persistentes disponibles para este usuario+hash');
+          console.log('❌ No se encontraron predicciones persistentes para esta clave');
+          console.log('🔑 Clave buscada:', claveUsuarioHash.substring(0, 50) + '...');
+          return false; // Indicar que no se encontraron predicciones
         }
       } catch (error) {
         console.warn('⚠️ Error en carga inmediata de predicciones:', error);
+        return false;
       }
     }
 
@@ -1541,6 +1576,35 @@
         cargarPrediccionesPersistentesInmediato();
       }, 100);
     }
+    
+    // EVENTO ESPECIAL: Verificar y restaurar predicciones cada 2 segundos
+    let verificacionInterval = setInterval(() => {
+      const melateElement = document.getElementById('combinacion-melate');
+      const revanchaElement = document.getElementById('combinacion-revancha');
+      const revanchitaElement = document.getElementById('combinacion-revanchita');
+      
+      // Si los elementos existen pero están vacíos, intentar cargar predicciones
+      if (melateElement && revanchaElement && revanchitaElement) {
+        const melateVacio = melateElement.textContent === '-- -- -- -- -- --';
+        const revanchaVacio = revanchaElement.textContent === '-- -- -- -- -- --';
+        const revanchitaVacio = revanchitaElement.textContent === '-- -- -- -- -- --';
+        
+        if (melateVacio && revanchaVacio && revanchitaVacio) {
+          console.log('🔄 Detectados elementos vacíos, intentando cargar predicciones persistentes...');
+          cargarPrediccionesPersistentesInmediato();
+        } else if (!melateVacio && !revanchaVacio && !revanchitaVacio) {
+          // Si ya hay predicciones cargadas, detener la verificación
+          console.log('✅ Predicciones ya cargadas, deteniendo verificación automática');
+          clearInterval(verificacionInterval);
+        }
+      }
+    }, 2000); // Verificar cada 2 segundos
+    
+    // Detener verificación después de 30 segundos para no consumir recursos infinitamente
+    setTimeout(() => {
+      clearInterval(verificacionInterval);
+      console.log('⏰ Verificación automática finalizada después de 30 segundos');
+    }, 30000);
   </script>
 </body>
 </html>
