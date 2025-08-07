@@ -135,21 +135,6 @@
       <!-- Formulario -->
       <form id="dream-form" method="post" action="javascript:void(0);" class="space-y-6">
         
-        <!-- Nombre -->
-        <div>
-          <label for="nombre" class="block text-white text-sm font-semibold mb-2">
-            ✨ ¿Cómo te gusta que te llamen?
-          </label>
-          <input 
-            type="text" 
-            id="nombre" 
-            name="nombre" 
-            class="input-field w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none"
-            placeholder="Tu nombre o apodo favorito"
-            required
-          >
-        </div>
-
         <!-- Selección de sueño -->
         <div>
           <label class="block text-white text-sm font-semibold mb-4">
@@ -237,7 +222,7 @@
           type="submit" 
           class="btn-primary w-full text-white font-bold py-4 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
         >
-          🚀 ¡Comenzar mi aventura!
+          🚀 ¡Comenzar Aventura!
         </button>
 
       </form>
@@ -352,10 +337,9 @@
           try {
             // Obtener datos del formulario
             const formData = new FormData(e.target);
-            const nombre = formData.get('nombre')?.trim() || '';
             const sueno = formData.get('sueno') || '';
 
-            console.log('📝 [DREAM] Datos del formulario:', { nombre, sueno });
+            console.log('📝 [DREAM] Datos del formulario:', { sueno });
 
             // Validar que se haya seleccionado un sueño
             if (!sueno) {
@@ -366,18 +350,10 @@
               return;
             }
 
-            // Actualizar perfil de Firebase Auth
-            if (nombre) {
-              await updateProfile(currentUser, {
-                displayName: nombre
-              });
-              console.log('✅ [DREAM] Perfil de Auth actualizado');
-            }
-
             // Guardar datos adicionales en Firestore
             const userData = {
               email: currentUser.email,
-              displayName: nombre,
+              displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Usuario',
               sueno: sueno,
               registroCompletado: true,
               fechaRegistro: new Date().toISOString(),
@@ -389,7 +365,7 @@
 
             // Guardar sueño en localStorage para uso inmediato
             localStorage.setItem('user_dream', sueno);
-            localStorage.setItem('user_name', nombre);
+            localStorage.setItem('user_name', userData.displayName);
 
             // Limpiar localStorage de registro
             localStorage.removeItem('registration_in_progress');
@@ -401,9 +377,8 @@
 
             console.log('✅ [DREAM] Registro completado, redirigiendo a home.html');
             
-            // Mensaje de éxito y redirección
+            // Redirección a home.html
             setTimeout(() => {
-              alert(`¡Perfecto! Ahora te ayudaremos a ${sueno} 🎉`);
               window.location.href = 'home.html';
             }, 1000);
 
@@ -451,17 +426,6 @@
       } else {
         console.error('❌ [DREAM] No se encontró el botón skip-btn');
       }
-
-      // Auto-completar nombre si está disponible
-      setTimeout(() => {
-        if (currentUser && currentUser.displayName) {
-          const nombreInput = document.getElementById('nombre');
-          if (nombreInput) {
-            nombreInput.value = currentUser.displayName;
-            console.log('✅ [DREAM] Nombre auto-completado:', currentUser.displayName);
-          }
-        }
-      }, 1000);
 
       // === DEBUG: Verificar estado inicial ===
       console.log('🎯 [DREAM] dream-input.html cargado');
