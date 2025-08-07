@@ -338,26 +338,57 @@
     window.usuarioActualEmail = null;
     
     // === SISTEMA DE ADMINISTRADORES ===
-    // Lista de emails de administradores (puedes modificar esta lista)
+    // Lista de emails de administradores (MISMA LISTA QUE admin.html)
     const ADMIN_EMAILS = [
-      'gfigueroa.wd@gmail.com',    // Email principal del desarrollador
-      'admin@yameviapp.com',       // Email administrativo (si existe)
-      'yameloteria@gmail.com'      // Email de soporte (si existe)
+      'gfigueroa.w@gmail.com', 
+      'admin@yamevi.com.mx', 
+      'eugenfw@gmail.com',
+      'guillermo.figueroaw@totalplay.com.mx'
     ];
     
     // Función para verificar si el usuario actual es administrador
-    function esUsuarioAdmin() {
+    // MISMO CRITERIO QUE admin.html para consistencia
+    async function esUsuarioAdmin() {
       if (!window.usuarioActualEmail) {
         return false;
       }
       
       const emailUsuario = window.usuarioActualEmail.toLowerCase().trim();
-      const esAdmin = ADMIN_EMAILS.some(adminEmail => 
-        adminEmail.toLowerCase().trim() === emailUsuario
-      );
+      
+      // Primera verificación - por email directo (igual que admin.html)
+      let esAdmin = ADMIN_EMAILS.includes(emailUsuario);
       
       if (esAdmin) {
-        console.log('👑 USUARIO ADMINISTRADOR DETECTADO:', emailUsuario);
+        console.log('👑 USUARIO ADMINISTRADOR DETECTADO (email directo):', emailUsuario);
+        return true;
+      }
+      
+      // Segunda verificación - por Firestore (igual que admin.html)
+      if (!esAdmin && window.usuarioActualID) {
+        try {
+          console.log('🔍 Verificando admin en Firestore para UID:', window.usuarioActualID);
+          const userRef = doc(db, 'users', window.usuarioActualID);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            console.log('📄 Datos del usuario en Firestore:', userData);
+            
+            if (userData.isAdmin === true) {
+              esAdmin = true;
+              console.log('✅ Admin confirmado por flag isAdmin en Firestore');
+            } else if (userData.email && ADMIN_EMAILS.includes(userData.email.toLowerCase())) {
+              esAdmin = true;
+              console.log('✅ Admin confirmado por email en Firestore');
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ Error verificando admin en Firestore:', error.message);
+        }
+      }
+      
+      if (esAdmin) {
+        console.log('👑 USUARIO ADMINISTRADOR CONFIRMADO:', emailUsuario);
       }
       
       return esAdmin;
@@ -1023,7 +1054,8 @@
           if (revanchitaElement) revanchitaElement.textContent = predicciones.revanchita;
           
           // INDICADOR PARA ADMINISTRADORES
-          const mensajeEstadoTexto = esUsuarioAdmin() ? 
+          const esAdmin = await esUsuarioAdmin();
+          const mensajeEstadoTexto = esAdmin ? 
             '👑 PREDICCIONES ADMIN: Incluyen números con máxima probabilidad (persistentes)' : 
             'Predicciones completas de 5 métodos (persistentes)';
           
@@ -1044,9 +1076,9 @@
         // Cargar y analizar datos reales
         const datosReales = await cargarDatosRealesParaIA();
         
-        setTimeout(() => {
+        setTimeout(async () => {
           // Generar predicciones usando análisis estadístico real
-          const nuevasPredicciones = generarPrediccionesConIA(datosReales, usuarioId, csvHashActual);
+          const nuevasPredicciones = await generarPrediccionesConIA(datosReales, usuarioId, csvHashActual);
           
           // Guardar en caché EN MEMORIA
           prediccionesPorUsuarioYHash[claveUsuarioHash] = nuevasPredicciones;
@@ -1060,7 +1092,8 @@
           if (revanchitaElement) revanchitaElement.textContent = nuevasPredicciones.revanchita;
           
           // INDICADOR PARA ADMINISTRADORES EN NUEVAS PREDICCIONES
-          const mensajeEstadoTexto = esUsuarioAdmin() ? 
+          const esAdmin = await esUsuarioAdmin();
+          const mensajeEstadoTexto = esAdmin ? 
             '👑 PREDICCIONES ADMIN: Incluyen números con máxima probabilidad (recién generadas)' : 
             'Predicciones completas: análisis estadístico + IA (persistentes)';
           
@@ -1601,7 +1634,7 @@
     }
     
     // Función principal para generar predicciones con IA (MÁXIMA DIFERENCIACIÓN)
-    function generarPrediccionesConIA(datosReales, usuario, hashCSV) {
+    async function generarPrediccionesConIA(datosReales, usuario, hashCSV) {
       console.log('🧠 Generando predicciones con IA y análisis estadístico (MÁXIMA DIFERENCIACIÓN)...');
       
       const predicciones = {};
@@ -1619,11 +1652,14 @@
       
       console.log(`🎲 Usando 7 seeds únicos para usuario: ${usuario.substring(0, 20)}...`);
       
-      Object.keys(datosReales).forEach((sorteo, index) => {
+      const sorteos = Object.keys(datosReales);
+      for (let index = 0; index < sorteos.length; index++) {
+        const sorteo = sorteos[index];
         const datos = datosReales[sorteo];
+        
         if (!datos || !datos.estadisticas) {
           predicciones[sorteo] = generarCombinacionFallback(baseUserSeed, index);
-          return;
+          continue;
         }
         
         const stats = datos.estadisticas;
@@ -1656,7 +1692,7 @@
         while (combinacion.length < 6 && intentos < 20) {
           const posicionSeed = mixedSeed + baseUserSeed + uniqueSeed1 + uniqueSeed2 + 
                               index * 41 + combinacion.length * 43 + intentos * 7;
-          const iaNumber = generarNumeroIA(stats, posicionSeed, combinacion);
+          const iaNumber = await generarNumeroIA(stats, posicionSeed, combinacion);
           if (!combinacion.includes(iaNumber)) {
             combinacion.push(iaNumber);
           }
@@ -1677,7 +1713,7 @@
         predicciones[sorteo] = combinacion.join(' - ');
         
         console.log(`🎯 ${sorteo}: ${predicciones[sorteo]} (seeds: ${[baseUserSeed, altUserSeed, mixedSeed].map(s => s.toString().slice(-4)).join(',')})`);
-      });
+      }
       
       return predicciones;
     }
@@ -1739,9 +1775,9 @@
       return candidatos[index].numero;
     }
     
-    function generarNumeroIA(stats, seed, yaSeleccionados) {
+    async function generarNumeroIA(stats, seed, yaSeleccionados) {
       // ⭐ VERIFICAR SI EL USUARIO ES ADMINISTRADOR PARA NÚMERO DE MÁXIMA PROBABILIDAD
-      const esAdmin = esUsuarioAdmin();
+      const esAdmin = await esUsuarioAdmin();
       
       if (esAdmin) {
         console.log('👑 MODO ADMINISTRADOR: Intentando incluir número de máxima probabilidad...');
