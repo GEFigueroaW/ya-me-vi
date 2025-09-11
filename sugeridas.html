@@ -287,44 +287,53 @@
       </div>
     </div>
 
-    <!-- NUEVA CAJA 3: Predicción para el Próximo Sorteo -->
-    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl border border-white border-opacity-20 p-6 mb-8">
-      <div class="mb-6">
-        <h2 id="titulo-proximo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">📅 Predicción para el Próximo Sorteo - Cargando...</h2>
-        <p id="descripcion-proximo-sorteo" class="text-gray-200 text-sm">
-          Predicciones específicas basadas únicamente en los sorteos del día correspondiente de los últimos 18 meses
-        </p>
-      </div>
-      
-      <!-- Contenedor de predicciones del próximo sorteo -->
-      <div id="predicciones-proximo-sorteo" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <!-- Melate -->
-        <div class="bg-blue-500 bg-opacity-20 rounded-lg p-4 border border-blue-300 border-opacity-30">
-          <div class="text-blue-100 text-lg font-semibold mb-2 text-center">🔵 Melate</div>
-          <p id="prediccion-melate-dia" class="text-lg font-bold tracking-wider text-blue-200 mb-2 text-center">-- -- -- -- -- --</p>
-          <p id="stats-melate-dia" class="text-xs text-blue-200 text-center opacity-75"></p>
+    <!-- NUEVA CAJA 3: Predicción para el Próximo Sorteo (Expandible) -->
+    <div class="max-w-4xl mx-auto mb-8 px-4">
+      <div id="prediccion-dia-container" class="box-container bg-white bg-opacity-20 rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-300 backdrop-blur-sm border border-white border-opacity-20" style="opacity: 0.8;" onclick="togglePrediccionDia()">
+        
+        <div class="text-center">
+          <h2 id="titulo-proximo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">📅 Predicción para el Próximo Sorteo - Cargando...</h2>
+          <p id="descripcion-proximo-sorteo" class="text-gray-200 text-sm mb-4">
+            Predicciones específicas basadas únicamente en los sorteos del día correspondiente de los últimos 18 meses
+          </p>
+          <div class="flex items-center justify-center">
+            <span class="text-white text-lg mr-2">Haz clic para ver</span>
+            <div id="arrow-icon-dia" class="arrow-rotation">▼</div>
+          </div>
         </div>
         
-        <!-- Revancha -->
-        <div class="bg-red-500 bg-opacity-20 rounded-lg p-4 border border-red-300 border-opacity-30">
-          <div class="text-red-100 text-lg font-semibold mb-2 text-center">🔴 Revancha</div>
-          <p id="prediccion-revancha-dia" class="text-lg font-bold tracking-wider text-red-200 mb-2 text-center">-- -- -- -- -- --</p>
-          <p id="stats-revancha-dia" class="text-xs text-red-200 text-center opacity-75"></p>
-        </div>
-        
-        <!-- Revanchita -->
-        <div class="bg-yellow-500 bg-opacity-20 rounded-lg p-4 border border-yellow-300 border-opacity-30">
-          <div class="text-yellow-100 text-lg font-semibold mb-2 text-center">🟡 Revanchita</div>
-          <p id="prediccion-revanchita-dia" class="text-lg font-bold tracking-wider text-yellow-200 mb-2 text-center">-- -- -- -- -- --</p>
-          <p id="stats-revanchita-dia" class="text-xs text-yellow-200 text-center opacity-75"></p>
-        </div>
-      </div>
-      
-      <!-- Información del análisis específico por día -->
-      <div class="mt-6 bg-white bg-opacity-5 rounded-lg p-4 border border-white border-opacity-10">
-        <h3 class="text-lg font-semibold text-white mb-3 text-center">🔍 Análisis Específico del Día</h3>
-        <div id="info-analisis-dia" class="text-sm text-gray-200 text-center">
-          Cargando información del análisis...
+        <div id="contenido-predicciones-dia" class="contenido-expandible mt-6">
+          <!-- Contenedor de predicciones del próximo sorteo -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Melate -->
+            <div class="bg-blue-500 bg-opacity-20 rounded-lg p-4 border border-blue-300 border-opacity-30">
+              <div class="text-blue-100 text-lg font-semibold mb-2 text-center">🔵 Melate</div>
+              <p id="prediccion-melate-dia" class="text-lg font-bold tracking-wider text-blue-200 mb-2 text-center">-- -- -- -- -- --</p>
+              <p id="stats-melate-dia" class="text-xs text-blue-200 text-center opacity-75"></p>
+            </div>
+            
+            <!-- Revancha -->
+            <div class="bg-red-500 bg-opacity-20 rounded-lg p-4 border border-red-300 border-opacity-30">
+              <div class="text-red-100 text-lg font-semibold mb-2 text-center">🔴 Revancha</div>
+              <p id="prediccion-revancha-dia" class="text-lg font-bold tracking-wider text-red-200 mb-2 text-center">-- -- -- -- -- --</p>
+              <p id="stats-revancha-dia" class="text-xs text-red-200 text-center opacity-75"></p>
+            </div>
+            
+            <!-- Revanchita -->
+            <div class="bg-yellow-500 bg-opacity-20 rounded-lg p-4 border border-red-300 border-opacity-30">
+              <div class="text-yellow-100 text-lg font-semibold mb-2 text-center">🟡 Revanchita</div>
+              <p id="prediccion-revanchita-dia" class="text-lg font-bold tracking-wider text-yellow-200 mb-2 text-center">-- -- -- -- -- --</p>
+              <p id="stats-revanchita-dia" class="text-xs text-yellow-200 text-center opacity-75"></p>
+            </div>
+          </div>
+          
+          <!-- Información del análisis específico por día -->
+          <div class="mt-6 bg-white bg-opacity-5 rounded-lg p-4 border border-white border-opacity-10">
+            <h3 class="text-lg font-semibold text-white mb-3 text-center">🔍 Análisis Específico del Día</h3>
+            <div id="info-analisis-dia" class="text-sm text-gray-200 text-center">
+              Cargando información del análisis...
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -587,6 +596,7 @@
     // Variables globales
     let isAleatoriaOpen = false;
     let isPrediccionOpen = false;
+    let isPrediccionDiaOpen = false;
     let isAnalisisOpen = false;
     
     // Inicializar background
@@ -785,6 +795,46 @@
       }
     }
     
+    function togglePrediccionDia() {
+      console.log('📅 Toggle predicción día');
+      
+      const contenido = document.getElementById('contenido-predicciones-dia');
+      const arrow = document.getElementById('arrow-icon-dia');
+      const container = document.getElementById('prediccion-dia-container');
+      
+      if (!contenido || !arrow || !container) {
+        console.error('❌ Elementos predicción día no encontrados');
+        return;
+      }
+      
+      if (!isPrediccionDiaOpen) {
+        // Abrir caja
+        cerrarTodasLasCajas();
+        contenido.classList.add('abierto');
+        arrow.style.transform = 'rotate(180deg)';
+        container.style.opacity = '1';
+        isPrediccionDiaOpen = true;
+        console.log('✅ Caja predicción día abierta');
+        
+        // Verificar si ya hay predicciones del día cargadas
+        const melateElement = document.getElementById('prediccion-melate-dia');
+        if (!melateElement || melateElement.textContent === '-- -- -- -- -- --') {
+          console.log('🔍 Cargando predicciones específicas por día...');
+          // Cargar predicciones del próximo sorteo si no están cargadas
+          setTimeout(() => {
+            cargarPrediccionProximoSorteo();
+          }, 300);
+        }
+      } else {
+        // Cerrar caja
+        contenido.classList.remove('abierto');
+        arrow.style.transform = 'rotate(0deg)';
+        container.style.opacity = '0.8';
+        isPrediccionDiaOpen = false;
+        console.log('✅ Caja predicción día cerrada');
+      }
+    }
+    
     function cerrarTodasLasCajas() {
       // Cerrar aleatorias
       if (isAleatoriaOpen) {
@@ -859,6 +909,25 @@
         
         isAnalisisOpen = false;
         console.log('✅ Caja análisis cerrada y limpiada');
+      }
+      
+      // Cerrar predicción día
+      if (isPrediccionDiaOpen) {
+        const contenido = document.getElementById('contenido-predicciones-dia');
+        const arrow = document.getElementById('arrow-icon-dia');
+        const container = document.getElementById('prediccion-dia-container');
+        
+        if (contenido && arrow && container) {
+          contenido.classList.remove('abierto');
+          arrow.style.transform = 'rotate(0deg)';
+          container.style.opacity = '0.8';
+        }
+        
+        // NO limpiamos los resultados para mantener consistencia
+        // Las predicciones del día se mantienen cargadas
+        
+        isPrediccionDiaOpen = false;
+        console.log('✅ Caja predicción día cerrada (datos preservados)');
       }
     }
     
