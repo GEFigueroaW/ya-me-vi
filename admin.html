@@ -55,6 +55,16 @@
   </style>
 </head>
 <body class="text-white">
+  <div id="modal-bg" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-lg z-40 hidden flex items-center justify-center"></div>
+  <div id="modal-content" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="bg-gray-900 rounded-lg shadow-lg p-8 w-full max-w-md animate__animated animate__fadeIn">
+      <div id="modal-loader" class="flex items-center justify-center mb-4">
+        <svg class="animate-spin h-8 w-8 text-blue-400" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+      </div>
+      <div id="modal-message" class="text-center text-lg font-medium text-blue-200 mb-4">Procesando...</div>
+      <button onclick="closeModal()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg w-full">Cerrar</button>
+    </div>
+  </div>
   <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="flex justify-between items-center mb-8">
@@ -281,7 +291,7 @@
       apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
       authDomain: "ya-me-vi.firebaseapp.com",
       projectId: "ya-me-vi",
-      storageBucket: "ya-me-vi.firebasestorage.app",
+      storageBucket: "ya-me-vi.appspot.com",
       messagingSenderId: "748876890843",
       appId: "1:748876890843:web:070d1eb476d38594d002fe"
     };
@@ -841,28 +851,78 @@
       }
     }
 
-    function exportData() {
-      if (!isUserAdmin) {
-        alert('❌ Sin permisos de administrador');
-        return;
-      }
-      alert('🚧 Función de exportación en desarrollo');
+    // === MODAL DE ACCIONES ===
+    function showModal(message, showLoader = true) {
+      document.getElementById('modal-bg').style.display = 'flex';
+      document.getElementById('modal-content').style.display = 'flex';
+      document.getElementById('modal-message').textContent = message;
+      document.getElementById('modal-loader').style.display = showLoader ? 'flex' : 'none';
+    }
+    function closeModal() {
+      document.getElementById('modal-bg').style.display = 'none';
+      document.getElementById('modal-content').style.display = 'none';
     }
 
-    function viewLogs() {
+    async function exportData() {
       if (!isUserAdmin) {
-        alert('❌ Sin permisos de administrador');
+        showModal('❌ Sin permisos de administrador', false);
         return;
       }
-      alert('🚧 Visor de logs en desarrollo');
+      showModal('Exportando datos...', true);
+      try {
+        // Ejemplo: exportar usuarios a CSV
+        const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+        const snapshot = await getDocs(collection(db, 'users'));
+        let csv = 'email,nombre,fechaRegistro\n';
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          csv += `${d.email || ''},${d.displayName || ''},${d.fechaRegistro || ''}\n`;
+        });
+        // Descargar CSV
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'usuarios.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showModal('✅ Exportación completada', false);
+      } catch (error) {
+        showModal('❌ Error exportando datos', false);
+      }
     }
 
-    function manageDB() {
+    async function viewLogs() {
       if (!isUserAdmin) {
-        alert('❌ Sin permisos de administrador');
+        showModal('❌ Sin permisos de administrador', false);
         return;
       }
-      alert('🚧 Gestor de base de datos en desarrollo');
+      showModal('Cargando logs...', true);
+      try {
+        const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+        const snapshot = await getDocs(collection(db, 'notification_logs'));
+        let logs = '';
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          logs += `• ${d.createdAt || ''}: ${d.message || ''}\n`;
+        });
+        document.getElementById('modal-message').textContent = logs || 'No hay logs disponibles.';
+        document.getElementById('modal-loader').style.display = 'none';
+      } catch (error) {
+        showModal('❌ Error cargando logs', false);
+      }
+    }
+
+    async function manageDB() {
+      if (!isUserAdmin) {
+        showModal('❌ Sin permisos de administrador', false);
+        return;
+      }
+      showModal('Cargando gestor de DB...', true);
+      setTimeout(() => {
+        showModal('🚧 Gestor de base de datos en desarrollo', false);
+      }, 1500);
     }
 
     // === INICIALIZAR CUANDO EL DOM ESTÉ LISTO ===
