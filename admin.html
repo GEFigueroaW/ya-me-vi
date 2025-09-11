@@ -266,7 +266,7 @@
     <!-- Quick Actions -->
     <div class="admin-card p-6 rounded-lg">
       <h3 class="text-xl font-semibold mb-6">⚡ Acciones Rápidas</h3>
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
         <button onclick="refreshAllData()" class="bg-blue-600 hover:bg-blue-700 p-4 rounded-lg transition-colors text-center">
           <div class="text-2xl mb-2">🔄</div>
           <div class="font-medium">Actualizar</div>
@@ -290,6 +290,11 @@
         <button onclick="syncUserData()" class="bg-cyan-600 hover:bg-cyan-700 p-4 rounded-lg transition-colors text-center">
           <div class="text-2xl mb-2">👥</div>
           <div class="font-medium">Sync Usuarios</div>
+        </button>
+        
+        <button onclick="loadUsersFixed()" class="bg-purple-600 hover:bg-purple-700 p-4 rounded-lg transition-colors text-center">
+          <div class="text-2xl mb-2">🔧</div>
+          <div class="font-medium">Fix Usuarios</div>
         </button>
       </div>
     </div>
@@ -1091,5 +1096,8 @@
   
   <!-- Solución completa para el problema de usuarios -->
   <script type="module" src="js/adminUsersCompleteSolution.js"></script>
+  
+  <!-- FIX DIRECTO PARA LOADUSERS -->
+  <script src="js/fix-loadUsers.js"></script>
 </body>
 </html>
