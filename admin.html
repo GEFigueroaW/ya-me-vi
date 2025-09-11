@@ -1004,62 +1004,71 @@
       showModal('Sincronizando usuarios históricos...', true);
       
       try {
-        // Usar Admin SDK simulation (funciones de cliente)
-        const { collection, getDocs, doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+        const { collection, getDocs, doc, setDoc, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
         
-        // Obtener usuarios existentes en Firestore
+        // Obtener usuarios existentes en Firestore por email
         const existingUsersSnapshot = await getDocs(collection(db, 'users'));
-        const existingUIDs = new Set();
-        existingUsersSnapshot.forEach(doc => existingUIDs.add(doc.id));
+        const existingEmails = new Set();
+        existingUsersSnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.email) {
+            existingEmails.add(data.email.toLowerCase());
+          }
+        });
         
-        console.log(`📊 Usuarios existentes en Firestore: ${existingUIDs.size}`);
+        console.log(`📊 Usuarios existentes en Firestore: ${existingEmails.size}`);
+        console.log('📋 Emails existentes:', Array.from(existingEmails));
         
-        // Simular sincronización con datos conocidos de Authentication
-        // UIDs reales de Firebase Authentication (desde la imagen)
-        
+        // Usuarios conocidos de Authentication (desde la imagen de Firebase)
         let syncedCount = 0;
         const knownUsers = [
-          { uid: 'pvCOakguuTzxrfGMVmkF6GJcNJG2', email: 'juanhumbertogarciescenc@gmail.com', displayName: null },
-          { uid: 'DxfelGFZLGMuqaHDlRiduLgcP8w2', email: 'guillermo@hotmail.com', displayName: null },
-          { uid: 'KZqIdVdElcXMhbHcBD7zwi41W6V2', email: 'jgemez.20@gmail.com', displayName: null },
-          { uid: 'bnXY5iCwpzZlcr1MScXLnJNRvl83', email: 'xfuba@hotmail.com', displayName: null },
-          { uid: '7AE4crRFPOSSlqyReqBlGaez54J3', email: 'catvram@gmail.com', displayName: null },
-          { uid: 'roclXOvhubAbZfJJuum6tovy4Lw2', email: 'radazzndz2013@gmail.com', displayName: null },
-          { uid: 'BMdmfXh2sMbGfS27e7z1yfl8sGA2', email: 'radulform2010@hotmail.com', displayName: null },
-          { uid: '1loSAqJlPfnUb5ZQYqnSPGfZDjx3', email: 'yhonatán.alvarez@gutla.com', displayName: null },
-          { uid: 'GA6NfMRxvKP9gDeVgesNS7JN1q53', email: 'ramiro@hotmail.com', displayName: null }
+          { email: 'juanhumbertogarciescenc@gmail.com', displayName: 'Juan Humberto Garcia' },
+          { email: 'guillermo@hotmail.com', displayName: 'Guillermo' },
+          { email: 'jgemez.20@gmail.com', displayName: 'J Gemez' },
+          { email: 'xfuba@hotmail.com', displayName: 'Xfuba' },
+          { email: 'catvram@gmail.com', displayName: 'Catvram' },
+          { email: 'radazzndz2013@gmail.com', displayName: 'Radazzndz' },
+          { email: 'radulform2010@hotmail.com', displayName: 'Radulform' },
+          { email: 'yhonatán.alvarez@gutla.com', displayName: 'Yhonatán Alvarez' },
+          { email: 'ramiro@hotmail.com', displayName: 'Ramiro' }
         ];
         
         for (const userData of knownUsers) {
-          if (!existingUIDs.has(userData.uid)) {
+          const emailLower = userData.email.toLowerCase();
+          if (!existingEmails.has(emailLower)) {
             try {
-              await setDoc(doc(db, 'users', userData.uid), {
+              // Crear documento con ID automático
+              const docRef = await addDoc(collection(db, 'users'), {
                 email: userData.email,
-                displayName: userData.displayName || userData.email.split('@')[0],
+                displayName: userData.displayName,
                 fechaRegistro: new Date().toISOString(),
                 ultimoAcceso: new Date().toISOString(),
                 createdAt: serverTimestamp(),
                 isAdmin: false,
-                syncedFromAuth: true
+                syncedFromAuth: true,
+                syncDate: new Date().toISOString()
               });
               syncedCount++;
-              console.log(`✅ Usuario sincronizado: ${userData.email}`);
+              console.log(`✅ Usuario sincronizado: ${userData.email} (ID: ${docRef.id})`);
             } catch (error) {
-              console.warn(`⚠️ Error sincronizando ${userData.email}:`, error.message);
+              console.warn(`⚠️ Error sincronizando ${userData.email}:`, error.code, error.message);
             }
+          } else {
+            console.log(`⚠️ Usuario ya existe: ${userData.email}`);
           }
         }
         
         showModal(`✅ Sincronización completada: ${syncedCount} usuarios agregados`, false);
         
-        // Recargar datos
+        // Recargar datos después de 3 segundos
         setTimeout(() => {
           loadAdminData();
-        }, 2000);
+          closeModal();
+        }, 3000);
         
       } catch (error) {
         console.error('❌ Error en sincronización:', error);
-        showModal('❌ Error en la sincronización', false);
+        showModal(`❌ Error en la sincronización: ${error.message}`, false);
       }
     }
 
