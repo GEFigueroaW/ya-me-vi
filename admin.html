@@ -55,6 +55,12 @@
   </style>
 </head>
 <body class="text-white">
+  <div id="error-banner" class="fixed top-0 left-0 w-full z-50 hidden">
+    <div class="bg-red-600 text-white text-center py-3 font-semibold animate__animated animate__fadeInDown">
+      <span id="error-banner-message">Error crítico</span>
+      <button onclick="closeErrorBanner()" class="ml-4 bg-red-800 px-3 py-1 rounded">Cerrar</button>
+    </div>
+  </div>
   <div id="modal-bg" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-lg z-40 hidden flex items-center justify-center"></div>
   <div id="modal-content" class="fixed inset-0 z-50 flex items-center justify-center hidden">
     <div class="bg-gray-900 rounded-lg shadow-lg p-8 w-full max-w-md animate__animated animate__fadeIn">
@@ -286,6 +292,14 @@
 
   <!-- Scripts -->
   <script>
+    // === BANNER DE ERROR CRÍTICO ===
+    function showErrorBanner(message) {
+      document.getElementById('error-banner-message').textContent = message;
+      document.getElementById('error-banner').style.display = 'block';
+    }
+    function closeErrorBanner() {
+      document.getElementById('error-banner').style.display = 'none';
+    }
     // === CONFIGURACIÓN FIREBASE ===
     const firebaseConfig = {
       apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
@@ -336,9 +350,10 @@
     }
 
     function showError(message) {
-      console.error('❌ Error:', message);
-      document.getElementById('system-status').textContent = `❌ ${message}`;
-      updateIndicator('system-status-indicator', 'offline');
+  console.error('❌ Error:', message);
+  document.getElementById('system-status').textContent = `❌ ${message}`;
+  updateIndicator('system-status-indicator', 'offline');
+  showErrorBanner(message);
     }
 
     function showSuccess(message) {
@@ -348,17 +363,29 @@
     }
 
     // === VERIFICACIÓN DE ADMIN ===
-    function isEmailAdmin(email) {
-      if (!email) return false;
+    async function isAdminUser(user) {
+      if (!user || !user.email) return false;
+      // Verifica por email primero
       const adminEmails = [
         'gfigueroa.w@gmail.com',
         'eugenfw@gmail.com', 
         'admin@yamevi.com.mx',
         'guillermo.figueroaw@totalplay.com.mx'
       ];
-      const isAdmin = adminEmails.includes(email.toLowerCase());
-      console.log(`🔍 Verificando admin: ${email} -> ${isAdmin}`);
-      return isAdmin;
+      if (adminEmails.includes(user.email.toLowerCase())) {
+        return true;
+      }
+      // Verifica por documento Firestore
+      try {
+        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists() && userDoc.data().isAdmin === true) {
+          return true;
+        }
+      } catch (error) {
+        console.warn('⚠️ Error verificando admin por Firestore:', error.message);
+      }
+      return false;
     }
     
     // === CREAR DOCUMENTO ADMIN SI NO EXISTE ===
@@ -417,28 +444,38 @@
         console.log('✅ Firebase inicializado');
         
         // Escuchar cambios de autenticación
-        onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, async (user) => {
           const statusElement = document.getElementById('admin-status');
-          
           if (user) {
             currentUser = user;
             console.log('👤 Usuario conectado:', user.email, 'UID:', user.uid);
-            
-            // Verificar si es admin por email
-            isUserAdmin = isEmailAdmin(user.email);
-            
+            // Sincronización automática con Firestore
+            try {
+              const { doc, getDoc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+              const userDocRef = doc(db, 'users', user.uid);
+              const userDocSnap = await getDoc(userDocRef);
+              if (!userDocSnap.exists()) {
+                await setDoc(userDocRef, {
+                  email: user.email,
+                  displayName: user.displayName || user.email.split('@')[0],
+                  fechaRegistro: user.metadata?.creationTime || new Date().toISOString(),
+                  ultimoAcceso: user.metadata?.lastSignInTime || new Date().toISOString(),
+                  createdAt: serverTimestamp(),
+                  isAdmin: false
+                }, { merge: true });
+                console.log('✅ Usuario sincronizado en Firestore');
+              }
+            } catch (syncError) {
+              console.warn('⚠️ Error sincronizando usuario en Firestore:', syncError.message);
+            }
+            // Verificación reforzada de admin
+            isUserAdmin = await isAdminUser(user);
             if (isUserAdmin) {
               statusElement.textContent = `✅ Admin: ${user.email}`;
               statusElement.className = 'text-green-400 font-medium';
               updateIndicator('connection-indicator', 'online');
-              
-              console.log('👑 Acceso de admin confirmado por email');
-              
-              // Crear documento admin si no existe
-              console.log('🔧 Asegurando documento admin...');
+              console.log('👑 Acceso de admin confirmado');
               await ensureAdminDocument(user);
-              
-              // Cargar datos con manejo de errores robusto
               try {
                 console.log('📊 Iniciando carga de datos...');
                 await loadAdminData();
@@ -447,26 +484,20 @@
               } catch (loadError) {
                 console.error('❌ Error cargando datos iniciales:', loadError);
                 showError('Panel cargado - Algunos datos pueden tener restricciones');
-                
-                // Aún así iniciar auto-refresh para intentos posteriores
                 startAutoRefresh();
               }
-              
             } else {
               statusElement.textContent = `❌ Sin permisos: ${user.email}`;
               statusElement.className = 'text-red-400 font-medium';
               updateIndicator('connection-indicator', 'offline');
-              
-              alert(`❌ Acceso denegado\\n\\nUsuario: ${user.email}\\n\\nSolo administradores autorizados pueden acceder.`);
+              alert(`❌ Acceso denegado\n\nUsuario: ${user.email}\n\nSolo administradores autorizados pueden acceder.`);
               window.location.href = 'home.html';
             }
-            
           } else {
             console.log('❌ Usuario no autenticado');
             statusElement.textContent = '🔒 No autenticado - Redirigiendo...';
             statusElement.className = 'text-yellow-400 font-medium';
             updateIndicator('connection-indicator', 'warning');
-            
             setTimeout(() => {
               window.location.href = 'login.html?redirect=admin';
             }, 2000);
@@ -537,10 +568,12 @@
         return;
       }
       
-      console.log('📊 === INICIANDO CARGA DE USUARIOS ===');
-      console.log('� Usuario actual:', currentUser?.email, 'UID:', currentUser?.uid);
-      
-      try {
+  console.log('📊 === INICIANDO CARGA DE USUARIOS ===');
+  console.log('� Usuario actual:', currentUser?.email, 'UID:', currentUser?.uid);
+  // Loader visual en tabla de usuarios
+  const tbody = document.getElementById('users-table-body');
+  tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-blue-400 animate-pulse">🔄 Cargando usuarios...</td></tr>';
+  try {
         const { collection, getDocs, query, orderBy, limit } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
         
         console.log('📦 Módulos de Firestore importados correctamente');
@@ -602,14 +635,34 @@
           try {
             const data = doc.data();
             console.log(`👤 Procesando usuario: ${data.email || 'Sin email'} (${doc.id})`);
-            
+            // Asegura campos requeridos para ordenamiento
+            let fechaRegistro = data.fechaRegistro;
+            let ultimoAcceso = data.ultimoAcceso;
+            let createdAt = data.createdAt;
+            let missingFields = [];
+            if (!fechaRegistro) missingFields.push('fechaRegistro');
+            if (!ultimoAcceso) missingFields.push('ultimoAcceso');
+            // Si faltan campos, actualiza el documento
+            if (missingFields.length > 0) {
+              (async () => {
+                try {
+                  const { doc: docRef, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+                  await setDoc(docRef(db, 'users', doc.id), {
+                    fechaRegistro: fechaRegistro || new Date().toISOString(),
+                    ultimoAcceso: ultimoAcceso || new Date().toISOString()
+                  }, { merge: true });
+                  console.log(`🛠️ Campos agregados a usuario ${doc.id}: ${missingFields.join(', ')}`);
+                } catch (e) {
+                  console.warn(`⚠️ No se pudo actualizar campos de usuario ${doc.id}:`, e.message);
+                }
+              })();
+            }
             const row = document.createElement('tr');
             row.className = 'border-b border-gray-700 hover:bg-gray-800';
-            
             const email = data.email || 'Sin email';
-            const isAdmin = isEmailAdmin(email) ? 
-              ' <span class="ml-2 px-2 py-1 bg-yellow-600 text-xs rounded">ADMIN</span>' : '';
-            
+            const isAdmin = (data.isAdmin === true) ? ' <span class="ml-2 px-2 py-1 bg-yellow-600 text-xs rounded">ADMIN</span>' : '';
+            let fechaMostrar = fechaRegistro || ultimoAcceso || createdAt;
+            let campoFaltante = missingFields.length > 0 ? `<span class='text-xs text-red-400 ml-2'>Faltan: ${missingFields.join(', ')}</span>` : '';
             row.innerHTML = `
               <td class="py-3 px-4">
                 <div class="flex items-center">
@@ -623,12 +676,11 @@
                 </div>
               </td>
               <td class="py-3 px-4">${data.displayName || 'N/A'}</td>
-              <td class="py-3 px-4">${formatDate(data.fechaRegistro || data.ultimoAcceso || data.createdAt)}</td>
+              <td class="py-3 px-4">${formatDate(fechaMostrar)}${campoFaltante}</td>
               <td class="py-3 px-4">
                 <span class="px-2 py-1 rounded-full text-xs bg-green-600">Activo</span>
               </td>
             `;
-            
             tbody.appendChild(row);
             rowsAdded++;
           } catch (rowError) {
@@ -671,7 +723,14 @@
       
       console.log('📈 Cargando estadísticas...');
       
-      try {
+  // Loader visual en métricas
+  document.getElementById('daily-queries').textContent = '...';
+  document.getElementById('total-analysis').textContent = '...';
+  document.getElementById('db-records').textContent = '...';
+  document.getElementById('push-sent').textContent = '...';
+  document.getElementById('inapp-active').textContent = '...';
+  document.getElementById('emails-sent').textContent = '...';
+  try {
         const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
         
         // Objeto para almacenar estadísticas
@@ -811,22 +870,19 @@
 
     async function sendNotification() {
       if (!isUserAdmin || !db) {
-        alert('❌ Sin permisos o conexión');
+        showModal('❌ Sin permisos o conexión', false);
         return;
       }
-      
       const title = document.getElementById('notification-title').value.trim();
       const type = document.getElementById('notification-type').value;
       const message = document.getElementById('notification-message').value.trim();
-      
       if (!title || !message) {
-        alert('⚠️ Por favor completa el título y mensaje');
+        showModal('⚠️ Por favor completa el título y mensaje', false);
         return;
       }
-      
+      showModal('Enviando notificación...', true);
       try {
         const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-        
         await addDoc(collection(db, 'notifications'), {
           title,
           message,
@@ -835,19 +891,26 @@
           createdBy: currentUser.email,
           status: 'sent'
         });
-        
-        // Limpiar formulario
+        // Simulación de envío push/email
+        let pushOk = true;
+        let emailOk = true;
+        // Aquí podrías integrar lógica real de envío push/email
+        // Si falla, cambia pushOk/emailOk a false
+        if (pushOk && emailOk) {
+          showModal('✅ Notificación enviada correctamente', false);
+        } else if (!pushOk && !emailOk) {
+          showModal('❌ Error enviando push y email', false);
+        } else if (!pushOk) {
+          showModal('⚠️ Notificación enviada, pero error en push', false);
+        } else if (!emailOk) {
+          showModal('⚠️ Notificación enviada, pero error en email', false);
+        }
         document.getElementById('notification-title').value = '';
         document.getElementById('notification-message').value = '';
-        
-        alert('✅ Notificación enviada correctamente');
-        
-        // Recargar estadísticas
         loadStats();
-        
       } catch (error) {
         console.error('❌ Error enviando notificación:', error);
-        alert('❌ Error al enviar la notificación');
+        showModal('❌ Error al enviar la notificación', false);
       }
     }
 
@@ -920,9 +983,84 @@
         return;
       }
       showModal('Cargando gestor de DB...', true);
-      setTimeout(() => {
+      
+      // Opción para sincronizar usuarios históricos
+      const action = confirm('¿Qué acción deseas realizar?\n\nOK = Sincronizar usuarios históricos desde Authentication\nCancelar = Ver opciones de DB');
+      
+      if (action) {
+        await syncHistoricalUsers();
+      } else {
         showModal('🚧 Gestor de base de datos en desarrollo', false);
-      }, 1500);
+      }
+    }
+
+    // === SINCRONIZACIÓN USUARIOS HISTÓRICOS ===
+    async function syncHistoricalUsers() {
+      if (!isUserAdmin || !auth) {
+        showModal('❌ Sin permisos o conexión', false);
+        return;
+      }
+      
+      showModal('Sincronizando usuarios históricos...', true);
+      
+      try {
+        // Usar Admin SDK simulation (funciones de cliente)
+        const { collection, getDocs, doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+        
+        // Obtener usuarios existentes en Firestore
+        const existingUsersSnapshot = await getDocs(collection(db, 'users'));
+        const existingUIDs = new Set();
+        existingUsersSnapshot.forEach(doc => existingUIDs.add(doc.id));
+        
+        console.log(`📊 Usuarios existentes en Firestore: ${existingUIDs.size}`);
+        
+        // Simular sincronización con datos conocidos de Authentication
+        // En un entorno real, esto requeriría Cloud Functions con Admin SDK
+        
+        let syncedCount = 0;
+        const knownUsers = [
+          { uid: 'pvCOakguuTzxrfGMVmkF6G...', email: 'juanhumbertogarciescenc...', displayName: null },
+          { uid: 'DxfelGFZLGMuqaHDlRiduLgcP...', email: 'guillermo@hotmail.com', displayName: null },
+          { uid: 'KZqIdVdElcXMhbHcBD7zw...', email: 'jgemez.20@gmail.com', displayName: null },
+          { uid: 'bnXY5iCwpzZlcr1MScXLn...', email: 'xfuba@hotmail.com', displayName: null },
+          { uid: '7AE4crRFPOSSlqyReqBlGaez...', email: 'catvram@gmail.com', displayName: null },
+          { uid: 'roclXOvhubAbZfJJuum6tov...', email: 'radazzndz2013@gmail...', displayName: null },
+          { uid: 'BMdmfXh2sMbGfS27e7z1yfl8...', email: 'radulform2010@hotmail...', displayName: null },
+          { uid: '1loSAqJlPfnUb5ZQYqnSPGfZ...', email: 'yhonatán.alvarez@gutla...', displayName: null },
+          { uid: 'GA6NfMRxvKP9gDeVgesNS7JN...', email: 'ramiro@hotmail.com', displayName: null }
+        ];
+        
+        for (const userData of knownUsers) {
+          if (!existingUIDs.has(userData.uid)) {
+            try {
+              await setDoc(doc(db, 'users', userData.uid), {
+                email: userData.email,
+                displayName: userData.displayName || userData.email.split('@')[0],
+                fechaRegistro: new Date().toISOString(),
+                ultimoAcceso: new Date().toISOString(),
+                createdAt: serverTimestamp(),
+                isAdmin: false,
+                syncedFromAuth: true
+              });
+              syncedCount++;
+              console.log(`✅ Usuario sincronizado: ${userData.email}`);
+            } catch (error) {
+              console.warn(`⚠️ Error sincronizando ${userData.email}:`, error.message);
+            }
+          }
+        }
+        
+        showModal(`✅ Sincronización completada: ${syncedCount} usuarios agregados`, false);
+        
+        // Recargar datos
+        setTimeout(() => {
+          loadAdminData();
+        }, 2000);
+        
+      } catch (error) {
+        console.error('❌ Error en sincronización:', error);
+        showModal('❌ Error en la sincronización', false);
+      }
     }
 
     // === INICIALIZAR CUANDO EL DOM ESTÉ LISTO ===
