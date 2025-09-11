@@ -287,6 +287,48 @@
       </div>
     </div>
 
+    <!-- NUEVA CAJA 3: Predicción para el Próximo Sorteo -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl border border-white border-opacity-20 p-6 mb-8">
+      <div class="mb-6">
+        <h2 id="titulo-proximo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">📅 Predicción para el Próximo Sorteo - Cargando...</h2>
+        <p id="descripcion-proximo-sorteo" class="text-gray-200 text-sm">
+          Predicciones específicas basadas únicamente en los sorteos del día correspondiente de los últimos 18 meses
+        </p>
+      </div>
+      
+      <!-- Contenedor de predicciones del próximo sorteo -->
+      <div id="predicciones-proximo-sorteo" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <!-- Melate -->
+        <div class="bg-blue-500 bg-opacity-20 rounded-lg p-4 border border-blue-300 border-opacity-30">
+          <div class="text-blue-100 text-lg font-semibold mb-2 text-center">🔵 Melate</div>
+          <p id="prediccion-melate-dia" class="text-lg font-bold tracking-wider text-blue-200 mb-2 text-center">-- -- -- -- -- --</p>
+          <p id="stats-melate-dia" class="text-xs text-blue-200 text-center opacity-75"></p>
+        </div>
+        
+        <!-- Revancha -->
+        <div class="bg-red-500 bg-opacity-20 rounded-lg p-4 border border-red-300 border-opacity-30">
+          <div class="text-red-100 text-lg font-semibold mb-2 text-center">🔴 Revancha</div>
+          <p id="prediccion-revancha-dia" class="text-lg font-bold tracking-wider text-red-200 mb-2 text-center">-- -- -- -- -- --</p>
+          <p id="stats-revancha-dia" class="text-xs text-red-200 text-center opacity-75"></p>
+        </div>
+        
+        <!-- Revanchita -->
+        <div class="bg-yellow-500 bg-opacity-20 rounded-lg p-4 border border-yellow-300 border-opacity-30">
+          <div class="text-yellow-100 text-lg font-semibold mb-2 text-center">🟡 Revanchita</div>
+          <p id="prediccion-revanchita-dia" class="text-lg font-bold tracking-wider text-yellow-200 mb-2 text-center">-- -- -- -- -- --</p>
+          <p id="stats-revanchita-dia" class="text-xs text-yellow-200 text-center opacity-75"></p>
+        </div>
+      </div>
+      
+      <!-- Información del análisis específico por día -->
+      <div class="mt-6 bg-white bg-opacity-5 rounded-lg p-4 border border-white border-opacity-10">
+        <h3 class="text-lg font-semibold text-white mb-3 text-center">🔍 Análisis Específico del Día</h3>
+        <div id="info-analisis-dia" class="text-sm text-gray-200 text-center">
+          Cargando información del análisis...
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-black bg-opacity-70 text-white text-xs text-center py-3 px-4 mt-8">
       <div class="mb-2">
@@ -2339,6 +2381,299 @@
       clearInterval(verificacionInterval);
       console.log('⏰ Verificación automática finalizada después de 30 segundos');
     }, 30000);
+
+    // === NUEVA FUNCIONALIDAD: PREDICCIÓN PARA EL PRÓXIMO SORTEO ===
+    
+    // Función para obtener el próximo día de sorteo
+    function obtenerProximoDiaSorteo() {
+      const hoy = new Date();
+      const diaActual = hoy.getDay(); // 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
+      
+      let proximoDia = '';
+      let diasHasta = 0;
+      
+      if (diaActual === 0) { // Domingo
+        proximoDia = 'miércoles';
+        diasHasta = 3;
+      } else if (diaActual === 1 || diaActual === 2) { // Lunes o Martes
+        proximoDia = 'miércoles';
+        diasHasta = 3 - diaActual;
+      } else if (diaActual === 3) { // Miércoles
+        proximoDia = 'viernes';
+        diasHasta = 2;
+      } else if (diaActual === 4) { // Jueves
+        proximoDia = 'viernes';
+        diasHasta = 1;
+      } else if (diaActual === 5) { // Viernes
+        proximoDia = 'domingo';
+        diasHasta = 2;
+      } else if (diaActual === 6) { // Sábado
+        proximoDia = 'domingo';
+        diasHasta = 1;
+      }
+      
+      const fechaProximoSorteo = new Date(hoy);
+      fechaProximoSorteo.setDate(hoy.getDate() + diasHasta);
+      
+      return {
+        dia: proximoDia,
+        diasHasta: diasHasta,
+        fecha: fechaProximoSorteo,
+        esHoy: diasHasta === 0
+      };
+    }
+    
+    // Función para filtrar sorteos por día específico
+    function filtrarSorteosPorDia(lineasCSV, diaObjetivo) {
+      const sorteosFiltrados = [];
+      const numerosDelDia = [];
+      
+      // Mapeo de días
+      const diasSemana = {
+        0: 'domingo',
+        1: 'lunes', 
+        2: 'martes',
+        3: 'miércoles',
+        4: 'jueves',
+        5: 'viernes',
+        6: 'sábado'
+      };
+      
+      // Fecha límite (18 meses atrás)
+      const fechaActual = new Date();
+      const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 18, fechaActual.getDate());
+      
+      for (let i = 1; i < lineasCSV.length; i++) {
+        const linea = lineasCSV[i].trim();
+        if (!linea) continue;
+        
+        const columnas = linea.split(',');
+        if (columnas.length < 9) continue;
+        
+        // Obtener fecha
+        const fechaStr = columnas[columnas.length - 1].trim();
+        if (!fechaStr) continue;
+        
+        const partesFecha = fechaStr.split('/');
+        if (partesFecha.length !== 3) continue;
+        
+        const dia = parseInt(partesFecha[0]);
+        const mes = parseInt(partesFecha[1]) - 1;
+        const año = parseInt(partesFecha[2]);
+        const fechaSorteo = new Date(año, mes, dia);
+        
+        // Verificar si está dentro del rango de 18 meses
+        if (fechaSorteo < fechaLimite) continue;
+        
+        // Verificar si es el día objetivo
+        const diaSemanaNumero = fechaSorteo.getDay();
+        const diaSemanaTexto = diasSemana[diaSemanaNumero];
+        
+        if (diaSemanaTexto === diaObjetivo) {
+          // Extraer números ganadores
+          const numeros = [];
+          const inicioNumeros = (columnas.length === 11) ? 2 : 2; // Melate vs Revancha/Revanchita
+          const finNumeros = (columnas.length === 11) ? 7 : 7;
+          
+          for (let j = inicioNumeros; j <= finNumeros; j++) {
+            const num = parseInt(columnas[j]);
+            if (!isNaN(num) && num >= 1 && num <= 56) {
+              numeros.push(num);
+            }
+          }
+          
+          if (numeros.length === 6) {
+            sorteosFiltrados.push({
+              fecha: fechaStr,
+              numeros: numeros,
+              concurso: columnas[1]
+            });
+            numerosDelDia.push(...numeros);
+          }
+        }
+      }
+      
+      return {
+        sorteos: sorteosFiltrados,
+        numeros: numerosDelDia,
+        total: sorteosFiltrados.length
+      };
+    }
+    
+    // Función para generar predicción basada en día específico
+    function generarPrediccionParaDia(userId, datosDia, tipoSorteo) {
+      if (!datosDia.numeros || datosDia.numeros.length === 0) {
+        // Predicciones por defecto
+        const prediccionesPorDefecto = {
+          melate: [7, 13, 23, 27, 42, 56],
+          revancha: [3, 19, 24, 31, 38, 51],
+          revanchita: [5, 12, 26, 33, 47, 54]
+        };
+        return prediccionesPorDefecto[tipoSorteo] || [1, 14, 21, 28, 35, 49];
+      }
+      
+      // Calcular frecuencias
+      const frecuencias = {};
+      for (let i = 1; i <= 56; i++) {
+        frecuencias[i] = 0;
+      }
+      
+      datosDia.numeros.forEach(num => {
+        if (num >= 1 && num <= 56) {
+          frecuencias[num]++;
+        }
+      });
+      
+      // Generar semilla específica
+      const semilla = hashCodeLocal(`${userId}-${tipoSorteo}-${Date.now()}`);
+      
+      // Convertir a array y ordenar por score
+      const numerosConScore = Object.entries(frecuencias).map(([num, freq]) => ({
+        numero: parseInt(num),
+        frecuencia: freq,
+        score: freq + (semilla % (parseInt(num) + 1)) / 100
+      })).sort((a, b) => b.score - a.score);
+      
+      // Seleccionar 6 números
+      const seleccionados = [];
+      const usados = new Set();
+      
+      for (let i = 0; i < numerosConScore.length && seleccionados.length < 6; i++) {
+        const numero = numerosConScore[i].numero;
+        const probabilidad = 0.7 - (i * 0.04) + ((semilla % 100) / 400);
+        const aleatorio = (semilla + i * 31) % 100 / 100;
+        
+        if (aleatorio < probabilidad && !usados.has(numero)) {
+          seleccionados.push(numero);
+          usados.add(numero);
+        }
+      }
+      
+      // Completar si es necesario
+      while (seleccionados.length < 6) {
+        const numeroAleatorio = ((semilla + seleccionados.length * 43) % 56) + 1;
+        if (!usados.has(numeroAleatorio)) {
+          seleccionados.push(numeroAleatorio);
+          usados.add(numeroAleatorio);
+        }
+      }
+      
+      return seleccionados.sort((a, b) => a - b);
+    }
+    
+    // Función hash local
+    function hashCodeLocal(str) {
+      let hash = 0;
+      if (str.length === 0) return hash;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash) % 2147483647;
+    }
+    
+    // Función principal para cargar predicciones del próximo sorteo
+    async function cargarPrediccionProximoSorteo() {
+      console.log('📅 Cargando predicción para el próximo sorteo...');
+      
+      const proximoSorteo = obtenerProximoDiaSorteo();
+      const userId = generarIDUsuarioUnico();
+      
+      // Actualizar títulos
+      const tituloElement = document.getElementById('titulo-proximo-sorteo');
+      const descripcionElement = document.getElementById('descripcion-proximo-sorteo');
+      
+      if (tituloElement) {
+        const textoTitulo = proximoSorteo.esHoy 
+          ? `📅 Predicción para HOY (${proximoSorteo.dia.toUpperCase()})` 
+          : `📅 Predicción para el Próximo ${proximoSorteo.dia.toUpperCase()} (en ${proximoSorteo.diasHasta} ${proximoSorteo.diasHasta === 1 ? 'día' : 'días'})`;
+        tituloElement.textContent = textoTitulo;
+      }
+      
+      if (descripcionElement) {
+        descripcionElement.textContent = `Predicciones específicas basadas únicamente en los sorteos de ${proximoSorteo.dia} de los últimos 18 meses`;
+      }
+      
+      try {
+        // Cargar datos de los 3 sorteos
+        const archivos = ['assets/Melate.csv', 'assets/Revancha.csv', 'assets/Revanchita.csv'];
+        const tipos = ['melate', 'revancha', 'revanchita'];
+        const resultados = {};
+        
+        for (let i = 0; i < archivos.length; i++) {
+          const archivo = archivos[i];
+          const tipo = tipos[i];
+          
+          try {
+            const response = await fetch(archivo);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const csvText = await response.text();
+            const lineas = csvText.trim().split('\n');
+            
+            const datosFiltrados = filtrarSorteosPorDia(lineas, proximoSorteo.dia);
+            const prediccion = generarPrediccionParaDia(userId, datosFiltrados, tipo);
+            
+            resultados[tipo] = {
+              prediccion: prediccion,
+              estadisticas: datosFiltrados
+            };
+            
+            // Mostrar predicción
+            const elemento = document.getElementById(`prediccion-${tipo}-dia`);
+            const elementoStats = document.getElementById(`stats-${tipo}-dia`);
+            
+            if (elemento) {
+              elemento.textContent = prediccion.join(' - ');
+            }
+            
+            if (elementoStats && datosFiltrados.total > 0) {
+              elementoStats.textContent = `Basado en ${datosFiltrados.total} sorteos de ${proximoSorteo.dia}`;
+            }
+            
+            console.log(`✅ ${tipo.toUpperCase()} para ${proximoSorteo.dia}: [${prediccion.join(', ')}] (${datosFiltrados.total} sorteos)`);
+            
+          } catch (error) {
+            console.error(`❌ Error cargando ${tipo}:`, error);
+            
+            // Mostrar predicción por defecto
+            const prediccionDefecto = generarPrediccionParaDia(userId, { numeros: [] }, tipo);
+            const elemento = document.getElementById(`prediccion-${tipo}-dia`);
+            const elementoStats = document.getElementById(`stats-${tipo}-dia`);
+            
+            if (elemento) {
+              elemento.textContent = prediccionDefecto.join(' - ');
+            }
+            if (elementoStats) {
+              elementoStats.textContent = 'Predicción por defecto';
+            }
+          }
+        }
+        
+        // Actualizar información del análisis
+        const infoElement = document.getElementById('info-analisis-dia');
+        if (infoElement) {
+          const totalSorteos = Object.values(resultados).reduce((sum, r) => sum + (r.estadisticas?.total || 0), 0);
+          const promedioSorteos = Math.round(totalSorteos / 3);
+          
+          infoElement.innerHTML = `
+            <p class="mb-2">🎯 <strong>Día analizado:</strong> ${proximoSorteo.dia.toUpperCase()}</p>
+            <p class="mb-2">📊 <strong>Sorteos promedio por juego:</strong> ~${promedioSorteos} sorteos de ${proximoSorteo.dia}</p>
+            <p class="mb-2">📅 <strong>Período:</strong> Últimos 18 meses (solo ${proximoSorteo.dia}s)</p>
+            <p class="text-yellow-200"><strong>💡 Ventaja:</strong> Estas predicciones se basan únicamente en el comportamiento histórico de los ${proximoSorteo.dia}s, no en datos generales.</p>
+          `;
+        }
+        
+      } catch (error) {
+        console.error('❌ Error general en predicción del próximo sorteo:', error);
+      }
+    }
+    
+    // Inicializar la nueva funcionalidad
+    setTimeout(() => {
+      cargarPrediccionProximoSorteo();
+    }, 1000);
   </script>
 </body>
 </html>
