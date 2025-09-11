@@ -389,7 +389,7 @@ export function graficarEstadisticas(datos) {
   
   // Función para calcular el ancho dinámico basado en el título más largo
   function calcularAnchoDinamico() {
-    const titulos = ['Frecuencias', 'Suma de números', 'Pares e impares', 'Década y terminación'];
+    const titulos = ['Frecuencias', 'Suma de números', 'Pares e impares', 'Décadas por posición', 'Análisis por día'];
     
     // Crear elemento temporal para medir el ancho real del texto
     const elementoTemporal = document.createElement('div');
@@ -480,6 +480,10 @@ export function crearCajaAnalisis(tipo, datos) {
     decada: {
       emoji: '🎯',
       titulo: 'Décadas por posición',
+    },
+    dias: {
+      emoji: '📅',
+      titulo: 'Análisis por día',
     }
   };
   if (!config[tipo]) return null;
@@ -636,6 +640,10 @@ function abrirCaja(tipo, datos) {
       // Usar el análisis de década por posición
       contenidoHTML = generarContenidoDecada(datos.decadaAnalisis || {});
       break;
+    case 'dias':
+      // Análisis por día de la semana
+      contenidoHTML = generarAnalisisPorDias(datos);
+      break;
     default:
       contenidoHTML = '<p class="text-white">Contenido no disponible</p>';
   }
@@ -650,7 +658,8 @@ function abrirCaja(tipo, datos) {
           ${tipo === 'frecuencias' ? '📊 Frecuencias' : 
             tipo === 'suma' ? '🔢 Suma de números' : 
             tipo === 'pares' ? '⚖️ Pares e impares' : 
-            tipo === 'decada' ? '🎯 Décadas por posición' : 'Análisis'}
+            tipo === 'decada' ? '🎯 Décadas por posición' : 
+            tipo === 'dias' ? '📅 Análisis por día' : 'Análisis'}
         </h3>
       </div>
       ${contenidoHTML}
@@ -1256,22 +1265,243 @@ export function mostrarAnalisisAvanzados(datos) {
   const paresAnalisis = analizarParesImpares(datos);
   // Usar el nuevo análisis de década por posición
   const decadaAnalisis = analizarDecadaPorPosicion(datos);
+  // Nuevo: análisis por día de la semana
+  const diasAnalisis = separarSorteosPorDia(datos);
 
   // Agregar análisis a los datos para que estén disponibles en las cajas
   datos.sumAnalisis = sumAnalisis;
   datos.paresAnalisis = paresAnalisis;
   datos.decadaAnalisis = decadaAnalisis;
+  datos.diasAnalisis = diasAnalisis;
 
 
-  // Crear las 3 cajas adicionales usando la firma correcta
+  // Crear las 4 cajas adicionales usando la firma correcta
   const cajaSuma = crearCajaAnalisis('suma', datos);
   const cajaPares = crearCajaAnalisis('pares', datos);
   const cajaDecada = crearCajaAnalisis('decada', datos);
+  const cajaDias = crearCajaAnalisis('dias', datos);
 
   // Agregar las cajas al contenedor
   if (cajaSuma) contenedorCajas.appendChild(cajaSuma);
   if (cajaPares) contenedorCajas.appendChild(cajaPares);
   if (cajaDecada) contenedorCajas.appendChild(cajaDecada);
+  if (cajaDias) contenedorCajas.appendChild(cajaDias);
 
   console.log('✅ Análisis avanzados completados (incluye década por posición)');
+}
+
+// === NUEVAS FUNCIONES PARA ANÁLISIS POR DÍA DE LA SEMANA ===
+
+// Función para obtener el día de la semana de una fecha
+function obtenerDiaSemana(fechaStr) {
+  const partesFecha = fechaStr.split('/');
+  if (partesFecha.length !== 3) return null;
+  
+  const dia = parseInt(partesFecha[0]);
+  const mes = parseInt(partesFecha[1]) - 1; // Mes base 0 para JavaScript
+  const año = parseInt(partesFecha[2]);
+  
+  const fecha = new Date(año, mes, dia);
+  return fecha.getDay(); // 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
+}
+
+// Función para identificar el tipo de sorteo por día
+function identificarTipoSorteo(diaSemana) {
+  switch(diaSemana) {
+    case 3: return 'miércoles'; // Miércoles - Melate
+    case 5: return 'viernes';   // Viernes - Revancha  
+    case 0: return 'domingo';   // Domingo - Revanchita
+    default: return 'otro';
+  }
+}
+
+// Función para separar sorteos por día de la semana
+export function separarSorteosPorDia(datos) {
+  console.log('📅 Separando sorteos por día de la semana...');
+  
+  const resultados = {};
+  
+  Object.entries(datos).forEach(([sorteo, datosIndividuales]) => {
+    if (!datosIndividuales || !datosIndividuales.sorteos) return;
+    
+    const sorteosPorDia = {
+      miércoles: { sorteos: [], numeros: [], conteo: 0 },
+      viernes: { sorteos: [], numeros: [], conteo: 0 },
+      domingo: { sorteos: [], numeros: [], conteo: 0 },
+      otros: { sorteos: [], numeros: [], conteo: 0 }
+    };
+    
+    datosIndividuales.sorteos.forEach(sorteoData => {
+      if (!sorteoData.fecha) return;
+      
+      const diaSemana = obtenerDiaSemana(sorteoData.fecha);
+      const tipoSorteo = identificarTipoSorteo(diaSemana);
+      
+      if (sorteosPorDia[tipoSorteo]) {
+        sorteosPorDia[tipoSorteo].sorteos.push(sorteoData);
+        sorteosPorDia[tipoSorteo].numeros.push(...sorteoData.numeros);
+        sorteosPorDia[tipoSorteo].conteo++;
+      } else {
+        sorteosPorDia.otros.sorteos.push(sorteoData);
+        sorteosPorDia.otros.numeros.push(...sorteoData.numeros);
+        sorteosPorDia.otros.conteo++;
+      }
+    });
+    
+    resultados[sorteo] = sorteosPorDia;
+    
+    console.log(`📊 ${sorteo.toUpperCase()}:`);
+    console.log(`   🎯 Miércoles: ${sorteosPorDia.miércoles.conteo} sorteos`);
+    console.log(`   🍀 Viernes: ${sorteosPorDia.viernes.conteo} sorteos`);
+    console.log(`   🌟 Domingo: ${sorteosPorDia.domingo.conteo} sorteos`);
+    if (sorteosPorDia.otros.conteo > 0) {
+      console.log(`   ❓ Otros días: ${sorteosPorDia.otros.conteo} sorteos`);
+    }
+  });
+  
+  return resultados;
+}
+
+// Función para crear análisis de frecuencia por día específico
+export function analizarFrecuenciaPorDia(sorteosPorDia, dia) {
+  const datosDia = sorteosPorDia[dia];
+  if (!datosDia || datosDia.numeros.length === 0) {
+    return { error: `No hay datos para ${dia}` };
+  }
+  
+  const frecuencias = calcularFrecuencias(datosDia.numeros);
+  const frecuenciasArray = Object.entries(frecuencias).map(([num, freq]) => ({
+    numero: parseInt(num),
+    frecuencia: freq,
+    porcentaje: ((freq / datosDia.conteo) * 100).toFixed(1)
+  }));
+  
+  frecuenciasArray.sort((a, b) => b.frecuencia - a.frecuencia);
+  
+  return {
+    totalSorteos: datosDia.conteo,
+    totalNumeros: datosDia.numeros.length,
+    topFrecuentes: frecuenciasArray.slice(0, 10),
+    menosFrecuentes: frecuenciasArray.slice(-10).reverse(),
+    dia: dia
+  };
+}
+
+// Función para generar contenido HTML del análisis por días
+export function generarAnalisisPorDias(datos) {
+  const sorteosPorDia = separarSorteosPorDia(datos);
+  
+  const dias = ['miércoles', 'viernes', 'domingo'];
+  const configDias = {
+    miércoles: { 
+      emoji: '🎯', 
+      color: 'bg-blue-500',
+      nombre: 'Miércoles (Melate)',
+      descripcion: 'Los miércoles son tradicionalmente el día del Melate'
+    },
+    viernes: { 
+      emoji: '🍀', 
+      color: 'bg-green-500',
+      nombre: 'Viernes (Revancha)',
+      descripcion: 'Los viernes se celebra el sorteo Revancha'
+    },
+    domingo: { 
+      emoji: '🌟', 
+      color: 'bg-purple-500',
+      nombre: 'Domingo (Revanchita)',
+      descripcion: 'Los domingos es el turno de Revanchita'
+    }
+  };
+  
+  let contenidoHTML = `<div class="space-y-8">
+    <div class="mb-6 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
+        <h3 class="text-2xl font-bold text-yellow-400 text-left">📅 ¡Análisis por Día de la Semana! 📅</h3>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
+      </button>
+      <div class="px-4 pb-4 hidden">
+        <p class="text-white text-base mb-4 text-center font-semibold">¿Sabías que cada día tiene sus propias tendencias numéricas?</p>
+        <p class="text-white text-base mb-2 text-center">Los sorteos de miércoles, viernes y domingo muestran patrones únicos.<br><span class="text-yellow-300 font-bold">¡Descubre qué números prefiere cada día!</span></p>
+        <div class="mt-2 text-sm text-yellow-200 text-center font-semibold">¿Por qué importa el día?</div>
+        <p class="text-gray-200 text-sm text-center">Cada día de sorteo puede tener sus propias tendencias. Al analizar por separado, puedes encontrar patrones más específicos.</p>
+      </div>
+    </div>`;
+  
+  // Analizar cada sorteo por día
+  Object.entries(datos).forEach(([sorteo, datosIndividuales]) => {
+    const datosSeparados = sorteosPorDia[sorteo];
+    if (!datosSeparados) return;
+    
+    contenidoHTML += `
+      <div class="mb-8">
+        <h4 class="text-2xl font-bold text-white mb-6 text-center">🎲 ${sorteo.toUpperCase()}</h4>`;
+    
+    dias.forEach(dia => {
+      const config = configDias[dia];
+      const analisisDia = analizarFrecuenciaPorDia(datosSeparados, dia);
+      
+      if (analisisDia.error) {
+        contenidoHTML += `
+          <div class="${config.color} bg-opacity-30 rounded-lg p-4 mb-4">
+            <h5 class="font-bold text-white mb-2 text-lg text-center">${config.emoji} ${config.nombre}</h5>
+            <p class="text-white text-center">${analisisDia.error}</p>
+          </div>`;
+        return;
+      }
+      
+      contenidoHTML += `
+        <div class="${config.color} bg-opacity-30 rounded-lg p-4 mb-4">
+          <h5 class="font-bold text-white mb-2 text-lg text-center">${config.emoji} ${config.nombre}</h5>
+          <p class="text-gray-200 text-sm text-center mb-3">${config.descripcion} - ${analisisDia.totalSorteos} sorteos analizados</p>
+          
+          <!-- Top 5 más frecuentes -->
+          <div class="mb-4">
+            <h6 class="text-sm font-semibold text-yellow-300 mb-2 text-center">🔥 Top 5 MÁS frecuentes</h6>
+            <div class="grid grid-cols-5 gap-2">
+              ${analisisDia.topFrecuentes.slice(0, 5).map(item => `
+                <div class="bg-white bg-opacity-75 rounded-lg p-2 text-center">
+                  <div class="text-red-600 font-bold">${item.numero}</div>
+                  <div class="text-red-600 text-xs">${item.frecuencia}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Top 5 menos frecuentes -->
+          <div>
+            <h6 class="text-sm font-semibold text-blue-300 mb-2 text-center">❄️ Top 5 MENOS frecuentes</h6>
+            <div class="grid grid-cols-5 gap-2">
+              ${analisisDia.menosFrecuentes.slice(0, 5).map(item => `
+                <div class="bg-white bg-opacity-75 rounded-lg p-2 text-center">
+                  <div class="text-blue-600 font-bold">${item.numero}</div>
+                  <div class="text-blue-600 text-xs">${item.frecuencia}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>`;
+    });
+    
+    contenidoHTML += `</div>`;
+  });
+  
+  contenidoHTML += `
+    <div class="mt-8 rounded-xl bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 overflow-hidden">
+      <button type="button" aria-expanded="false" class="w-full flex items-center justify-between px-4 py-3 focus:outline-none group" onclick="const panel=this.nextElementSibling;const icon=this.querySelector('.chevron');const expanded=this.getAttribute('aria-expanded')==='true';this.setAttribute('aria-expanded',!expanded);panel.classList.toggle('hidden');icon.innerHTML=expanded?'&#9660;':'&#9650;';">
+        <h4 class="text-lg font-bold text-yellow-300 text-left">¿Cómo usar esta información?</h4>
+        <span class="chevron text-2xl transition-transform duration-300">&#9660;</span>
+      </button>
+      <div class="px-4 pb-4 hidden">
+        <ul class="list-disc list-inside text-white text-base mb-2">
+          <li>Si vas a jugar un miércoles (Melate), usa los números más frecuentes de ese día</li>
+          <li>Para el viernes (Revancha), considera los patrones específicos de ese día</li>
+          <li>Los domingos (Revanchita) tienen sus propias tendencias únicas</li>
+          <li>Combina esta información con otros análisis para mejores resultados</li>
+        </ul>
+        <div class="text-yellow-300 font-bold text-center">¡Cada día tiene su estrategia ideal!</div>
+      </div>
+    </div>
+  </div>`;
+  
+  return contenidoHTML;
 }
