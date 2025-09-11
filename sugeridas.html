@@ -238,7 +238,7 @@
         
         <div id="contenido-analisis" class="contenido-expandible mt-6">
           <p class="text-center text-sm text-gray-300 mb-6">
-            Combinaciones basadas en los 4 análisis de los últimos 30 meses: frecuencias, suma de números, balance pares/impares y décadas por posición
+            Combinaciones basadas en los 4 análisis de los últimos 18 meses: frecuencias, suma de números, balance pares/impares y décadas por posición
           </p>
           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1205,8 +1205,8 @@
           const frecuencias = {};
           const sumaTotal = [];
           
-          // Procesar últimos 30 meses de datos
-          for (let j = 1; j < Math.min(lineas.length, 120); j++) { // ~120 sorteos = 30 meses
+          // Procesar últimos 18 meses de datos
+          for (let j = 1; j < Math.min(lineas.length, 72); j++) { // ~72 sorteos = 18 meses
             const linea = lineas[j].trim();
             if (!linea) continue;
             

@@ -75,9 +75,9 @@ async function cargarDatosCSV() {
       
       const numeros = [];
       let sorteosValidos = 0;
-      // Filtrar por los últimos 30 meses según requerimiento
+      // Filtrar por los últimos 18 meses según requerimiento
       const fechaActual = new Date();
-      const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 30, fechaActual.getDate());
+      const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 18, fechaActual.getDate());
       console.log(`📅 Filtrando sorteos desde: ${fechaLimite.toLocaleDateString()} para ${sorteo}`);
       
       // Procesar líneas según el formato
@@ -221,7 +221,7 @@ function mostrarResumenCarga(estadisticasCarga) {
     console.log(`✅ DATOS HISTÓRICOS REALES CARGADOS (${archivosReales}/3 archivos)`);
     Object.entries(estadisticasCarga).forEach(([sorteo, stats]) => {
       if (stats.cargado) {
-        const periodo = stats.formato === 'historico_real' ? ' - Últimos 30 meses' : '';
+        const periodo = stats.formato === 'historico_real' ? ' - Últimos 18 meses' : '';
         console.log(`   📊 ${sorteo.toUpperCase()}: ${stats.sorteos} sorteos históricos (${stats.formato}${periodo})`);
         // Verificar si hay datos suficientes
         if (stats.totalNumeros < 100) {

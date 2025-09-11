@@ -27,7 +27,7 @@ function generarContenidoSuma(sumAnalisis) {
       </button>
       <div class="px-4 pb-4 hidden">
         <p class="text-white text-base mb-4 text-center font-semibold">¿Sabías que la suma de los números ganadores tiene un patrón favorito?</p>
-        <p class="text-white text-base mb-2 text-center">En los últimos 30 meses, la mayoría de los sorteos premiados caen en un rango de suma muy especial.<br><span class="text-yellow-300 font-bold">¡Descubre la zona dorada y elige tus números con ventaja!</span></p>
+        <p class="text-white text-base mb-2 text-center">En los últimos 18 meses, la mayoría de los sorteos premiados caen en un rango de suma muy especial.<br><span class="text-yellow-300 font-bold">¡Descubre la zona dorada y elige tus números con ventaja!</span></p>
         <div class="mt-2 text-sm text-yellow-200 text-center font-semibold">¿Por qué importa la suma?</div>
         <p class="text-gray-200 text-sm text-center">No todas las sumas son igual de comunes. Los sorteos premiados suelen agruparse en ciertos rangos. Si tu combinación suma dentro de ese rango, ¡estás jugando con la estadística a tu favor!</p>
       </div>
@@ -131,7 +131,7 @@ function generarContenidoPares(paresAnalisis) {
       </button>
       <div class="px-4 pb-4 hidden">
         <p class="text-white text-base mb-4 text-center font-semibold">¿Sabías que el balance entre pares e impares es la clave de muchas combinaciones ganadoras?</p>
-        <p class="text-white text-base mb-2 text-center">En los últimos 30 meses, la mayoría de los premios han salido con una mezcla muy especial.<br><span class="text-yellow-300 font-bold">¡Descubre el balance ideal y juega con ventaja!</span></p>
+        <p class="text-white text-base mb-2 text-center">En los últimos 18 meses, la mayoría de los premios han salido con una mezcla muy especial.<br><span class="text-yellow-300 font-bold">¡Descubre el balance ideal y juega con ventaja!</span></p>
         <div class="mt-2 text-sm text-yellow-200 text-center font-semibold">¿Por qué importa el balance?</div>
         <p class="text-gray-200 text-sm text-center">No es casualidad: la combinación 3 pares y 3 impares es la más frecuente. Si tu selección se acerca a este equilibrio, ¡tienes más posibilidades de ganar!</p>
       </div>
@@ -261,9 +261,9 @@ async function cargarSorteoIndividual(sorteo) {
     const numeros = [];
     let ultimoSorteo = 'No disponible';
     
-    // Calcular fecha límite (30 meses atrás desde hoy)
+    // Calcular fecha límite (18 meses atrás desde hoy)
     const fechaActual = new Date();
-    const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 36, fechaActual.getDate());
+    const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 18, fechaActual.getDate());
     console.log(`📅 Filtrando sorteos desde: ${fechaLimite.toLocaleDateString()} para ${sorteo}`);
     
     // Procesar cada línea (saltar encabezado)
@@ -282,7 +282,7 @@ async function cargarSorteoIndividual(sorteo) {
         // Formato: NPRODUCTO,CONCURSO,R1,R2,R3,R4,R5,R6,R7,BOLSA,FECHA
         concurso = columnas[1];
         
-        // Verificar fecha - últimos 30 meses
+        // Verificar fecha - últimos 18 meses
         const fechaStr = columnas[10].trim();
         if (fechaStr) {
           const partesFecha = fechaStr.split('/');
@@ -293,7 +293,7 @@ async function cargarSorteoIndividual(sorteo) {
             fechaSorteo = new Date(año, mes, dia);
             
             if (fechaSorteo < fechaLimite) {
-              continue; // Saltar sorteos más antiguos de 30 meses
+              continue; // Saltar sorteos más antiguos de 18 meses
             }
           }
         }
@@ -308,7 +308,7 @@ async function cargarSorteoIndividual(sorteo) {
         // Formato: NPRODUCTO,CONCURSO,R1/F1,R2/F2,R3/F3,R4/F4,R5/F5,R6/F6,BOLSA,FECHA
         concurso = columnas[1];
         
-        // Verificar fecha - últimos 30 meses
+        // Verificar fecha - últimos 18 meses
         const fechaStr = columnas[9].trim();
         if (fechaStr) {
           const partesFecha = fechaStr.split('/');
@@ -319,7 +319,7 @@ async function cargarSorteoIndividual(sorteo) {
             fechaSorteo = new Date(año, mes, dia);
             
             if (fechaSorteo < fechaLimite) {
-              continue; // Saltar sorteos más antiguos de 30 meses
+              continue; // Saltar sorteos más antiguos de 18 meses
             }
           }
         }
@@ -346,7 +346,7 @@ async function cargarSorteoIndividual(sorteo) {
       }
     }
     
-    console.log(`✅ ${sorteo}: ${sorteos.length} sorteos cargados (últimos 30 meses) - ${numeros.length} números`);
+    console.log(`✅ ${sorteo}: ${sorteos.length} sorteos cargados (últimos 18 meses) - ${numeros.length} números`);
     
     return {
       sorteos: sorteos,
@@ -782,7 +782,7 @@ function moverCajaAbiertaAlContenido(tipo, datos) {
   contenedorContenido.insertBefore(cajaEnContenido, contenedorContenido.firstChild);
 }
 
-// Función para generar contenido de frecuencias con últimos 30 meses
+// Función para generar contenido de frecuencias con últimos 18 meses
 function generarContenidoFrecuencias(datos) {
   const sorteos = ['melate', 'revancha', 'revanchita'];
   let contenidoHTML = '<div class="space-y-8">';
@@ -794,11 +794,11 @@ function generarContenidoFrecuencias(datos) {
       return;
     }
     
-    // Usar todos los sorteos (ya filtrados por 30 meses en cargarSorteoIndividual)
+    // Usar todos los sorteos (ya filtrados por 18 meses en cargarSorteoIndividual)
     const sorteosFiltrados = datosIndividuales.sorteos;
     const numerosFiltrados = datosIndividuales.numeros;
     
-    console.log(`📊 ${sorteo}: ${sorteosFiltrados.length} sorteos (últimos 30 meses), ${numerosFiltrados.length} números`);
+    console.log(`📊 ${sorteo}: ${sorteosFiltrados.length} sorteos (últimos 18 meses), ${numerosFiltrados.length} números`);
     
     const frecuencias = calcularFrecuencias(numerosFiltrados);
     const frecuenciasArray = Object.entries(frecuencias).map(([num, freq]) => ({
@@ -1141,7 +1141,7 @@ let contenidoHTML = `<div class="space-y-8">
     </button>
     <div class="px-4 pb-4 hidden">
       <p class="text-white text-base mb-4 text-center font-semibold">¿Sabías que cada posición en la combinación ganadora tiene una década favorita?</p>
-      <p class="text-white text-base mb-2 text-center">En los últimos 30 meses, los números ganadores muestran una tendencia clara: cada lugar de la combinación prefiere una década específica.<br><span class="text-yellow-300 font-bold">¡Aprovecha este patrón y elige tus números con estrategia!</span></p>
+      <p class="text-white text-base mb-2 text-center">En los últimos 18 meses, los números ganadores muestran una tendencia clara: cada lugar de la combinación prefiere una década específica.<br><span class="text-yellow-300 font-bold">¡Aprovecha este patrón y elige tus números con estrategia!</span></p>
       <div class="mt-2 text-sm text-yellow-200 text-center font-semibold">¿Por qué importa la década y la posición?</div>
       <p class="text-gray-200 text-sm text-center">No todos los números tienen la misma probabilidad de aparecer en cada posición. Si eliges tus números siguiendo la década más frecuente para cada lugar, ¡estás jugando con la estadística a tu favor!</p>
     </div>

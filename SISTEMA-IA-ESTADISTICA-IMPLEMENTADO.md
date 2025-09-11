@@ -12,7 +12,7 @@
 - NO consideraba probabilidades reales
 
 ### ✅ **Sistema Nuevo (IA Estadística Real)**:
-- Análisis completo de últimos 30 meses de datos reales
+- Análisis completo de últimos 18 meses de datos reales
 - 5 métodos estadísticos combinados
 - IA que considera múltiples factores
 - Números lógicos basados en probabilidades reales
@@ -53,7 +53,7 @@
 
 ### **Paso 1: Carga de Datos Reales**
 ```javascript
-// Carga últimos ~120 sorteos (30 meses) de cada CSV
+// Carga últimos ~72 sorteos (18 meses) de cada CSV
 - assets/Melate.csv
 - assets/Revancha.csv  
 - assets/Revanchita.csv
@@ -140,7 +140,7 @@ Revanchita: 5 - 19 - 27 - 31 - 45 - 52  (Balance par/impar: 3-3)
 - ✅ Basado en datos históricos reales
 - ✅ Respeta patrones probabilísticos 
 - ✅ Evita combinaciones estadísticamente imposibles
-- ✅ Considera tendencias de últimos 30 meses
+- ✅ Considera tendencias de últimos 18 meses
 
 ### **Inteligencia Artificial:**
 - ✅ 5 métodos combinados inteligentemente
@@ -175,7 +175,7 @@ Revanchita: 5 - 19 - 27 - 31 - 45 - 52  (Balance par/impar: 3-3)
 
 **El sistema ahora genera combinaciones que:**
 1. **Tienen sentido estadístico** basado en datos reales
-2. **Respetan probabilidades** de los últimos 30 meses  
+2. **Respetan probabilidades** de los últimos 18 meses  
 3. **Son diferentes por usuario** pero consistentes
 4. **Solo cambian** cuando se actualicen los CSV
 5. **Combinan 5 métodos científicos** + IA
