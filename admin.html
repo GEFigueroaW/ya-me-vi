@@ -1015,19 +1015,19 @@
         console.log(`📊 Usuarios existentes en Firestore: ${existingUIDs.size}`);
         
         // Simular sincronización con datos conocidos de Authentication
-        // En un entorno real, esto requeriría Cloud Functions con Admin SDK
+        // UIDs reales de Firebase Authentication (desde la imagen)
         
         let syncedCount = 0;
         const knownUsers = [
-          { uid: 'pvCOakguuTzxrfGMVmkF6G...', email: 'juanhumbertogarciescenc...', displayName: null },
-          { uid: 'DxfelGFZLGMuqaHDlRiduLgcP...', email: 'guillermo@hotmail.com', displayName: null },
-          { uid: 'KZqIdVdElcXMhbHcBD7zw...', email: 'jgemez.20@gmail.com', displayName: null },
-          { uid: 'bnXY5iCwpzZlcr1MScXLn...', email: 'xfuba@hotmail.com', displayName: null },
-          { uid: '7AE4crRFPOSSlqyReqBlGaez...', email: 'catvram@gmail.com', displayName: null },
-          { uid: 'roclXOvhubAbZfJJuum6tov...', email: 'radazzndz2013@gmail...', displayName: null },
-          { uid: 'BMdmfXh2sMbGfS27e7z1yfl8...', email: 'radulform2010@hotmail...', displayName: null },
-          { uid: '1loSAqJlPfnUb5ZQYqnSPGfZ...', email: 'yhonatán.alvarez@gutla...', displayName: null },
-          { uid: 'GA6NfMRxvKP9gDeVgesNS7JN...', email: 'ramiro@hotmail.com', displayName: null }
+          { uid: 'pvCOakguuTzxrfGMVmkF6GJcNJG2', email: 'juanhumbertogarciescenc@gmail.com', displayName: null },
+          { uid: 'DxfelGFZLGMuqaHDlRiduLgcP8w2', email: 'guillermo@hotmail.com', displayName: null },
+          { uid: 'KZqIdVdElcXMhbHcBD7zwi41W6V2', email: 'jgemez.20@gmail.com', displayName: null },
+          { uid: 'bnXY5iCwpzZlcr1MScXLnJNRvl83', email: 'xfuba@hotmail.com', displayName: null },
+          { uid: '7AE4crRFPOSSlqyReqBlGaez54J3', email: 'catvram@gmail.com', displayName: null },
+          { uid: 'roclXOvhubAbZfJJuum6tovy4Lw2', email: 'radazzndz2013@gmail.com', displayName: null },
+          { uid: 'BMdmfXh2sMbGfS27e7z1yfl8sGA2', email: 'radulform2010@hotmail.com', displayName: null },
+          { uid: '1loSAqJlPfnUb5ZQYqnSPGfZDjx3', email: 'yhonatán.alvarez@gutla.com', displayName: null },
+          { uid: 'GA6NfMRxvKP9gDeVgesNS7JN1q53', email: 'ramiro@hotmail.com', displayName: null }
         ];
         
         for (const userData of knownUsers) {
