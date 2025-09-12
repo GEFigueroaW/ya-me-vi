@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YA ME VI - Login Simple</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .input-field:focus {
+            background: rgba(255, 255, 255, 1);
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    
+    <div class="w-full max-w-md">
+        <div class="glass-effect rounded-2xl p-8 shadow-2xl">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-purple-600">YA</span>
+                </div>
+                <h1 class="text-2xl font-bold text-white mb-2">YA ME VI</h1>
+                <p class="text-white text-opacity-80">Acceso Simple - Solo Email</p>
+            </div>
+
+            <!-- Status -->
+            <div id="status" class="mb-6 p-4 rounded-lg bg-green-500 bg-opacity-20 text-white text-center">
+                📧 Ingresa tu email para continuar
+            </div>
+
+            <!-- Formulario de Login -->
+            <form id="loginForm" class="space-y-4">
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-white text-sm font-medium mb-2">
+                        Email
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        required
+                        placeholder="tu@email.com"
+                        class="input-field w-full px-4 py-3 rounded-lg text-gray-700 focus:ring-2 focus:ring-purple-500"
+                    >
+                </div>
+
+                <!-- Nombre (opcional) -->
+                <div>
+                    <label for="name" class="block text-white text-sm font-medium mb-2">
+                        Nombre (opcional)
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name"
+                        placeholder="Tu nombre"
+                        class="input-field w-full px-4 py-3 rounded-lg text-gray-700 focus:ring-2 focus:ring-purple-500"
+                    >
+                </div>
+
+                <!-- Botón Ingresar -->
+                <button 
+                    type="submit" 
+                    id="btnLogin"
+                    class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2">
+                    <span>📧</span>
+                    <span>Ingresar con Email</span>
+                </button>
+            </form>
+
+            <!-- Acceso Rápido -->
+            <div class="mt-6 space-y-3">
+                <div class="text-center text-white text-opacity-70 text-sm">
+                    Acceso rápido:
+                </div>
+                
+                <button 
+                    id="btnDemo"
+                    class="w-full bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2">
+                    <span>👤</span>
+                    <span>Usuario Demo</span>
+                </button>
+                
+                <button 
+                    id="btnGuest"
+                    class="w-full bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors flex items-center justify-center space-x-2">
+                    <span>🔓</span>
+                    <span>Acceso Invitado</span>
+                </button>
+            </div>
+
+            <!-- Info -->
+            <div class="mt-6 p-4 bg-black bg-opacity-20 rounded-lg text-xs text-white text-opacity-70 text-center">
+                <strong>Acceso Simple:</strong><br>
+                Sin complicaciones de OAuth<br>
+                Funciona en cualquier dispositivo
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('📧 Login Simple iniciado');
+        
+        // Elementos del DOM
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const nameInput = document.getElementById('name');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnDemo = document.getElementById('btnDemo');
+        const btnGuest = document.getElementById('btnGuest');
+        const status = document.getElementById('status');
+
+        // Actualizar status
+        function updateStatus(message, color = 'green') {
+            status.className = `mb-6 p-4 rounded-lg bg-${color}-500 bg-opacity-20 text-white text-center`;
+            status.innerHTML = message;
+            console.log('📱 Status:', message);
+        }
+
+        // Login con email
+        function loginWithEmail(email, name = '') {
+            console.log('📧 Login con email:', email);
+            
+            if (!email || !email.includes('@')) {
+                updateStatus('❌ Email inválido', 'red');
+                return;
+            }
+
+            updateStatus('✅ Creando sesión...', 'blue');
+
+            // Crear datos de usuario
+            const userData = {
+                uid: 'email_' + Date.now(),
+                email: email,
+                displayName: name || email.split('@')[0],
+                photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Usuario')}&background=6366f1&color=fff`,
+                providerId: 'email',
+                accessToken: 'email_token_' + Date.now(),
+                isBackupAuth: false,
+                loginMethod: 'email',
+                loginTime: new Date().toISOString()
+            };
+
+            // Guardar datos
+            localStorage.setItem('yamevi_user', JSON.stringify(userData));
+            localStorage.setItem('yamevi_auth_token', userData.accessToken);
+            localStorage.setItem('yamevi_auth_method', 'email');
+
+            console.log('💾 Usuario guardado:', userData);
+            updateStatus('✅ ¡Login exitoso!', 'green');
+
+            // Redirigir después de 1 segundo
+            setTimeout(() => {
+                console.log('🚀 Redirigiendo a home...');
+                window.location.href = 'home-apk.html';
+            }, 1000);
+        }
+
+        // Login demo
+        function loginDemo() {
+            console.log('👤 Login demo');
+            loginWithEmail('demo@yamevi.com', 'Usuario Demo');
+        }
+
+        // Login invitado
+        function loginGuest() {
+            console.log('🔓 Login invitado');
+            loginWithEmail('invitado@yamevi.com', 'Invitado');
+        }
+
+        // Event Listeners
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('📝 Formulario enviado');
+            
+            const email = emailInput.value.trim();
+            const name = nameInput.value.trim();
+            
+            if (!email) {
+                updateStatus('❌ Email requerido', 'red');
+                emailInput.focus();
+                return;
+            }
+            
+            loginWithEmail(email, name);
+        });
+
+        btnDemo.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('🖱️ Botón Demo clickeado');
+            loginDemo();
+        });
+
+        btnGuest.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('🖱️ Botón Invitado clickeado');
+            loginGuest();
+        });
+
+        // Verificar si ya hay sesión activa
+        function checkExistingSession() {
+            const existingUser = localStorage.getItem('yamevi_user');
+            if (existingUser) {
+                try {
+                    const user = JSON.parse(existingUser);
+                    console.log('👤 Sesión existente encontrada:', user.email);
+                    updateStatus(`👤 Sesión activa: ${user.email}`, 'blue');
+                    
+                    // Opción de continuar o cambiar usuario
+                    const continueSession = confirm(`¿Continuar como ${user.displayName}?`);
+                    if (continueSession) {
+                        console.log('🔄 Continuando sesión existente');
+                        window.location.href = 'home-apk.html';
+                        return;
+                    } else {
+                        // Limpiar sesión anterior
+                        localStorage.removeItem('yamevi_user');
+                        localStorage.removeItem('yamevi_auth_token');
+                        localStorage.removeItem('yamevi_auth_method');
+                        updateStatus('📧 Ingresa tu email para continuar', 'green');
+                    }
+                } catch (error) {
+                    console.error('❌ Error leyendo sesión:', error);
+                    localStorage.clear();
+                }
+            }
+        }
+
+        // Inicialización
+        function init() {
+            console.log('🚀 Inicializando login simple...');
+            updateStatus('📧 Ingresa tu email para continuar', 'green');
+            checkExistingSession();
+            
+            // Focus en email
+            emailInput.focus();
+            
+            console.log('✅ Login simple listo');
+        }
+
+        // Iniciar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
