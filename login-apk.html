@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Ingreso</title>
+  
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <!-- Firebase SDK v9 modular -->
+  <script type="module" src="js/firebase-init.js"></script>
+  
+  <!-- Estilos -->
+  <link href="css/styles.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 1rem;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .divider {
+      margin: 1.5rem 0;
+      position: relative;
+      text-align: center;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .divider span {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 0 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.875rem;
+    }
+
+    .links {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .links a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+
+    .links a:hover {
+      color: white;
+      text-decoration: underline;
+    }
+
+    .loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .error-message {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .success-message {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      color: #86efac;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .demo-info {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <!-- Logo -->
+    <div class="logo">YA</div>
+    
+    <!-- Título -->
+    <h1 style="margin: 0 0 0.5rem; font-size: 1.875rem; font-weight: bold;">YA ME VI</h1>
+    <p style="margin: 0 0 2rem; color: rgba(255, 255, 255, 0.8); font-size: 1rem;">
+      Cumple tu sueño con la lotería mexicana
+    </p>
+
+    <!-- Mensajes -->
+    <div id="errorMessage" class="error-message hidden"></div>
+    <div id="successMessage" class="success-message hidden"></div>
+
+    <!-- Formulario de Login -->
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="form-input" 
+          placeholder="tu@email.com"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="form-input" 
+          placeholder="••••••••"
+          required
+        >
+      </div>
+
+      <button type="submit" id="loginBtn" class="btn btn-primary">
+        <span>📧</span>
+        <span class="btn-text">Iniciar Sesión</span>
+      </button>
+    </form>
+
+    <!-- Divider -->
+    <div class="divider">
+      <span>o crea una cuenta</span>
+    </div>
+
+    <!-- Botón Crear Cuenta -->
+    <button id="createAccountBtn" class="btn btn-secondary">
+      <span>✨</span>
+      <span>Crear Cuenta Nueva</span>
+    </button>
+
+    <!-- Links -->
+    <div class="links">
+      <a href="recover.html">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <!-- Demo Info -->
+    <div class="demo-info">
+      <strong>Acceso rápido:</strong><br>
+      Email: demo@yamevi.com<br>
+      Contraseña: demo123
+    </div>
+  </div>
+
+  <script type="module">
+    // Firebase imports
+    import { 
+      auth, 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword,
+      updateProfile
+    } from './js/firebase-init.js';
+
+    // Elementos DOM
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const createAccountBtn = document.getElementById('createAccountBtn');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+
+    let isCreatingAccount = false;
+
+    // Mostrar mensaje de error
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.remove('hidden');
+      successMessage.classList.add('hidden');
+    }
+
+    // Mostrar mensaje de éxito
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.remove('hidden');
+      errorMessage.classList.add('hidden');
+    }
+
+    // Ocultar mensajes
+    function hideMessages() {
+      errorMessage.classList.add('hidden');
+      successMessage.classList.add('hidden');
+    }
+
+    // Mostrar loading
+    function showLoading(btnElement, text) {
+      btnElement.classList.add('loading');
+      btnElement.disabled = true;
+      const textElement = btnElement.querySelector('.btn-text');
+      if (textElement) {
+        textElement.textContent = text;
+      }
+    }
+
+    // Ocultar loading
+    function hideLoading(btnElement, originalText) {
+      btnElement.classList.remove('loading');
+      btnElement.disabled = false;
+      const textElement = btnElement.querySelector('.btn-text');
+      if (textElement) {
+        textElement.textContent = originalText;
+      }
+    }
+
+    // Login con email y contraseña
+    async function loginWithEmail(email, password) {
+      try {
+        showLoading(loginBtn, 'Iniciando sesión...');
+        hideMessages();
+
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        console.log('✅ Usuario logueado:', user);
+        showSuccess('¡Inicio de sesión exitoso!');
+
+        // Redirigir después de éxito
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 1000);
+
+      } catch (error) {
+        console.error('❌ Error en login:', error);
+        hideLoading(loginBtn, 'Iniciar Sesión');
+
+        let errorMsg = 'Error al iniciar sesión';
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMsg = 'Usuario no encontrado. ¿Deseas crear una cuenta?';
+            break;
+          case 'auth/wrong-password':
+            errorMsg = 'Contraseña incorrecta';
+            break;
+          case 'auth/invalid-email':
+            errorMsg = 'Email inválido';
+            break;
+          case 'auth/user-disabled':
+            errorMsg = 'Usuario deshabilitado';
+            break;
+          case 'auth/too-many-requests':
+            errorMsg = 'Demasiados intentos. Intenta más tarde';
+            break;
+          default:
+            errorMsg = error.message;
+        }
+        showError(errorMsg);
+      }
+    }
+
+    // Crear cuenta
+    async function createAccount(email, password) {
+      try {
+        showLoading(createAccountBtn, 'Creando cuenta...');
+        hideMessages();
+
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Actualizar perfil con nombre
+        const displayName = email.split('@')[0];
+        await updateProfile(user, { displayName });
+
+        console.log('✅ Cuenta creada:', user);
+        showSuccess('¡Cuenta creada exitosamente! Iniciando sesión...');
+
+        // Redirigir después de éxito
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 1500);
+
+      } catch (error) {
+        console.error('❌ Error creando cuenta:', error);
+        hideLoading(createAccountBtn, 'Crear Cuenta Nueva');
+
+        let errorMsg = 'Error al crear cuenta';
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMsg = 'El email ya está registrado. Intenta iniciar sesión';
+            break;
+          case 'auth/invalid-email':
+            errorMsg = 'Email inválido';
+            break;
+          case 'auth/weak-password':
+            errorMsg = 'La contraseña debe tener al menos 6 caracteres';
+            break;
+          default:
+            errorMsg = error.message;
+        }
+        showError(errorMsg);
+      }
+    }
+
+    // Cambiar modo entre login y crear cuenta
+    function toggleMode() {
+      isCreatingAccount = !isCreatingAccount;
+      
+      if (isCreatingAccount) {
+        loginBtn.querySelector('.btn-text').textContent = 'Crear Cuenta';
+        createAccountBtn.querySelector('span:last-child').textContent = 'Ya tengo cuenta';
+        document.querySelector('h1').nextElementSibling.textContent = 'Crea tu cuenta nueva';
+      } else {
+        loginBtn.querySelector('.btn-text').textContent = 'Iniciar Sesión';
+        createAccountBtn.querySelector('span:last-child').textContent = 'Crear Cuenta Nueva';
+        document.querySelector('h1').nextElementSibling.textContent = 'Cumple tu sueño con la lotería mexicana';
+      }
+      
+      hideMessages();
+    }
+
+    // Event Listeners
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      
+      if (!email || !password) {
+        showError('Por favor completa todos los campos');
+        return;
+      }
+
+      if (isCreatingAccount) {
+        await createAccount(email, password);
+      } else {
+        await loginWithEmail(email, password);
+      }
+    });
+
+    createAccountBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleMode();
+    });
+
+    // Auto-llenar demo
+    emailInput.addEventListener('focus', () => {
+      if (!emailInput.value) {
+        emailInput.value = 'demo@yamevi.com';
+        passwordInput.value = 'demo123';
+      }
+    });
+
+    console.log('🚀 Login APK iniciado - Solo email');
+  </script>
+</body>
+</html>
