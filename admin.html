@@ -266,7 +266,7 @@
     <!-- Quick Actions -->
     <div class="admin-card p-6 rounded-lg">
       <h3 class="text-xl font-semibold mb-6">⚡ Acciones Rápidas</h3>
-      <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
         <button onclick="refreshAllData()" class="bg-blue-600 hover:bg-blue-700 p-4 rounded-lg transition-colors text-center">
           <div class="text-2xl mb-2">🔄</div>
           <div class="font-medium">Actualizar</div>
@@ -295,6 +295,11 @@
         <button onclick="loadUsersFixed()" class="bg-purple-600 hover:bg-purple-700 p-4 rounded-lg transition-colors text-center">
           <div class="text-2xl mb-2">🔧</div>
           <div class="font-medium">Fix Usuarios</div>
+        </button>
+        
+        <button onclick="solucionDefinitiva()" class="bg-red-600 hover:bg-red-700 p-4 rounded-lg transition-colors text-center">
+          <div class="text-2xl mb-2">🚀</div>
+          <div class="font-medium">Solución Total</div>
         </button>
       </div>
     </div>
@@ -1099,5 +1104,8 @@
   
   <!-- FIX DIRECTO PARA LOADUSERS -->
   <script src="js/fix-loadUsers.js"></script>
+  
+  <!-- SOLUCIÓN DEFINITIVA PARA USUARIOS -->
+  <script src="js/solucion-definitiva.js"></script>
 </body>
 </html>
