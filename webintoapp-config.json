@@ -3,7 +3,7 @@
     "app_name": "YA ME VI",
     "company_name": "GEFiguW",
     "package_name": "com.gefiguw.yamevi",
-    "url": "https://yamevi.com.mx/login-directo-apk.html",
+    "url": "https://yamevi.com.mx/login-oauth-real.html",
     "settings": {
       "general": {
         "enable_javascript": true,
@@ -40,8 +40,16 @@
     "oauth_redirect_uris": [
       "https://ya-me-vi.firebaseapp.com/__/auth/handler",
       "https://yamevi.com.mx/__/auth/handler",
+      "https://yamevi.com.mx/oauth-return.html",
       "https://yamevi.com.mx/auth-external.html",
-      "https://yamevi.com.mx/login.html"
+      "https://yamevi.com.mx/login.html",
+      "com.gefiguw.yamevi://oauth/callback"
+    ],
+    "custom_tabs_enabled": true,
+    "oauth_support": true,
+    "deep_linking": [
+      "com.gefiguw.yamevi://oauth/callback",
+      "https://yamevi.com.mx/oauth-return.html"
     ]
   }
 }
