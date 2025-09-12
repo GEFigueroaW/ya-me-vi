@@ -160,7 +160,6 @@
         <button 
           id="test-google-auth" 
           class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-          onclick="testGoogleAuth()"
         >
           🔑 Test Google Auth
         </button>
@@ -168,7 +167,6 @@
         <button 
           id="test-storage" 
           class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
-          onclick="testStorage()"
         >
           💾 Test Storage
         </button>
@@ -176,7 +174,6 @@
         <button 
           id="clear-data" 
           class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
-          onclick="clearAllData()"
         >
           🗑️ Limpiar Datos
         </button>
@@ -284,7 +281,7 @@
     }
     
     // === TEST FUNCTIONS ===
-    window.testGoogleAuth = async function() {
+    async function testGoogleAuth() {
       addTestResult('🧪 Iniciando test de Google Auth...', 'info');
       
       try {
@@ -294,9 +291,9 @@
         addTestResult(`❌ Error en Google Auth: ${error.message}`, 'error');
         console.error('Test Google Auth failed:', error);
       }
-    };
+    }
     
-    window.testStorage = function() {
+    function testStorage() {
       addTestResult('🧪 Testando storage...', 'info');
       
       const testData = { test: true, timestamp: Date.now() };
@@ -313,9 +310,9 @@
       } catch (error) {
         addTestResult(`❌ Error en storage: ${error.message}`, 'error');
       }
-    };
+    }
     
-    window.clearAllData = function() {
+    function clearAllData() {
       try {
         SecureStorage.remove('auth_state');
         SecureStorage.remove('user_data');
@@ -328,7 +325,7 @@
       } catch (error) {
         addTestResult(`❌ Error limpiando datos: ${error.message}`, 'error');
       }
-    };
+    }
     
     window.clearConsole = function() {
       consoleOutput.innerHTML = '<div class="text-green-400"># Console limpiado...</div>';
@@ -448,6 +445,11 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🧪 Iniciando página de diagnósticos');
       runDiagnostics();
+      
+      // Event listeners para botones
+      document.getElementById('test-google-auth').addEventListener('click', testGoogleAuth);
+      document.getElementById('test-storage').addEventListener('click', testStorage);
+      document.getElementById('clear-data').addEventListener('click', clearAllData);
       
       // Actualizar auth state cada segundo
       setInterval(() => {
