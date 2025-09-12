@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YA ME VI - Login Funcional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white bg-opacity-20 backdrop-blur-lg rounded-2xl p-8">
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4">🎯</div>
+                <h1 class="text-3xl font-bold text-white mb-2">YA ME VI</h1>
+                <p class="text-white text-opacity-80">Login Funcional</p>
+            </div>
+
+            <div id="status" class="mb-6 p-4 rounded-lg bg-blue-500 bg-opacity-20">
+                <p class="text-white">🔍 Verificando estado...</p>
+            </div>
+
+            <!-- Google Login -->
+            <button id="googleBtn" class="w-full bg-white bg-opacity-20 text-white py-3 px-6 rounded-lg border border-white border-opacity-30 hover:bg-opacity-30 transition-all duration-300 mb-4">
+                🔑 Login con Google
+            </button>
+
+            <!-- Email Login -->
+            <div class="space-y-3 mb-4">
+                <input type="email" id="email" placeholder="📧 Email" value="eugenfw@gmail.com" class="w-full p-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30">
+                <input type="password" id="password" placeholder="🔒 Password" class="w-full p-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30">
+                <button id="emailBtn" class="w-full bg-green-500 bg-opacity-60 text-white py-3 px-6 rounded-lg hover:bg-opacity-80 transition-all duration-300">
+                    ✅ Login con Email
+                </button>
+            </div>
+
+            <!-- Direct Admin Access -->
+            <button id="adminBtn" class="w-full bg-red-500 bg-opacity-60 text-white py-3 px-6 rounded-lg hover:bg-opacity-80 transition-all duration-300 mb-4">
+                🔧 Acceso Directo Admin
+            </button>
+
+            <div id="log" class="mt-6 p-4 rounded-lg bg-black bg-opacity-20 text-white text-sm max-h-60 overflow-y-auto">
+                <h3 class="font-bold mb-2">📋 Log:</h3>
+                <div id="logContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from './js/firebase-init.js';
+        import { 
+            signInWithEmailAndPassword, 
+            signInWithPopup, 
+            GoogleAuthProvider,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const status = document.getElementById('status');
+        const logContent = document.getElementById('logContent');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-blue-300',
+                success: 'text-green-300', 
+                error: 'text-red-300',
+                warning: 'text-yellow-300'
+            };
+            
+            logContent.innerHTML += `<div class="${colors[type]}">${timestamp}: ${message}</div>`;
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function updateStatus(message, isSuccess = false) {
+            status.innerHTML = `<p class="text-${isSuccess ? 'green' : 'blue'}-300">${message}</p>`;
+        }
+
+        // Monitor auth state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                log(`✅ Usuario autenticado: ${user.email}`, 'success');
+                updateStatus(`✅ Autenticado como: ${user.email}`, true);
+                
+                // Add buttons to go to different pages
+                status.innerHTML += `
+                    <div class="mt-3 space-y-2">
+                        <button onclick="location.href='admin.html'" class="block w-full bg-green-500 text-white px-4 py-2 rounded">
+                            🚀 Ir a Admin Panel
+                        </button>
+                        <button onclick="location.href='home.html'" class="block w-full bg-blue-500 text-white px-4 py-2 rounded">
+                            🏠 Ir a Home
+                        </button>
+                    </div>
+                `;
+            } else {
+                log('❌ No hay usuario autenticado', 'warning');
+                updateStatus('❌ No autenticado');
+            }
+        });
+
+        // Google login
+        document.getElementById('googleBtn').addEventListener('click', async () => {
+            try {
+                log('🔍 Iniciando login con Google...', 'info');
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(auth, provider);
+                log(`✅ Login Google exitoso: ${result.user.email}`, 'success');
+            } catch (error) {
+                log(`❌ Error Google: ${error.message}`, 'error');
+            }
+        });
+
+        // Email login
+        document.getElementById('emailBtn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                log('❌ Email y password requeridos', 'error');
+                return;
+            }
+
+            try {
+                log(`🔍 Iniciando login con email: ${email}`, 'info');
+                const result = await signInWithEmailAndPassword(auth, email, password);
+                log(`✅ Login email exitoso: ${result.user.email}`, 'success');
+            } catch (error) {
+                log(`❌ Error email: ${error.message}`, 'error');
+            }
+        });
+
+        // Direct admin access (bypass login for testing)
+        document.getElementById('adminBtn').addEventListener('click', () => {
+            log('🔧 Redirigiendo directamente a admin...', 'warning');
+            window.location.href = 'admin.html';
+        });
+
+        // Enter key support
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('emailBtn').click();
+            }
+        });
+
+        log('🚀 Página de login funcional cargada', 'info');
+        updateStatus('🔍 Listo para login');
+    </script>
+</body>
+</html>

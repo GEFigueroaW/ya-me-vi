@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YA ME VI - Login Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white bg-opacity-20 backdrop-blur-lg rounded-2xl p-8">
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4">🎯</div>
+                <h1 class="text-3xl font-bold text-white mb-2">YA ME VI</h1>
+                <p class="text-white text-opacity-80">Login Debug</p>
+            </div>
+
+            <div id="loginStatus" class="mb-6 p-4 rounded-lg bg-blue-500 bg-opacity-20">
+                <p class="text-white">🔍 Iniciando Firebase...</p>
+            </div>
+
+            <div class="space-y-4">
+                <button id="googleLogin" class="w-full bg-white bg-opacity-20 text-white py-3 px-6 rounded-lg border border-white border-opacity-30 hover:bg-opacity-30 transition-all duration-300">
+                    🔑 Login con Google
+                </button>
+
+                <button id="emailLogin" class="w-full bg-blue-500 bg-opacity-60 text-white py-3 px-6 rounded-lg hover:bg-opacity-80 transition-all duration-300">
+                    📧 Login con Email/Password
+                </button>
+
+                <div id="emailForm" class="hidden space-y-4">
+                    <input type="email" id="email" placeholder="Email" class="w-full p-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30">
+                    <input type="password" id="password" placeholder="Contraseña" class="w-full p-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-60 border border-white border-opacity-30">
+                    <button id="submitLogin" class="w-full bg-green-500 bg-opacity-60 text-white py-3 px-6 rounded-lg hover:bg-opacity-80 transition-all duration-300">
+                        ✅ Iniciar Sesión
+                    </button>
+                </div>
+            </div>
+
+            <div id="debugInfo" class="mt-6 p-4 rounded-lg bg-black bg-opacity-20 text-white text-sm">
+                <h3 class="font-bold mb-2">🐛 Debug Info:</h3>
+                <div id="debugLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-init.js';
+        import { 
+            signInWithEmailAndPassword, 
+            signInWithPopup, 
+            GoogleAuthProvider,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const statusDiv = document.getElementById('loginStatus');
+        const debugLog = document.getElementById('debugLog');
+        
+        function log(message) {
+            console.log(message);
+            debugLog.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+        }
+
+        log('🔥 Firebase inicializado');
+        log(`🆔 Project ID: ${db.app.options.projectId}`);
+
+        // Monitor auth state
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                log(`✅ Usuario autenticado: ${user.email}`);
+                log(`🆔 UID: ${user.uid}`);
+                
+                statusDiv.innerHTML = `
+                    <p class="text-green-300">✅ Autenticado como: ${user.email}</p>
+                    <button onclick="location.href='admin.html'" class="mt-2 bg-green-500 text-white px-4 py-2 rounded">
+                        🚀 Ir a Admin Panel
+                    </button>
+                `;
+
+                // Test Firestore access
+                try {
+                    log('🔍 Probando acceso a Firestore...');
+                    const querySnapshot = await getDocs(collection(db, 'users'));
+                    log(`📊 Usuarios encontrados: ${querySnapshot.size}`);
+                    
+                    querySnapshot.forEach((doc) => {
+                        log(`👤 Usuario: ${doc.id} - ${doc.data().email || 'Sin email'}`);
+                    });
+                } catch (error) {
+                    log(`❌ Error Firestore: ${error.message}`);
+                }
+            } else {
+                log('❌ No hay usuario autenticado');
+                statusDiv.innerHTML = '<p class="text-red-300">❌ No autenticado</p>';
+            }
+        });
+
+        // Google login
+        document.getElementById('googleLogin').addEventListener('click', async () => {
+            try {
+                log('🔍 Intentando login con Google...');
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(auth, provider);
+                log(`✅ Login exitoso: ${result.user.email}`);
+            } catch (error) {
+                log(`❌ Error Google login: ${error.message}`);
+            }
+        });
+
+        // Email login toggle
+        document.getElementById('emailLogin').addEventListener('click', () => {
+            const form = document.getElementById('emailForm');
+            form.classList.toggle('hidden');
+        });
+
+        // Email login submit
+        document.getElementById('submitLogin').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                log('❌ Email y contraseña requeridos');
+                return;
+            }
+
+            try {
+                log(`🔍 Intentando login con: ${email}`);
+                const result = await signInWithEmailAndPassword(auth, email, password);
+                log(`✅ Login exitoso: ${result.user.email}`);
+            } catch (error) {
+                log(`❌ Error email login: ${error.message}`);
+                log(`📋 Código de error: ${error.code}`);
+            }
+        });
+
+        log('🚀 Página de debug lista');
+    </script>
+</body>
+</html>

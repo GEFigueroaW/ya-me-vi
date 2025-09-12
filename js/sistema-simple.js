@@ -35,15 +35,27 @@ async function cargarUsuariosRealesSimple() {
   tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-blue-400 animate-pulse">🔄 Cargando usuarios reales...</td></tr>';
   
   try {
-    // Intentar Firestore REAL sin crear nada
-    if (!window.db) {
-      throw new Error('Base de datos no disponible');
-    }
+    // Importar Firebase y configurar
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     
-    const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+      authDomain: "ya-me-vi.firebaseapp.com",
+      projectId: "ya-me-vi",
+      storageBucket: "ya-me-vi.firebasestorage.app",
+      messagingSenderId: "748876890843",
+      appId: "1:748876890843:web:07bd1eb476d38594d002fe",
+      measurementId: "G-D7R797S5BC"
+    };
+    
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
     
     console.log('🔍 Consultando Firestore REAL...');
-    const snapshot = await getDocs(collection(window.db, 'users'));
+    const snapshot = await getDocs(collection(db, 'users'));
     
     console.log(`📊 Encontrados: ${snapshot.size} usuarios en Firestore`);
     

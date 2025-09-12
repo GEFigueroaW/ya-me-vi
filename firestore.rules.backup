@@ -1,0 +1,118 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Función helper para verificar admin
+    function isAdmin() {
+      return request.auth != null && 
+        request.auth.token.email in [
+          'gfigueroa.w@gmail.com',
+          'eugenfw@gmail.com', 
+          'admin@yamevi.com.mx',
+          'guillermo.figueroaw@totalplay.com.mx'
+        ];
+    }
+    
+    // Función helper para verificar admin por documento
+    function isAdminByDoc() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Reglas para usuarios - ACCESO COMPLETO
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin() || isAdminByDoc();
+      
+      // Subcolecciones del usuario (profile, dream, etc.)
+      match /{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if isAdmin() || isAdminByDoc();
+      }
+    }
+    
+    // NUEVAS REGLAS PARA ADMIN - Acceso completo a colecciones administrativas
+    match /queries/{queryId} {
+      allow read: if isAdmin() || isAdminByDoc();
+      allow write: if request.auth != null;
+    }
+    
+    match /analysis/{analysisId} {
+      allow read: if isAdmin() || isAdminByDoc();
+      allow write: if request.auth != null;
+    }
+    
+    match /notifications/{notificationId} {
+      allow read, write: if isAdmin() || isAdminByDoc();
+    }
+    
+    match /pushNotifications/{notificationId} {
+      allow read, write: if isAdmin() || isAdminByDoc();
+    }
+    
+    match /inAppNotifications/{notificationId} {
+      allow read, write: if isAdmin() || isAdminByDoc();
+    }
+    
+    match /emailNotifications/{notificationId} {
+      allow read, write: if isAdmin() || isAdminByDoc();
+    }
+    
+    // Reglas para actividad de usuarios
+    match /user_activity/{activityId} {
+      allow create: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.userId || isAdmin() || isAdminByDoc());
+    }
+    
+    // Reglas para análisis individuales
+    match /individual_analysis/{analysisId} {
+      allow create: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.userId || isAdmin() || isAdminByDoc());
+    }
+    
+    // Reglas para análisis de combinaciones
+    match /combination_analysis/{analysisId} {
+      allow create: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.userId || isAdmin() || isAdminByDoc());
+    }
+    
+    // Reglas para predicciones ML
+    match /ml_predictions/{predictionId} {
+      allow create: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.userId || isAdmin() || isAdminByDoc());
+    }
+    
+    // Reglas para combinaciones de usuarios
+    match /user_combinations/{combinationId} {
+      allow create, update: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.userId || isAdmin() || isAdminByDoc());
+    }
+    
+    // Reglas para resultados de lotería (lectura para todos, escritura para admin)
+    match /lottery_results/{resultId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isAdminByDoc();
+    }
+    
+    // Reglas para logs de notificaciones (admin completo)
+    match /notification_logs/{logId} {
+      allow read, write: if isAdmin() || isAdminByDoc();
+    }
+    
+    // Reglas para logs de email (admin completo)
+    match /email_logs/{logId} {
+      allow read, write: if isAdmin() || isAdminByDoc();
+    }
+    
+    // REGLA TEMPORAL PARA DESARROLLO - Admin puede acceder a todo
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
