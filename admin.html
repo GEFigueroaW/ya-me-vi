@@ -266,7 +266,7 @@
     <!-- Quick Actions -->
     <div class="admin-card p-6 rounded-lg">
       <h3 class="text-xl font-semibold mb-6">⚡ Acciones Rápidas</h3>
-      <div class="grid grid-cols-1 md:grid-cols-9 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <button onclick="refreshAllData()" class="bg-blue-600 hover:bg-blue-700 p-4 rounded-lg transition-colors text-center">
           <div class="text-2xl mb-2">🔄</div>
           <div class="font-medium">Actualizar</div>
@@ -277,39 +277,14 @@
           <div class="font-medium">Exportar</div>
         </button>
         
-        <button onclick="viewLogs()" class="bg-orange-600 hover:bg-orange-700 p-4 rounded-lg transition-colors text-center">
-          <div class="text-2xl mb-2">📋</div>
-          <div class="font-medium">Ver Logs</div>
+        <button onclick="cargarUsuariosRealesSimple()" class="bg-purple-600 hover:bg-purple-700 p-4 rounded-lg transition-colors text-center">
+          <div class="text-2xl mb-2">�</div>
+          <div class="font-medium">Usuarios Reales</div>
         </button>
         
-        <button onclick="manageDB()" class="bg-purple-600 hover:bg-purple-700 p-4 rounded-lg transition-colors text-center">
-          <div class="text-2xl mb-2">🗄️</div>
+        <button onclick="manageDB()" class="bg-gray-600 hover:bg-gray-700 p-4 rounded-lg transition-colors text-center">
+          <div class="text-2xl mb-2">�️</div>
           <div class="font-medium">Gestionar DB</div>
-        </button>
-        
-        <button onclick="syncUserData()" class="bg-cyan-600 hover:bg-cyan-700 p-4 rounded-lg transition-colors text-center">
-          <div class="text-2xl mb-2">👥</div>
-          <div class="font-medium">Sync Usuarios</div>
-        </button>
-        
-        <button onclick="loadUsersFixed()" class="bg-purple-600 hover:bg-purple-700 p-4 rounded-lg transition-colors text-center">
-          <div class="text-2xl mb-2">🔧</div>
-          <div class="font-medium">Fix Usuarios</div>
-        </button>
-        
-        <button onclick="solucionDefinitiva()" class="bg-red-600 hover:bg-red-700 p-4 rounded-lg transition-colors text-center">
-          <div class="text-2xl mb-2">🚀</div>
-          <div class="font-medium">Solución Total</div>
-        </button>
-        
-        <button onclick="verificarDatosReales()" class="bg-yellow-600 hover:bg-yellow-700 p-4 rounded-lg transition-colors text-center">
-          <div class="text-2xl mb-2">🔍</div>
-          <div class="font-medium">Verificar Datos</div>
-        </button>
-        
-        <button onclick="mostrarSoloReales()" class="bg-green-600 hover:bg-green-700 p-4 rounded-lg transition-colors text-center">
-          <div class="text-2xl mb-2">✅</div>
-          <div class="font-medium">Solo Reales</div>
         </button>
       </div>
     </div>
@@ -1103,22 +1078,7 @@
     console.log('📋 Script de administración cargado');
   </script>
   
-  <!-- Script optimizado para carga de usuarios -->
-  <script type="module" src="js/adminUsersIntegration.js"></script>
-  
-  <!-- Script para sincronización de datos de usuarios -->
-  <script type="module" src="js/userDataSync.js"></script>
-  
-  <!-- Solución completa para el problema de usuarios -->
-  <script type="module" src="js/adminUsersCompleteSolution.js"></script>
-  
-  <!-- FIX DIRECTO PARA LOADUSERS -->
-  <script src="js/fix-loadUsers.js"></script>
-  
-  <!-- SOLUCIÓN DEFINITIVA PARA USUARIOS -->
-  <script src="js/solucion-definitiva.js"></script>
-  
-  <!-- VERIFICADOR DE DATOS REALES -->
-  <script src="js/verificador-datos.js"></script>
+  <!-- SISTEMA SIMPLE - SOLO USUARIOS REALES -->
+  <script src="js/sistema-simple.js"></script>
 </body>
 </html>
