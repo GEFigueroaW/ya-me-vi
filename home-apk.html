@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Inicio APK</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- iOS Safari Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="overflow-hidden">
+
+  <!-- Fondo con Imagen y Overlay -->
+  <div class="fixed inset-0 z-0">
+    <div id="background" class="absolute inset-0 transition-all duration-1000"></div>
+    <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-8">
+    
+    <!-- Header con Usuario -->
+    <div class="absolute top-4 right-4 flex items-center space-x-4">
+      <!-- Info del Usuario -->
+      <div id="user-info" class="text-white text-right hidden">
+        <div id="user-name" class="font-semibold text-sm"></div>
+        <div id="user-email" class="text-xs opacity-75"></div>
+      </div>
+      
+      <!-- Avatar del Usuario -->
+      <div id="user-avatar" class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hidden">
+        <img id="user-photo" class="w-8 h-8 rounded-full hidden" alt="Usuario">
+        <span id="user-initial" class="text-white font-bold text-sm"></span>
+      </div>
+      
+      <!-- Botón Logout -->
+      <button 
+        id="logout-btn" 
+        class="bg-red-500 bg-opacity-20 hover:bg-opacity-40 text-white p-2 rounded-lg transition-all duration-300 hidden"
+        title="Cerrar Sesión"
+      >
+        🚪
+      </button>
+    </div>
+
+    <!-- Logo y Título -->
+    <div class="text-center mb-12 animate__animated animate__fadeInDown">
+      <div class="mb-6">
+        <div class="w-32 h-32 bg-white bg-opacity-10 rounded-full flex items-center justify-center mx-auto backdrop-blur-lg border border-white border-opacity-30 shadow-xl">
+          <span class="text-4xl font-bold text-white">YA</span>
+        </div>
+      </div>
+      <h1 id="welcome-msg" class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 drop-shadow-lg">
+        ¡Bienvenido a YA ME VI!
+      </h1>
+      <p class="text-xl md:text-2xl font-light text-white mt-4 drop-shadow-md">
+        Cumple tu sueño con la lotería mexicana
+      </p>
+    </div>
+
+    <!-- Botones Principales -->
+    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 mb-8 animate__animated animate__fadeInUp animate__delay-1s">
+      <button id="btn-analisis" class="bg-gray-800 bg-opacity-70 backdrop-blur-lg border border-white border-opacity-30 px-8 py-4 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300 text-center whitespace-nowrap shadow-lg">
+        📊 Analizar últimos sorteos
+      </button>
+      <button id="btn-combinacion" class="bg-gray-800 bg-opacity-70 backdrop-blur-lg border border-white border-opacity-30 px-8 py-4 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300 text-center whitespace-nowrap shadow-lg">
+        🎯 Evaluar mi combinación
+      </button>
+      <button id="btn-sugeridas" class="bg-gray-800 bg-opacity-70 backdrop-blur-lg border border-white border-opacity-30 px-8 py-4 rounded-full text-white hover:bg-white hover:text-gray-800 transition-all duration-300 text-center whitespace-nowrap shadow-lg">
+        💡 Combinaciones sugeridas
+      </button>
+      <!-- Botón de Admin -->
+      <button id="btn-admin" class="admin-only bg-purple-800 bg-opacity-80 backdrop-blur-lg border border-white border-opacity-30 px-8 py-4 rounded-full text-white hover:bg-purple-900 transition-all duration-300 text-center whitespace-nowrap hidden shadow-lg">
+        🔐 Control Admin
+      </button>
+    </div>
+
+    <!-- Información de Estado (para APK) -->
+    <div id="apk-info" class="bg-green-500 bg-opacity-20 border border-green-400 rounded-lg p-4 mb-6 hidden">
+      <div class="text-green-200 text-center">
+        <span class="text-sm">📱 Versión APK WebIntoApp</span>
+        <div class="text-xs opacity-75 mt-1">Sistema de autenticación directa activo</div>
+      </div>
+    </div>
+
+    <!-- Sección de Análisis -->
+    <div class="mt-12 max-w-4xl mx-auto">
+      <div class="text-lg md:text-xl font-normal text-yellow-300 mt-2 drop-shadow-md text-center mb-6" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.6);">
+        📊 Análisis de los últimos 18 meses de sorteos
+      </div>
+      
+      <div class="text-lg md:text-xl font-normal text-white mt-2 drop-shadow-md text-center" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.6);">
+        <span id="ultimo-sorteo-numero">🎯 Sistema listo para análisis...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-container" class="absolute bottom-0 left-0 w-full z-10"></div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  
+  <script type="module">
+    import { hybridAuth, authGuard, toggleAdminElements } from './js/auth-hybrid.js';
+    
+    console.log('🏠 Home APK inicializando...');
+    
+    // Variables globales
+    let currentUser = null;
+    let isWebViewEnvironment = false;
+    
+    // Detectar entorno
+    function detectEnvironment() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      isWebViewEnvironment = /wv|webview/.test(userAgent) || 
+                            /webintoapp/i.test(userAgent) || 
+                            !window.chrome || 
+                            typeof window.chrome.runtime === 'undefined';
+      
+      console.log('🔍 Entorno detectado:', isWebViewEnvironment ? 'WebView/APK' : 'Browser');
+      
+      if (isWebViewEnvironment) {
+        document.getElementById('apk-info').classList.remove('hidden');
+      }
+    }
+    
+    // Verificar autenticación
+    function checkAuthentication() {
+      if (!authGuard()) {
+        return false;
+      }
+      
+      currentUser = hybridAuth.getCurrentUser();
+      if (currentUser) {
+        setupUserInterface(currentUser);
+        toggleAdminElements(currentUser);
+        return true;
+      }
+      
+      return false;
+    }
+    
+    // Configurar interfaz de usuario
+    function setupUserInterface(user) {
+      console.log('👤 Configurando UI para usuario:', user.email);
+      
+      // Mostrar información del usuario
+      const userInfo = document.getElementById('user-info');
+      const userAvatar = document.getElementById('user-avatar');
+      const logoutBtn = document.getElementById('logout-btn');
+      
+      // Nombre y email
+      document.getElementById('user-name').textContent = user.displayName || user.email.split('@')[0];
+      document.getElementById('user-email').textContent = user.email;
+      
+      // Avatar
+      if (user.photoURL) {
+        document.getElementById('user-photo').src = user.photoURL;
+        document.getElementById('user-photo').classList.remove('hidden');
+      } else {
+        const initial = (user.displayName || user.email).charAt(0).toUpperCase();
+        document.getElementById('user-initial').textContent = initial;
+      }
+      
+      // Mostrar elementos
+      userInfo.classList.remove('hidden');
+      userAvatar.classList.remove('hidden');
+      logoutBtn.classList.remove('hidden');
+      
+      // Mensaje de bienvenida personalizado
+      const welcomeMsg = document.getElementById('welcome-msg');
+      const userName = user.displayName || user.email.split('@')[0];
+      welcomeMsg.textContent = `¡Bienvenido ${userName}!`;
+      
+      // Información adicional del tipo de usuario
+      const userType = user.provider === 'google.com' ? 'Google' : 
+                      user.provider === 'demo' ? 'Demo' : 'Email';
+      console.log(`✅ Usuario ${userType} configurado correctamente`);
+    }
+    
+    // Configurar event listeners
+    function setupEventListeners() {
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', async () => {
+        if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+          await hybridAuth.signOut();
+        }
+      });
+      
+      // Navegación
+      document.getElementById('btn-analisis').addEventListener('click', () => {
+        window.location.href = './analisis.html';
+      });
+      
+      document.getElementById('btn-combinacion').addEventListener('click', () => {
+        window.location.href = './combinacion.html';
+      });
+      
+      document.getElementById('btn-sugeridas').addEventListener('click', () => {
+        window.location.href = './sugeridas.html';
+      });
+      
+      // Admin (si existe)
+      const adminBtn = document.getElementById('btn-admin');
+      if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+          window.location.href = './admin.html';
+        });
+      }
+    }
+    
+    // Configurar fondo
+    function setupBackground() {
+      const backgrounds = [
+        'css/vg1.jpg', 'css/vg2.jpg', 'css/vg3.jpg', 
+        'css/vg4.jpg', 'css/vg5.jpg'
+      ];
+      
+      const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+      const bgElement = document.getElementById('background');
+      bgElement.style.backgroundImage = `url('${randomBg}')`;
+      bgElement.style.backgroundSize = 'cover';
+      bgElement.style.backgroundPosition = 'center';
+      bgElement.style.backgroundRepeat = 'no-repeat';
+      
+      console.log('🎨 Fondo configurado:', randomBg);
+    }
+    
+    // Cargar footer
+    async function loadFooter() {
+      try {
+        const response = await fetch('./footer.html');
+        const footerHTML = await response.text();
+        document.getElementById('footer-container').innerHTML = footerHTML;
+      } catch (error) {
+        console.warn('⚠️ No se pudo cargar el footer:', error);
+      }
+    }
+    
+    // Inicialización principal
+    async function initialize() {
+      console.log('🚀 Inicializando Home APK...');
+      
+      detectEnvironment();
+      
+      if (!checkAuthentication()) {
+        return;
+      }
+      
+      setupEventListeners();
+      setupBackground();
+      await loadFooter();
+      
+      console.log('✅ Home APK inicializado completamente');
+    }
+    
+    // Iniciar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', initialize);
+    
+    // Manejar cambios de estado de autenticación
+    hybridAuth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('👤 Estado de auth cambió - Usuario:', user.email);
+        currentUser = user;
+        setupUserInterface(user);
+        toggleAdminElements(user);
+      } else {
+        console.log('👤 Usuario no autenticado');
+        authGuard();
+      }
+    });
+    
+    console.log('✅ Home APK scripts cargados');
+  </script>
+</body>
+</html>
