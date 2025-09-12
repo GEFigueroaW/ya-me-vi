@@ -266,7 +266,7 @@
     <!-- Quick Actions -->
     <div class="admin-card p-6 rounded-lg">
       <h3 class="text-xl font-semibold mb-6">⚡ Acciones Rápidas</h3>
-      <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-9 gap-4">
         <button onclick="refreshAllData()" class="bg-blue-600 hover:bg-blue-700 p-4 rounded-lg transition-colors text-center">
           <div class="text-2xl mb-2">🔄</div>
           <div class="font-medium">Actualizar</div>
@@ -300,6 +300,16 @@
         <button onclick="solucionDefinitiva()" class="bg-red-600 hover:bg-red-700 p-4 rounded-lg transition-colors text-center">
           <div class="text-2xl mb-2">🚀</div>
           <div class="font-medium">Solución Total</div>
+        </button>
+        
+        <button onclick="verificarDatosReales()" class="bg-yellow-600 hover:bg-yellow-700 p-4 rounded-lg transition-colors text-center">
+          <div class="text-2xl mb-2">🔍</div>
+          <div class="font-medium">Verificar Datos</div>
+        </button>
+        
+        <button onclick="mostrarSoloReales()" class="bg-green-600 hover:bg-green-700 p-4 rounded-lg transition-colors text-center">
+          <div class="text-2xl mb-2">✅</div>
+          <div class="font-medium">Solo Reales</div>
         </button>
       </div>
     </div>
@@ -1107,5 +1117,8 @@
   
   <!-- SOLUCIÓN DEFINITIVA PARA USUARIOS -->
   <script src="js/solucion-definitiva.js"></script>
+  
+  <!-- VERIFICADOR DE DATOS REALES -->
+  <script src="js/verificador-datos.js"></script>
 </body>
 </html>
