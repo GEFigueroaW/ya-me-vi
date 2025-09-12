@@ -2,27 +2,27 @@
   "project_info": {
     "project_number": "748876890843",
     "project_id": "ya-me-vi",
-    "storage_bucket": "ya-me-vi.appspot.com"
+    "storage_bucket": "ya-me-vi.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:748876890843:android:webintoapp001d002fe",
+        "mobilesdk_app_id": "1:748876890843:android:f3bf99d0c2d9a3f2d002fe",
         "android_client_info": {
           "package_name": "com.webintoapp.myapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "748876890843-ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+          "client_id": "748876890843-0aoervmma600d6qk8mc99mnpmdidde8p.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.webintoapp.myapp",
-            "certificate_hash": "sha1_placeholder"
+            "certificate_hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
           }
         },
         {
-          "client_id": "748876890843-ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+          "client_id": "748876890843-jiu4cfl2ioqgjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -35,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "748876890843-ju4cf2i0ggjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
+              "client_id": "748876890843-jiu4cfl2ioqgjomna6fa8r4pqogl3q7l.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

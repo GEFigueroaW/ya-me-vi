@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YA ME VI - Test APK Auth</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .test-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .status-ok { color: #10b981; }
+    .status-error { color: #ef4444; }
+    .status-warning { color: #f59e0b; }
+    
+    .code-block {
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-4">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">🧪 YA ME VI - Test APK Auth</h1>
+      <p class="text-purple-100">Diagnóstico de Autenticación WebIntoApp</p>
+    </div>
+
+    <!-- Test Cards Grid -->
+    <div class="grid md:grid-cols-2 gap-6">
+      
+      <!-- Environment Detection -->
+      <div class="test-card rounded-xl p-6 shadow-lg">
+        <h3 class="text-lg font-semibold mb-4 flex items-center">
+          <span class="mr-2">🔍</span>
+          Detección de Entorno
+        </h3>
+        
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>User Agent:</span>
+            <span id="user-agent" class="font-mono text-xs truncate max-w-40"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Es WebView:</span>
+            <span id="is-webview" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Entorno:</span>
+            <span id="environment" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>WebIntoApp:</span>
+            <span id="is-webintoapp" class="font-semibold"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Storage Support -->
+      <div class="test-card rounded-xl p-6 shadow-lg">
+        <h3 class="text-lg font-semibold mb-4 flex items-center">
+          <span class="mr-2">💾</span>
+          Soporte de Storage
+        </h3>
+        
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>localStorage:</span>
+            <span id="local-storage" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>sessionStorage:</span>
+            <span id="session-storage" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Cookies:</span>
+            <span id="cookies" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>IndexedDB:</span>
+            <span id="indexed-db" class="font-semibold"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Firebase Status -->
+      <div class="test-card rounded-xl p-6 shadow-lg">
+        <h3 class="text-lg font-semibold mb-4 flex items-center">
+          <span class="mr-2">🔥</span>
+          Estado Firebase
+        </h3>
+        
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>SDK Cargado:</span>
+            <span id="firebase-loaded" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Auth Inicializado:</span>
+            <span id="auth-initialized" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Usuario Actual:</span>
+            <span id="current-user" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Estado Auth:</span>
+            <span id="auth-state" class="font-semibold"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Network & Connectivity -->
+      <div class="test-card rounded-xl p-6 shadow-lg">
+        <h3 class="text-lg font-semibold mb-4 flex items-center">
+          <span class="mr-2">🌐</span>
+          Conectividad
+        </h3>
+        
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>Online:</span>
+            <span id="online-status" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Conexión:</span>
+            <span id="connection-type" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>HTTPS:</span>
+            <span id="https-status" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>CORS:</span>
+            <span id="cors-status" class="font-semibold"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auth Test Section -->
+    <div class="test-card rounded-xl p-6 shadow-lg mt-6">
+      <h3 class="text-lg font-semibold mb-4 flex items-center">
+        <span class="mr-2">🔐</span>
+        Test de Autenticación
+      </h3>
+      
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <button 
+          id="test-google-auth" 
+          class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+          onclick="testGoogleAuth()"
+        >
+          🔑 Test Google Auth
+        </button>
+        
+        <button 
+          id="test-storage" 
+          class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+          onclick="testStorage()"
+        >
+          💾 Test Storage
+        </button>
+        
+        <button 
+          id="clear-data" 
+          class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
+          onclick="clearAllData()"
+        >
+          🗑️ Limpiar Datos
+        </button>
+      </div>
+      
+      <!-- Test Results -->
+      <div id="test-results" class="space-y-2">
+        <div class="text-sm text-gray-600 mb-2">Resultados de las pruebas aparecerán aquí...</div>
+      </div>
+    </div>
+
+    <!-- Console Log -->
+    <div class="test-card rounded-xl p-6 shadow-lg mt-6">
+      <h3 class="text-lg font-semibold mb-4 flex items-center">
+        <span class="mr-2">📝</span>
+        Console Log
+        <button 
+          onclick="clearConsole()" 
+          class="ml-auto text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300"
+        >
+          Limpiar
+        </button>
+      </h3>
+      
+      <div id="console-output" class="code-block h-48 overflow-y-auto">
+        <div class="text-green-400"># Console log aparecerá aquí...</div>
+      </div>
+    </div>
+
+    <!-- Go to App -->
+    <div class="text-center mt-8">
+      <a 
+        href="./login-webintoapp.html" 
+        class="bg-purple-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-purple-600 transition-colors inline-block"
+      >
+        🚀 Ir a Login WebIntoApp
+      </a>
+      
+      <a 
+        href="./login.html" 
+        class="ml-4 bg-gray-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-600 transition-colors inline-block"
+      >
+        🌐 Login Original
+      </a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { webViewAuth, WebViewDetector, SecureStorage } from './js/webview-auth-fix.js';
+    
+    // === CONSOLE OVERRIDE ===
+    const originalConsole = { ...console };
+    const consoleOutput = document.getElementById('console-output');
+    
+    function addToConsole(type, ...args) {
+      const timestamp = new Date().toLocaleTimeString();
+      const message = args.map(arg => 
+        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+      ).join(' ');
+      
+      const color = {
+        log: '#e5e7eb',
+        info: '#60a5fa',
+        warn: '#fbbf24',
+        error: '#f87171'
+      }[type] || '#e5e7eb';
+      
+      const logEntry = document.createElement('div');
+      logEntry.style.color = color;
+      logEntry.innerHTML = `<span style="color: #9ca3af">[${timestamp}]</span> ${message}`;
+      
+      consoleOutput.appendChild(logEntry);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+      
+      // Llamar al console original
+      originalConsole[type](...args);
+    }
+    
+    console.log = (...args) => addToConsole('log', ...args);
+    console.info = (...args) => addToConsole('info', ...args);
+    console.warn = (...args) => addToConsole('warn', ...args);
+    console.error = (...args) => addToConsole('error', ...args);
+    
+    // === UTILITY FUNCTIONS ===
+    function setStatus(elementId, status, type = 'ok') {
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.textContent = status;
+        element.className = `font-semibold status-${type}`;
+      }
+    }
+    
+    function addTestResult(message, type = 'info') {
+      const results = document.getElementById('test-results');
+      const result = document.createElement('div');
+      result.className = `text-sm p-2 rounded ${
+        type === 'error' ? 'bg-red-100 text-red-700' :
+        type === 'success' ? 'bg-green-100 text-green-700' :
+        type === 'warning' ? 'bg-yellow-100 text-yellow-700' :
+        'bg-blue-100 text-blue-700'
+      }`;
+      result.textContent = message;
+      results.appendChild(result);
+      results.scrollTop = results.scrollHeight;
+    }
+    
+    // === TEST FUNCTIONS ===
+    window.testGoogleAuth = async function() {
+      addTestResult('🧪 Iniciando test de Google Auth...', 'info');
+      
+      try {
+        await webViewAuth.signInWithGoogle();
+        addTestResult('✅ Google Auth iniciado correctamente', 'success');
+      } catch (error) {
+        addTestResult(`❌ Error en Google Auth: ${error.message}`, 'error');
+        console.error('Test Google Auth failed:', error);
+      }
+    };
+    
+    window.testStorage = function() {
+      addTestResult('🧪 Testando storage...', 'info');
+      
+      const testData = { test: true, timestamp: Date.now() };
+      
+      try {
+        SecureStorage.set('test_data', testData);
+        const retrieved = SecureStorage.get('test_data');
+        
+        if (JSON.stringify(retrieved) === JSON.stringify(testData)) {
+          addTestResult('✅ Storage funcionando correctamente', 'success');
+        } else {
+          addTestResult('⚠️ Storage con inconsistencias', 'warning');
+        }
+      } catch (error) {
+        addTestResult(`❌ Error en storage: ${error.message}`, 'error');
+      }
+    };
+    
+    window.clearAllData = function() {
+      try {
+        SecureStorage.remove('auth_state');
+        SecureStorage.remove('user_data');
+        SecureStorage.remove('test_data');
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        addTestResult('🗑️ Todos los datos limpiados', 'info');
+        setTimeout(() => location.reload(), 1000);
+      } catch (error) {
+        addTestResult(`❌ Error limpiando datos: ${error.message}`, 'error');
+      }
+    };
+    
+    window.clearConsole = function() {
+      consoleOutput.innerHTML = '<div class="text-green-400"># Console limpiado...</div>';
+    };
+    
+    // === DIAGNOSTIC FUNCTIONS ===
+    function runDiagnostics() {
+      console.log('🧪 Ejecutando diagnósticos...');
+      
+      // Environment Detection
+      const userAgent = navigator.userAgent;
+      const isWebView = WebViewDetector.isWebView();
+      const environment = WebViewDetector.getEnvironment();
+      const isWebIntoApp = /webintoapp/i.test(userAgent) || window.webintoapp !== undefined;
+      
+      document.getElementById('user-agent').textContent = userAgent.substring(0, 50) + '...';
+      setStatus('is-webview', isWebView ? 'Sí' : 'No', isWebView ? 'ok' : 'warning');
+      setStatus('environment', environment, environment === 'webview' ? 'ok' : 'warning');
+      setStatus('is-webintoapp', isWebIntoApp ? 'Sí' : 'No', isWebIntoApp ? 'ok' : 'error');
+      
+      // Storage Support
+      testStorageSupport();
+      
+      // Firebase Status
+      testFirebaseStatus();
+      
+      // Network & Connectivity
+      testConnectivity();
+      
+      console.log('✅ Diagnósticos completados');
+    }
+    
+    function testStorageSupport() {
+      // localStorage
+      try {
+        localStorage.setItem('test', 'test');
+        localStorage.removeItem('test');
+        setStatus('local-storage', 'Disponible', 'ok');
+      } catch (e) {
+        setStatus('local-storage', 'No disponible', 'error');
+      }
+      
+      // sessionStorage
+      try {
+        sessionStorage.setItem('test', 'test');
+        sessionStorage.removeItem('test');
+        setStatus('session-storage', 'Disponible', 'ok');
+      } catch (e) {
+        setStatus('session-storage', 'No disponible', 'error');
+      }
+      
+      // Cookies
+      try {
+        document.cookie = 'test=test';
+        const cookiesEnabled = document.cookie.indexOf('test=test') !== -1;
+        document.cookie = 'test=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        setStatus('cookies', cookiesEnabled ? 'Disponible' : 'No disponible', cookiesEnabled ? 'ok' : 'error');
+      } catch (e) {
+        setStatus('cookies', 'No disponible', 'error');
+      }
+      
+      // IndexedDB
+      try {
+        const hasIndexedDB = 'indexedDB' in window;
+        setStatus('indexed-db', hasIndexedDB ? 'Disponible' : 'No disponible', hasIndexedDB ? 'ok' : 'warning');
+      } catch (e) {
+        setStatus('indexed-db', 'No disponible', 'error');
+      }
+    }
+    
+    function testFirebaseStatus() {
+      // Firebase SDK
+      const firebaseLoaded = typeof firebase !== 'undefined' || typeof window.firebase !== 'undefined';
+      setStatus('firebase-loaded', firebaseLoaded ? 'Sí' : 'No', firebaseLoaded ? 'ok' : 'error');
+      
+      // Auth
+      try {
+        const authInitialized = webViewAuth && webViewAuth.auth;
+        setStatus('auth-initialized', authInitialized ? 'Sí' : 'No', authInitialized ? 'ok' : 'error');
+        
+        // Current user
+        const currentUser = webViewAuth?.auth?.currentUser;
+        setStatus('current-user', currentUser ? currentUser.email : 'Ninguno', currentUser ? 'ok' : 'warning');
+        
+        // Auth state
+        const authState = SecureStorage.get('auth_state') || 'unknown';
+        setStatus('auth-state', authState, authState === 'authenticated' ? 'ok' : 'warning');
+        
+      } catch (error) {
+        setStatus('auth-initialized', 'Error', 'error');
+        setStatus('current-user', 'Error', 'error');
+        setStatus('auth-state', 'Error', 'error');
+      }
+    }
+    
+    function testConnectivity() {
+      // Online status
+      setStatus('online-status', navigator.onLine ? 'Conectado' : 'Desconectado', navigator.onLine ? 'ok' : 'error');
+      
+      // Connection type
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const connectionType = connection ? connection.effectiveType || connection.type : 'Desconocido';
+      setStatus('connection-type', connectionType, 'ok');
+      
+      // HTTPS
+      const isHTTPS = location.protocol === 'https:';
+      setStatus('https-status', isHTTPS ? 'Sí' : 'No', isHTTPS ? 'ok' : 'warning');
+      
+      // CORS (basic test)
+      setStatus('cors-status', 'Probando...', 'warning');
+      fetch('https://ya-me-vi.firebaseapp.com', { mode: 'no-cors' })
+        .then(() => setStatus('cors-status', 'OK', 'ok'))
+        .catch(() => setStatus('cors-status', 'Error', 'error'));
+    }
+    
+    // === INITIALIZATION ===
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🧪 Iniciando página de diagnósticos');
+      runDiagnostics();
+      
+      // Actualizar auth state cada segundo
+      setInterval(() => {
+        const authState = SecureStorage.get('auth_state') || 'unknown';
+        setStatus('auth-state', authState, authState === 'authenticated' ? 'ok' : 'warning');
+      }, 1000);
+    });
+    
+    console.log('✅ Diagnósticos APK Auth inicializados');
+  </script>
+</body>
+</html>

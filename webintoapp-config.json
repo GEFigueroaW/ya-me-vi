@@ -3,7 +3,7 @@
     "app_name": "YA ME VI",
     "company_name": "GEFiguW",
     "package_name": "com.gefiguw.yamevi",
-    "url": "https://yamevi.com.mx/login.html",
+    "url": "https://yamevi.com.mx/login-webintoapp.html",
     "settings": {
       "general": {
         "enable_javascript": true,
@@ -12,11 +12,13 @@
         "enable_system_user_agent": true
       },
       "advanced": {
-        "load_cache_else_network": false,
+        "load_cache_else_network": true,
         "clear_cache_on_exit": false,
         "allow_http_requests": true,
         "enable_zoom_control": false,
-        "screen_on": false
+        "screen_on": false,
+        "dom_storage_enabled": true,
+        "database_enabled": true
       },
       "permissions": {
         "add_internet_permission": true,
