@@ -70,6 +70,33 @@
       cursor: pointer !important;
     }
     
+    /* Estilos para botones de ojo */
+    .password-toggle-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-radius: 0.375rem;
+      z-index: 40;
+    }
+    
+    .password-toggle-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: scale(1.1);
+    }
+    
+    .password-toggle-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .password-toggle-btn svg {
+      transition: color 0.2s ease;
+    }
+    
+    .password-toggle-btn:hover svg {
+      color: #1f2937;
+    }
+    
     /* Estilo para el spinner de loading */
     .loading-spinner {
       border: 2px solid rgba(255, 255, 255, 0.3);
@@ -134,14 +161,30 @@
         autocomplete="email"
         style="pointer-events: auto; position: relative; z-index: 30; color: #1f2937 !important;"
       />
-      <input 
-        type="password" 
-        id="passwordInput" 
-        placeholder="🔒 Contraseña" 
-        class="w-full px-4 py-3 rounded-lg bg-white/90 border border-white/50 text-gray-800 placeholder:text-gray-600 focus:bg-white focus:border-blue-400 focus:outline-none transition-all relative z-30"
-        autocomplete="current-password"
-        style="pointer-events: auto; position: relative; z-index: 30; color: #1f2937 !important;"
-      />
+      
+      <!-- Contenedor de contraseña con botón de ojo -->
+      <div class="relative">
+        <input 
+          type="password" 
+          id="passwordInput" 
+          placeholder="🔒 Contraseña" 
+          class="w-full px-4 py-3 pr-12 rounded-lg bg-white/90 border border-white/50 text-gray-800 placeholder:text-gray-600 focus:bg-white focus:border-blue-400 focus:outline-none transition-all relative z-30"
+          autocomplete="current-password"
+          style="pointer-events: auto; position: relative; z-index: 30; color: #1f2937 !important;"
+        />
+        <button 
+          type="button"
+          id="togglePassword"
+          class="password-toggle-btn absolute inset-y-0 right-0 flex items-center px-3 text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200 z-40"
+          style="pointer-events: auto; cursor: pointer;"
+          title="Mostrar/Ocultar contraseña"
+        >
+          <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+        </button>
+      </div>
       
       <button 
         id="loginWithEmail" 
@@ -561,7 +604,7 @@
       // Inicializar botón
       initializeButton();
       
-      // Configurar event listener del botón
+      // Configurar event listener del botón de login
       const loginButton = document.getElementById('loginWithEmail');
       if (loginButton) {
         loginButton.onclick = function(e) {
@@ -574,8 +617,36 @@
         console.error('❌ Botón no encontrado');
       }
       
-      // Enter en password
+      // Configurar toggle de contraseña
+      const togglePasswordBtn = document.getElementById('togglePassword');
       const passwordInput = document.getElementById('passwordInput');
+      const eyeIcon = document.getElementById('eyeIcon');
+      
+      if (togglePasswordBtn && passwordInput && eyeIcon) {
+        togglePasswordBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          if (passwordInput.type === 'password') {
+            // Mostrar contraseña
+            passwordInput.type = 'text';
+            eyeIcon.innerHTML = `
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+            `;
+            togglePasswordBtn.title = 'Ocultar contraseña';
+          } else {
+            // Ocultar contraseña
+            passwordInput.type = 'password';
+            eyeIcon.innerHTML = `
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            `;
+            togglePasswordBtn.title = 'Mostrar contraseña';
+          }
+        });
+        console.log('👁️ Toggle de contraseña configurado');
+      }
+      
+      // Enter en password
       if (passwordInput) {
         passwordInput.onkeypress = function(e) {
           if (e.key === 'Enter') {
