@@ -18,6 +18,19 @@ document.addEventListener("DOMContentLoaded", function () {
       const name = document.getElementById("name").value;
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      // Validar que las contraseñas coincidan
+      if (password !== confirmPassword) {
+        showMessage("❌ Las contraseñas no coinciden. Por favor verifica que ambas sean iguales.", "error");
+        return;
+      }
+
+      // Validar longitud mínima de contraseña
+      if (password.length < 6) {
+        showMessage("❌ La contraseña debe tener al menos 6 caracteres.", "error");
+        return;
+      }
 
       createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
@@ -82,6 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function clearFormFields() {
   const emailField = document.getElementById('email');
   const passwordField = document.getElementById('password');
+  const confirmPasswordField = document.getElementById('confirmPassword');
   
   if (emailField) {
     emailField.value = '';
@@ -93,7 +107,12 @@ function clearFormFields() {
     passwordField.defaultValue = '';
   }
   
-  console.log('✅ Campos de email y contraseña limpiados');
+  if (confirmPasswordField) {
+    confirmPasswordField.value = '';
+    confirmPasswordField.defaultValue = '';
+  }
+  
+  console.log('✅ Campos de email, contraseña y confirmación limpiados');
 }
 
 // Limpiar campos cuando se enfoca la ventana
