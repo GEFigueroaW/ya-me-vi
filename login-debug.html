@@ -1,12 +1,245 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YA ME VI - Login Debug</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YA ME VI - Login Debug</title>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="css/styles.css" />
+  
+  <style>
+    input {
+      background: rgba(255, 255, 255, 0.95) !important;
+      color: #1f2937 !important;
+      border: 2px solid rgba(255, 255, 255, 0.6) !important;
+    }
+    
+    button {
+      cursor: pointer !important;
+      pointer-events: auto !important;
+    }
+    
+    .debug-info {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      max-width: 300px;
+      z-index: 1000;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800">
+<body class="overflow-hidden">
+
+  <!-- Debug Info -->
+  <div id="debugInfo" class="debug-info">
+    <div>🔍 DEBUG INFO:</div>
+    <div id="debugStatus">Cargando...</div>
+  </div>
+
+  <!-- Fondo dinámico -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido principal -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
+    <div class="bg-white bg-opacity-20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md text-white text-center border border-white border-opacity-30 relative z-20">
+    
+      <!-- Logo -->
+      <div class="mb-6">
+        <div class="text-6xl mb-4">🎯</div>
+        <h1 class="text-3xl font-bold mb-2">YA ME VI</h1>
+        <p class="text-sm opacity-80">Debug Login</p>
+      </div>
+
+      <!-- Login Form -->
+      <div class="space-y-4 mb-6">
+        <input 
+          type="email" 
+          id="emailInput" 
+          placeholder="📧 Correo electrónico" 
+          class="w-full px-4 py-3 rounded-lg"
+          value="eugenfw@gmail.com"
+        />
+        <input 
+          type="password" 
+          id="passwordInput" 
+          placeholder="🔒 Contraseña" 
+          class="w-full px-4 py-3 rounded-lg"
+        />
+        
+        <button 
+          id="loginBtn" 
+          class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg"
+          onclick="testLogin()"
+        >
+          🔑 Test Login
+        </button>
+        
+        <button 
+          id="firebaseBtn" 
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg"
+          onclick="initFirebase()"
+        >
+          🔥 Init Firebase
+        </button>
+      </div>
+
+      <!-- Test Results -->
+      <div id="testResults" class="text-xs bg-black/20 p-3 rounded-lg"></div>
+    </div>
+  </div>
+
+  <!-- Firebase CDN - Version Estable -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // Variables globales
+    let auth = null;
+    let firebaseInitialized = false;
+
+    // Función de debug
+    function updateDebug(message) {
+      const debugStatus = document.getElementById('debugStatus');
+      if (debugStatus) {
+        debugStatus.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + message;
+        debugStatus.scrollTop = debugStatus.scrollHeight;
+      }
+      console.log('🔍 DEBUG:', message);
+    }
+
+    // Test básico sin Firebase
+    function testLogin() {
+      updateDebug('Iniciando test login...');
+      
+      const email = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
+      
+      updateDebug('Email: ' + (email ? '✅' : '❌'));
+      updateDebug('Password: ' + (password ? '✅' : '❌'));
+      
+      if (!email || !password) {
+        updateDebug('❌ Campos vacíos');
+        alert('Por favor ingresa email y contraseña');
+        return;
+      }
+      
+      if (!firebaseInitialized) {
+        updateDebug('❌ Firebase no inicializado');
+        alert('Firebase no inicializado. Usa el botón "Init Firebase" primero');
+        return;
+      }
+      
+      // Test Firebase login
+      updateDebug('🔥 Intentando login con Firebase...');
+      
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          updateDebug('✅ Login exitoso!');
+          updateDebug('Usuario: ' + userCredential.user.email);
+          
+          document.getElementById('testResults').innerHTML = 
+            '<div class="text-green-400">✅ Login exitoso!</div>' +
+            '<div>Email: ' + userCredential.user.email + '</div>' +
+            '<div>UID: ' + userCredential.user.uid + '</div>';
+            
+          setTimeout(() => {
+            window.location.href = 'home.html';
+          }, 2000);
+        })
+        .catch((error) => {
+          updateDebug('❌ Error: ' + error.code);
+          updateDebug('❌ Mensaje: ' + error.message);
+          
+          document.getElementById('testResults').innerHTML = 
+            '<div class="text-red-400">❌ Error en login</div>' +
+            '<div>Código: ' + error.code + '</div>' +
+            '<div>Mensaje: ' + error.message + '</div>';
+        });
+    }
+
+    // Inicializar Firebase
+    function initFirebase() {
+      updateDebug('Inicializando Firebase...');
+      
+      try {
+        const firebaseConfig = {
+          apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+          authDomain: "ya-me-vi.firebaseapp.com",
+          projectId: "ya-me-vi",
+          storageBucket: "ya-me-vi.firebasestorage.app",
+          messagingSenderId: "748876890843",
+          appId: "1:748876890843:web:07bd1eb476d38594d002fe"
+        };
+
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+          updateDebug('✅ Firebase inicializado');
+        } else {
+          updateDebug('⚠️ Firebase ya estaba inicializado');
+        }
+        
+        auth = firebase.auth();
+        firebaseInitialized = true;
+        
+        updateDebug('✅ Auth configurado');
+        
+        document.getElementById('firebaseBtn').innerText = '✅ Firebase Ready';
+        document.getElementById('firebaseBtn').disabled = true;
+        
+      } catch (error) {
+        updateDebug('❌ Error inicializando Firebase: ' + error.message);
+        
+        document.getElementById('testResults').innerHTML = 
+          '<div class="text-red-400">❌ Error Firebase</div>' +
+          '<div>' + error.message + '</div>';
+      }
+    }
+
+    // Enter key support
+    document.addEventListener('DOMContentLoaded', function() {
+      updateDebug('DOM cargado');
+      
+      const passwordInput = document.getElementById('passwordInput');
+      if (passwordInput) {
+        passwordInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            testLogin();
+          }
+        });
+      }
+      
+      // Auto init Firebase después de 1 segundo
+      setTimeout(() => {
+        initFirebase();
+      }, 1000);
+    });
+
+    // Test de elementos
+    window.addEventListener('load', function() {
+      updateDebug('Página cargada completamente');
+      
+      const email = document.getElementById('emailInput');
+      const password = document.getElementById('passwordInput');
+      const loginBtn = document.getElementById('loginBtn');
+      
+      updateDebug('Email input: ' + (email ? '✅' : '❌'));
+      updateDebug('Password input: ' + (password ? '✅' : '❌'));
+      updateDebug('Login button: ' + (loginBtn ? '✅' : '❌'));
+    });
+  </script>
+
+  <!-- Cargar shared.js para el fondo dinámico -->
+  <script src="js/shared.js"></script>
+</body>
+</html>
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-md mx-auto bg-white bg-opacity-20 backdrop-blur-lg rounded-2xl p-8">
             <div class="text-center mb-8">

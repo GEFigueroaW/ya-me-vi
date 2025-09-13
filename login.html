@@ -189,17 +189,16 @@
     </div>
   </div>
 
-  <!-- Firebase and Auth Logic -->
-  <script type="module">
-    // Import Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getAuth, 
-      signInWithEmailAndPassword, 
-      onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <!-- Firebase CDN - Version Compat (No modules required) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
-    // Firebase Config - CORREGIDA para que coincida con google-services.json
+  <script>
+    // Variables globales
+    let auth = null;
+    let firebaseApp = null;
+
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
       authDomain: "ya-me-vi.firebaseapp.com",
@@ -210,9 +209,17 @@
       measurementId: "G-D7R797S5BC"
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    // Inicializar Firebase inmediatamente
+    try {
+      if (!firebase.apps.length) {
+        firebaseApp = firebase.initializeApp(firebaseConfig);
+        console.log('✅ Firebase inicializado');
+      }
+      auth = firebase.auth();
+      console.log('✅ Auth configurado');
+    } catch (error) {
+      console.error('❌ Error inicializando Firebase:', error);
+    }
 
     // Environment Detection - SIMPLIFICADA
     function detectEnvironment() {
@@ -321,85 +328,84 @@
       }
     }
     
-    async function loginWithEmail() {
-      console.log('🔑 === INICIO DE FUNCIÓN LOGIN ===');
-      console.log('🔍 Verificando elementos...');
+    // Función de login simplificada
+    function loginWithEmail() {
+      console.log('🔑 === INICIO LOGIN ===');
       
       const emailInput = document.getElementById('emailInput');
       const passwordInput = document.getElementById('passwordInput');
       
       if (!emailInput || !passwordInput) {
-        console.error('❌ Elementos de input no encontrados');
-        showNotification('Error: Elementos de formulario no encontrados', 'error');
+        console.error('❌ Inputs no encontrados');
+        alert('Error: Elementos del formulario no encontrados');
         return;
       }
       
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
       
-      console.log('📧 Email:', email ? `${email.substring(0, 3)}***` : 'Vacío');
-      console.log('🔒 Password:', password ? `${password.length} caracteres` : 'Vacío');
+      console.log('📧 Email:', email ? email.substring(0, 3) + '***' : 'Vacío');
+      console.log('🔒 Password:', password ? password.length + ' caracteres' : 'Vacío');
       
       if (!email || !password) {
-        console.log('⚠️ Campos vacíos detectados');
+        console.log('⚠️ Campos vacíos');
         showNotification('Por favor ingresa email y contraseña', 'warning');
         return;
       }
 
       if (!auth) {
-        console.error('❌ Auth no inicializado');
+        console.error('❌ Auth no disponible');
         showNotification('Error: Sistema de autenticación no disponible', 'error');
         return;
       }
 
-      try {
-        console.log('🔄 Iniciando proceso de autenticación...');
-        showLoading('loginWithEmail', 'Verificando credenciales...');
-        
-        console.log('🌐 Llamando a signInWithEmailAndPassword...');
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        
-        console.log('✅ Autenticación exitosa:', userCredential.user.uid);
-        console.log('📧 Email autenticado:', userCredential.user.email);
-        
-        handleAuthSuccess(userCredential.user);
-        
-      } catch (error) {
-        console.error('❌ Error completo en login:', error);
-        console.error('❌ Código de error:', error.code);
-        console.error('❌ Mensaje de error:', error.message);
-        
-        hideLoading('loginWithEmail');
-        
-        let message = 'Error al iniciar sesión: ';
-        switch (error.code) {
-          case 'auth/user-not-found':
-            message = 'No existe una cuenta con este email';
-            break;
-          case 'auth/wrong-password':
-            message = 'Contraseña incorrecta';
-            break;
-          case 'auth/invalid-email':
-            message = 'Email inválido';
-            break;
-          case 'auth/too-many-requests':
-            message = 'Demasiados intentos. Espera unos minutos';
-            break;
-          case 'auth/network-request-failed':
-            message = 'Error de conexión. Verifica tu internet';
-            break;
-          case 'auth/invalid-credential':
-            message = 'Credenciales inválidas. Verifica tu email y contraseña';
-            break;
-          default:
-            message += error.message;
-        }
-        
-        console.log('📢 Mostrando mensaje:', message);
-        showNotification(message, 'error');
-      }
+      console.log('🔄 Iniciando autenticación...');
+      showLoading('loginWithEmail', 'Verificando credenciales...');
       
-      console.log('🔑 === FIN DE FUNCIÓN LOGIN ===');
+      // Usar Firebase v9 compat
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          console.log('✅ Login exitoso!');
+          console.log('� Usuario:', userCredential.user.email);
+          
+          hideLoading('loginWithEmail');
+          handleAuthSuccess(userCredential.user);
+        })
+        .catch((error) => {
+          console.error('❌ Error en login:', error);
+          console.error('❌ Código:', error.code);
+          console.error('❌ Mensaje:', error.message);
+          
+          hideLoading('loginWithEmail');
+          
+          let message = 'Error al iniciar sesión: ';
+          switch (error.code) {
+            case 'auth/user-not-found':
+              message = 'No existe una cuenta con este email';
+              break;
+            case 'auth/wrong-password':
+              message = 'Contraseña incorrecta';
+              break;
+            case 'auth/invalid-email':
+              message = 'Email inválido';
+              break;
+            case 'auth/too-many-requests':
+              message = 'Demasiados intentos. Espera unos minutos';
+              break;
+            case 'auth/network-request-failed':
+              message = 'Error de conexión. Verifica tu internet';
+              break;
+            case 'auth/invalid-credential':
+              message = 'Credenciales inválidas';
+              break;
+            default:
+              message += error.message;
+          }
+          
+          showNotification(message, 'error');
+        });
+      
+      console.log('🔑 === FIN LOGIN ===');
     }
 
     // Handle Authentication Success
@@ -467,148 +473,83 @@
       console.log('✅ Inicialización completada');
     }
 
-    // Event Listeners
+    // Event Listeners - SIMPLIFICADO
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🔄 DOM cargado, configurando event listeners...');
+      console.log('🔄 DOM cargado');
       
-      // Asegurar que el botón esté en estado normal al inicio
+      // Inicializar botón
       initializeButton();
       
+      // Configurar event listener del botón
       const loginButton = document.getElementById('loginWithEmail');
-      const emailInput = document.getElementById('emailInput');
-      const passwordInput = document.getElementById('passwordInput');
-      
-      // Verificar que los elementos existan
-      console.log('🔍 Elementos encontrados:');
-      console.log('- loginButton:', !!loginButton);
-      console.log('- emailInput:', !!emailInput);
-      console.log('- passwordInput:', !!passwordInput);
-      
       if (loginButton) {
-        // Limpiar cualquier event listener previo
-        loginButton.removeEventListener('click', loginWithEmail);
-        
-        // Agregar event listener
-        loginButton.addEventListener('click', function(e) {
+        loginButton.onclick = function(e) {
           e.preventDefault();
-          e.stopPropagation();
-          console.log('🔑 Botón de login clickeado');
+          console.log('🔑 Botón clickeado');
           loginWithEmail();
-        });
-        
-        // Marcar como configurado
-        loginButton.setAttribute('data-listener-configured', 'true');
-        console.log('✅ Event listener del botón login configurado');
+        };
+        console.log('✅ Event listener configurado');
       } else {
-        console.error('❌ No se encontró el botón loginWithEmail');
+        console.error('❌ Botón no encontrado');
       }
       
+      // Enter en password
+      const passwordInput = document.getElementById('passwordInput');
       if (passwordInput) {
-        passwordInput.addEventListener('keypress', function(e) {
+        passwordInput.onkeypress = function(e) {
           if (e.key === 'Enter') {
             e.preventDefault();
-            console.log('⌨️ Enter presionado en contraseña');
             loginWithEmail();
           }
-        });
-        console.log('✅ Event listener del Enter configurado');
+        };
       }
       
+      // Enter en email
+      const emailInput = document.getElementById('emailInput');
       if (emailInput) {
-        emailInput.addEventListener('keypress', function(e) {
+        emailInput.onkeypress = function(e) {
           if (e.key === 'Enter') {
             e.preventDefault();
             if (passwordInput) {
               passwordInput.focus();
             }
           }
-        });
-        console.log('✅ Event listener del email configurado');
+        };
       }
       
-      // Inicializar la app después de configurar listeners
+      // Inicializar app
       initializeApp();
     });
     
-    // Backup de seguridad - Solo si no se configuró en DOMContentLoaded
+    // Backup simplificado
     setTimeout(() => {
-      console.log('🔧 Verificando configuración backup...');
-      
       const loginButton = document.getElementById('loginWithEmail');
-      if (loginButton && !loginButton.hasAttribute('data-listener-configured')) {
-        console.log('⚠️ Configurando backup event listener...');
-        
-        // Asegurar estado normal del botón
-        initializeButton();
-        
-        loginButton.addEventListener('click', function(e) {
+      if (loginButton) {
+        // Asegurar que el botón funcione
+        loginButton.onclick = function(e) {
           e.preventDefault();
-          e.stopPropagation();
-          console.log('🔑 Botón de login clickeado (backup)');
+          console.log('🔑 Login (backup)');
           loginWithEmail();
-        });
-        
-        loginButton.setAttribute('data-listener-configured', 'true');
-        console.log('✅ Backup event listener configurado');
-        
-        // Inicializar app si no se hizo antes
-        if (!window.appInitialized) {
-          initializeApp();
+        };
+        console.log('✅ Backup configurado');
+      }
+      
+      initializeButton(); // Asegurar estado normal
+    }, 1000);
+
+    // Auth State Listener - Version compat
+    if (auth) {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          console.log('✅ Usuario ya autenticado:', user.email || user.uid);
+          console.log('ℹ️ Usuario detectado, esperando acción manual');
+        } else {
+          console.log('ℹ️ No hay usuario autenticado');
         }
-      } else {
-        console.log('✅ Event listeners ya configurados correctamente');
-      }
-    }, 500);
+      });
+    }
 
-    // Auth State Listener - MODIFICADO para evitar redirección automática
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log('✅ Usuario ya autenticado:', user.email || user.uid);
-        // No redirigir automáticamente, dejar que el usuario haga login manualmente
-        console.log('ℹ️ Usuario autenticado detectado, pero esperando acción manual');
-      } else {
-        console.log('ℹ️ No hay usuario autenticado');
-      }
-    });
-
-    console.log('🚀 Script cargado, esperando DOM...');
-    
-    // Función de test para verificar funcionamiento
-    window.testLogin = function() {
-      console.log('🧪 === TEST DE FUNCIONALIDAD ===');
-      console.log('🔍 Verificando elementos...');
-      
-      const button = document.getElementById('loginWithEmail');
-      const email = document.getElementById('emailInput');
-      const password = document.getElementById('passwordInput');
-      
-      console.log('- Botón encontrado:', !!button);
-      console.log('- Email input encontrado:', !!email);
-      console.log('- Password input encontrado:', !!password);
-      
-      if (button) {
-        console.log('- Botón habilitado:', !button.disabled);
-        console.log('- Event listeners configurados:', button.hasAttribute('data-listener-configured'));
-      }
-      
-      console.log('- Auth inicializado:', !!auth);
-      console.log('- App inicializada:', !!window.appInitialized);
-      
-      if (button && email && password && auth) {
-        console.log('✅ Todos los elementos están listos para funcionar');
-      } else {
-        console.error('❌ Faltan elementos para el funcionamiento');
-      }
-      
-      console.log('🧪 === FIN DEL TEST ===');
-    };
-    
-    // Auto-test después de 2 segundos
-    setTimeout(() => {
-      if (window.testLogin) {
-        window.testLogin();
-      }
-    }, 2000);
+    console.log('🚀 Login script cargado');
   </script>
 
   <!-- Cargar shared.js para el fondo dinámico -->
