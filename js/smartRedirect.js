@@ -138,10 +138,10 @@ export class SmartRedirector {
         
         if (currentUser) {
           console.log('✅ Usuario previamente autenticado encontrado:', currentUser.email);
-          console.log('🔐 Redirigiendo a login-email.html para confirmar identidad');
+          console.log('🔐 Redirigiendo a login.html para confirmar identidad');
           
           return {
-            destination: 'login-email.html',
+            destination: 'login.html',
             reason: 'confirm_identity',
             userInfo: { email: currentUser.email }
           };
@@ -186,7 +186,7 @@ export class SmartRedirector {
       } else if (userFlow.action === 'login') {
         console.log('🔑 Usuario desktop existente - redirigiendo directo a login');
         return {
-          destination: 'login-email.html',
+          destination: 'login.html',
           reason: 'desktop_login',
           userInfo: userFlow.userInfo
         };

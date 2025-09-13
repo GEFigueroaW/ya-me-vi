@@ -79,7 +79,7 @@ function showSuccessMessage(message) {
 
 // Inicialización principal - VERSION SIMPLIFICADA
 document.addEventListener("DOMContentLoaded", function () {
-  console.log('🔄 Iniciando login-email.html (versión simplificada)...');
+  console.log('🔄 Iniciando login.html (versión simplificada)...');
   
   // Mostrar loading inicial
   showLoadingOverlay('Verificando cuenta...');
@@ -315,7 +315,7 @@ async function handlePasswordLogin(email, auth, signInWithEmailAndPassword) {
   }
 }
 
-// Manejo de registro con Google (lleva a login-email.html)
+// Manejo de registro con Google (lleva a login.html)
 async function handleGoogleRegistration(auth, signInWithPopup, GoogleAuthProvider) {
   console.log('🔄 Iniciando registro con Google...');
   showLoadingOverlay('Creando cuenta con Google...');

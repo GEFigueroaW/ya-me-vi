@@ -207,7 +207,7 @@ export class DeviceDetector {
       console.log('🖥️ Desktop: Usuario existente - redirigiendo a login con contraseña');
       return {
         action: 'login',
-        page: 'login-email.html',
+        page: 'login.html',
         userInfo: userInfo,
         reason: 'returning_desktop_user'
       };
