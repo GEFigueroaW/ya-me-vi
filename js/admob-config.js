@@ -1,6 +1,7 @@
 /**
  * YA ME VI - Configuración Google AdMob
  * Configuración centralizada para publicidad móvil y web
+ * Actualizado con anuncios nativos avanzados y de inicio de aplicación
  */
 
 // IDs de AdMob proporcionados por Google
@@ -9,32 +10,64 @@ export const ADMOB_CONFIG = {
   APP_ID: 'ca-app-pub-2226536008153511~2187640363',
   
   // ID de cliente AdSense (para web)
-  CLIENT_ID: 'ca-app-pub-2226536008153511',
+  CLIENT_ID: 'ca-pub-2226536008153511',
   
   // IDs de unidades publicitarias
   AD_UNITS: {
     // Banner principal de YA ME VI
     BANNER_MAIN: 'ca-app-pub-2226536008153511/4122666428',
     
+    // Anuncios nativos avanzados - Integrados naturalmente al contenido
+    NATIVE_ADVANCED: 'ca-app-pub-2226536008153511/5826684234',
+    
+    // Anuncios de inicio de aplicación - Para pantallas de bienvenida
+    APP_OPEN: 'ca-app-pub-2226536008153511/6365686382',
+    
     // Configuraciones adicionales para diferentes tipos de anuncios
     BANNER_HOME: 'ca-app-pub-2226536008153511/4122666428',
     BANNER_ANALYSIS: 'ca-app-pub-2226536008153511/4122666428',
-    BANNER_SUGGESTIONS: 'ca-app-pub-2226536008153511/4122666428'
+    BANNER_SUGGESTIONS: 'ca-app-pub-2226536008153511/4122666428',
+    NATIVE_HOME: 'ca-app-pub-2226536008153511/5826684234',
+    NATIVE_ANALYSIS: 'ca-app-pub-2226536008153511/5826684234'
   },
   
   // Configuraciones por tipo de dispositivo
   DEVICE_CONFIG: {
     MOBILE: {
       banner_size: '320x50',
+      native_size: '300x250',
       format: 'auto'
     },
     TABLET: {
       banner_size: '728x90',
+      native_size: '728x250',
       format: 'auto'
     },
     DESKTOP: {
       banner_size: '728x90',
+      native_size: '728x300',
       format: 'auto'
+    }
+  },
+  
+  // Configuración de anuncios nativos
+  NATIVE_CONFIG: {
+    // Estilos para anuncios nativos
+    styles: {
+      container: 'bg-white bg-opacity-90 backdrop-blur-lg rounded-xl shadow-lg p-4 mb-6',
+      headline: 'text-lg font-bold text-gray-800 mb-2',
+      body: 'text-gray-600 text-sm mb-3',
+      advertiser: 'text-xs text-gray-400 uppercase tracking-wide',
+      callToAction: 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors'
+    },
+    // Configuración de elementos
+    elements: {
+      headline: true,
+      body: true,
+      advertiser: true,
+      callToAction: true,
+      image: true,
+      icon: true
     }
   }
 };
@@ -52,19 +85,20 @@ export const ADMOB_POLICIES = {
   ],
   
   // Ubicaciones recomendadas para anuncios
-  RECOMMENDED_PLACEMENTS: [
-    'header', // Encabezado de página
-    'footer', // Pie de página  
-    'between-content', // Entre contenido
-    'sidebar' // Barra lateral (desktop)
-  ]
+  RECOMMENDED_PLACEMENTS: {
+    banners: ['header', 'footer', 'between-content'],
+    native: ['in-feed', 'content-stream', 'recommendation'],
+    appOpen: ['welcome', 'startup', 'onboarding']
+  }
 };
 
 // Función para inicializar AdMob
 export function initializeAdMob() {
-  console.log('🎯 Inicializando AdMob...');
+  console.log('🎯 Inicializando AdMob con anuncios nativos...');
   console.log('📱 App ID:', ADMOB_CONFIG.APP_ID);
   console.log('🏷️ Banner ID:', ADMOB_CONFIG.AD_UNITS.BANNER_MAIN);
+  console.log('🎨 Native ID:', ADMOB_CONFIG.AD_UNITS.NATIVE_ADVANCED);
+  console.log('🚀 App Open ID:', ADMOB_CONFIG.AD_UNITS.APP_OPEN);
   
   // Verificar si el script de AdSense está cargado
   const adSenseScript = document.querySelector('script[src*="adsbygoogle.js"]');
@@ -119,6 +153,78 @@ export function createAdMobBanner(containerId, adUnitId = null, size = 'auto') {
   }
 }
 
+// Función para crear anuncio nativo avanzado
+export function createNativeAd(containerId, customStyles = {}) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error(`❌ Contenedor ${containerId} no encontrado`);
+    return false;
+  }
+  
+  // Combinar estilos personalizados con los predeterminados
+  const styles = { ...ADMOB_CONFIG.NATIVE_CONFIG.styles, ...customStyles };
+  
+  // Crear contenedor de anuncio nativo
+  const nativeContainer = document.createElement('div');
+  nativeContainer.className = styles.container;
+  nativeContainer.innerHTML = `
+    <div class="text-xs text-gray-400 mb-2">Publicidad</div>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-format="fluid"
+         data-ad-layout-key="-6t+ed+2i-1n-4w"
+         data-ad-client="${ADMOB_CONFIG.CLIENT_ID}"
+         data-ad-slot="${ADMOB_CONFIG.AD_UNITS.NATIVE_ADVANCED.split('/')[1]}"></ins>
+  `;
+  
+  // Insertar en el contenedor
+  container.appendChild(nativeContainer);
+  
+  // Inicializar anuncio nativo
+  try {
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
+    console.log(`✅ Anuncio nativo AdMob creado en ${containerId}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Error inicializando anuncio nativo:', error);
+    return false;
+  }
+}
+
+// Función para anuncio de inicio de aplicación
+export function createAppOpenAd(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error(`❌ Contenedor ${containerId} no encontrado`);
+    return false;
+  }
+  
+  // Crear anuncio de inicio de aplicación
+  const appOpenContainer = document.createElement('div');
+  appOpenContainer.className = 'text-center mb-6';
+  appOpenContainer.innerHTML = `
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="${ADMOB_CONFIG.CLIENT_ID}"
+         data-ad-slot="${ADMOB_CONFIG.AD_UNITS.APP_OPEN.split('/')[1]}"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  `;
+  
+  // Insertar en el contenedor
+  container.appendChild(appOpenContainer);
+  
+  // Inicializar anuncio
+  try {
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
+    console.log(`✅ App Open Ad creado en ${containerId}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Error inicializando App Open Ad:', error);
+    return false;
+  }
+}
+
 // Función para obtener configuración responsiva según dispositivo
 export function getResponsiveAdConfig() {
   const width = window.innerWidth;
@@ -139,14 +245,16 @@ export function checkAdMobCompliance() {
     categories: ADMOB_POLICIES.CATEGORIES,
     privacy_policy: true, // YA ME VI tiene política de privacidad
     terms_of_service: true, // YA ME VI tiene términos de servicio
-    age_appropriate: true // Contenido apropiado para 13+
+    age_appropriate: true, // Contenido apropiado para 13+
+    native_ads: true, // Anuncios nativos implementados
+    app_open_ads: true // Anuncios de inicio implementados
   };
   
-  console.log('📋 AdMob Compliance Check:', compliance);
+  console.log('📋 AdMob Compliance Check (Actualizado):', compliance);
   return compliance;
 }
 
 // Auto-inicialización si el módulo se carga
 if (typeof window !== 'undefined') {
-  console.log('🎯 AdMob Config cargado para YA ME VI');
+  console.log('🎯 AdMob Config actualizado para YA ME VI (Nativos + App Open)');
 }

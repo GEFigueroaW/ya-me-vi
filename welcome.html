@@ -78,9 +78,25 @@
   <meta name="format-detection" content="telephone=no">
   <meta name="apple-mobile-web-app-title" content="YA ME VI">
   
-  <!-- Google AdSense -->
+  <!-- Google AdMob - YA ME VI -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
      crossorigin="anonymous"></script>
+  
+  <!-- AdMob Configuration for Welcome/Startup Page -->
+  <script>
+    // AdMob App ID: ca-app-pub-2226536008153511~2187640363
+    (adsbygoogle = window.adsbygoogle || []).push({
+      google_ad_client: "ca-pub-2226536008153511",
+      enable_page_level_ads: true
+    });
+    
+    // Configuración específica para página de bienvenida
+    window.admobConfig = {
+      appId: "ca-app-pub-2226536008153511~2187640363",
+      appOpenId: "ca-app-pub-2226536008153511/6365686382",
+      page: "welcome"
+    };
+  </script>
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
@@ -106,6 +122,21 @@
       <h2 class="text-3xl md:text-4xl font-bold mb-2 drop-shadow-lg">¡Hola de nuevo!</h2>
       <p id="welcome-message" class="text-xl md:text-2xl mb-4 font-light">Bienvenido, Usuario</p>
       <p class="text-lg opacity-80">¿Listo para tu siguiente oportunidad?</p>
+    </div>
+
+    <!-- AdMob App Open Ad - Inicio de aplicación -->
+    <div id="admob-app-open-welcome" class="mb-6 max-w-sm mx-auto">
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl shadow-lg p-2 border border-white border-opacity-20">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-app-pub-2226536008153511"
+             data-ad-slot="6365686382"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
     </div>
 
     <!-- Opciones de inicio de sesión -->

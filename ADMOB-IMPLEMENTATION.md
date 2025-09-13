@@ -7,9 +7,21 @@
 ca-app-pub-2226536008153511~2187640363
 ```
 
-### ID de Banner Principal
+### IDs de Unidades Publicitarias
+
+#### Banner Principal
 ```
 ca-app-pub-2226536008153511/4122666428
+```
+
+#### Anuncios Nativos Avanzados
+```
+ca-app-pub-2226536008153511/5826684234
+```
+
+#### Anuncios de Inicio de Aplicación
+```
+ca-app-pub-2226536008153511/6365686382
 ```
 
 ### ID de Cliente AdSense (Web)
@@ -21,13 +33,15 @@ ca-pub-2226536008153511
 
 ### ✅ home.html
 - **Banner**: Ubicado después de botones principales
+- **Native Ad**: Integrado después de sección de análisis
 - **Configuración**: AdMob config con App ID
-- **ID Usado**: `4122666428`
+- **IDs Usados**: `4122666428` (banner), `5826684234` (native)
 
 ### ✅ analisis.html
 - **Banner**: Ubicado después de resultados de análisis
+- **Native Ad**: Integrado como contenido recomendado
 - **Configuración**: AdMob config para página de análisis  
-- **ID Usado**: `4122666428`
+- **IDs Usados**: `4122666428` (banner), `5826684234` (native)
 
 ### ✅ combinacion.html
 - **Banner Top**: Después del botón de regreso
@@ -38,10 +52,70 @@ ca-pub-2226536008153511
 ### ✅ sugeridas.html
 - **Banner Top**: Después del botón de regreso
 - **Banner Middle**: Entre secciones de contenido
+- **Native Ad**: Integrado como recomendaciones
 - **Configuración**: AdMob config para página de sugerencias
-- **ID Usado**: `4122666428` (ambos banners)
+- **IDs Usados**: `4122666428` (banners), `5826684234` (native)
 
-## 🛠️ Configuración Técnica
+### ✅ welcome.html
+- **App Open Ad**: Ubicado después del mensaje de bienvenida
+- **Configuración**: AdMob config para página de bienvenida
+- **ID Usado**: `6365686382` (app open)
+
+### ✅ index.html (Landing Page)
+- **App Open Ad**: Ubicado en el hero section
+- **Configuración**: AdMob config para landing page
+- **ID Usado**: `6365686382` (app open)
+
+## � Configuración de Archivo AdMob
+
+### js/admob-config.js
+```javascript
+const ADMOB_CONFIG = {
+    APP_ID: 'ca-app-pub-2226536008153511~2187640363',
+    AD_UNITS: {
+        BANNER_MAIN: 'ca-app-pub-2226536008153511/4122666428',
+        NATIVE_ADVANCED: 'ca-app-pub-2226536008153511/5826684234',
+        APP_OPEN: 'ca-app-pub-2226536008153511/6365686382'
+    },
+    ENABLED: {
+        BANNERS: true,
+        NATIVE_ADS: true,
+        APP_OPEN_ADS: true
+    }
+};
+
+// Función para cargar AdSense
+window.adsbygoogle = window.adsbygoogle || [];
+```
+
+**Funcionalidades incluidas**:
+- ✅ **Banner Ads**: Anuncios responsivos principales
+- ✅ **Native Advanced Ads**: Anuncios nativos fluidos
+- ✅ **App Open Ads**: Anuncios de apertura de aplicación
+- ✅ **Configuración centralizada**: Un solo archivo para todos los IDs
+- ✅ **Control granular**: Activar/desactivar tipos específicos de anuncios
+
+## 🛠️ Tipos de Anuncios Implementados
+
+### 1. Banner Ads Responsivos
+- **ID**: `ca-app-pub-2226536008153511/4122666428`
+- **Formato**: `auto`
+- **Estilo**: `display:block; full-width-responsive`
+- **Ubicaciones**: Todas las páginas principales
+
+### 2. Native Advanced Ads
+- **ID**: `ca-app-pub-2226536008153511/5826684234`
+- **Formato**: `fluid`
+- **Estilo**: `layout-in-article`
+- **Ubicaciones**: home.html, analisis.html, sugeridas.html
+
+### 3. App Open Ads
+- **ID**: `ca-app-pub-2226536008153511/6365686382`
+- **Formato**: Pantalla completa
+- **Estilo**: Integrado con backdrop-blur
+- **Ubicaciones**: welcome.html, index.html (landing)
+
+## �🛠️ Configuración Técnica
 
 ### Script AdMob Base
 ```html

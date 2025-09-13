@@ -76,9 +76,26 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css">
   
-  <!-- Google AdSense -->
+  <!-- Google AdMob - YA ME VI Landing -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
      crossorigin="anonymous"></script>
+  
+  <!-- AdMob Configuration for Landing Page -->
+  <script>
+    // AdMob App ID: ca-app-pub-2226536008153511~2187640363
+    (adsbygoogle = window.adsbygoogle || []).push({
+      google_ad_client: "ca-pub-2226536008153511",
+      enable_page_level_ads: true
+    });
+    
+    // Configuración específica para landing page
+    window.admobConfig = {
+      appId: "ca-app-pub-2226536008153511~2187640363",
+      appOpenId: "ca-app-pub-2226536008153511/6365686382",
+      bannerId: "ca-app-pub-2226536008153511/4122666428",
+      page: "landing"
+    };
+  </script>
 
   <!-- Custom Styles - AFTER Tailwind to override -->
   <style>
@@ -335,14 +352,19 @@
   <section id="inicio" class="pt-16 min-h-screen flex items-center justify-center">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div class="text-center">
-        <!-- AdSense Ad Unit - Top of Page -->
-        <div class="mb-8">
-          <ins class="adsbygoogle"
-               style="display:block"
-               data-ad-client="ca-pub-2226536008153511"
-               data-ad-slot="1234567890"
-               data-ad-format="auto"
-               data-full-width-responsive="true"></ins>
+        <!-- AdMob App Open Ad - Landing Page -->
+        <div id="admob-app-open-landing" class="mb-8 max-w-md mx-auto">
+          <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl shadow-lg p-3 border border-white border-opacity-20">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-app-pub-2226536008153511"
+                 data-ad-slot="6365686382"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+          </div>
         </div>
         
         <div class="floating-animation mb-8">
