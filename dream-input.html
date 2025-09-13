@@ -279,6 +279,31 @@
       
       inicializarFondo();
       
+      // === Manejar selección de sueños con scroll automático ===
+      const dreamOptions = document.querySelectorAll('.dream-option');
+      const submitButton = document.querySelector('button[type="submit"]');
+      
+      dreamOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const radio = option.querySelector('input[type="radio"]');
+          if (radio) {
+            radio.checked = true;
+            console.log('💭 [DREAM] Sueño seleccionado:', radio.value);
+            
+            // Scroll automático hacia los botones después de seleccionar
+            setTimeout(() => {
+              if (submitButton) {
+                submitButton.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'center' 
+                });
+                console.log('📜 [DREAM] Scroll automático hacia botones');
+              }
+            }, 300);
+          }
+        });
+      });
+      
       // === Manejar envío del formulario ===
       const dreamForm = document.getElementById('dream-form');
       if (dreamForm) {
