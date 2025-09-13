@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verificar Email - YA ME VI</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#00B44F">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
+  
+  <style>
+    .pulse-icon {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+    
+    .verification-container {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body class="overflow-auto">
+
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <div class="verification-container relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4 py-8">
+    
+    <!-- Contenido principal -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-white border-opacity-20 shadow-2xl">
+      
+      <!-- Icono de email animado -->
+      <div class="mb-8">
+        <div class="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto pulse-icon">
+          <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Título -->
+      <h1 class="text-3xl font-bold mb-4">📧 Verifica tu Email</h1>
+      
+      <!-- Email del usuario -->
+      <div class="bg-white bg-opacity-20 rounded-lg p-4 mb-6">
+        <p class="text-sm opacity-90 mb-2">Email de verificación enviado a:</p>
+        <p id="user-email" class="font-bold text-lg break-all">cargando...</p>
+      </div>
+      
+      <!-- Instrucciones -->
+      <div class="text-left bg-white bg-opacity-10 rounded-lg p-6 mb-6">
+        <h3 class="font-bold mb-3 text-center">📋 Pasos a seguir:</h3>
+        <ol class="space-y-2 text-sm">
+          <li class="flex items-start">
+            <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">1</span>
+            <span>Revisa tu <strong>bandeja de entrada</strong> y carpeta de <strong>spam</strong></span>
+          </li>
+          <li class="flex items-start">
+            <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">2</span>
+            <span>Busca el email de <strong>"YA ME VI - Verificación"</strong></span>
+          </li>
+          <li class="flex items-start">
+            <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">3</span>
+            <span>Haz clic en el <strong>enlace de verificación</strong></span>
+          </li>
+          <li class="flex items-start">
+            <span class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">✓</span>
+            <span>Regresa aquí para <strong>continuar</strong></span>
+          </li>
+        </ol>
+      </div>
+      
+      <!-- Estado de verificación -->
+      <div id="verification-status" class="mb-6">
+        <div class="bg-yellow-500 bg-opacity-20 border border-yellow-300 rounded-lg p-4">
+          <div class="flex items-center justify-center">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-300 mr-2"></div>
+            <span class="text-yellow-100 text-sm">Esperando verificación...</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botones de acción -->
+      <div class="space-y-3">
+        <button id="check-verification" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+          🔄 Verificar Estado
+        </button>
+        
+        <button id="resend-email" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+          📧 Reenviar Email
+        </button>
+        
+        <button id="continue-anyway" 
+                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg opacity-75">
+          ⏭️ Continuar sin Verificar
+        </button>
+      </div>
+      
+      <!-- Nota importante -->
+      <div class="mt-6 pt-4 border-t border-white border-opacity-20">
+        <div class="bg-red-500 bg-opacity-20 border border-red-300 rounded-lg p-3">
+          <p class="text-red-100 text-xs">
+            <strong>⚠️ Importante:</strong> Sin verificación de email tendrás acceso limitado a las funciones de YA ME VI
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-white text-opacity-60 text-xs">
+      <p>"Ya me vi" es una herramienta diseñada con fines de entretenimiento y análisis estadístico.</p>
+    </footer>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-8 text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+      <p class="text-gray-800 font-semibold">Verificando...</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  
+  <!-- Firebase CDN v10 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, sendEmailVerification, reload } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1gTGY3Q4EbZGZOSqBWOAjm-zbNJ8I4As",
+      authDomain: "yamevi-com-mx.firebaseapp.com",
+      projectId: "yamevi-com-mx",
+      storageBucket: "yamevi-com-mx.appspot.com",
+      messagingSenderId: "593993993553",
+      appId: "1:593993993553:web:da6f10c03d49a9ae2d4c8b"
+    };
+    
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    // Elementos del DOM
+    const userEmailElement = document.getElementById('user-email');
+    const verificationStatusElement = document.getElementById('verification-status');
+    const checkVerificationBtn = document.getElementById('check-verification');
+    const resendEmailBtn = document.getElementById('resend-email');
+    const continueAnywayBtn = document.getElementById('continue-anyway');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    
+    // Obtener email de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailFromUrl = urlParams.get('email');
+    
+    if (emailFromUrl) {
+      userEmailElement.textContent = emailFromUrl;
+    }
+    
+    // Verificar estado de autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('👤 Usuario autenticado:', user.email);
+        userEmailElement.textContent = user.email;
+        
+        if (user.emailVerified) {
+          showVerified();
+        }
+      } else {
+        console.log('❌ No hay usuario autenticado');
+        userEmailElement.textContent = emailFromUrl || 'No especificado';
+      }
+    });
+    
+    // Función para mostrar estado verificado
+    function showVerified() {
+      verificationStatusElement.innerHTML = `
+        <div class="bg-green-500 bg-opacity-20 border border-green-300 rounded-lg p-4">
+          <div class="flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-300 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-green-100 text-sm font-bold">✅ Email verificado exitosamente</span>
+          </div>
+        </div>
+      `;
+      
+      // Cambiar botón de verificar por continuar
+      checkVerificationBtn.textContent = '🎯 ¡Continuar a YA ME VI!';
+      checkVerificationBtn.className = 'w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg animate__animated animate__pulse';
+      
+      // Ocultar otros botones
+      resendEmailBtn.style.display = 'none';
+      continueAnywayBtn.style.display = 'none';
+    }
+    
+    // Event listeners
+    checkVerificationBtn.addEventListener('click', async () => {
+      if (checkVerificationBtn.textContent.includes('Continuar a YA ME VI')) {
+        window.location.href = 'dream-input.html';
+        return;
+      }
+      
+      loadingOverlay.classList.remove('hidden');
+      
+      try {
+        if (auth.currentUser) {
+          await reload(auth.currentUser);
+          
+          if (auth.currentUser.emailVerified) {
+            showVerified();
+          } else {
+            showMessage('⚠️ Email aún no verificado. Revisa tu bandeja de entrada.', 'warning');
+          }
+        } else {
+          showMessage('❌ No hay sesión activa. Inicia sesión primero.', 'error');
+        }
+      } catch (error) {
+        console.error('Error verificando:', error);
+        showMessage('❌ Error verificando el estado. Intenta de nuevo.', 'error');
+      }
+      
+      loadingOverlay.classList.add('hidden');
+    });
+    
+    resendEmailBtn.addEventListener('click', async () => {
+      loadingOverlay.classList.remove('hidden');
+      
+      try {
+        if (auth.currentUser) {
+          await sendEmailVerification(auth.currentUser, {
+            url: window.location.origin + '/welcome.html',
+            handleCodeInApp: true
+          });
+          
+          showMessage('📧 Email de verificación reenviado. Revisa tu bandeja de entrada.', 'success');
+        } else {
+          showMessage('❌ No hay sesión activa. Inicia sesión primero.', 'error');
+        }
+      } catch (error) {
+        console.error('Error reenviando:', error);
+        showMessage('❌ Error reenviando email. Intenta de nuevo más tarde.', 'error');
+      }
+      
+      loadingOverlay.classList.add('hidden');
+    });
+    
+    continueAnywayBtn.addEventListener('click', () => {
+      if (confirm('⚠️ Sin verificar tu email tendrás acceso limitado. ¿Continuar de todos modos?')) {
+        window.location.href = 'dream-input.html';
+      }
+    });
+    
+    // Función para mostrar mensajes
+    function showMessage(message, type = 'info') {
+      const existingMessage = document.querySelector('.message-overlay');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message-overlay fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown';
+      
+      if (type === 'success') {
+        messageDiv.classList.add('bg-green-500', 'bg-opacity-90', 'backdrop-blur-lg', 'text-white');
+      } else if (type === 'error') {
+        messageDiv.classList.add('bg-red-500', 'bg-opacity-90', 'backdrop-blur-lg', 'text-white');
+      } else if (type === 'warning') {
+        messageDiv.classList.add('bg-yellow-500', 'bg-opacity-90', 'backdrop-blur-lg', 'text-white');
+      } else {
+        messageDiv.classList.add('bg-blue-500', 'bg-opacity-90', 'backdrop-blur-lg', 'text-white');
+      }
+      
+      messageDiv.textContent = message;
+      document.body.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        if (messageDiv.parentNode) {
+          messageDiv.classList.remove('animate__fadeInDown');
+          messageDiv.classList.add('animate__fadeOutUp');
+          setTimeout(() => {
+            messageDiv.remove();
+          }, 500);
+        }
+      }, 4000);
+    }
+    
+    // Inicializar fondo dinámico
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof iniciarFondoDinamico === 'function') {
+        iniciarFondoDinamico();
+      }
+    });
+  </script>
+</body>
+</html>

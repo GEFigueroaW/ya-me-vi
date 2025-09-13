@@ -1,6 +1,6 @@
 
 import { auth } from './firebase-init.js';
-import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { app } from './firebase-init.js';
 
@@ -36,9 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(async (userCredential) => {
           console.log("✅ Usuario registrado:", userCredential.user);
           
-          // Mostrar mensaje de éxito
-          showMessage("✅ Cuenta creada exitosamente", "success");
-          
           // Actualizar el perfil del usuario con el nombre
           try {
             await updateProfile(userCredential.user, {
@@ -49,13 +46,33 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("⚠️ Error actualizando perfil:", profileError);
           }
           
-          // No necesitamos guardar aquí porque firebase-init.js ya lo hace automáticamente
-          console.log("✅ Registro completado - el listener global guardará en Firestore");
-          
-          // Redirigir después de un breve delay
-          setTimeout(() => {
-            window.location.href = "dream-input.html";
-          }, 1500);
+          // Enviar email de verificación
+          try {
+            await sendEmailVerification(userCredential.user, {
+              url: window.location.origin + '/welcome.html',
+              handleCodeInApp: true
+            });
+            
+            console.log("📧 Email de verificación enviado");
+            
+            // Mostrar mensaje especial con instrucciones
+            showEmailVerificationMessage(email);
+            
+            // Redirigir a una página de verificación después de mostrar el mensaje
+            setTimeout(() => {
+              window.location.href = "email-verification.html?email=" + encodeURIComponent(email);
+            }, 3000);
+            
+          } catch (verificationError) {
+            console.error("❌ Error enviando verificación:", verificationError);
+            
+            // Aunque falle la verificación, permitir continuar pero avisar
+            showMessage("✅ Cuenta creada. Verificación de email pendiente.", "success");
+            
+            setTimeout(() => {
+              window.location.href = "dream-input.html";
+            }, 2000);
+          }
         })
         .catch((error) => {
           console.error("❌ Error al registrarse:", error);
@@ -124,6 +141,65 @@ window.addEventListener('pageshow', function(event) {
     clearFormFields();
   }
 });
+
+// Función para mostrar mensaje especial de verificación de email
+function showEmailVerificationMessage(email) {
+  // Remover mensaje anterior si existe
+  const existingMessage = document.querySelector('.verification-overlay');
+  if (existingMessage) {
+    existingMessage.remove();
+  }
+  
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'verification-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+  
+  messageDiv.innerHTML = `
+    <div class="bg-white rounded-xl p-8 max-w-md mx-auto text-center shadow-2xl animate__animated animate__zoomIn">
+      <div class="mb-6">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">¡Verifica tu Email!</h3>
+        <p class="text-gray-600 text-sm mb-4">
+          Hemos enviado un email de verificación a:<br>
+          <strong class="text-blue-600">${email}</strong>
+        </p>
+      </div>
+      
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div class="flex items-start">
+          <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <div class="text-left">
+            <p class="text-yellow-800 text-sm font-medium">Importante:</p>
+            <p class="text-yellow-700 text-xs mt-1">
+              Debes verificar tu email para acceder a todas las funciones de YA ME VI
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="space-y-3">
+        <p class="text-xs text-gray-500">
+          📧 Revisa tu bandeja de entrada y spam<br>
+          🔗 Haz clic en el enlace de verificación<br>
+          ✅ Regresa para continuar
+        </p>
+      </div>
+      
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <p class="text-xs text-gray-400">
+          Redirigiendo automáticamente...
+        </p>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(messageDiv);
+}
 
 // Función para mostrar mensajes de error/éxito
 function showMessage(message, type = 'info') {
