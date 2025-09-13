@@ -47,13 +47,27 @@
       z-index: 30;
     }
     
-    button {
-      cursor: pointer !important;
+    /* Estilos mejorados para inputs */
+    input {
+      background: rgba(255, 255, 255, 0.95) !important;
+      color: #1f2937 !important;
+      border: 2px solid rgba(255, 255, 255, 0.6) !important;
     }
     
     input:focus {
+      background: rgba(255, 255, 255, 1) !important;
+      border-color: #3b82f6 !important;
       outline: none !important;
-      border-color: rgba(255, 255, 255, 0.6) !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    input::placeholder {
+      color: #6b7280 !important;
+      opacity: 0.8 !important;
+    }
+    
+    button {
+      cursor: pointer !important;
     }
     
     /* Estilo para el spinner de loading */
@@ -64,11 +78,22 @@
       width: 20px;
       height: 20px;
       animation: spin 1s linear infinite;
+      display: inline-block;
     }
     
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+    
+    /* Asegurar que el texto del botón sea visible */
+    .btn-text {
+      display: inline-block;
+    }
+    
+    /* Ocultar spinner por defecto */
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
@@ -105,23 +130,24 @@
         type="email" 
         id="emailInput" 
         placeholder="📧 Correo electrónico" 
-        class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/30 focus:border-white/50 focus:outline-none transition-all relative z-30"
+        class="w-full px-4 py-3 rounded-lg bg-white/90 border border-white/50 text-gray-800 placeholder:text-gray-600 focus:bg-white focus:border-blue-400 focus:outline-none transition-all relative z-30"
         autocomplete="email"
-        style="pointer-events: auto; position: relative; z-index: 30;"
+        style="pointer-events: auto; position: relative; z-index: 30; color: #1f2937 !important;"
       />
       <input 
         type="password" 
         id="passwordInput" 
         placeholder="🔒 Contraseña" 
-        class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/30 focus:border-white/50 focus:outline-none transition-all relative z-30"
+        class="w-full px-4 py-3 rounded-lg bg-white/90 border border-white/50 text-gray-800 placeholder:text-gray-600 focus:bg-white focus:border-blue-400 focus:outline-none transition-all relative z-30"
         autocomplete="current-password"
-        style="pointer-events: auto; position: relative; z-index: 30;"
+        style="pointer-events: auto; position: relative; z-index: 30; color: #1f2937 !important;"
       />
       
       <button 
         id="loginWithEmail" 
         class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg relative z-30"
         style="pointer-events: auto; cursor: pointer; position: relative; z-index: 30;"
+        type="button"
       >
         <span class="btn-text">🔑 Iniciar Sesión</span>
         <div class="loading-spinner hidden mx-auto"></div>
@@ -267,9 +293,28 @@
         notification.remove();
       }, 5000);
     }
+    
+    // Función para inicializar el estado del botón
+    function initializeButton() {
+      const button = document.getElementById('loginWithEmail');
+      if (button) {
+        button.disabled = false;
+        const spinner = button.querySelector('.loading-spinner');
+        const text = button.querySelector('.btn-text');
+        if (spinner) spinner.classList.add('hidden');
+        if (text) text.classList.remove('hidden');
+        console.log('✅ Botón inicializado en estado normal');
+      }
+    }
+    
     async function loginWithEmail() {
+      console.log('🔑 Función loginWithEmail ejecutada');
+      
       const email = document.getElementById('emailInput').value.trim();
       const password = document.getElementById('passwordInput').value.trim();
+      
+      console.log('📧 Email:', email ? 'Proporcionado' : 'Vacío');
+      console.log('🔒 Password:', password ? 'Proporcionado' : 'Vacío');
       
       if (!email || !password) {
         showNotification('Por favor ingresa email y contraseña', 'warning');
@@ -278,8 +323,10 @@
 
       try {
         showLoading('loginWithEmail', 'Verificando credenciales...');
+        console.log('🔄 Intentando autenticación...');
         
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log('✅ Autenticación exitosa');
         handleAuthSuccess(userCredential.user);
         
       } catch (error) {
@@ -347,6 +394,9 @@
       
       console.log('🚀 App inicializada solo con email:', env);
       
+      // Inicializar botón en estado normal
+      initializeButton();
+      
       // Debug info solo en localhost
       if (env.isLocalhost || window.location.search.includes('debug=true')) {
         const debugInfo = document.getElementById('debugInfo');
@@ -398,6 +448,11 @@
     
     // Backup event listeners - en caso de que DOMContentLoaded ya haya pasado
     setTimeout(() => {
+      console.log('🔧 Ejecutando backup de configuración...');
+      
+      // Asegurar que el botón esté en estado normal
+      initializeButton();
+      
       const loginButton = document.getElementById('loginWithEmail');
       if (loginButton && !loginButton.hasAttribute('data-listener-added')) {
         loginButton.addEventListener('click', function(e) {
