@@ -6,6 +6,7 @@
   <title>YA ME VI - Ingreso</title>
   
   <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-circle.svg?v=6">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   
   <!-- Web App Manifest -->
@@ -20,52 +21,33 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="YA ME VI">
   
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <!-- iOS Touch Icon - CONFIGURACIÓN SIMPLIFICADA -->
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   
-  <style>
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .loading-spinner {
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top: 2px solid white;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .webview-warning {
-      background: linear-gradient(135deg, #ff9800, #f57c00);
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin: 10px 0;
-      text-align: center;
-      font-weight: bold;
-    }
-  </style>
+  <!-- iOS Startup Images -->
+  <link rel="apple-touch-startup-image" href="assets/logo-512.png">
+  
+  <!-- Additional iOS Meta -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-title" content="YA ME VI">
+  
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
+     crossorigin="anonymous"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="overflow-hidden">
 
-  <div class="glass-effect rounded-3xl p-8 w-full max-w-md text-white text-center animate__animated animate__fadeInUp">
+  <!-- Fondo dinámico -->
+  <div id="background" class="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"></div>
+
+  <!-- Contenido principal -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-white text-center px-4">
+
+  <div class="bg-white bg-opacity-20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md text-white text-center animate__animated animate__fadeInUp border border-white border-opacity-30">
     
     <!-- Logo -->
     <div class="mb-6">
@@ -133,6 +115,8 @@
 
     <!-- Debug info (solo en desarrollo) -->
     <div id="debugInfo" class="hidden mt-6 p-3 bg-black/20 rounded-lg text-xs font-mono text-left"></div>
+  </div>
+
   </div>
 
   <!-- Modal de loading -->
@@ -352,5 +336,8 @@
     // Initialize
     initializeApp();
   </script>
+
+  <!-- Cargar shared.js para el fondo dinámico -->
+  <script src="js/shared.js"></script>
 </body>
 </html>
