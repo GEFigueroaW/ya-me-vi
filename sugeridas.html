@@ -2455,40 +2455,50 @@
     
     // Función para obtener el próximo día de sorteo
     function obtenerProximoDiaSorteo() {
-      const hoy = new Date();
-      const diaActual = hoy.getDay(); // 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
-      
+      const ahora = new Date();
+      const diaActual = ahora.getDay(); // 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
+      const horaActual = ahora.getHours(); // Hora actual (0-23)
       let proximoDia = '';
       let diasHasta = 0;
-      
-      if (diaActual === 0) { // Domingo
-        proximoDia = 'miércoles';
-        diasHasta = 3;
-      } else if (diaActual === 1 || diaActual === 2) { // Lunes o Martes
-        proximoDia = 'miércoles';
-        diasHasta = 3 - diaActual;
-      } else if (diaActual === 3) { // Miércoles
-        proximoDia = 'viernes';
-        diasHasta = 2;
-      } else if (diaActual === 4) { // Jueves
-        proximoDia = 'viernes';
-        diasHasta = 1;
-      } else if (diaActual === 5) { // Viernes
-        proximoDia = 'domingo';
-        diasHasta = 2;
-      } else if (diaActual === 6) { // Sábado
-        proximoDia = 'domingo';
-        diasHasta = 1;
+      let esHoy = false;
+
+      // Sorteos: Miércoles, Viernes, Domingo a las 21:00
+      // Si es día de sorteo y antes de las 21:00, mantener el día
+      if ((diaActual === 0 || diaActual === 3 || diaActual === 5) && horaActual < 21) {
+        proximoDia = ['domingo','miércoles','viernes'][[0,3,5].indexOf(diaActual)];
+        diasHasta = 0;
+        esHoy = true;
+      } else {
+        if (diaActual === 0) {
+          proximoDia = 'miércoles';
+          diasHasta = 3;
+        } else if (diaActual === 1 || diaActual === 2) {
+          proximoDia = 'miércoles';
+          diasHasta = 3 - diaActual;
+        } else if (diaActual === 3) {
+          proximoDia = 'viernes';
+          diasHasta = 2;
+        } else if (diaActual === 4) {
+          proximoDia = 'viernes';
+          diasHasta = 1;
+        } else if (diaActual === 5) {
+          proximoDia = 'domingo';
+          diasHasta = 2;
+        } else if (diaActual === 6) {
+          proximoDia = 'domingo';
+          diasHasta = 1;
+        }
+        esHoy = false;
       }
-      
-      const fechaProximoSorteo = new Date(hoy);
-      fechaProximoSorteo.setDate(hoy.getDate() + diasHasta);
-      
+
+      const fechaProximoSorteo = new Date(ahora);
+      fechaProximoSorteo.setDate(ahora.getDate() + diasHasta);
+
       return {
         dia: proximoDia,
         diasHasta: diasHasta,
         fecha: fechaProximoSorteo,
-        esHoy: diasHasta === 0
+        esHoy: esHoy
       };
     }
     
@@ -2654,14 +2664,12 @@
       const descripcionElement = document.getElementById('descripcion-proximo-sorteo');
       
       if (tituloElement) {
-        const textoTitulo = proximoSorteo.esHoy 
-          ? `📅 Predicción para HOY (${proximoSorteo.dia.toUpperCase()})` 
-          : `📅 Predicción para el Próximo ${proximoSorteo.dia.toUpperCase()} (en ${proximoSorteo.diasHasta} ${proximoSorteo.diasHasta === 1 ? 'día' : 'días'})`;
+        const textoTitulo = `📅 Combinaciones sugeridas en base a los sorteos de LOS DIAS "${proximoSorteo.dia.toUpperCase()}"`;
         tituloElement.textContent = textoTitulo;
       }
       
       if (descripcionElement) {
-        descripcionElement.textContent = `Predicciones específicas basadas únicamente en los sorteos de ${proximoSorteo.dia} de los últimos 18 meses`;
+        descripcionElement.textContent = `Combinaciones inteligentes basadas únicamente en los sorteos de ${proximoSorteo.dia} de los últimos 18 meses`;
       }
       
       try {
