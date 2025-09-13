@@ -414,6 +414,13 @@
       
       hideLoading('loginWithEmail');
       
+      // Verificar si el email está verificado
+      if (!user.emailVerified) {
+        console.log('⚠️ Email no verificado');
+        showEmailNotVerifiedMessage(user.email);
+        return;
+      }
+      
       showNotification('¡Ingreso exitoso! Redirigiendo...', 'success');
       
       // Verificar si es admin
@@ -471,6 +478,80 @@
       // Marcar como inicializada
       window.appInitialized = true;
       console.log('✅ Inicialización completada');
+    }
+
+    // Función para mostrar mensaje de email no verificado
+    function showEmailNotVerifiedMessage(email) {
+      // Remover mensaje anterior si existe
+      const existingMessage = document.querySelector('.email-verification-overlay');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'email-verification-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+      
+      messageDiv.innerHTML = `
+        <div class="bg-white rounded-xl p-8 max-w-md mx-auto text-center shadow-2xl animate__animated animate__zoomIn">
+          <div class="mb-6">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">📧 Email No Verificado</h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Necesitas verificar tu email para continuar:<br>
+              <strong class="text-blue-600">${email}</strong>
+            </p>
+          </div>
+          
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="text-left">
+              <p class="text-blue-800 text-sm font-medium mb-2">📋 Pasos a seguir:</p>
+              <ol class="text-blue-700 text-xs space-y-1">
+                <li>1. Revisa tu bandeja de entrada y spam</li>
+                <li>2. Busca el email de "YA ME VI - Verificación"</li>
+                <li>3. Haz clic en el enlace de verificación</li>
+                <li>4. Regresa aquí e intenta ingresar de nuevo</li>
+              </ol>
+            </div>
+          </div>
+          
+          <div class="space-y-3">
+            <button id="resend-verification" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300">
+              📧 Reenviar Email de Verificación
+            </button>
+            <button id="close-verification-modal" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-6 rounded-lg transition-all duration-300">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(messageDiv);
+      
+      // Event listeners
+      document.getElementById('resend-verification').addEventListener('click', async () => {
+        try {
+          await firebase.auth().currentUser.sendEmailVerification();
+          showNotification('📧 Email de verificación reenviado. Revisa tu bandeja de entrada.', 'success');
+        } catch (error) {
+          console.error('Error reenviando:', error);
+          showNotification('❌ Error reenviando email. Intenta de nuevo más tarde.', 'error');
+        }
+      });
+      
+      document.getElementById('close-verification-modal').addEventListener('click', () => {
+        messageDiv.remove();
+      });
+      
+      // Cerrar con click fuera del modal
+      messageDiv.addEventListener('click', (e) => {
+        if (e.target === messageDiv) {
+          messageDiv.remove();
+        }
+      });
     }
 
     // Event Listeners - SIMPLIFICADO

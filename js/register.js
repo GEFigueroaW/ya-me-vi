@@ -58,10 +58,10 @@ document.addEventListener("DOMContentLoaded", function () {
             // Mostrar mensaje especial con instrucciones
             showEmailVerificationMessage(email);
             
-            // Redirigir a una página de verificación después de mostrar el mensaje
+            // Redirigir directamente a login después de mostrar el mensaje
             setTimeout(() => {
-              window.location.href = "email-verification.html?email=" + encodeURIComponent(email);
-            }, 3000);
+              window.location.href = "login.html";
+            }, 4000);
             
           } catch (verificationError) {
             console.error("❌ Error enviando verificación:", verificationError);
@@ -186,13 +186,13 @@ function showEmailVerificationMessage(email) {
         <p class="text-xs text-gray-500">
           📧 Revisa tu bandeja de entrada y spam<br>
           🔗 Haz clic en el enlace de verificación<br>
-          ✅ Regresa para continuar
+          🔑 Regresa al login para continuar
         </p>
       </div>
       
       <div class="mt-6 pt-4 border-t border-gray-200">
         <p class="text-xs text-gray-400">
-          Redirigiendo automáticamente...
+          Redirigiendo al login...
         </p>
       </div>
     </div>
