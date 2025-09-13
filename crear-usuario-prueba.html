@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Usuario de Prueba - YA ME VI</title>
+    <style>
+        body { 
+            margin: 40px; 
+            font-family: Arial; 
+            background: #111; 
+            color: white;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #222;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #007cba;
+        }
+        input, button { 
+            display: block; 
+            width: 100%;
+            margin: 15px 0; 
+            padding: 12px; 
+            font-size: 16px;
+            background: white;
+            color: black;
+            border: 2px solid #333;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button { 
+            background: #007cba; 
+            color: white; 
+            cursor: pointer;
+            font-weight: bold;
+            border: 2px solid #007cba;
+        }
+        button:hover {
+            background: #005a8a;
+        }
+        #resultado { 
+            margin: 20px 0; 
+            padding: 15px; 
+            background: #333; 
+            border-left: 4px solid #007cba;
+            border-radius: 5px;
+        }
+        .success {
+            background: #1a5a3e !important;
+            border-left-color: #28a745 !important;
+        }
+        .error {
+            background: #5a1a1a !important;
+            border-left-color: #dc3545 !important;
+        }
+        h1 {
+            color: #007cba;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .note {
+            background: #444;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Crear Usuario de Prueba</h1>
+        
+        <div class="note">
+            <strong>📝 Instrucciones:</strong><br>
+            1. Crea un usuario con email y contraseña que recuerdes<br>
+            2. Usa esas credenciales para hacer login<br>
+            3. ¡Confirma que el sistema funciona perfectamente!
+        </div>
+        
+        <input type="email" id="email" placeholder="Email para nuevo usuario" value="prueba@yamevi.com">
+        <input type="password" id="password" placeholder="Contraseña (mínimo 6 caracteres)" value="123456">
+        <input type="text" id="nombre" placeholder="Nombre completo" value="Usuario de Prueba">
+        
+        <button onclick="crearUsuario()">🚀 Crear Usuario de Prueba</button>
+        
+        <div id="resultado">⏳ Esperando...</div>
+        
+        <div class="note">
+            <strong>✅ Después de crear el usuario:</strong><br>
+            Ve a <a href="login.html" style="color: #007cba;">login.html</a> y usa las mismas credenciales para ingresar.
+        </div>
+    </div>
+    
+    <!-- Firebase CDN v9 compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1gTGY3Q4EbZGZOSqBWOAjm-zbNJ8I4As",
+            authDomain: "yamevi-com-mx.firebaseapp.com",
+            projectId: "yamevi-com-mx",
+            storageBucket: "yamevi-com-mx.appspot.com",
+            messagingSenderId: "593993993553",
+            appId: "1:593993993553:web:da6f10c03d49a9ae2d4c8b"
+        };
+        
+        // Inicializar Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase inicializado para registro');
+        } catch (error) {
+            console.error('❌ Firebase Error:', error);
+        }
+        
+        // Función para crear usuario
+        function crearUsuario() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const nombre = document.getElementById('nombre').value;
+            const resultado = document.getElementById('resultado');
+            
+            // Validaciones
+            if (!email || !password || !nombre) {
+                resultado.className = 'error';
+                resultado.innerHTML = '❌ Todos los campos son obligatorios';
+                return;
+            }
+            
+            if (password.length < 6) {
+                resultado.className = 'error';
+                resultado.innerHTML = '❌ La contraseña debe tener al menos 6 caracteres';
+                return;
+            }
+            
+            resultado.className = '';
+            resultado.innerHTML = '⏳ Creando usuario...';
+            console.log('🔑 Creando usuario:', email);
+            
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // Actualizar perfil con nombre
+                    return user.updateProfile({
+                        displayName: nombre
+                    }).then(() => {
+                        resultado.className = 'success';
+                        resultado.innerHTML = `✅ USUARIO CREADO EXITOSAMENTE!<br><br>
+                            <strong>📧 Email:</strong> ${email}<br>
+                            <strong>🔑 Contraseña:</strong> ${password}<br>
+                            <strong>👤 Nombre:</strong> ${nombre}<br>
+                            <strong>🆔 UID:</strong> ${user.uid}<br><br>
+                            <strong>🎯 Ahora ve a <a href="login.html" style="color: #28a745;">login.html</a> y usa estas credenciales</strong>`;
+                        
+                        console.log('✅ Usuario creado exitosamente:', user);
+                        
+                        // Cerrar sesión para poder hacer login después
+                        firebase.auth().signOut();
+                    });
+                })
+                .catch((error) => {
+                    let mensaje = '';
+                    switch(error.code) {
+                        case 'auth/email-already-in-use':
+                            mensaje = 'Este email ya está registrado. Usa el login normal.';
+                            break;
+                        case 'auth/invalid-email':
+                            mensaje = 'El formato del email no es válido.';
+                            break;
+                        case 'auth/weak-password':
+                            mensaje = 'La contraseña es muy débil. Usa al menos 6 caracteres.';
+                            break;
+                        default:
+                            mensaje = error.message;
+                    }
+                    
+                    resultado.className = 'error';
+                    resultado.innerHTML = `❌ ERROR AL CREAR USUARIO:<br>Código: ${error.code}<br>Mensaje: ${mensaje}`;
+                    console.error('❌ Error creación:', error);
+                });
+        }
+        
+        // Enter en campos
+        document.getElementById('nombre').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                crearUsuario();
+            }
+        });
+        
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('nombre').focus();
+            }
+        });
+        
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('password').focus();
+            }
+        });
+        
+        console.log('🚀 Creador de usuarios de prueba cargado');
+    </script>
+</body>
+</html>
