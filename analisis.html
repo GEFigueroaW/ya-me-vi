@@ -35,16 +35,24 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
   
-  <!-- Google AdSense -->
+  <!-- Google AdMob - YA ME VI -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
      crossorigin="anonymous"></script>
   
-  <!-- AdSense Auto Ads -->
+  <!-- AdMob Configuration for Analysis Page -->
   <script>
+    // AdMob App ID: ca-app-pub-2226536008153511~2187640363
     (adsbygoogle = window.adsbygoogle || []).push({
-      google_ad_client: "ca-pub-2226536008153511",
+      google_ad_client: "ca-app-pub-2226536008153511",
       enable_page_level_ads: true
     });
+    
+    // Configuración específica para página de análisis
+    window.admobConfig = {
+      appId: "ca-app-pub-2226536008153511~2187640363",
+      bannerId: "ca-app-pub-2226536008153511/4122666428",
+      page: "analysis"
+    };
   </script>
 </head>
 <body class="overflow-x-hidden">
@@ -103,12 +111,12 @@
     <!-- Estadísticas adicionales -->
     <div id="estadisticas-extra" class="animate__animated animate__fadeInUp"></div>
 
-    <!-- AdSense Ad Unit - After Results -->
-    <div class="text-center mt-8 mb-8">
+    <!-- AdMob Banner - YA ME VI Analysis -->
+    <div id="admob-banner-analysis" class="text-center mt-8 mb-8">
       <ins class="adsbygoogle"
            style="display:block"
-           data-ad-client="ca-pub-2226536008153511"
-           data-ad-slot="4567890123"
+           data-ad-client="ca-app-pub-2226536008153511"
+           data-ad-slot="4122666428"
            data-ad-format="auto"
            data-full-width-responsive="true"></ins>
       <script>
