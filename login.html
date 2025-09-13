@@ -301,43 +301,86 @@
         button.disabled = false;
         const spinner = button.querySelector('.loading-spinner');
         const text = button.querySelector('.btn-text');
-        if (spinner) spinner.classList.add('hidden');
-        if (text) text.classList.remove('hidden');
+        
+        if (spinner) {
+          spinner.classList.add('hidden');
+          spinner.style.display = 'none';
+        }
+        if (text) {
+          text.classList.remove('hidden');
+          text.style.display = 'inline-block';
+        }
+        
+        // Asegurar que el botón sea clickeable
+        button.style.pointerEvents = 'auto';
+        button.style.cursor = 'pointer';
+        
         console.log('✅ Botón inicializado en estado normal');
+      } else {
+        console.error('❌ No se encontró el botón para inicializar');
       }
     }
     
     async function loginWithEmail() {
-      console.log('🔑 Función loginWithEmail ejecutada');
+      console.log('🔑 === INICIO DE FUNCIÓN LOGIN ===');
+      console.log('🔍 Verificando elementos...');
       
-      const email = document.getElementById('emailInput').value.trim();
-      const password = document.getElementById('passwordInput').value.trim();
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
       
-      console.log('📧 Email:', email ? 'Proporcionado' : 'Vacío');
-      console.log('🔒 Password:', password ? 'Proporcionado' : 'Vacío');
+      if (!emailInput || !passwordInput) {
+        console.error('❌ Elementos de input no encontrados');
+        showNotification('Error: Elementos de formulario no encontrados', 'error');
+        return;
+      }
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      console.log('📧 Email:', email ? `${email.substring(0, 3)}***` : 'Vacío');
+      console.log('🔒 Password:', password ? `${password.length} caracteres` : 'Vacío');
       
       if (!email || !password) {
+        console.log('⚠️ Campos vacíos detectados');
         showNotification('Por favor ingresa email y contraseña', 'warning');
         return;
       }
 
+      if (!auth) {
+        console.error('❌ Auth no inicializado');
+        showNotification('Error: Sistema de autenticación no disponible', 'error');
+        return;
+      }
+
       try {
+        console.log('🔄 Iniciando proceso de autenticación...');
         showLoading('loginWithEmail', 'Verificando credenciales...');
-        console.log('🔄 Intentando autenticación...');
         
+        console.log('🌐 Llamando a signInWithEmailAndPassword...');
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log('✅ Autenticación exitosa');
+        
+        console.log('✅ Autenticación exitosa:', userCredential.user.uid);
+        console.log('📧 Email autenticado:', userCredential.user.email);
+        
         handleAuthSuccess(userCredential.user);
         
       } catch (error) {
-        console.error('❌ Error en login con email:', error);
+        console.error('❌ Error completo en login:', error);
+        console.error('❌ Código de error:', error.code);
+        console.error('❌ Mensaje de error:', error.message);
+        
         hideLoading('loginWithEmail');
         
         let message = 'Error al iniciar sesión: ';
         switch (error.code) {
           case 'auth/user-not-found':
+            message = 'No existe una cuenta con este email';
+            break;
           case 'auth/wrong-password':
-            message = 'Email o contraseña incorrectos';
+            message = 'Contraseña incorrecta';
+            break;
+          case 'auth/invalid-email':
+            message = 'Email inválido';
             break;
           case 'auth/too-many-requests':
             message = 'Demasiados intentos. Espera unos minutos';
@@ -345,12 +388,18 @@
           case 'auth/network-request-failed':
             message = 'Error de conexión. Verifica tu internet';
             break;
+          case 'auth/invalid-credential':
+            message = 'Credenciales inválidas. Verifica tu email y contraseña';
+            break;
           default:
             message += error.message;
         }
         
+        console.log('📢 Mostrando mensaje:', message);
         showNotification(message, 'error');
       }
+      
+      console.log('🔑 === FIN DE FUNCIÓN LOGIN ===');
     }
 
     // Handle Authentication Success
@@ -386,11 +435,18 @@
 
     // Initialize App - SIMPLIFICADA
     function initializeApp() {
+      if (window.appInitialized) {
+        console.log('⚠️ App ya inicializada, saltando...');
+        return;
+      }
+      
       const env = detectEnvironment();
       
       // Update environment info
       const envInfo = document.getElementById('environmentInfo');
-      envInfo.textContent = `${env.isMobile ? '📱' : '🖥️'} ${env.isWebView ? 'WebView' : 'Navegador'} | Solo Email ✅`;
+      if (envInfo) {
+        envInfo.textContent = `${env.isMobile ? '📱' : '🖥️'} ${env.isWebView ? 'WebView' : 'Navegador'} | Solo Email ✅`;
+      }
       
       console.log('🚀 App inicializada solo con email:', env);
       
@@ -400,25 +456,48 @@
       // Debug info solo en localhost
       if (env.isLocalhost || window.location.search.includes('debug=true')) {
         const debugInfo = document.getElementById('debugInfo');
-        debugInfo.textContent = JSON.stringify(env, null, 2);
-        debugInfo.classList.remove('hidden');
+        if (debugInfo) {
+          debugInfo.textContent = JSON.stringify(env, null, 2);
+          debugInfo.classList.remove('hidden');
+        }
       }
+      
+      // Marcar como inicializada
+      window.appInitialized = true;
+      console.log('✅ Inicialización completada');
     }
 
     // Event Listeners
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🔄 DOM cargado, configurando event listeners...');
       
+      // Asegurar que el botón esté en estado normal al inicio
+      initializeButton();
+      
       const loginButton = document.getElementById('loginWithEmail');
       const emailInput = document.getElementById('emailInput');
       const passwordInput = document.getElementById('passwordInput');
       
+      // Verificar que los elementos existan
+      console.log('🔍 Elementos encontrados:');
+      console.log('- loginButton:', !!loginButton);
+      console.log('- emailInput:', !!emailInput);
+      console.log('- passwordInput:', !!passwordInput);
+      
       if (loginButton) {
+        // Limpiar cualquier event listener previo
+        loginButton.removeEventListener('click', loginWithEmail);
+        
+        // Agregar event listener
         loginButton.addEventListener('click', function(e) {
           e.preventDefault();
+          e.stopPropagation();
           console.log('🔑 Botón de login clickeado');
           loginWithEmail();
         });
+        
+        // Marcar como configurado
+        loginButton.setAttribute('data-listener-configured', 'true');
         console.log('✅ Event listener del botón login configurado');
       } else {
         console.error('❌ No se encontró el botón loginWithEmail');
@@ -439,42 +518,97 @@
         emailInput.addEventListener('keypress', function(e) {
           if (e.key === 'Enter') {
             e.preventDefault();
-            passwordInput.focus();
+            if (passwordInput) {
+              passwordInput.focus();
+            }
           }
         });
         console.log('✅ Event listener del email configurado');
       }
+      
+      // Inicializar la app después de configurar listeners
+      initializeApp();
     });
     
-    // Backup event listeners - en caso de que DOMContentLoaded ya haya pasado
+    // Backup de seguridad - Solo si no se configuró en DOMContentLoaded
     setTimeout(() => {
-      console.log('🔧 Ejecutando backup de configuración...');
-      
-      // Asegurar que el botón esté en estado normal
-      initializeButton();
+      console.log('🔧 Verificando configuración backup...');
       
       const loginButton = document.getElementById('loginWithEmail');
-      if (loginButton && !loginButton.hasAttribute('data-listener-added')) {
+      if (loginButton && !loginButton.hasAttribute('data-listener-configured')) {
+        console.log('⚠️ Configurando backup event listener...');
+        
+        // Asegurar estado normal del botón
+        initializeButton();
+        
         loginButton.addEventListener('click', function(e) {
           e.preventDefault();
+          e.stopPropagation();
           console.log('🔑 Botón de login clickeado (backup)');
           loginWithEmail();
         });
-        loginButton.setAttribute('data-listener-added', 'true');
+        
+        loginButton.setAttribute('data-listener-configured', 'true');
         console.log('✅ Backup event listener configurado');
+        
+        // Inicializar app si no se hizo antes
+        if (!window.appInitialized) {
+          initializeApp();
+        }
+      } else {
+        console.log('✅ Event listeners ya configurados correctamente');
       }
-    }, 100);
+    }, 500);
 
-    // Auth State Listener
+    // Auth State Listener - MODIFICADO para evitar redirección automática
     onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log('✅ Usuario ya autenticado:', user.email || user.uid);
-        handleAuthSuccess(user);
+        // No redirigir automáticamente, dejar que el usuario haga login manualmente
+        console.log('ℹ️ Usuario autenticado detectado, pero esperando acción manual');
+      } else {
+        console.log('ℹ️ No hay usuario autenticado');
       }
     });
 
-    // Initialize
-    initializeApp();
+    console.log('🚀 Script cargado, esperando DOM...');
+    
+    // Función de test para verificar funcionamiento
+    window.testLogin = function() {
+      console.log('🧪 === TEST DE FUNCIONALIDAD ===');
+      console.log('🔍 Verificando elementos...');
+      
+      const button = document.getElementById('loginWithEmail');
+      const email = document.getElementById('emailInput');
+      const password = document.getElementById('passwordInput');
+      
+      console.log('- Botón encontrado:', !!button);
+      console.log('- Email input encontrado:', !!email);
+      console.log('- Password input encontrado:', !!password);
+      
+      if (button) {
+        console.log('- Botón habilitado:', !button.disabled);
+        console.log('- Event listeners configurados:', button.hasAttribute('data-listener-configured'));
+      }
+      
+      console.log('- Auth inicializado:', !!auth);
+      console.log('- App inicializada:', !!window.appInitialized);
+      
+      if (button && email && password && auth) {
+        console.log('✅ Todos los elementos están listos para funcionar');
+      } else {
+        console.error('❌ Faltan elementos para el funcionamiento');
+      }
+      
+      console.log('🧪 === FIN DEL TEST ===');
+    };
+    
+    // Auto-test después de 2 segundos
+    setTimeout(() => {
+      if (window.testLogin) {
+        window.testLogin();
+      }
+    }, 2000);
   </script>
 
   <!-- Cargar shared.js para el fondo dinámico -->
