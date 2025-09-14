@@ -480,10 +480,6 @@ export function crearCajaAnalisis(tipo, datos) {
     decada: {
       emoji: '🎯',
       titulo: 'Décadas por posición',
-    },
-    dias: {
-      emoji: '📅',
-      titulo: 'Análisis por día',
     }
   };
   if (!config[tipo]) return null;
@@ -640,10 +636,6 @@ function abrirCaja(tipo, datos) {
       // Usar el análisis de década por posición
       contenidoHTML = generarContenidoDecada(datos.decadaAnalisis || {});
       break;
-    case 'dias':
-      // Análisis por día de la semana
-      contenidoHTML = generarAnalisisPorDias(datos);
-      break;
     default:
       contenidoHTML = '<p class="text-white">Contenido no disponible</p>';
   }
@@ -658,8 +650,7 @@ function abrirCaja(tipo, datos) {
           ${tipo === 'frecuencias' ? '📊 Frecuencias' : 
             tipo === 'suma' ? '🔢 Suma de números' : 
             tipo === 'pares' ? '⚖️ Pares e impares' : 
-            tipo === 'decada' ? '🎯 Décadas por posición' : 
-            tipo === 'dias' ? '📅 Análisis por día' : 'Análisis'}
+            tipo === 'decada' ? '🎯 Décadas por posición' : 'Análisis'}
         </h3>
       </div>
       ${contenidoHTML}
@@ -1265,27 +1256,22 @@ export function mostrarAnalisisAvanzados(datos) {
   const paresAnalisis = analizarParesImpares(datos);
   // Usar el nuevo análisis de década por posición
   const decadaAnalisis = analizarDecadaPorPosicion(datos);
-  // Nuevo: análisis por día de la semana
-  const diasAnalisis = separarSorteosPorDia(datos);
 
   // Agregar análisis a los datos para que estén disponibles en las cajas
   datos.sumAnalisis = sumAnalisis;
   datos.paresAnalisis = paresAnalisis;
   datos.decadaAnalisis = decadaAnalisis;
-  datos.diasAnalisis = diasAnalisis;
 
 
-  // Crear las 4 cajas adicionales usando la firma correcta
+  // Crear las 3 cajas adicionales usando la firma correcta
   const cajaSuma = crearCajaAnalisis('suma', datos);
   const cajaPares = crearCajaAnalisis('pares', datos);
   const cajaDecada = crearCajaAnalisis('decada', datos);
-  const cajaDias = crearCajaAnalisis('dias', datos);
 
   // Agregar las cajas al contenedor
   if (cajaSuma) contenedorCajas.appendChild(cajaSuma);
   if (cajaPares) contenedorCajas.appendChild(cajaPares);
   if (cajaDecada) contenedorCajas.appendChild(cajaDecada);
-  if (cajaDias) contenedorCajas.appendChild(cajaDias);
 
   console.log('✅ Análisis avanzados completados (incluye década por posición)');
 }
