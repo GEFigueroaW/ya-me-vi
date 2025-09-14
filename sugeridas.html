@@ -1833,13 +1833,13 @@
       // GENERAR MÚLTIPLES SEEDS ÚNICOS PARA MÁXIMA DIFERENCIACIÓN ENTRE USUARIOS
       const baseUserSeed = generarHashSimple(usuario + "_base_" + hashCSV);
       const altUserSeed = generarHashSimple(usuario + "_alt_" + hashCSV + "_ia");
-      const mixedSeed = generarHashSimple(usuario + hashCSV + "_mixed_" + Date.now().toString().slice(-4));
+      const mixedSeed = generarHashSimple(usuario + hashCSV + "_mixed_" + hashCSV); // Removido Date.now() para consistencia
       
       // SEEDS ADICIONALES PARA MAYOR VARIABILIDAD
       const uniqueSeed1 = generarHashSimple(usuario.split('_')[0] + "_unique1_" + hashCSV);
       const uniqueSeed2 = generarHashSimple(usuario.split('_')[1] + "_unique2_" + hashCSV);
       const uniqueSeed3 = generarHashSimple(usuario.split('_')[2] + "_unique3_" + hashCSV);
-      const timeSeed = generarHashSimple(usuario + "_time_" + Math.floor(Date.now() / 86400000)); // Cambia cada día
+      const timeSeed = generarHashSimple(usuario + "_time_" + Math.floor(Date.now() / 86400000)); // Cambia cada día - mantener para funcionalidad diaria
       
       console.log(`🎲 Usando 7 seeds únicos para usuario: ${usuario.substring(0, 20)}...`);
       
@@ -2619,8 +2619,8 @@
         }
       });
       
-      // Generar semilla específica
-      const semilla = hashCodeLocal(`${userId}-${tipoSorteo}-${Date.now()}`);
+      // Generar semilla específica (sin Date.now() para mantener consistencia)
+      const semilla = hashCodeLocal(`${userId}-${tipoSorteo}`);
       
       // Convertir a array y ordenar por score
       const numerosConScore = Object.entries(frecuencias).map(([num, freq]) => ({
