@@ -1,0 +1,47 @@
+# 📋 INSTRUCCIONES PARA GOOGLE PLAY CONSOLE
+
+## 🎯 YA ME VI - Análisis de Lotería Mexicana
+
+### COPIAR Y PEGAR EN GOOGLE PLAY CONSOLE:
+
+---
+
+**INSTRUCCIÓN 1:**
+La app YA ME VI es de acceso público y NO requiere credenciales especiales. Todas las funciones principales (análisis estadístico, predicciones IA, evaluación de combinaciones) están disponibles inmediatamente al abrir la app sin necesidad de registro o autenticación.
+
+---
+
+**INSTRUCCIÓN 2:**
+Para acceso opcional con funciones personalizadas, usar Google OAuth con credenciales de prueba: Email: yamevi.testing@gmail.com | Password: YaMeVi2024Test! | Acción: Tocar "Continuar con Google" en pantalla inicial y usar estas credenciales.
+
+---
+
+**INSTRUCCIÓN 3:**
+Funcionalidades a revisar sin restricciones: 1) Análisis estadístico de lotería mexicana (frecuencias, gráficos), 2) Predicciones con 6 métodos de IA, 3) Evaluación de combinaciones personales, 4) Sugerencias automáticas. Todo accesible desde el menú principal sin bloqueos.
+
+---
+
+**INSTRUCCIÓN 4:**
+NO hay restricciones de ubicación, verificación 2FA, membresías premium obligatorias, o dispositivos adicionales requeridos. La app funciona globalmente con conexión a internet para datos actualizados de lotería y anuncios AdMob (cumple políticas Google).
+
+---
+
+**INSTRUCCIÓN 5:**
+Políticas implementadas: Privacidad en politica-privacidad.html, Términos en aviso-legal.html, Rating Teen 13+, contenido legal de análisis estadístico (sin apuestas reales), AdMob con IDs ca-pub-2226536008153511. Contacto soporte: gefigueroadev@gmail.com
+
+---
+
+## 📱 RESUMEN EJECUTIVO PARA REVISORES:
+
+- **✅ ACCESO INMEDIATO:** Sin credenciales
+- **🔐 ACCESO AVANZADO:** yamevi.testing@gmail.com / YaMeVi2024Test!
+- **🚫 SIN RESTRICCIONES:** Geolocalización, 2FA, premium obligatorio
+- **📜 COMPLIANCE:** Políticas, términos, AdMob configurado
+- **📞 SOPORTE:** 24/7 durante revisión
+
+## 🔗 URLs DE VERIFICACIÓN:
+
+- **App Principal:** https://yamevi.com.mx/
+- **Política Privacidad:** https://yamevi.com.mx/politica-privacidad.html
+- **Términos Legales:** https://yamevi.com.mx/aviso-legal.html
+- **Diagnóstico Técnico:** https://yamevi.com.mx/diagnostico-admob.html
