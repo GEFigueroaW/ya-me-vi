@@ -35,6 +35,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="css/styles.css" />
   
+  <!-- AdMob Integration -->
+  <script type="module" src="js/admob-manager.js"></script>
+  
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
      crossorigin="anonymous"></script>
@@ -935,6 +938,41 @@
     // También ejecutar después de que se generen las cajas
     setTimeout(forzarLayoutMovil, 1000);
     setTimeout(forzarLayoutMovil, 3000);
+    
+    // === INTEGRACIÓN ADMOB ===
+    // Eventos de AdMob para página de análisis
+    document.addEventListener('DOMContentLoaded', () => {
+      // Registrar vista de página de análisis
+      if (window.yamevi_admob) {
+        setTimeout(() => {
+          window.yamevi_admob.trackLotteryInteraction('analysis_page_view', {
+            page: 'analisis',
+            timestamp: new Date().toISOString()
+          });
+        }, 2000);
+      }
+    });
+    
+    // Tracking para análisis completado
+    function trackAnalysisCompleted(type, details = {}) {
+      if (window.yamevi_admob) {
+        window.yamevi_admob.trackLotteryInteraction('analysis_requested', {
+          type: type,
+          details: details,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+    
+    // Interceptar cuando se complete un análisis
+    const originalCargarDatos = window.cargarDatosHistoricos;
+    if (originalCargarDatos) {
+      window.cargarDatosHistoricos = function(...args) {
+        const result = originalCargarDatos.apply(this, args);
+        trackAnalysisCompleted('historical_data_loaded', { args });
+        return result;
+      };
+    }
   </script>
 </body>
 </html>

@@ -1,10 +1,32 @@
 /**
  * YA ME VI - Configuración Google AdMob
  * Configuración centralizada para publicidad móvil y web
- * Actualizado con anuncios nativos avanzados y de inicio de aplicación
+ * Actualizado con UNIDADES DE DEMOSTRACIÓN para pruebas seguras
  */
 
-// IDs de AdMob proporcionados por Google
+// === IDS DE UNIDADES DE DEMOSTRACIÓN DE GOOGLE ===
+// ⚠️ IMPORTANTE: Reemplazar estos IDs por los reales antes de publicar la app
+export const ADMOB_DEMO_UNITS = {
+  // Banners
+  banner_adaptable: 'ca-app-pub-3940256099942544/9214589741',
+  banner_fijo: 'ca-app-pub-3940256099942544/6300978111',
+  
+  // Intersticiales
+  intersticial: 'ca-app-pub-3940256099942544/1033173712',
+  intersticial_recompensado: 'ca-app-pub-3940256099942544/5354046379',
+  
+  // Recompensados
+  video_recompensado: 'ca-app-pub-3940256099942544/5224354917',
+  
+  // Nativos
+  nativo: 'ca-app-pub-3940256099942544/2247696110',
+  nativo_video: 'ca-app-pub-3940256099942544/1044960115',
+  
+  // Inicio de aplicación
+  app_open: 'ca-app-pub-3940256099942544/9257395921'
+};
+
+// IDs de AdMob de producción (para uso futuro)
 export const ADMOB_CONFIG = {
   // ID de aplicación AdMob
   APP_ID: 'ca-app-pub-2226536008153511~2187640363',
