@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Diagnóstico AdMob - YA ME VI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- AdSense con ID REAL de producción -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2226536008153511"
+        crossorigin="anonymous"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen text-white">
+    
+    <div class="container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-4">🔍 Diagnóstico AdMob</h1>
+            <p class="text-xl text-blue-200">Verificación del estado de los anuncios en producción</p>
+            <p class="text-lg text-yellow-300 mt-2">yamevi.com.mx</p>
+        </div>
+
+        <!-- Estado de la cuenta AdMob -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">📊 Estado de la Cuenta AdMob</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-purple-600 bg-opacity-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-yellow-300">Client ID</h3>
+                    <p class="font-mono">ca-pub-2226536008153511</p>
+                </div>
+                <div class="bg-blue-600 bg-opacity-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-yellow-300">App ID</h3>
+                    <p class="font-mono">ca-app-pub-2226536008153511~2187640363</p>
+                </div>
+                <div class="bg-indigo-600 bg-opacity-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-yellow-300">Banner Unit</h3>
+                    <p class="font-mono">ca-app-pub-2226536008153511/4122666428</p>
+                </div>
+                <div class="bg-green-600 bg-opacity-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-yellow-300">Native Unit</h3>
+                    <p class="font-mono">ca-app-pub-2226536008153511/5826684234</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test de Banner Real -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-center">📱 Test Banner Producción</h2>
+            
+            <!-- Banner con ID REAL -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-2226536008153511"
+                 data-ad-slot="4122666428"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            
+            <div class="mt-4 p-4 bg-yellow-900 bg-opacity-50 rounded-lg">
+                <h3 class="font-bold text-yellow-300">🕒 ¿Por qué no veo anuncios?</h3>
+                <ul class="text-sm mt-2 space-y-1">
+                    <li>• <strong>Cuenta nueva:</strong> AdMob puede tardar 24-48 horas en activar</li>
+                    <li>• <strong>Revisión de contenido:</strong> Google está verificando el sitio</li>
+                    <li>• <strong>Inventario limitado:</strong> No hay anuncios disponibles para tu audiencia</li>
+                    <li>• <strong>AdBlocker:</strong> Extensiones pueden bloquear anuncios</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Test de Native Ad Real -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-center">📝 Test Native Ad Producción</h2>
+            
+            <!-- Native Ad con ID REAL -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-format="fluid"
+                 data-ad-layout-key="-6t+ed+2i-1n-4w"
+                 data-ad-client="ca-pub-2226536008153511"
+                 data-ad-slot="5826684234"></ins>
+                 
+            <div class="mt-4 p-4 bg-blue-900 bg-opacity-50 rounded-lg">
+                <h3 class="font-bold text-blue-300">ℹ️ Información</h3>
+                <p class="text-sm mt-2">Los anuncios nativos se integran más naturalmente y pueden tardar más en cargar.</p>
+            </div>
+        </div>
+
+        <!-- Verificación técnica -->
+        <div class="bg-green-900 bg-opacity-50 rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">🔧 Verificación Técnica</h2>
+            <div id="diagnostics" class="bg-black bg-opacity-50 p-4 rounded-lg font-mono text-sm">
+                <p class="text-green-400">Ejecutando diagnósticos...</p>
+            </div>
+        </div>
+
+        <!-- Pasos siguientes -->
+        <div class="bg-orange-900 bg-opacity-50 rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">🚀 Pasos Siguientes</h2>
+            <div class="space-y-3 text-sm">
+                <div class="p-3 bg-orange-700 bg-opacity-50 rounded-lg">
+                    <h3 class="font-bold">1. Verificar Console de AdMob</h3>
+                    <p>Ve a <a href="https://apps.admob.com/" class="text-blue-300 underline" target="_blank">apps.admob.com</a> y verifica que tu sitio esté aprobado</p>
+                </div>
+                <div class="p-3 bg-orange-700 bg-opacity-50 rounded-lg">
+                    <h3 class="font-bold">2. Verificar ads.txt</h3>
+                    <p>Google puede requerir un archivo ads.txt en yamevi.com.mx/ads.txt</p>
+                </div>
+                <div class="p-3 bg-orange-700 bg-opacity-50 rounded-lg">
+                    <h3 class="font-bold">3. Paciencia</h3>
+                    <p>Las cuentas nuevas pueden tardar 1-3 días en mostrar anuncios reales</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="text-center">
+            <a href="home.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg mr-4 inline-block">
+                🏠 Ir a Home
+            </a>
+            <a href="test-admob.html" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg inline-block">
+                🧪 Test Demo Units
+            </a>
+        </div>
+    </div>
+
+    <script>
+        console.log('🔍 Diagnóstico AdMob - Producción Real');
+        console.log('🆔 Client ID: ca-pub-2226536008153511');
+        
+        // Inicializar anuncios reales
+        (adsbygoogle = window.adsbygoogle || []).push({});
+        (adsbygoogle = window.adsbygoogle || []).push({});
+        
+        // Diagnósticos
+        const diagnosticsEl = document.getElementById('diagnostics');
+        let diagnostics = [];
+        
+        // 1. Verificar script de AdSense
+        const adSenseScript = document.querySelector('script[src*="adsbygoogle.js"]');
+        if (adSenseScript) {
+            diagnostics.push('✅ Script AdSense cargado correctamente');
+        } else {
+            diagnostics.push('❌ Script AdSense NO encontrado');
+        }
+        
+        // 2. Verificar AdBlocker
+        if (typeof window.adsbygoogle === 'undefined') {
+            diagnostics.push('⚠️ Posible AdBlocker detectado');
+        } else {
+            diagnostics.push('✅ AdSense disponible (sin AdBlocker)');
+        }
+        
+        // 3. Verificar dominio
+        const currentDomain = window.location.hostname;
+        if (currentDomain === 'yamevi.com.mx') {
+            diagnostics.push('✅ Dominio correcto: yamevi.com.mx');
+        } else if (currentDomain === 'localhost') {
+            diagnostics.push('⚠️ Testing en localhost (usar demo units)');
+        } else {
+            diagnostics.push(`❌ Dominio no autorizado: ${currentDomain}`);
+        }
+        
+        // 4. Verificar HTTPS
+        if (window.location.protocol === 'https:') {
+            diagnostics.push('✅ Conexión HTTPS segura');
+        } else {
+            diagnostics.push('⚠️ Conexión HTTP (AdMob prefiere HTTPS)');
+        }
+        
+        // 5. Verificar slots de anuncios
+        setTimeout(() => {
+            const adSlots = document.querySelectorAll('.adsbygoogle');
+            diagnostics.push(`📊 ${adSlots.length} slots de anuncios encontrados`);
+            
+            adSlots.forEach((slot, index) => {
+                const status = slot.getAttribute('data-adsbygoogle-status');
+                if (status === 'done') {
+                    diagnostics.push(`✅ Slot ${index + 1}: Procesado correctamente`);
+                } else if (status === 'error') {
+                    diagnostics.push(`❌ Slot ${index + 1}: Error en carga`);
+                } else {
+                    diagnostics.push(`⏳ Slot ${index + 1}: Aún procesando...`);
+                }
+            });
+            
+            // Actualizar diagnósticos
+            diagnosticsEl.innerHTML = diagnostics.map(d => `<p>${d}</p>`).join('');
+            
+            // Mensaje final
+            setTimeout(() => {
+                diagnosticsEl.innerHTML += `
+                    <br>
+                    <p class="text-yellow-400">🎯 RESULTADO:</p>
+                    <p class="text-blue-300">Si todos están en ✅ pero no ves anuncios:</p>
+                    <p class="text-white">• Tu cuenta AdMob está en período de revisión</p>
+                    <p class="text-white">• Espera 24-48 horas para activación completa</p>
+                `;
+            }, 2000);
+        }, 3000);
+        
+        console.log('🔍 Diagnósticos ejecutándose...');
+    </script>
+
+</body>
+</html>
