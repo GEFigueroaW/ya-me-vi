@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Login Google Play - YA ME VI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen text-white">
+    
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-lg mx-auto">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold mb-4">🧪 Test Login Google Play</h1>
+                <p class="text-xl text-blue-200">Probar credenciales de usuario de prueba</p>
+            </div>
+
+            <!-- Formulario de login -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-6 text-center">🔐 Login de Prueba</h2>
+                
+                <!-- Credenciales predefinidas -->
+                <div class="bg-green-600 bg-opacity-30 p-4 rounded-lg mb-6">
+                    <h3 class="font-bold text-yellow-300 mb-2">📋 Credenciales Google Play</h3>
+                    <div class="text-sm space-y-1">
+                        <p><strong>Email:</strong> yamevi.testing@gmail.com</p>
+                        <p><strong>Password:</strong> YaMeVi2024Test!</p>
+                    </div>
+                </div>
+
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <input 
+                            type="email" 
+                            id="email"
+                            value="yamevi.testing@gmail.com"
+                            class="w-full px-4 py-3 bg-black bg-opacity-50 border border-white border-opacity-30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="password"
+                            value="YaMeVi2024Test!"
+                            class="w-full px-4 py-3 bg-black bg-opacity-50 border border-white border-opacity-30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                            required
+                        >
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300"
+                    >
+                        🔐 Probar Login
+                    </button>
+                </form>
+
+                <!-- Botones adicionales -->
+                <div class="mt-6 space-y-3">
+                    <button 
+                        id="fillCredentials"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
+                    >
+                        📋 Rellenar Credenciales
+                    </button>
+                    
+                    <button 
+                        id="testGoogleAuth"
+                        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg"
+                    >
+                        🔴 Test Google OAuth
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estado del login -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-8">
+                <h2 class="text-xl font-bold mb-4">📊 Estado del Login</h2>
+                <div id="loginStatus" class="space-y-2">
+                    <p class="text-yellow-300">⏳ Esperando intento de login...</p>
+                </div>
+            </div>
+
+            <!-- Log de actividades -->
+            <div class="bg-black bg-opacity-50 rounded-xl p-6">
+                <h2 class="text-lg font-bold mb-4">📝 Log de Actividades</h2>
+                <div id="activityLog" class="font-mono text-xs space-y-1 max-h-40 overflow-y-auto">
+                    <p class="text-green-400">Sistema de pruebas iniciado...</p>
+                </div>
+            </div>
+
+            <!-- Navegación -->
+            <div class="text-center mt-8 space-y-4">
+                <a href="registro-google-play.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg inline-block">
+                    🔐 Registrar Usuario
+                </a>
+                <a href="login.html" class="bg-orange-600 hover:bg-orange-700 px-6 py-3 rounded-lg inline-block">
+                    🏠 Login Principal
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword,
+            GoogleAuthProvider,
+            signInWithPopup,
+            onAuthStateChanged
+        } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+        // Configuración Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+            authDomain: "ya-me-vi.firebaseapp.com",
+            projectId: "ya-me-vi",
+            storageBucket: "ya-me-vi.firebasestorage.app",
+            messagingSenderId: "748876890843",
+            appId: "1:748876890843:web:07bd1eb476d38594d002fe",
+            measurementId: "G-D7R797S5BC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Elementos DOM
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const statusEl = document.getElementById('loginStatus');
+        const logEl = document.getElementById('activityLog');
+        const fillBtn = document.getElementById('fillCredentials');
+        const googleBtn = document.getElementById('testGoogleAuth');
+
+        // Credenciales de prueba
+        const TEST_EMAIL = 'yamevi.testing@gmail.com';
+        const TEST_PASSWORD = 'YaMeVi2024Test!';
+
+        // Función para agregar log
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colorClass = type === 'success' ? 'text-green-400' : 
+                             type === 'error' ? 'text-red-400' : 
+                             type === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+            
+            logEl.innerHTML += `<p class="${colorClass}">[${timestamp}] ${message}</p>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // Función para actualizar estado
+        function updateStatus(message, type = 'info') {
+            const icons = {
+                success: '✅',
+                error: '❌', 
+                warning: '⚠️',
+                info: '🔄'
+            };
+            
+            statusEl.innerHTML = `<p class="text-lg">${icons[type]} ${message}</p>`;
+        }
+
+        // Rellenar credenciales
+        fillBtn.addEventListener('click', () => {
+            emailInput.value = TEST_EMAIL;
+            passwordInput.value = TEST_PASSWORD;
+            addLog('Credenciales rellenadas automáticamente', 'info');
+        });
+
+        // Login con email/password
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            addLog(`Intentando login con: ${email}`, 'info');
+            updateStatus('Iniciando sesión...', 'info');
+            
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                addLog(`Login exitoso: ${user.email}`, 'success');
+                updateStatus('Login exitoso', 'success');
+                
+                // Mostrar información del usuario
+                statusEl.innerHTML += `
+                    <div class="mt-4 p-4 bg-green-600 bg-opacity-50 rounded-lg text-sm">
+                        <p><strong>✅ Usuario autenticado</strong></p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>UID:</strong> ${user.uid}</p>
+                        <p><strong>Nombre:</strong> ${user.displayName || 'No establecido'}</p>
+                        <p><strong>Verificado:</strong> ${user.emailVerified ? 'Sí' : 'No'}</p>
+                        <p><strong>Creado:</strong> ${user.metadata.creationTime}</p>
+                        <p><strong>Último login:</strong> ${user.metadata.lastSignInTime}</p>
+                    </div>
+                `;
+                
+                // Simular redirección después de 3 segundos
+                setTimeout(() => {
+                    addLog('Login completado - Listo para Google Play', 'success');
+                    statusEl.innerHTML += `
+                        <div class="mt-4 p-4 bg-blue-600 bg-opacity-50 rounded-lg">
+                            <p class="font-bold">🎯 CONFIRMACIÓN PARA GOOGLE PLAY</p>
+                            <p class="text-sm">Las credenciales funcionan correctamente</p>
+                            <p class="text-sm">Email: ${email}</p>
+                            <p class="text-sm">Password: ${password}</p>
+                        </div>
+                    `;
+                }, 2000);
+                
+            } catch (error) {
+                addLog(`Error de login: ${error.message}`, 'error');
+                updateStatus(`Error: ${error.code}`, 'error');
+                
+                // Mostrar detalles del error
+                statusEl.innerHTML += `
+                    <div class="mt-4 p-4 bg-red-600 bg-opacity-50 rounded-lg text-sm">
+                        <p><strong>❌ Error de autenticación</strong></p>
+                        <p><strong>Código:</strong> ${error.code}</p>
+                        <p><strong>Mensaje:</strong> ${error.message}</p>
+                        <p class="mt-2 text-yellow-300">💡 Posibles soluciones:</p>
+                        <ul class="list-disc list-inside text-xs mt-1">
+                            <li>Verificar que el usuario esté registrado</li>
+                            <li>Comprobar credenciales exactas</li>
+                            <li>Revisar configuración Firebase</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        });
+
+        // Test Google OAuth
+        googleBtn.addEventListener('click', async () => {
+            addLog('Probando autenticación con Google...', 'info');
+            updateStatus('Probando Google OAuth...', 'info');
+            
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                
+                addLog(`Google OAuth exitoso: ${user.email}`, 'success');
+                updateStatus('Google OAuth exitoso', 'success');
+                
+                statusEl.innerHTML += `
+                    <div class="mt-4 p-4 bg-green-600 bg-opacity-50 rounded-lg text-sm">
+                        <p><strong>✅ Google OAuth funcionando</strong></p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Nombre:</strong> ${user.displayName}</p>
+                        <p><strong>Foto:</strong> ${user.photoURL ? 'Disponible' : 'No disponible'}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                addLog(`Error Google OAuth: ${error.message}`, 'error');
+                updateStatus(`Error Google OAuth: ${error.code}`, 'error');
+            }
+        });
+
+        // Monitor de estado de autenticación
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                addLog(`Usuario conectado: ${user.email}`, 'success');
+            } else {
+                addLog('Usuario desconectado', 'warning');
+            }
+        });
+
+        // Inicialización
+        addLog('🧪 Sistema de pruebas de login iniciado', 'success');
+        addLog(`📧 Email de prueba: ${TEST_EMAIL}`, 'info');
+        addLog(`🔑 Password de prueba: ${TEST_PASSWORD}`, 'info');
+        updateStatus('Sistema listo para pruebas', 'success');
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Registrar Usuario Google Play - YA ME VI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen text-white">
+    
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold mb-4">🔐 Registrar Usuario Google Play</h1>
+                <p class="text-xl text-blue-200">Crear cuenta de prueba para revisores</p>
+            </div>
+
+            <!-- Credenciales para Google Play -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-4 text-center">📋 Credenciales para Google Play</h2>
+                
+                <div class="bg-green-600 bg-opacity-50 p-4 rounded-lg mb-4">
+                    <h3 class="font-bold text-yellow-300 mb-2">🎯 Usuario de Prueba</h3>
+                    <div class="bg-black bg-opacity-50 p-3 rounded font-mono text-sm">
+                        <p><strong>Email:</strong> <span id="testEmail">yamevi.testing@gmail.com</span></p>
+                        <p><strong>Password:</strong> <span id="testPassword">YaMeVi2024Test!</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado del registro -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-4">📊 Estado del Registro</h2>
+                <div id="registrationStatus" class="space-y-2">
+                    <p class="text-yellow-300">🔄 Preparando registro...</p>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="text-center space-y-4">
+                <button id="registerUser" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-lg text-lg font-bold block w-full">
+                    🔐 Registrar Usuario de Prueba
+                </button>
+                
+                <button id="verifyLogin" class="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-lg text-lg font-bold block w-full">
+                    ✅ Verificar Login
+                </button>
+                
+                <button id="resetPassword" class="bg-orange-600 hover:bg-orange-700 px-8 py-4 rounded-lg text-lg font-bold block w-full">
+                    🔄 Resetear Contraseña
+                </button>
+                
+                <a href="login.html" class="bg-purple-600 hover:bg-purple-700 px-8 py-4 rounded-lg text-lg font-bold block w-full">
+                    🧪 Probar Login en App
+                </a>
+            </div>
+
+            <!-- Log de actividades -->
+            <div class="bg-black bg-opacity-50 rounded-xl p-6 mt-8">
+                <h2 class="text-xl font-bold mb-4">📝 Log de Actividades</h2>
+                <div id="activityLog" class="font-mono text-sm space-y-1 max-h-60 overflow-y-auto">
+                    <p class="text-green-400">Sistema iniciado...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail,
+            updateProfile
+        } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+        // Configuración Firebase (usando la configuración real de ya-me-vi)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4bCGyyPuQo-3-ONMPFKtqPEJDFl8Cb54",
+            authDomain: "ya-me-vi.firebaseapp.com",
+            projectId: "ya-me-vi",
+            storageBucket: "ya-me-vi.firebasestorage.app",
+            messagingSenderId: "748876890843",
+            appId: "1:748876890843:web:07bd1eb476d38594d002fe",
+            measurementId: "G-D7R797S5BC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Elementos DOM
+        const statusEl = document.getElementById('registrationStatus');
+        const logEl = document.getElementById('activityLog');
+        const registerBtn = document.getElementById('registerUser');
+        const verifyBtn = document.getElementById('verifyLogin');
+        const resetBtn = document.getElementById('resetPassword');
+
+        // Credenciales de prueba
+        const TEST_EMAIL = 'yamevi.testing@gmail.com';
+        const TEST_PASSWORD = 'YaMeVi2024Test!';
+
+        // Función para agregar log
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colorClass = type === 'success' ? 'text-green-400' : 
+                             type === 'error' ? 'text-red-400' : 
+                             type === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+            
+            logEl.innerHTML += `<p class="${colorClass}">[${timestamp}] ${message}</p>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // Función para actualizar estado
+        function updateStatus(message, type = 'info') {
+            const icons = {
+                success: '✅',
+                error: '❌', 
+                warning: '⚠️',
+                info: '🔄'
+            };
+            
+            statusEl.innerHTML = `<p class="text-lg">${icons[type]} ${message}</p>`;
+        }
+
+        // Registrar usuario de prueba
+        registerBtn.addEventListener('click', async () => {
+            addLog('Iniciando registro de usuario de prueba...', 'info');
+            updateStatus('Registrando usuario...', 'info');
+            
+            try {
+                // Intentar crear el usuario
+                const userCredential = await createUserWithEmailAndPassword(auth, TEST_EMAIL, TEST_PASSWORD);
+                
+                // Actualizar perfil
+                await updateProfile(userCredential.user, {
+                    displayName: 'Usuario Google Play Testing'
+                });
+                
+                addLog(`Usuario creado exitosamente: ${userCredential.user.email}`, 'success');
+                updateStatus('Usuario registrado correctamente', 'success');
+                
+                // Agregar información adicional al estado
+                statusEl.innerHTML += `
+                    <div class="mt-4 p-4 bg-green-600 bg-opacity-50 rounded-lg">
+                        <p class="font-bold">✅ Usuario creado exitosamente</p>
+                        <p class="text-sm">Email: ${userCredential.user.email}</p>
+                        <p class="text-sm">UID: ${userCredential.user.uid}</p>
+                        <p class="text-sm">Nombre: ${userCredential.user.displayName}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') {
+                    addLog('Usuario ya existe, verificando credenciales...', 'warning');
+                    updateStatus('Usuario ya existe', 'warning');
+                    
+                    // Si ya existe, intentar login para verificar
+                    try {
+                        const loginResult = await signInWithEmailAndPassword(auth, TEST_EMAIL, TEST_PASSWORD);
+                        addLog('Usuario verificado exitosamente', 'success');
+                        updateStatus('Usuario ya existe y está verificado', 'success');
+                        
+                        statusEl.innerHTML += `
+                            <div class="mt-4 p-4 bg-blue-600 bg-opacity-50 rounded-lg">
+                                <p class="font-bold">✅ Usuario ya existe y funciona</p>
+                                <p class="text-sm">Email: ${loginResult.user.email}</p>
+                                <p class="text-sm">UID: ${loginResult.user.uid}</p>
+                                <p class="text-sm">Última conexión: ${loginResult.user.metadata.lastSignInTime}</p>
+                            </div>
+                        `;
+                        
+                    } catch (loginError) {
+                        addLog(`Error verificando usuario: ${loginError.message}`, 'error');
+                        updateStatus('Usuario existe pero hay problemas', 'error');
+                    }
+                } else {
+                    addLog(`Error creando usuario: ${error.message}`, 'error');
+                    updateStatus(`Error: ${error.code}`, 'error');
+                }
+            }
+        });
+
+        // Verificar login
+        verifyBtn.addEventListener('click', async () => {
+            addLog('Verificando login del usuario de prueba...', 'info');
+            updateStatus('Verificando login...', 'info');
+            
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, TEST_EMAIL, TEST_PASSWORD);
+                addLog('Login verificado exitosamente', 'success');
+                updateStatus('Login funciona correctamente', 'success');
+                
+                statusEl.innerHTML += `
+                    <div class="mt-4 p-4 bg-green-600 bg-opacity-50 rounded-lg">
+                        <p class="font-bold">✅ Login verificado</p>
+                        <p class="text-sm">Email: ${userCredential.user.email}</p>
+                        <p class="text-sm">Verificado: ${userCredential.user.emailVerified}</p>
+                        <p class="text-sm">Creado: ${userCredential.user.metadata.creationTime}</p>
+                        <p class="text-sm">Último login: ${userCredential.user.metadata.lastSignInTime}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                addLog(`Error en login: ${error.message}`, 'error');
+                updateStatus(`Error de login: ${error.code}`, 'error');
+            }
+        });
+
+        // Resetear contraseña
+        resetBtn.addEventListener('click', async () => {
+            addLog('Enviando reset de contraseña...', 'info');
+            updateStatus('Enviando reset...', 'info');
+            
+            try {
+                await sendPasswordResetEmail(auth, TEST_EMAIL);
+                addLog('Email de reset enviado', 'success');
+                updateStatus('Email de reset enviado', 'success');
+            } catch (error) {
+                addLog(`Error enviando reset: ${error.message}`, 'error');
+                updateStatus(`Error: ${error.code}`, 'error');
+            }
+        });
+
+        // Inicialización
+        addLog('🔐 Sistema de registro para Google Play iniciado', 'success');
+        addLog(`📧 Email de prueba: ${TEST_EMAIL}`, 'info');
+        addLog(`🔑 Password configurado: ${TEST_PASSWORD}`, 'info');
+        updateStatus('Sistema listo para registro', 'success');
+
+    </script>
+
+</body>
+</html>
