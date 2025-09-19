@@ -2683,12 +2683,12 @@
       const descripcionElement = document.getElementById('descripcion-proximo-sorteo');
       
       if (tituloElement) {
-        const textoTitulo = `📅 Combinaciones sugeridas para el próximo sorteo del ${proximoSorteo.dia.toUpperCase()}`;
+        const textoTitulo = `📅 Predicciones para el próximo ${proximoSorteo.dia.toUpperCase()} - Los 3 Sorteos`;
         tituloElement.textContent = textoTitulo;
       }
       
       if (descripcionElement) {
-        descripcionElement.textContent = `Predicciones especializadas para el próximo sorteo (${proximoSorteo.dia}). Todos los sorteos (Melate, Revancha, Revanchita) se realizan miércoles, viernes y domingos.`;
+        descripcionElement.textContent = `Predicciones especializadas basadas en el análisis histórico de todos los ${proximoSorteo.dia}s de los últimos 18 meses. Los 3 sorteos (Melate, Revancha, Revanchita) se realizan el mismo día.`;
       }
       
       try {
@@ -2755,9 +2755,9 @@
           
           infoElement.innerHTML = `
             <p class="mb-2">🎯 <strong>Próximo sorteo:</strong> ${proximoSorteo.dia.toUpperCase()}</p>
-            <p class="mb-2">📊 <strong>Sorteos analizados:</strong> ~${promedioSorteos} ${proximoSorteo.dia}s por juego</p>
-            <p class="mb-2">📅 <strong>Período:</strong> Últimos 18 meses (solo ${proximoSorteo.dia}s)</p>
-            <p class="text-yellow-200"><strong>💡 Nota:</strong> Todos los sorteos (Melate, Revancha, Revanchita) se realizan miércoles, viernes y domingos a las 21:00.</p>
+            <p class="mb-2">📊 <strong>Metodología:</strong> Análisis individual de cada sorteo basado solo en sus ${proximoSorteo.dia}s históricos</p>
+            <p class="mb-2">📅 <strong>Datos analizados:</strong> ~${promedioSorteos} ${proximoSorteo.dia}s por sorteo (últimos 18 meses)</p>
+            <p class="text-yellow-200"><strong>💡 Ventaja:</strong> Cada predicción usa únicamente el comportamiento histórico de ese sorteo específico en ${proximoSorteo.dia}s, no datos generales.</p>
           `;
         }
         
