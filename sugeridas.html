@@ -313,7 +313,7 @@
         <div class="text-center">
           <h2 id="titulo-proximo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">📅 Predicción para el Próximo Sorteo - Cargando...</h2>
           <p id="descripcion-proximo-sorteo" class="text-gray-200 text-sm mb-4">
-            Predicciones específicas basadas únicamente en los sorteos del día correspondiente de los últimos 18 meses
+            Predicciones específicas para el próximo día de sorteo basadas en datos históricos de los últimos 18 meses
           </p>
           <div class="flex items-center justify-center">
             <span class="text-white text-lg mr-2">Haz clic para ver</span>
@@ -2683,12 +2683,12 @@
       const descripcionElement = document.getElementById('descripcion-proximo-sorteo');
       
       if (tituloElement) {
-        const textoTitulo = `📅 Combinaciones sugeridas en base a los sorteos de LOS ${proximoSorteo.dia.toUpperCase()}`;
+        const textoTitulo = `📅 Combinaciones sugeridas para el próximo sorteo del ${proximoSorteo.dia.toUpperCase()}`;
         tituloElement.textContent = textoTitulo;
       }
       
       if (descripcionElement) {
-        descripcionElement.textContent = `Combinaciones inteligentes basadas únicamente en los sorteos de ${proximoSorteo.dia} de los últimos 18 meses`;
+        descripcionElement.textContent = `Predicciones especializadas para el próximo sorteo (${proximoSorteo.dia}). Todos los sorteos (Melate, Revancha, Revanchita) se realizan miércoles, viernes y domingos.`;
       }
       
       try {
@@ -2754,10 +2754,10 @@
           const promedioSorteos = Math.round(totalSorteos / 3);
           
           infoElement.innerHTML = `
-            <p class="mb-2">🎯 <strong>Día analizado:</strong> ${proximoSorteo.dia.toUpperCase()}</p>
-            <p class="mb-2">📊 <strong>Sorteos promedio por juego:</strong> ~${promedioSorteos} sorteos de ${proximoSorteo.dia}</p>
+            <p class="mb-2">🎯 <strong>Próximo sorteo:</strong> ${proximoSorteo.dia.toUpperCase()}</p>
+            <p class="mb-2">📊 <strong>Sorteos analizados:</strong> ~${promedioSorteos} ${proximoSorteo.dia}s por juego</p>
             <p class="mb-2">📅 <strong>Período:</strong> Últimos 18 meses (solo ${proximoSorteo.dia}s)</p>
-            <p class="text-yellow-200"><strong>💡 Ventaja:</strong> Estas predicciones se basan únicamente en el comportamiento histórico de los ${proximoSorteo.dia}s, no en datos generales.</p>
+            <p class="text-yellow-200"><strong>💡 Nota:</strong> Todos los sorteos (Melate, Revancha, Revanchita) se realizan miércoles, viernes y domingos a las 21:00.</p>
           `;
         }
         
