@@ -311,9 +311,9 @@
       <div id="prediccion-dia-container" class="box-container bg-white bg-opacity-20 rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-300 backdrop-blur-sm border border-white border-opacity-20" style="opacity: 0.8;" onclick="togglePrediccionDia()">
         
         <div class="text-center">
-          <h2 id="titulo-proximo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: red !important; font-size: 32px !important;">🚀 ACTUALIZADO: Predicciones para TODOS los sorteos del próximo día</h2>
+          <h2 id="titulo-proximo-sorteo" class="text-2xl font-bold text-white mb-2" style="color: white !important;">� Predicciones para el próximo VIERNES - Los 3 Sorteos</h2>
           <p id="descripcion-proximo-sorteo" class="text-gray-200 text-sm mb-4">
-            ⚡ NUEVO: Análisis individual de Melate, Revancha y Revanchita por día específico (NO más predicciones genéricas)
+            Predicciones individuales para Melate, Revancha y Revanchita basadas en análisis histórico del día específico
           </p>
           <div class="flex items-center justify-center">
             <span class="text-white text-lg mr-2">Haz clic para ver</span>
@@ -2683,12 +2683,12 @@
       const descripcionElement = document.getElementById('descripcion-proximo-sorteo');
       
       if (tituloElement) {
-        const textoTitulo = `🚀 ACTUALIZADO: Predicciones para TODOS los sorteos del ${proximoSorteo.dia.toUpperCase()}`;
+        const textoTitulo = `� Predicciones para el próximo ${proximoSorteo.dia.toUpperCase()} - Los 3 Sorteos`;
         tituloElement.textContent = textoTitulo;
       }
       
       if (descripcionElement) {
-        descripcionElement.textContent = `Análisis especializado: cada sorteo (Melate, Revancha, Revanchita) analizado individualmente con datos históricos solo de ${proximoSorteo.dia}s de los últimos 18 meses.`;
+        descripcionElement.textContent = `Predicciones individuales para Melate, Revancha y Revanchita basadas en análisis histórico exclusivo de ${proximoSorteo.dia}s de los últimos 18 meses.`;
       }
       
       try {
