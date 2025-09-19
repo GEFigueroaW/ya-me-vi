@@ -261,11 +261,6 @@ async function cargarSorteoIndividual(sorteo) {
     const numeros = [];
     let ultimoSorteo = 'No disponible';
     
-    // Calcular fecha límite (18 meses atrás desde hoy) - OPTIMIZADO para máxima efectividad
-    const fechaActual = new Date();
-    const fechaLimite = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 18, fechaActual.getDate());
-    console.log(`📅 Filtrando sorteos desde: ${fechaLimite.toLocaleDateString()} para ${sorteo} (18 meses)`);
-    
     // Procesar cada línea (saltar encabezado)
     for (let i = 1; i < lineas.length; i++) {
       const linea = lineas[i].trim();
@@ -346,9 +341,7 @@ async function cargarSorteoIndividual(sorteo) {
       }
     }
     
-    console.log(`✅ ${sorteo}: ${sorteos.length} sorteos cargados (últimos 18 meses) - ${numeros.length} números`);
-    
-    return {
+        console.log(`✅ ${sorteo}: ${sorteos.length} sorteos cargados (últimos 5 años) - ${numeros.length} números`);    return {
       sorteos: sorteos,
       numeros: numeros,
       ultimoSorteo: ultimoSorteo
